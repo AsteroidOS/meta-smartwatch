@@ -10,11 +10,6 @@ COMPATIBLE_MACHINE = "dory"
 S = "${WORKDIR}/system/"
 B = "${S}"
 
-FILESEXTRAPATHS_prepend := "${THISDIR}/files-lp:"
-SRC_URI += "file://extract-headers.sh"
-SRC_URI[md5sum] = "cf648a3ee9682b34d681352a7b3c95cc"
-SRC_URI[sha256sum] = "e797b5ae862e94e5eee19b04b904206cb44b43b89a156e6824e2b21203bfaf94"
-
 PROVIDES += "virtual/android-system-image"
 PROVIDES += "virtual/android-headers"
 
