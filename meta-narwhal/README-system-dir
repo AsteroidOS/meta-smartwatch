@@ -1,0 +1,45 @@
+/system/ directory build instructions
+=====================================
+
+The /system/ directory available on the dory platform and provided in prebuilt 
+form by android_dory-lp.bb is a tricky mix of an original Android Wear /system
+and some recompiled parts. This is due to the half-closed nature of Android
+Wear. This file explains you how to rebuild manually your own /system dir.
+
+We firt need to adb pull a /system directory from a living Android Wear 5.1.1
+installation and then modify it with some symlinks:
+  adb pull /system/ system
+  cd system/vendor/lib/egl/
+  ln -s libGLESv2_adreno.so libGLESv2S3D_adreno.so
+  cd ../../../lib/hw/
+  ln -s hwcomposer.msm8226.so hwcomposer.dory.so
+  ln -s gralloc.msm8226.so gralloc.dory.so
+  ln -s memtrack.msm8226.so memtrack.dory.so
+  cd ../../../
+
+This installation wouldn't be enough because libhybris needs a patched bionic
+and the GPU drivers also need to be recompiled on the QCOM platform with the 
+QCOM_BSP flag. Thankfully, those specific parts are open-source so we can 
+download and then build them. (This may take a while)
+  ### Download
+  curl https://storage.googleapis.com/git-repo-downloads/repo > repo
+  chmod a+x repo
+  mkdir -p android-dory/
+  cd android-dory
+  # For now the repo manifest is pretty much dory-specific, maybe we should 
+  # split/merge branches later?
+  repo init -u https://github.com/Asteroid-Project/android_manifest
+  repo sync
+
+  ### Build (can only be done in bash)
+  . build/envsetup.sh
+  export TARGET_USES_C2D_COMPOSITION=true # Needed by copybit
+  export TARGET_USES_QCOM_BSP=true        # Fixes GPU problems on QCOM platforms
+  export TARGET_BOARD_PLATFORM=msm8226    # We Specify the SoC by hand
+  mmma hardware/qcom/display/msm8226/     # hwcomposer, gralloc, dependencies...
+  mmma frameworks/native/cmds/servicemanager/
+  mmma system/core/init/
+
+  ### Installation
+  cp out/target/product/generic/root/init ../system/bin/
+  cp out/target/product/generic/system/* ../system/
