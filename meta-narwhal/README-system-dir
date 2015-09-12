@@ -29,8 +29,8 @@ download and then build them. (This may take a while)
   cd android-dory
   # For now the repo manifest is pretty much dory-specific, maybe we should 
   # split/merge branches later?
-  repo init -u https://github.com/Asteroid-Project/android_manifest
-  repo sync
+  ../repo init -u https://github.com/Asteroid-Project/android_manifest
+  ../repo sync
 
   ### Build (can only be done in bash)
   . build/envsetup.sh
@@ -38,6 +38,8 @@ download and then build them. (This may take a while)
   export TARGET_USES_QCOM_BSP=true        # Fixes GPU problems on QCOM platforms
   export TARGET_BOARD_PLATFORM=msm8226    # We Specify the SoC by hand
   mmma hardware/qcom/display/msm8226/     # hwcomposer, gralloc, dependencies...
+  mmma frameworks/native/cmds/servicemanager/
+  mmma system/core/logd/
   mmma system/core/init/
 
   ### Installation
