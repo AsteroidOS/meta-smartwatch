@@ -9,8 +9,10 @@ Wear. This file explains you how to rebuild manually your own /system dir.
 We firt need to adb pull a /system directory from a living Android Wear 5.1.1
 installation and then modify it with some symlinks:
   adb pull /system/ system
-  sed -i "/persist.hwc.mdpcomp.enable=true/d" system/build.prop
-  cd system/vendor/lib/egl/
+  cd system/
+  rm -rf app/ fonts/ framework/ media/ priv-app/ xbin/
+  sed -i "/persist.hwc.mdpcomp.enable=true/d" build.prop
+  cd vendor/lib/egl/
   ln -s libGLESv2_adreno.so libGLESv2S3D_adreno.so
   cd ../../../lib/hw/
   ln -s hwcomposer.msm8226.so hwcomposer.dory.so
@@ -44,4 +46,4 @@ download and then build them. (This may take a while)
 
   ### Installation
   cp out/target/product/generic/root/init ../system/bin/
-  cp out/target/product/generic/system/* ../system/
+  cp -r out/target/product/generic/system/* ../system/
