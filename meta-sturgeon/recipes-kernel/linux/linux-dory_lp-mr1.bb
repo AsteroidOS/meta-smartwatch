@@ -20,6 +20,12 @@ B = "${S}"
 BOOT_PARTITION = "/dev/mmcblk0p15"
 
 # Removes some headers that are installed incorrectly
+
+do_configure_prepend() {
+    # Fixes build with GCC5
+    echo "#include <linux/compiler-gcc4.h>" > ${S}/include/linux/compiler-gcc5.h
+}
+
 do_install_append() {
     rm -rf ${D}/usr/src/usr/
 }
