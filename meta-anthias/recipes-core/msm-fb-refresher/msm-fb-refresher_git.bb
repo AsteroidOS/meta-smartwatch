@@ -1,6 +1,6 @@
 DESCRIPTION = "Some qualcomm devices need a refresher ioctl to show something on screen. This is a simple soft that does that on boot."
 PR = "r0"
-SRC_URI = "git://github.com/Asteroid-Project/msm-fb-refresher.git;protocol=https \
+SRC_URI = "git://github.com/AsteroidOS/msm-fb-refresher.git;protocol=https \
     file://msm-fb-refresher.service"
 SRCREV = "9c6f10c74cbe1d4f0e1cc8b3dc7e186b94a103ac"
 LICENSE = "GPLv3"
