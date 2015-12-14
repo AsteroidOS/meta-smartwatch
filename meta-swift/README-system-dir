@@ -6,7 +6,7 @@ form by android_dory-lp.bb is a tricky mix of an original Android Wear /system
 and some recompiled parts. This is due to the half-closed nature of Android
 Wear. This file explains you how to rebuild manually your own /system dir.
 
-We firt need to adb pull a /system directory from a living Android Wear 5.1.1
+We first need to adb pull a /system directory from a living Android Wear 5.1.1
 installation and then modify it with some symlinks:
   adb pull /system/ system
   cd system/
