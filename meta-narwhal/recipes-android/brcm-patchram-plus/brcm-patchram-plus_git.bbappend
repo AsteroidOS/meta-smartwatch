@@ -1,6 +1,7 @@
 FILESEXTRAPATHS_prepend := "${THISDIR}/brcm-patchram-plus:"
 SRC_URI += " file://patchram.service \
              file://patchram.sh "
+LICENSE = "BSD"
 
 do_install_append() {
     install -d ${D}/lib/systemd/system/multi-user.target.wants/
