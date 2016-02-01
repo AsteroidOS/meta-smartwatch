@@ -2,9 +2,9 @@ inherit gettext
 
 SUMMARY = "Downloads the LG Watch Urbane /system and /usr/include/android folders and installs them for libhybris"
 LICENSE = "CLOSED"
-SRC_URI = ""
-SRC_URI[md5sum] = ""
-SRC_URI[sha256sum] = ""
+SRC_URI = "https://b43a252b7a206dabaf71-21c43c0c3ff60f78f8a73aec28dbf490.ssl.cf5.rackcdn.com/bass-system-7.tar.gz"
+SRC_URI[md5sum] = "08e86a5e9920ad18c7fcdd0ca8a89d4c"
+SRC_URI[sha256sum] = "5c874be80ff2d8f11d2081e0ba060b50374570eb3ddd1ea1d47bb9693b45a344"
 PV = "lollipop"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
