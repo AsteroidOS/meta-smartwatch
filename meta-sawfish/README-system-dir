@@ -47,3 +47,17 @@ download and then build them. (This may take a while)
   ### Installation
   cp out/target/product/generic/root/init ../system/bin/
   cp -r out/target/product/generic/system/* ../system/
+
+libhybris headers
+=================
+
+The second part of this tarball contains header files to compile against
+libhybris. There is a script in the libhybris distribution that can pull
+the header files from the downloaded android distribution (above).
+
+  git clone https://github.com/libhybris/libhybris
+  ./libhybris/utils/extract_headers.sh android-dory include
+
+With the system and include directories, you can create the system-dir tarball:
+
+  tar zxvf system.tar.gz system include
