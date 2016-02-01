@@ -1,8 +1,8 @@
 /system/ directory build instructions
 =====================================
 
-The /system/ directory available on the dory platform and provided in prebuilt 
-form by android_dory-lp.bb is a tricky mix of an original Android Wear /system
+The /system/ directory available on the bass platform and provided in prebuilt
+form by android_bass-lp.bb is a tricky mix of an original Android Wear /system
 and some recompiled parts. This is due to the half-closed nature of Android
 Wear. This file explains you how to rebuild manually your own /system dir.
 
@@ -15,21 +15,21 @@ installation and then modify it with some symlinks:
   cd vendor/lib/egl/
   ln -s libGLESv2_adreno.so libGLESv2S3D_adreno.so
   cd ../../../lib/hw/
-  ln -s hwcomposer.msm8226.so hwcomposer.dory.so
-  ln -s gralloc.msm8226.so gralloc.dory.so
-  ln -s memtrack.msm8226.so memtrack.dory.so
+  ln -s hwcomposer.msm8226.so hwcomposer.bass.so
+  ln -s gralloc.msm8226.so gralloc.bass.so
+  ln -s memtrack.msm8226.so memtrack.bass.so
   cd ../../../
 
 This installation wouldn't be enough because libhybris needs a patched bionic
-and the GPU drivers also need to be recompiled on the QCOM platform with the 
-QCOM_BSP flag. Thankfully, those specific parts are open-source so we can 
+and the GPU drivers also need to be recompiled on the QCOM platform with the
+QCOM_BSP flag. Thankfully, those specific parts are open-source so we can
 download and then build them. (This may take a while)
   ### Download
   curl https://storage.googleapis.com/git-repo-downloads/repo > repo
   chmod a+x repo
-  mkdir -p android-dory/
-  cd android-dory
-  # For now the repo manifest is pretty much dory-specific, maybe we should 
+  mkdir -p android-bass/
+  cd android-bass
+  # For now the repo manifest is pretty much bass-specific, maybe we should
   # split/merge branches later?
   ../repo init -u https://github.com/AsteroidOS/android_manifest
   ../repo sync
