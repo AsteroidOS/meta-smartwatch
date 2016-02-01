@@ -29,7 +29,7 @@ download and then build them. (This may take a while)
   chmod a+x repo
   mkdir -p android-bass/
   cd android-bass
-  # For now the repo manifest is pretty much bass-specific, maybe we should
+  # For now the repo manifest is pretty much dory-specific, maybe we should
   # split/merge branches later?
   ../repo init -u https://github.com/AsteroidOS/android_manifest
   ../repo sync
