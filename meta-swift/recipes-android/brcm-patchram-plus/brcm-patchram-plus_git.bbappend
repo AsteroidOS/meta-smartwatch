@@ -10,7 +10,8 @@ do_install_append() {
 
     install -d ${D}/usr/bin/
     cp ${WORKDIR}/patchram.sh ${D}/usr/bin/
+    chmod +x ${D}/usr/bin/patchram.sh
 }
 
 FILES_${PN} += "/lib/systemd/system/"
-DEPENDS += "rfkill"
+RDEPENDS_${PN} += "rfkill bash"
