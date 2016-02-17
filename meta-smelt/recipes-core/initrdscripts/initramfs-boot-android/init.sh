@@ -111,4 +111,4 @@ mount -t proc proc /rfs/proc
 mount -t sysfs sys /rfs/sys
 
 info "Switching to rootfs..."
-exec switch_root -c /dev/ttyprintk /rfs /sbin/init > /dev/ttyprintk
+exec switch_root -c /dev/ttyprintk /rfs /lib/systemd/systemd > /dev/ttyprintk
