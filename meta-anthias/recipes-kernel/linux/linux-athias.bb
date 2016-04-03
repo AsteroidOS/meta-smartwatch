@@ -17,7 +17,7 @@ PV = "${LINUX_VERSION}+lollipop"
 S = "${WORKDIR}/git"
 B = "${S}"
 
-BOOT_PARTITION = "/dev/mmcblk0p15"
+BOOT_PARTITION = "/dev/mmcblk0p11"
 
 # Removes some headers that are installed incorrectly
 

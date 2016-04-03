@@ -2,14 +2,12 @@ inherit gettext
 
 SUMMARY = "Downloads the LG G Watch /system and /usr/include/android folders and installs them for libhybris"
 LICENSE = "CLOSED"
-SRC_URI = "https://dl.dropboxusercontent.com/s/cqvt6d3hkd651ku/system.tar.gz"
-SRC_URI[md5sum] = "6d030679e7bdeb54d4d5d752e1c92244"
-SRC_URI[sha256sum] = "99cb5684bc6a55f2e5836194723ad419017dd68db8e97e1392deb43ba5964e41"
+SRC_URI = "file://system.tar.bz2"
 PV = "lollipop"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 INHIBIT_PACKAGE_STRIP = "1"
-COMPATIBLE_MACHINE = "dory"
+COMPATIBLE_MACHINE = "athias"
 S = "${WORKDIR}"
 B = "${S}"
 
@@ -21,11 +19,13 @@ do_install() {
     cp -r system/* ${D}/system/
 
     install -d ${D}${includedir}/android
-    cp -r include/* ${D}${includedir}/android/
+    cp -r include/android/* ${D}${includedir}/android/
+    cp -r include/* ${D}${includedir}/
+    cp include/android-version.h ${D}${includedir}/android/
 
     install -d ${D}${libdir}/pkgconfig
-    install -m 0644 ${D}${includedir}/android/android-headers.pc ${D}${libdir}/pkgconfig
-    rm ${D}${includedir}/android/android-headers.pc
+    install -m 0644 ${D}${includedir}/android-headers.pc ${D}${libdir}/pkgconfig
+    rm ${D}${includedir}/android-headers.pc
     cd ${D}
     ln -s system/vendor vendor
 }
