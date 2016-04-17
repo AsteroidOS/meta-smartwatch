@@ -2,10 +2,9 @@ inherit gettext
 
 SUMMARY = "Downloads the Sony Smartwatch3 /system and /usr/include/android folders and installs them for libhybris"
 LICENSE = "CLOSED"
-SRC_URI = "https://dl.dropboxusercontent.com/s/cqvt6d3hkd651ku/system.tar.gz"
-# TODO: This is dory, pack a new tarball
-SRC_URI[md5sum] = "6d030679e7bdeb54d4d5d752e1c92244"
-SRC_URI[sha256sum] = "99cb5684bc6a55f2e5836194723ad419017dd68db8e97e1392deb43ba5964e41"
+SRC_URI = "https://dl.dropboxusercontent.com/s/ts0j8c3et40cnol/system-tetra.tar.gz"
+SRC_URI[md5sum] = "4f4447e262f2b858a73f797490fd4a3d"
+SRC_URI[sha256sum] = "a96ea5f4ac38a192dbec2fc8f1856a18b64c525dbd6de1a1d16df3e8ce4e247e"
 PV = "lollipop"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
