@@ -1,5 +1,9 @@
 require recipes-kernel/linux/linux.inc
-inherit gettext boot-img
+inherit gettext
+
+KERNEL_RAM_BASE = "0x82000000"
+
+inherit kernel_android
 
 SECTION = "kernel"
 SUMMARY = "Android kernel for the Sony Smartwatch 3"
@@ -11,7 +15,9 @@ COMPATIBLE_MACHINE = "tetra"
 SRC_URI = "git://android.googlesource.com/kernel/bcm;branch=android-bcm-tetra-3.10-lollipop-mr1-wear-release;protocol=https \
     file://defconfig \
     file://img_info \
-    file://0001-Fix-build-with-OE.patch"
+    file://0001-Fix-build-with-OE.patch \
+    file://0002-Bluetooth-fixes-a-poorly-done-patch.patch \
+    file://0003-ion-don-t-use-lmk.patch"
 SRCREV = "34ff7fc1fe7a771816ee65eb38fb0f74dd3feda7"
 LINUX_VERSION ?= "3.10"
 PV = "${LINUX_VERSION}+lollipop"

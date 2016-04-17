@@ -3,10 +3,10 @@ ramdisk=%%RAMDISK%%
 page_size=2048
 kernel_size=5331540
 ramdisk_size=675891
-base_addr=0x00000000
-kernel_offset=0x82008000
-ramdisk_offset=0x83000000
-tags_offset=0x82000100
-cmd_line='console=ttyS0,115200n8 mem=456M gpt v3d_mem=67108864 pmem=24M@0x9E800000'
-board="tetra"
+base_addr=0x82000000
+kernel_offset=0x00008000
+ramdisk_offset=0x01000000
+tags_offset=0x00000100
+cmd_line=''
+board=""
 format=gzip

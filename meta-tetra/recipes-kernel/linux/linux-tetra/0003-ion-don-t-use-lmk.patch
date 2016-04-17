@@ -1,0 +1,32 @@
+From e6015e78f4ccb200c5a9649147c6095ce911bf33 Mon Sep 17 00:00:00 2001
+From: Florent Revest <revestflo@gmail.com>
+Date: Mon, 18 Apr 2016 00:46:31 +0200
+Subject: [PATCH] ion: don't use lmk
+
+---
+ drivers/gpu/ion/ion_system_heap.c | 2 --
+ 1 file changed, 2 deletions(-)
+
+diff --git a/drivers/gpu/ion/ion_system_heap.c b/drivers/gpu/ion/ion_system_heap.c
+index 4b5b1c1..6619c12 100644
+--- a/drivers/gpu/ion/ion_system_heap.c
++++ b/drivers/gpu/ion/ion_system_heap.c
+@@ -468,7 +468,6 @@ struct ion_heap *ion_system_heap_create(struct ion_platform_heap *unused)
+ 	heap->heap.debug_show = ion_system_heap_debug_show;
+ #ifdef CONFIG_ION_BCM
+ 	heap->reg_lmk.cbk = ion_system_heap_lmk_cbk;
+-	register_lmk(&heap->reg_lmk);
+ 	heap->reg_show_mem.cbk = ion_system_heap_show_mem_cbk;
+ 	register_show_mem(&heap->reg_show_mem);
+ #endif
+@@ -491,7 +490,6 @@ void ion_system_heap_destroy(struct ion_heap *heap)
+ 	int i;
+ 
+ #ifdef CONFIG_ION_BCM
+-	unregister_lmk(&sys_heap->reg_lmk);
+ 	unregister_show_mem(&sys_heap->reg_show_mem);
+ #endif
+ 	for (i = 0; i < num_orders; i++)
+-- 
+2.8.0.rc3
+
