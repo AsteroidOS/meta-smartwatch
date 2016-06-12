@@ -1,5 +1,4 @@
 #! /bin/sh
-
 . /machine.conf
 . /distro.conf
 
@@ -24,14 +23,15 @@ mount -t sysfs sys /sys
 mkdir -p /dev
 
 setup_devtmpfs ""
-
+#chmod 022 /sys/devices/platform/msm_hsusb/gadget/wakeup
+#echo 1 > /sys/devices/platform/msm_hsusb/gadget/wakeup
 echo 0 > /sys/class/android_usb/android0/enable
 echo 18d1 > /sys/class/android_usb/android0/idVendor
 echo d001 > /sys/class/android_usb/android0/idProduct
 echo adb > /sys/class/android_usb/android0/f_ffs/aliases
 echo ffs > /sys/class/android_usb/android0/functions
-echo lge > /sys/class/android_usb/android0/iManufacturer
-echo dory > /sys/class/android_usb/android0/iProduct
+echo asus > /sys/class/android_usb/android0/iManufacturer
+echo anthias > /sys/class/android_usb/android0/iProduct
 echo asteroidasteroid > /sys/class/android_usb/android0/iSerial # What should we put here??
 echo 1 > /sys/class/android_usb/android0/enable
 
@@ -48,11 +48,11 @@ fail() {
 }
 
 # Check wether we need to start adbd for interactive debugging
-cat /proc/cmdline | grep enable_adb
-if [ $? -ne 1 ] ; then
-    /usr/bin/android-gadget-setup adb
-    /usr/bin/adbd
-fi
+#cat /proc/cmdline | grep enable_adb
+#if [ $? -ne 1 ] ; then
+#/usr/bin/android-gadget-setup adb
+#/usr/bin/adbd
+#fi
 
 mkdir -m 0755 /rfs
 

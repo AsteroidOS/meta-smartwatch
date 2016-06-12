@@ -7,7 +7,7 @@ PV = "lollipop"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 INHIBIT_PACKAGE_STRIP = "1"
-COMPATIBLE_MACHINE = "athias"
+COMPATIBLE_MACHINE = "anthias"
 S = "${WORKDIR}"
 B = "${S}"
 
