@@ -22,7 +22,6 @@ on init
     write /sys/module/lpm_levels/system/cpu0/standalone_pc/idle_enabled 1
     write /sys/module/lpm_levels/system/cpu0/pc/idle_enabled 1
 
-    setprop vold.post_fs_data_done 1
     class_start core
 
 service logd /system/bin/logd
