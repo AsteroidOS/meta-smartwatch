@@ -1,0 +1,56 @@
+From e8e18ec2df8ebc117c22b11a7037c9b89b551ca9 Mon Sep 17 00:00:00 2001
+From: Florent Revest <revestflo@gmail.com>
+Date: Sat, 16 Jul 2016 21:20:46 +0200
+Subject: [PATCH] Adapt to what tetra's hwcomposer expects
+
+---
+ hwcomposer/hwcomposer_backend_v11.cpp | 12 ++++++------
+ 1 file changed, 6 insertions(+), 6 deletions(-)
+
+diff --git a/hwcomposer/hwcomposer_backend_v11.cpp b/hwcomposer/hwcomposer_backend_v11.cpp
+index 11f870f..02f642f 100644
+--- a/hwcomposer/hwcomposer_backend_v11.cpp
++++ b/hwcomposer/hwcomposer_backend_v11.cpp
+@@ -78,9 +78,9 @@ void HWComposer::present(HWComposerNativeWindowBuffer *buffer)
+ {
+     int oldretire = mlist[0]->retireFenceFd;
+     mlist[0]->retireFenceFd = -1;
+-    fblayer->handle = buffer->handle;
+-    fblayer->acquireFenceFd = getFenceBufferFd(buffer);
+-    fblayer->releaseFenceFd = -1;
++    mlist[0]->hwLayers[0].handle = buffer->handle;
++    mlist[0]->hwLayers[0].acquireFenceFd = getFenceBufferFd(buffer);
++    mlist[0]->hwLayers[0].releaseFenceFd = -1;
+ 
+     int err = hwcdevice->prepare(hwcdevice, num_displays, mlist);
+     HWC_PLUGIN_EXPECT_ZERO(err);
+@@ -88,7 +88,7 @@ void HWComposer::present(HWComposerNativeWindowBuffer *buffer)
+     err = hwcdevice->set(hwcdevice, num_displays, mlist);
+     HWC_PLUGIN_EXPECT_ZERO(err);
+ 
+-    setFenceBufferFd(buffer, fblayer->releaseFenceFd);
++    setFenceBufferFd(buffer, mlist[0]->hwLayers[0].releaseFenceFd);
+ 
+     if (oldretire != -1)
+     {   
+@@ -212,7 +212,7 @@ HwComposerBackend_v11::createWindow(int width, int height)
+     hwc_list->numHwLayers = 2;
+ 
+     hwc_win = new HWComposer(width, height, HAL_PIXEL_FORMAT_RGBA_8888,
+-            hwc_device, hwc_mList, &hwc_list->hwLayers[1], num_displays);
++            hwc_device, hwc_mList, &hwc_list->hwLayers[0], num_displays);
+     return (EGLNativeWindowType) static_cast<ANativeWindow *>(hwc_win);
+ }
+ 
+@@ -245,7 +245,7 @@ HwComposerBackend_v11::sleepDisplay(bool sleep)
+ #endif
+     } else {
+ #ifdef HWC_DEVICE_API_VERSION_1_4
+-        HWC_PLUGIN_EXPECT_ZERO(hwc_device->setPowerMode(hwc_device, 0, HWC_POWER_MODE_NORMAL));
++//        HWC_PLUGIN_EXPECT_ZERO(hwc_device->setPowerMode(hwc_device, 0, HWC_POWER_MODE_NORMAL));
+ #else
+         HWC_PLUGIN_EXPECT_ZERO(hwc_device->blank(hwc_device, 0, 0));
+ #endif
+-- 
+2.8.1
+
