@@ -26,12 +26,12 @@ mkdir -p /dev
 setup_devtmpfs ""
 
 echo 0 > /sys/class/android_usb/android0/enable
-echo 18d1 > /sys/class/android_usb/android0/idVendor
-echo d001 > /sys/class/android_usb/android0/idProduct
+echo 0B05 > /sys/class/android_usb/android0/idVendor
+echo 7770 > /sys/class/android_usb/android0/idProduct
 echo adb > /sys/class/android_usb/android0/f_ffs/aliases
 echo ffs > /sys/class/android_usb/android0/functions
-echo lge > /sys/class/android_usb/android0/iManufacturer
-echo dory > /sys/class/android_usb/android0/iProduct
+echo asus > /sys/class/android_usb/android0/iManufacturer
+echo sparrow > /sys/class/android_usb/android0/iProduct
 echo asteroidasteroid > /sys/class/android_usb/android0/iSerial # What should we put here??
 echo 1 > /sys/class/android_usb/android0/enable
 
