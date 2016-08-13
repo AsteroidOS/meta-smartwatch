@@ -1,10 +1,6 @@
 require recipes-kernel/linux/linux.inc
 inherit gettext
 
-KERNEL_RAM_BASE = "0x82000000"
-
-inherit kernel_android
-
 SECTION = "kernel"
 SUMMARY = "Android kernel for the Sony Smartwatch 3"
 HOMEPAGE = "https://android.googlesource.com/"
@@ -24,19 +20,20 @@ PV = "${LINUX_VERSION}+lollipop"
 S = "${WORKDIR}/git"
 B = "${S}"
 
-BOOT_PARTITION = "/dev/mmcblk0p29"
-
-# Removes some headers that are installed incorrectly
-
 do_configure_prepend() {
     # Fixes build with GCC5
     echo "#include <linux/compiler-gcc4.h>" > ${S}/include/linux/compiler-gcc5.h
 
     # This Kbuild is wanted by do_install
-    mkdir ${S}/include/uapi/linux/broadcom
+    mkdir -p ${S}/include/uapi/linux/broadcom
     touch ${S}/include/uapi/linux/broadcom/Kbuild
 }
 
 do_install_append() {
     rm -rf ${D}/usr/src/usr/
 }
+
+BOOT_PARTITION = "/dev/mmcblk0p29"
+MKBOOTIMG_ARGS = "--base 0x82000000"
+
+inherit mkbootimg
