@@ -1,5 +1,5 @@
 require recipes-kernel/linux/linux.inc
-inherit gettext boot-img
+inherit gettext
 
 SECTION = "kernel"
 SUMMARY = "Android kernel for the LG G Watch"
@@ -18,8 +18,6 @@ PV = "${LINUX_VERSION}+lollipop"
 S = "${WORKDIR}/git"
 B = "${S}"
 
-BOOT_PARTITION = "/dev/mmcblk0p15"
-
 # Removes some headers that are installed incorrectly
 
 do_configure_prepend() {
@@ -30,3 +28,7 @@ do_configure_prepend() {
 do_install_append() {
     rm -rf ${D}/usr/src/usr/
 }
+
+BOOT_PARTITION = "/dev/mmcblk0p15"
+
+inherit mkboot
