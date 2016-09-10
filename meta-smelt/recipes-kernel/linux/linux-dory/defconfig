@@ -513,3 +513,5 @@ CONFIG_PPP=y
 # CONFIG_CIFS_UPCALL is not set
 # CONFIG_CIFS_DFS_UPCALL is not set
 # CONFIG_KGDB is not set
+# CONFIG_LEGACY_PTYS is not set
+# CONFIG_LEGACY_PTY_COUNT is not set
