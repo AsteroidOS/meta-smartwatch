@@ -1,8 +1,6 @@
 [Unit]
 Description=Load firmware into BCM20715A1 bluetooth chip
-After=basic.target
-After=suspend.target
-After=hibernate.target
+After=dev-ttyHS99.device
 
 [Service]
 Type=simple
@@ -10,5 +8,3 @@ ExecStart=/usr/bin/patchram.sh
 
 [Install]
 WantedBy=basic.target
-WantedBy=suspend.target
-WantedBy=hibernate.target
