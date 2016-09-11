@@ -1,9 +1,5 @@
 [Unit]
 Description=msm-fb-refresher updates the framebuffer on qualcomm devices
-Wants=systemd-udev-settle.service
-After=local-fs.target systemd-udev-settle.service systemd-tmpfiles-setup.service
-DefaultDependencies=no
-Before=basic.target
 
 [Service]
 Type=oneshot
