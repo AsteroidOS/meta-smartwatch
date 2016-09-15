@@ -11,7 +11,7 @@ if [ "$RFKILLSOFT" ]; then
 	rfkill unblock bluetooth
 	hciconfig hci0 reset
 fi
-brcm_patchram_plus -d --enable_hci --no2bytes --patchram /vendor/firmware/BCM20715A1.hcd /dev/ttyHS99
+brcm_patchram_plus --enable_hci --no2bytes --patchram /vendor/firmware/BCM20715A1.hcd /dev/ttyHS99
 
 # In case something happened and its blocked after uploading the patch
 RFKILLSOFT=$(rfkill list | grep Bluetooth -n2 | grep Soft | grep yes)
