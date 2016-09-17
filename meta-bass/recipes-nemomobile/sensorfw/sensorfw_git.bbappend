@@ -1,1 +1,1 @@
-DEPENDS_append_bass = "libhybris"
+DEPENDS_append_bass = " libhybris "
