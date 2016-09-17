@@ -4,7 +4,7 @@ After=dev-ttyHS99.device
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/patchram.sh
+ExecStart=/usr/bin/brcm_patchram_plus --enable_hci --no2bytes --patchram /vendor/firmware/BCM20715A1.hcd /dev/ttyHS99
 
 [Install]
 WantedBy=basic.target
