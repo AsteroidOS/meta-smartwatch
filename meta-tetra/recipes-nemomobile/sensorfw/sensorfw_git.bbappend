@@ -1,1 +1,1 @@
-DEPENDS_append_tetra = "libhybris"
+DEPENDS_append_tetra = " libhybris "
