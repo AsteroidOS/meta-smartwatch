@@ -23,6 +23,7 @@ B = "${S}"
 do_configure_prepend() {
     # Fixes build with GCC5
     echo "#include <linux/compiler-gcc4.h>" > ${S}/include/linux/compiler-gcc5.h
+    echo "#include <linux/compiler-gcc5.h>" > ${S}/include/linux/compiler-gcc6.h
 }
 
 do_install_append() {
