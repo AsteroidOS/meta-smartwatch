@@ -5,8 +5,6 @@
 
 setup_devtmpfs() {
     mount -t devtmpfs -o mode=0755,nr_inodes=0 devtmpfs $1/dev
-    mkdir -p $1/dev/pts
-    mount -t devpts   -o mode=0755,nr_inodes=0 devpts   $1/dev/pts
     mkdir -p $1/dev/usb-ffs/adb
     mount -t functionfs adb $1/dev/usb-ffs/adb
     # Create additional nodes which devtmpfs does not provide
