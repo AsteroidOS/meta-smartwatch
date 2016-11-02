@@ -4,24 +4,6 @@ on init
     symlink /dev/fb0 /dev/graphics/fb0
     chown system root /sys/class/timed_output/vibrator/enable
 
-    # Set the CPU's freq to 787MHz and disable three cores
-    write /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor "ondemand"
-    write /sys/module/lpm_levels/parameters/sleep_disabled 0
-    write /sys/devices/system/cpu/cpu1/online 0
-    write /sys/devices/system/cpu/cpu2/online 0
-    write /sys/devices/system/cpu/cpu3/online 0
-
-    # Set the GPU's freq to 200MHz
-    write /sys/class/kgsl/kgsl-3d0/devfreq/max_freq 200000000
-    write /sys/class/kgsl/kgsl-3d0/devfreq/min_freq 200000000
-    write /sys/class/kgsl/kgsl-3d0/devfreq/governor performance
-
-    # CPU IDLE Low Power Mode config
-    write /sys/module/lpm_levels/system/cpu0/pc/suspend_enabled 1
-    write /sys/module/lpm_levels/system/cpu0/standalone_pc/suspend_enabled 1
-    write /sys/module/lpm_levels/system/cpu0/standalone_pc/idle_enabled 1
-    write /sys/module/lpm_levels/system/cpu0/pc/idle_enabled 1
-
     class_start core
 
 service logd /system/bin/logd
