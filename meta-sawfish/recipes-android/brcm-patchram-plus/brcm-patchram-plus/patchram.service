@@ -4,6 +4,7 @@ After=dev-ttyHS99.device
 
 [Service]
 Type=simple
+ExecStartPre=/usr/sbin/rfkill unblock bluetooth
 ExecStart=/usr/bin/brcm_patchram_plus --enable_hci --no2bytes --patchram /vendor/firmware/BCM20715A1.hcd /dev/ttyHS99
 
 [Install]
