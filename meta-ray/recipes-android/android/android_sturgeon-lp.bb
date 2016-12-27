@@ -1,15 +1,15 @@
 inherit gettext
 
-SUMMARY = "Downloads the LG G Watch /system and /usr/include/android folders and installs them for libhybris"
+SUMMARY = "Downloads the Huawei Watch /system and /usr/include/android folders and installs them for libhybris"
 LICENSE = "CLOSED"
-SRC_URI = "https://dl.dropboxusercontent.com/s/cqvt6d3hkd651ku/system-dory.tar.gz"
-SRC_URI[md5sum] = "19b79e766f00f6f7d1493192e9626f7b"
-SRC_URI[sha256sum] = "be4e81fbac01532655b6150d373c19f43e89cedd221d92a9845bb059ee3b2437"
-PV = "lollipop"
+SRC_URI = "https://dl.condi.me/asteroidos/system-sturgeon-fe2a4c1a626.tar.gz"
+SRC_URI[md5sum] = "ecd520327391b6b0b3e8faa17faba76f"
+SRC_URI[sha256sum] = "fe2a4c1a626fdb06bf6ddbed85b9b9f1e3a016c7205bbc247c324ffc10d125de"
+PV = "mashmallow"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 INHIBIT_PACKAGE_STRIP = "1"
-COMPATIBLE_MACHINE = "dory"
+COMPATIBLE_MACHINE = "sturgeon"
 INSANE_SKIP_${PN} = "already-stripped"
 S = "${WORKDIR}"
 B = "${S}"

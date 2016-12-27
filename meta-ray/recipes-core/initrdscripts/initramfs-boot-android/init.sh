@@ -15,9 +15,9 @@ setup_devtmpfs() {
 }
 
 echo "Mounting relevant filesystems ..."
-mkdir -m 0755 /proc
+mkdir -m 0755 -p /proc
 mount -t proc proc /proc
-mkdir -m 0755 /sys
+mkdir -m 0755 -p /sys
 mount -t sysfs sys /sys
 mkdir -p /dev
 
@@ -28,8 +28,8 @@ echo 18d1 > /sys/class/android_usb/android0/idVendor
 echo d001 > /sys/class/android_usb/android0/idProduct
 echo adb > /sys/class/android_usb/android0/f_ffs/aliases
 echo ffs > /sys/class/android_usb/android0/functions
-echo lge > /sys/class/android_usb/android0/iManufacturer
-echo dory > /sys/class/android_usb/android0/iProduct
+echo huawei > /sys/class/android_usb/android0/iManufacturer
+echo sturgeon > /sys/class/android_usb/android0/iProduct
 echo asteroidasteroid > /sys/class/android_usb/android0/iSerial # What should we put here??
 echo 1 > /sys/class/android_usb/android0/enable
 
@@ -52,7 +52,7 @@ if [ $? -ne 1 ] ; then
     /usr/bin/adbd
 fi
 
-mkdir -m 0755 /rfs
+mkdir -m 0755 -p /rfs
 
 while [ ! -e /sys/block/mmcblk0 ] ; do
     info "Waiting for sdcard/nand ..."
@@ -65,7 +65,7 @@ if [ ! -e /sys/block/mmcblk0/$sdcard_partition ] ; then
 fi
 
 info "Mounting sdcard/nand ..."
-mkdir -m 0777 /sdcard
+mkdir -m 0777 -p /sdcard
 mount -t auto -o rw,noatime,nodiratime /dev/$sdcard_partition /sdcard
 [ $? -eq 0 ] || fail "Failed to mount the sdcard/nan. Cannot continue."
 

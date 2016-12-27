@@ -1,2 +1,2 @@
-FILESEXTRAPATHS_prepend_dory := "${THISDIR}/brcm-patchram-plus:"
-SRC_URI_append_dory = " file://patchram.service "
+FILESEXTRAPATHS_prepend_sturgeon := "${THISDIR}/brcm-patchram-plus:"
+SRC_URI_append_sturgeon = " file://patchram.service "
