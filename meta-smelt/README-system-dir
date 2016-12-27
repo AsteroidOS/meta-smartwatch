@@ -1,8 +1,8 @@
 /system/ directory build instructions
 =====================================
 
-The /system/ directory available on the dory platform and provided in prebuilt 
-form by android_dory-lp.bb is a tricky mix of an original Android Wear /system
+The /system/ directory available on the sturgeon platform and provided in prebuilt
+form by android_sturgeon-lp.bb is a tricky mix of an original Android Wear /system
 and some recompiled parts. This is due to the half-closed nature of Android
 Wear. This file explains you how to rebuild manually your own /system dir.
 
@@ -15,9 +15,9 @@ installation and then modify it with some symlinks:
   cd vendor/lib/egl/
   ln -s libGLESv2_adreno.so libGLESv2S3D_adreno.so
   cd ../../../lib/hw/
-  ln -s hwcomposer.msm8226.so hwcomposer.dory.so
-  ln -s gralloc.msm8226.so gralloc.dory.so
-  ln -s memtrack.msm8226.so memtrack.dory.so
+  ln -s hwcomposer.msm8226.so hwcomposer.sturgeon.so
+  ln -s gralloc.msm8226.so gralloc.sturgeon.so
+  ln -s memtrack.msm8226.so memtrack.sturgeon.so
   cd ../../../
 
 This installation wouldn't be enough because libhybris needs a patched bionic
@@ -27,9 +27,9 @@ download and then build them. (This may take a while)
   ### Download
   curl https://storage.googleapis.com/git-repo-downloads/repo > repo
   chmod a+x repo
-  mkdir -p android-dory/
-  cd android-dory
-  # For now the repo manifest is pretty much dory-specific, maybe we should 
+  mkdir -p android-sturgeon/
+  cd android-sturgeon
+  # For now the repo manifest is pretty much sturgeon-specific, maybe we should
   # split/merge branches later?
   ../repo init -u https://github.com/AsteroidOS/android_manifest
   ../repo sync
@@ -56,7 +56,7 @@ libhybris. There is a script in the libhybris distribution that can pull
 the header files from the downloaded android distribution (above).
 
   git clone https://github.com/libhybris/libhybris
-  ./libhybris/utils/extract_headers.sh android-dory include
+  ./libhybris/utils/extract_headers.sh android-sturgeon include
 
 With the system and include directories, you can create the system-dir tarball:
 
