@@ -1,2 +1,2 @@
-FILESEXTRAPATHS_prepend_dory := "${THISDIR}/${PN}:"
-COMPATIBLE_MACHINE_dory = "dory"
+FILESEXTRAPATHS_prepend_sturgeon := "${THISDIR}/${PN}:"
+COMPATIBLE_MACHINE_sturgeon = "sturgeon"
