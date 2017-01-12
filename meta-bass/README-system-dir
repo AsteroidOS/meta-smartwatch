@@ -44,6 +44,11 @@ download and then build them. (This may take a while)
   mmma system/core/logd/
   mmma system/core/init/
 
+  If you get an error like "linux/msm_kgsl.h: No such file or directory", edit
+  hardware/qcom/display/msm8226/common.mk and add this line:
+
+  common_includes += $(LOCAL_PATH)/../../../msm8x26/kernel-headers/
+
   ### Installation
   cp out/target/product/generic/root/init ../system/bin/
   cp -r out/target/product/generic/system/* ../system/
