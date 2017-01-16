@@ -1,0 +1,333 @@
+From c211809f692e87e08a3107cbcbdab7531018f0d5 Mon Sep 17 00:00:00 2001
+From: Florent Revest <revestflo@gmail.com>
+Date: Mon, 16 Jan 2017 15:09:57 +0100
+Subject: [PATCH] msm-mdss-mdp: Don't use tracing features
+
+---
+ drivers/video/msm/mdss/mdss_mdp.c            |  3 ---
+ drivers/video/msm/mdss/mdss_mdp_ctl.c        | 28 ----------------------------
+ drivers/video/msm/mdss/mdss_mdp_intf_cmd.c   |  5 -----
+ drivers/video/msm/mdss/mdss_mdp_intf_video.c |  1 -
+ drivers/video/msm/mdss/mdss_mdp_overlay.c    | 16 ----------------
+ drivers/video/msm/mdss/mdss_mdp_rotator.c    |  2 --
+ 6 files changed, 55 deletions(-)
+
+diff --git a/drivers/video/msm/mdss/mdss_mdp.c b/drivers/video/msm/mdss/mdss_mdp.c
+index b370e8b79637..c2a86f83b6d3 100644
+--- a/drivers/video/msm/mdss/mdss_mdp.c
++++ b/drivers/video/msm/mdss/mdss_mdp.c
+@@ -54,9 +54,6 @@
+ #include "mdss_debug.h"
+ #include "mdss_mdp_debug.h"
+ 
+-#define CREATE_TRACE_POINTS
+-#include "mdss_mdp_trace.h"
+-
+ #define AXI_HALT_TIMEOUT_US	0x4000
+ #define AUTOSUSPEND_TIMEOUT_MS	200
+ 
+diff --git a/drivers/video/msm/mdss/mdss_mdp_ctl.c b/drivers/video/msm/mdss/mdss_mdp_ctl.c
+index 030aff48e130..9c60aa5b3b0f 100644
+--- a/drivers/video/msm/mdss/mdss_mdp_ctl.c
++++ b/drivers/video/msm/mdss/mdss_mdp_ctl.c
+@@ -24,7 +24,6 @@
+ #include "mdss_fb.h"
+ #include "mdss_mdp.h"
+ #include "mdss_debug.h"
+-#include "mdss_mdp_trace.h"
+ #include "mdss_debug.h"
+ 
+ static void mdss_mdp_xlog_mixer_reg(struct mdss_mdp_ctl *ctl);
+@@ -983,7 +982,6 @@ static inline void mdss_mdp_ctl_perf_update_bus(struct mdss_data_type *mdata,
+ 	u64 bus_ab_quota, bus_ib_quota;
+ 	int i;
+ 
+-	ATRACE_BEGIN(__func__);
+ 	for (i = 0; i < mdata->nctl; i++) {
+ 		struct mdss_mdp_ctl *ctl;
+ 		ctl = mdata->ctl_off + i;
+@@ -1003,11 +1001,8 @@ static inline void mdss_mdp_ctl_perf_update_bus(struct mdss_data_type *mdata,
+ 	bus_ib_quota = max(bw_sum_of_intfs, mdata->perf_tune.min_bus_vote);
+ 	bus_ab_quota = apply_fudge_factor(bus_ib_quota,
+ 		&mdss_res->ab_factor);
+-	trace_mdp_perf_update_bus(bus_ab_quota, bus_ib_quota);
+-	ATRACE_INT("bus_quota", bus_ib_quota);
+ 	mdss_bus_scale_set_quota(MDSS_HW_MDP, bus_ab_quota, bus_ib_quota);
+ 	pr_debug("ab=%llu ib=%llu\n", bus_ab_quota, bus_ib_quota);
+-	ATRACE_END(__func__);
+ }
+ 
+ /**
+@@ -1056,7 +1051,6 @@ void mdss_mdp_ctl_perf_release_bw(struct mdss_mdp_ctl *ctl)
+ 		struct mdss_mdp_ctl *ctl_local =
+ 			mdss_mdp_get_main_ctl(ctl) ? : ctl;
+ 
+-		trace_mdp_cmd_release_bw(ctl_local->num);
+ 		ctl_local->cur_perf.bw_ctl = 0;
+ 		ctl_local->new_perf.bw_ctl = 0;
+ 		pr_debug("Release BW ctl=%d\n", ctl_local->num);
+@@ -1135,7 +1129,6 @@ static void mdss_mdp_ctl_perf_update(struct mdss_mdp_ctl *ctl,
+ 
+ 	if (!ctl || !ctl->mdata)
+ 		return;
+-	ATRACE_BEGIN(__func__);
+ 	mutex_lock(&mdss_mdp_ctl_lock);
+ 
+ 	mdata = ctl->mdata;
+@@ -1203,13 +1196,11 @@ static void mdss_mdp_ctl_perf_update(struct mdss_mdp_ctl *ctl,
+ 	 * bandwidth is available before clock rate is increased.
+ 	 */
+ 	if (update_clk) {
+-		ATRACE_INT("mdp_clk", clk_rate);
+ 		mdss_mdp_set_clk_rate(clk_rate);
+ 		pr_debug("update clk rate = %d HZ\n", clk_rate);
+ 	}
+ 
+ 	mutex_unlock(&mdss_mdp_ctl_lock);
+-	ATRACE_END(__func__);
+ }
+ 
+ static struct mdss_mdp_ctl *mdss_mdp_ctl_alloc(struct mdss_data_type *mdata,
+@@ -2380,7 +2371,6 @@ static void mdss_mdp_mixer_setup(struct mdss_mdp_ctl *master_ctl,
+ 		return;
+ 	}
+ 
+-	trace_mdp_mixer_update(mixer->num);
+ 	pr_debug("setup mixer=%d\n", mixer->num);
+ 	screen_state = ctl->force_screen_state;
+ 
+@@ -2529,7 +2519,6 @@ static void mdss_mdp_mixer_setup(struct mdss_mdp_ctl *master_ctl,
+ 				mixercfg_extn |= BIT(14);
+ 		}
+ 
+-		trace_mdp_sspp_change(pipe);
+ 
+ 		pr_debug("stg=%d op=%x fg_alpha=%x bg_alpha=%x\n", stage,
+ 					blend_op, fg_alpha, bg_alpha);
+@@ -2948,12 +2937,9 @@ int mdss_mdp_display_wait4comp(struct mdss_mdp_ctl *ctl)
+ 		return 0;
+ 	}
+ 
+-	ATRACE_BEGIN("wait_fnc");
+ 	if (ctl->wait_fnc)
+ 		ret = ctl->wait_fnc(ctl, NULL);
+-	ATRACE_END("wait_fnc");
+ 
+-	trace_mdp_commit(ctl);
+ 
+ 	mdss_mdp_ctl_perf_update(ctl, 0);
+ 
+@@ -3044,16 +3030,13 @@ int mdss_mdp_display_commit(struct mdss_mdp_ctl *ctl, void *arg,
+ 	if (is_bw_released || ctl->force_screen_state ||
+ 		(ctl->mixer_left && ctl->mixer_left->params_changed) ||
+ 		(ctl->mixer_right && ctl->mixer_right->params_changed)) {
+-		ATRACE_BEGIN("prepare_fnc");
+ 		if (ctl->prepare_fnc)
+ 			ret = ctl->prepare_fnc(ctl, arg);
+-		ATRACE_END("prepare_fnc");
+ 		if (ret) {
+ 			pr_err("error preparing display\n");
+ 			goto done;
+ 		}
+ 
+-		ATRACE_BEGIN("mixer_programming");
+ 		mdss_mdp_ctl_perf_update(ctl, 1);
+ 
+ 		mdss_mdp_mixer_setup(ctl, MDSS_MDP_MIXER_MUX_LEFT);
+@@ -3073,10 +3056,8 @@ int mdss_mdp_display_commit(struct mdss_mdp_ctl *ctl, void *arg,
+ 				sctl->flush_bits |= BIT(31) >>
+ 					(sctl->intf_num - MDSS_MDP_INTF0);
+ 		}
+-		ATRACE_END("mixer_programming");
+ 	}
+ 
+-	ATRACE_BEGIN("frame_ready");
+ 	if (ctl->shared_lock) {
+ 		mutex_unlock(ctl->shared_lock);
+ 		mdss_mdp_ctl_notify(ctl, MDP_NOTIFY_FRAME_READY);
+@@ -3084,7 +3065,6 @@ int mdss_mdp_display_commit(struct mdss_mdp_ctl *ctl, void *arg,
+ 	} else {
+ 		mdss_mdp_ctl_notify(ctl, MDP_NOTIFY_FRAME_READY);
+ 	}
+-	ATRACE_END("frame_ready");
+ 
+ 	ctl->roi_bkup.w = ctl->roi.w;
+ 	ctl->roi_bkup.h = ctl->roi.h;
+@@ -3098,7 +3078,6 @@ int mdss_mdp_display_commit(struct mdss_mdp_ctl *ctl, void *arg,
+ 		mdss_mdp_ctl_split_display_enable(split_enable, ctl, sctl);
+ 	}
+ 
+-	ATRACE_BEGIN("postproc_programming");
+ 	if (ctl->mfd && ctl->mfd->dcm_state != DTM_ENTER)
+ 		/* postprocessing setup, including dspp */
+ 		mdss_mdp_pp_setup_locked(ctl);
+@@ -3107,9 +3086,7 @@ int mdss_mdp_display_commit(struct mdss_mdp_ctl *ctl, void *arg,
+ 		ctl->flush_bits |= sctl->flush_bits;
+ 		sctl->flush_bits = 0;
+ 	}
+-	ATRACE_END("postproc_programming");
+ 
+-	ATRACE_BEGIN("flush_kickoff");
+ 	mdss_mdp_ctl_write(ctl, MDSS_MDP_REG_CTL_FLUSH, ctl->flush_bits);
+ 	if (sctl && sctl->flush_bits) {
+ 		mdss_mdp_ctl_write(sctl, MDSS_MDP_REG_CTL_FLUSH,
+@@ -3139,14 +3116,10 @@ int mdss_mdp_display_commit(struct mdss_mdp_ctl *ctl, void *arg,
+ 				MDP_COMMIT_STAGE_WAIT_FOR_PINGPONG,
+ 				commit_cb->data);
+ 
+-		ATRACE_BEGIN("wait_pingpong");
+ 		ctl->wait_pingpong(ctl, NULL);
+-		ATRACE_END("wait_pingpong");
+ 
+ 		if (sctl && sctl->wait_pingpong) {
+-			ATRACE_BEGIN("wait_pingpong sctl");
+ 			sctl->wait_pingpong(sctl, NULL);
+-			ATRACE_END("wait_pingpong sctl");
+ 		}
+ 
+ 		if (commit_cb)
+@@ -3175,7 +3148,6 @@ int mdss_mdp_display_commit(struct mdss_mdp_ctl *ctl, void *arg,
+ 		pr_warn("error displaying frame\n");
+ 
+ 	ctl->play_cnt++;
+-	ATRACE_END("flush_kickoff");
+ 
+ done:
+ 	mdss_mdp_clk_ctrl(MDP_BLOCK_POWER_OFF);
+diff --git a/drivers/video/msm/mdss/mdss_mdp_intf_cmd.c b/drivers/video/msm/mdss/mdss_mdp_intf_cmd.c
+index 8532b24a9194..4621e9b89c2d 100644
+--- a/drivers/video/msm/mdss/mdss_mdp_intf_cmd.c
++++ b/drivers/video/msm/mdss/mdss_mdp_intf_cmd.c
+@@ -385,8 +385,6 @@ static void mdss_mdp_cmd_pingpong_done(void *arg)
+ 	} else
+ 		pr_err("%s: should not have pingpong interrupt!\n", __func__);
+ 
+-	trace_mdp_cmd_pingpong_done(ctl, ctx->pp_num,
+-					atomic_read(&ctx->koff_cnt));
+ 	pr_debug("%s: ctl_num=%d intf_num=%d ctx=%d kcnt=%d\n", __func__,
+ 			ctl->num, ctl->intf_num, ctx->pp_num,
+ 				atomic_read(&ctx->koff_cnt));
+@@ -554,8 +552,6 @@ static int mdss_mdp_cmd_wait4pingpong(struct mdss_mdp_ctl *ctl, void *arg)
+ 		rc = wait_for_completion_timeout(
+ 				&ctx->pp_comp, KOFF_TIMEOUT);
+ 
+-		trace_mdp_cmd_wait_pingpong(ctl->num,
+-					atomic_read(&ctx->koff_cnt));
+ 
+ 		if (rc <= 0) {
+ 			WARN(1, "cmd kickoff timed out (%d) ctl=%d\n",
+@@ -749,7 +745,6 @@ int mdss_mdp_cmd_kickoff(struct mdss_mdp_ctl *ctl, void *arg)
+ 	}
+ 	spin_unlock_irqrestore(&ctx->koff_lock, flags);
+ 
+-	trace_mdp_cmd_kickoff(ctl->num, atomic_read(&ctx->koff_cnt));
+ 
+ 	mdss_mdp_cmd_clk_on(ctx);
+ 
+diff --git a/drivers/video/msm/mdss/mdss_mdp_intf_video.c b/drivers/video/msm/mdss/mdss_mdp_intf_video.c
+index 62c949ffb1d0..33307a70b277 100644
+--- a/drivers/video/msm/mdss/mdss_mdp_intf_video.c
++++ b/drivers/video/msm/mdss/mdss_mdp_intf_video.c
+@@ -534,7 +534,6 @@ static void mdss_mdp_video_underrun_intr_done(void *arg)
+ 	ctl->underrun_cnt++;
+ 	MDSS_XLOG(ctl->num, ctl->underrun_cnt);
+ 	MDSS_XLOG_TOUT_HANDLER("mdp", "dsi0", "dsi1", "edp", "hdmi", "panic");
+-	trace_mdp_video_underrun_done(ctl->num, ctl->underrun_cnt);
+ 	pr_debug("display underrun detected for ctl=%d count=%d\n", ctl->num,
+ 			ctl->underrun_cnt);
+ 
+diff --git a/drivers/video/msm/mdss/mdss_mdp_overlay.c b/drivers/video/msm/mdss/mdss_mdp_overlay.c
+index 78f5cd7d80ba..e1d454b7216a 100644
+--- a/drivers/video/msm/mdss/mdss_mdp_overlay.c
++++ b/drivers/video/msm/mdss/mdss_mdp_overlay.c
+@@ -1341,9 +1341,7 @@ static void __overlay_kickoff_requeue(struct msm_fb_data_type *mfd)
+ 	mdss_mdp_display_commit(ctl, NULL, NULL);
+ 	mdss_mdp_display_wait4comp(ctl);
+ 
+-	ATRACE_BEGIN("sspp_programming");
+ 	__overlay_queue_pipes(mfd);
+-	ATRACE_END("sspp_programming");
+ 
+ 	mdss_mdp_display_commit(ctl, NULL,  NULL);
+ 	mdss_mdp_display_wait4comp(ctl);
+@@ -1386,7 +1384,6 @@ int mdss_mdp_overlay_kickoff(struct msm_fb_data_type *mfd,
+ 	bool need_cleanup = false;
+ 	struct mdss_mdp_commit_cb commit_cb;
+ 
+-	ATRACE_BEGIN(__func__);
+ 	if (ctl->shared_lock) {
+ 		mdss_mdp_ctl_notify(ctl, MDP_NOTIFY_FRAME_BEGIN);
+ 		mutex_lock(ctl->shared_lock);
+@@ -1450,27 +1447,19 @@ int mdss_mdp_overlay_kickoff(struct msm_fb_data_type *mfd,
+ 		need_cleanup = true;
+ 	}
+ 
+-	ATRACE_BEGIN("sspp_programming");
+ 	ret = __overlay_queue_pipes(mfd);
+-	ATRACE_END("sspp_programming");
+ 	mutex_unlock(&mdp5_data->list_lock);
+ 
+ 	if (mfd->panel.type == WRITEBACK_PANEL) {
+-		ATRACE_BEGIN("wb_kickoff");
+ 		ret = mdss_mdp_wb_kickoff(mfd);
+-		ATRACE_END("wb_kickoff");
+ 	} else if (!need_cleanup) {
+-		ATRACE_BEGIN("display_commit");
+ 		commit_cb.commit_cb_fnc = mdss_mdp_commit_cb;
+ 		commit_cb.data = mfd;
+ 		ret = mdss_mdp_display_commit(mdp5_data->ctl, NULL,
+ 			&commit_cb);
+-		ATRACE_END("display_commit");
+ 	} else {
+-		ATRACE_BEGIN("display_commit");
+ 		ret = mdss_mdp_display_commit(mdp5_data->ctl, NULL,
+ 			NULL);
+-		ATRACE_END("display_commit");
+ 	}
+ 
+ 	/* MDP_NOTIFY_FRAME_START is sent in cb for command panel */
+@@ -1483,9 +1472,7 @@ int mdss_mdp_overlay_kickoff(struct msm_fb_data_type *mfd,
+ 	mutex_unlock(&mdp5_data->ov_lock);
+ 	mdss_mdp_overlay_update_pm(mdp5_data);
+ 
+-	ATRACE_BEGIN("display_wait4comp");
+ 	ret = mdss_mdp_display_wait4comp(mdp5_data->ctl);
+-	ATRACE_END("display_wait4comp");
+ 	mutex_lock(&mdp5_data->ov_lock);
+ 
+ 	if (ret == 0) {
+@@ -1501,9 +1488,7 @@ int mdss_mdp_overlay_kickoff(struct msm_fb_data_type *mfd,
+ 
+ 	mdss_fb_update_notify_update(mfd);
+ commit_fail:
+-	ATRACE_BEGIN("overlay_cleanup");
+ 	mdss_mdp_overlay_cleanup(mfd);
+-	ATRACE_END("overlay_cleanup");
+ 	mdss_mdp_clk_ctrl(MDP_BLOCK_POWER_OFF);
+ 	mdss_mdp_ctl_notify(ctl, MDP_NOTIFY_FRAME_FLUSHED);
+ 	if (need_cleanup)
+@@ -1512,7 +1497,6 @@ commit_fail:
+ 	mutex_unlock(&mdp5_data->ov_lock);
+ 	if (ctl->shared_lock)
+ 		mutex_unlock(ctl->shared_lock);
+-	ATRACE_END(__func__);
+ 	return ret;
+ }
+ 
+diff --git a/drivers/video/msm/mdss/mdss_mdp_rotator.c b/drivers/video/msm/mdss/mdss_mdp_rotator.c
+index 6e3f3c6bc534..35ff1fb9aee2 100644
+--- a/drivers/video/msm/mdss/mdss_mdp_rotator.c
++++ b/drivers/video/msm/mdss/mdss_mdp_rotator.c
+@@ -288,9 +288,7 @@ static int mdss_mdp_rotator_queue_sub(struct mdss_mdp_rotator_session *rot,
+ 		pr_err("unable to queue rot data\n");
+ 		goto error;
+ 	}
+-	ATRACE_BEGIN("rotator_kickoff");
+ 	ret = mdss_mdp_rotator_kickoff(rot_ctl, rot, dst_data);
+-	ATRACE_END("rotator_kickoff");
+ 
+ 	return ret;
+ error:
+-- 
+2.11.0
+
