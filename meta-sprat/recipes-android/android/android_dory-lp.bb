@@ -3,8 +3,8 @@ inherit gettext
 SUMMARY = "Downloads the LG G Watch /system and /usr/include/android folders and installs them for libhybris"
 LICENSE = "CLOSED"
 SRC_URI = "https://dl.dropboxusercontent.com/s/cqvt6d3hkd651ku/system-dory.tar.gz"
-SRC_URI[md5sum] = "19b79e766f00f6f7d1493192e9626f7b"
-SRC_URI[sha256sum] = "be4e81fbac01532655b6150d373c19f43e89cedd221d92a9845bb059ee3b2437"
+SRC_URI[md5sum] = "48302d8bf4bbdff7c28e961fbc6e5e3f"
+SRC_URI[sha256sum] = "500c2766d30ffd70593333183c72997fc4e49add595bc825b916426491e66d52"
 PV = "lollipop"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
