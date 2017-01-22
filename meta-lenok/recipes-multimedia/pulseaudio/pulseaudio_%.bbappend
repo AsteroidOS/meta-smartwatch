@@ -1,1 +1,1 @@
-RDEPENDS_${PN}_append_dory = "pulseaudio-modules-nemo"
+RDEPENDS_${PN}_append_dory = "pulseaudio-modules-droid"
