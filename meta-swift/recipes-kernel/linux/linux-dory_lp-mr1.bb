@@ -11,7 +11,8 @@ COMPATIBLE_MACHINE = "dory"
 SRC_URI = "git://android.googlesource.com/kernel/msm;branch=android-msm-dory-3.10-lollipop-mr1-wear-release;protocol=https \
     file://defconfig \
     file://img_info \
-    file://0001-Backport-mainline-4.1-Bluetooth-subsystem.patch "
+    file://0001-Backport-mainline-4.1-Bluetooth-subsystem.patch \
+    file://0002-msm_serial_hs-disable-msm_serial_hs_dma-wakelock-for.patch"
 SRCREV = "9baeef88e425be653d8287f141ee209d78b918b3"
 LINUX_VERSION ?= "3.10"
 PV = "${LINUX_VERSION}+lollipop"
