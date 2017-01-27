@@ -1,4 +1,6 @@
 on init
+    write /sys/kernel/boot_adsp/boot 1
+
     mkdir /dev/graphics/
     symlink /dev/fb0 /dev/graphics/fb0
     chown system root /sys/class/timed_output/vibrator/enable
