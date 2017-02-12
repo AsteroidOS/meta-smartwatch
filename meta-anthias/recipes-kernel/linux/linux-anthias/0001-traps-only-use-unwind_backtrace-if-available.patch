@@ -1,0 +1,26 @@
+From 8e7d93593804e6fe8aed52819fef35377c849ef0 Mon Sep 17 00:00:00 2001
+From: Florent Revest <revestflo@gmail.com>
+Date: Fri, 10 Feb 2017 21:33:22 +0100
+Subject: [PATCH] traps: only use unwind_backtrace if available
+
+---
+ arch/arm/kernel/traps.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/arch/arm/kernel/traps.c b/arch/arm/kernel/traps.c
+index 951f31c62ac8..0d5d5c87cb96 100644
+--- a/arch/arm/kernel/traps.c
++++ b/arch/arm/kernel/traps.c
+@@ -229,7 +229,9 @@ void save_stack_trace_asus(struct task_struct *tsk, struct stack_trace *trace)
+ {
+     asus_save_stack = 1;
+     asus_strace = trace;
++#ifdef CONFIG_ARM_UNWIND
+     unwind_backtrace(NULL, tsk);
++#endif
+     asus_save_stack = 0;
+ }
+ 
+-- 
+2.11.0
+

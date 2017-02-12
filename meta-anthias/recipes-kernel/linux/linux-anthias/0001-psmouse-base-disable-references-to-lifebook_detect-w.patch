@@ -1,0 +1,52 @@
+From ece7405456210ae55a344b3a49a6f75d6094536e Mon Sep 17 00:00:00 2001
+From: Florent Revest <revestflo@gmail.com>
+Date: Fri, 10 Feb 2017 19:55:54 +0100
+Subject: [PATCH 1/2] psmouse-base: disable references to lifebook_detect which
+ needs x86
+
+---
+ drivers/input/mouse/psmouse-base.c | 12 ++++++------
+ 1 file changed, 6 insertions(+), 6 deletions(-)
+
+diff --git a/drivers/input/mouse/psmouse-base.c b/drivers/input/mouse/psmouse-base.c
+index cff065f6261c..436902c64a20 100644
+--- a/drivers/input/mouse/psmouse-base.c
++++ b/drivers/input/mouse/psmouse-base.c
+@@ -710,12 +710,12 @@ static int psmouse_extensions(struct psmouse *psmouse,
+  * We always check for lifebook because it does not disturb mouse
+  * (it only checks DMI information).
+  */
+-	if (psmouse_do_detect(lifebook_detect, psmouse, set_properties) == 0) {
++/*	if (psmouse_do_detect(lifebook_detect, psmouse, set_properties) == 0) {
+ 		if (max_proto > PSMOUSE_IMEX) {
+ 			if (!set_properties || lifebook_init(psmouse) == 0)
+ 				return PSMOUSE_LIFEBOOK;
+ 		}
+-	}
++	} */
+ 
+ /*
+  * Try Kensington ThinkingMouse (we try first, because synaptics probe
+@@ -846,15 +846,15 @@ static int psmouse_extensions(struct psmouse *psmouse,
+  * Trackpoint devices (causing TP_READ_ID command to time out).
+  */
+ 	if (max_proto > PSMOUSE_IMEX) {
+-		if (psmouse_do_detect(fsp_detect,
++/*		if (psmouse_do_detect(fsp_detect,
+ 				      psmouse, set_properties) == 0) {
+ 			if (!set_properties || fsp_init(psmouse) == 0)
+-				return PSMOUSE_FSP;
++				return PSMOUSE_FSP;*/
+ /*
+  * Init failed, try basic relative protocols
+  */
+-			max_proto = PSMOUSE_IMEX;
+-		}
++//			max_proto = PSMOUSE_IMEX;
++//		}
+ 	}
+ 
+ /*
+-- 
+2.11.0
+
