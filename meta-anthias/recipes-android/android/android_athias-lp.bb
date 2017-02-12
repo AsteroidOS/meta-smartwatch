@@ -1,6 +1,6 @@
 inherit gettext
 
-SUMMARY = "Downloads the LG G Watch /system and /usr/include/android folders and installs them for libhybris"
+SUMMARY = "Downloads the Asus Zenwatch 1 /system and /usr/include/android folders and installs them for libhybris"
 LICENSE = "CLOSED"
 SRC_URI = "file://system.tar.bz2"
 PV = "lollipop"
@@ -8,6 +8,7 @@ PV = "lollipop"
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 INHIBIT_PACKAGE_STRIP = "1"
 COMPATIBLE_MACHINE = "anthias"
+INSANE_SKIP_${PN} = "already-stripped"
 S = "${WORKDIR}"
 B = "${S}"
 
