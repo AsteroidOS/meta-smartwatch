@@ -1,11 +1,10 @@
 #! /bin/sh
+
 . /machine.conf
 . /distro.conf
 
 setup_devtmpfs() {
     mount -t devtmpfs -o mode=0755,nr_inodes=0 devtmpfs $1/dev
-    mkdir -p $1/dev/pts
-    mount -t devpts   -o mode=0755,nr_inodes=0 devpts   $1/dev/pts
     mkdir -p $1/dev/usb-ffs/adb
     mount -t functionfs adb $1/dev/usb-ffs/adb
     # Create additional nodes which devtmpfs does not provide
@@ -23,8 +22,7 @@ mount -t sysfs sys /sys
 mkdir -p /dev
 
 setup_devtmpfs ""
-#chmod 022 /sys/devices/platform/msm_hsusb/gadget/wakeup
-#echo 1 > /sys/devices/platform/msm_hsusb/gadget/wakeup
+
 echo 0 > /sys/class/android_usb/android0/enable
 echo 18d1 > /sys/class/android_usb/android0/idVendor
 echo d001 > /sys/class/android_usb/android0/idProduct
@@ -48,11 +46,11 @@ fail() {
 }
 
 # Check wether we need to start adbd for interactive debugging
-#cat /proc/cmdline | grep enable_adb
-#if [ $? -ne 1 ] ; then
-#/usr/bin/android-gadget-setup adb
-#/usr/bin/adbd
-#fi
+cat /proc/cmdline | grep enable_adb
+if [ $? -ne 1 ] ; then
+    /usr/bin/android-gadget-setup adb
+    /usr/bin/adbd
+fi
 
 mkdir -m 0755 /rfs
 
