@@ -60,4 +60,4 @@ the header files from the downloaded android distribution (above).
 
 With the system and include directories, you can create the system-dir tarball:
 
-  tar zxvf system.tar.gz system include
+  tar zcvf system.tar.gz system include
