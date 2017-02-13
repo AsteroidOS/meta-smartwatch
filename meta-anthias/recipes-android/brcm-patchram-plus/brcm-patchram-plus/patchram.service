@@ -1,9 +1,11 @@
 [Unit]
-Description=Load firmware into broadcom bluetooth chip
+Description=Load firmware into BCM20715A1 bluetooth chip
+After=dev-ttyHS0.device
 
 [Service]
 Type=simple
-ExecStart=/bin/echo This script should be device specific
+ExecStartPre=/usr/sbin/rfkill unblock bluetooth
+ExecStart=/usr/bin/brcm_patchram_plus --enable_hci --no2bytes --patchram /vendor/firmware/BCM20715A1_001.002.014.0082.0084.hcd /dev/ttyHS0
 
 [Install]
 WantedBy=basic.target
