@@ -53,6 +53,7 @@ download and then build them. (This may take a while)
   ### Installation
   cp out/target/product/generic/root/init ../system/bin/
   cp -r out/target/product/generic/system/* ../system/
+  chmod +x ../system/bin/*
 
 libhybris headers
 =================
