@@ -1,6 +1,5 @@
 [Unit]
 Description=Load firmware into BCM20715A1 bluetooth chip
-After=dev-ttyHS99.device
 
 [Service]
 Type=simple
