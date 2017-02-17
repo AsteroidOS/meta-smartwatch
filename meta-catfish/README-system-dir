@@ -18,6 +18,7 @@ installation and then modify it with some symlinks:
   ln -s hwcomposer.msm8226.so hwcomposer.sturgeon.so
   ln -s gralloc.msm8226.so gralloc.sturgeon.so
   ln -s memtrack.msm8226.so memtrack.sturgeon.so
+  mv sensors.invensense.so sensors.sturgeon.so
   cd ../../../
 
 This installation wouldn't be enough because libhybris needs a patched bionic
