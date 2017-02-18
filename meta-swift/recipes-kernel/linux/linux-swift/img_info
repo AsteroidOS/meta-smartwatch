@@ -7,6 +7,6 @@ base_addr=0x00000000
 kernel_offset=0x00008000
 ramdisk_offset=0x02000000
 tags_offset=0x01e00000
-cmd_line='androidboot.hardware=dory user_debug=31 maxcpus=4 msm_rtb.filter=0x3F pm_levels.sleep_disabled=1 selinux=0'
-board="dory"
+cmd_line='androidboot.hardware=swift user_debug=31 maxcpus=4 msm_rtb.filter=0x3F pm_levels.sleep_disabled=1 selinux=0'
+board="swift"
 format=gzip
