@@ -1,11 +1,11 @@
 inherit gettext
 
-SUMMARY = "Downloads the LG G Watch /system and /usr/include/android folders and installs them for libhybris"
+SUMMARY = "Downloads the Asus Zenwatch 3 /system and /usr/include/android folders and installs them for libhybris"
 LICENSE = "CLOSED"
-SRC_URI = "https://dl.dropboxusercontent.com/s/cqvt6d3hkd651ku/system-swift.tar.gz"
-SRC_URI[md5sum] = "05b1545b6d4013af5e035f6d0a663873"
-SRC_URI[sha256sum] = "1b8a03a234ad0c3c84c399759b913435f27352a26b62474a4fe64c8e7fe19e65"
-PV = "lollipop"
+SRC_URI = "http://kicherer.org/aos/system.tar.gz"
+SRC_URI[md5sum] = "60ab67b7b988ee018258744efc547cb7"
+SRC_URI[sha256sum] = "fbe6f939e7062bb14f0df4698dddd9c31e1a098ddb3cceecaee18ddb2fc43366"
+PV = "marshmallow"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 INHIBIT_PACKAGE_STRIP = "1"
@@ -31,7 +31,7 @@ do_install() {
     ln -s system/vendor vendor
 }
 
-# FIXME: QA Issue: Architecture did not match (40 to 164) on /work/swift-oe-linux-gnueabi/android/lollipop-r0/packages-split/android-system/system/vendor/firmware/adsp.b00 [arch]
+# FIXME: QA Issue: Architecture did not match (40 to 164) on /work/dory-oe-linux-gnueabi/android/lollipop-r0/packages-split/android-system/system/vendor/firmware/adsp.b00 [arch]
 do_package_qa() {
 }
 

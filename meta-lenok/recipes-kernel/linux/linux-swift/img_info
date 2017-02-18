@@ -1,12 +1,12 @@
 kernel=%%KERNEL%%
 ramdisk=%%RAMDISK%%
-page_size=2048
-kernel_size=14309960
-ramdisk_size=699687
-base_addr=0x00000000
+kernel_size=%%KERNEL_SIZE%%
+ramdisk_size=%%RAMDISK_SIZE%%
 kernel_offset=0x00008000
-ramdisk_offset=0x02000000
-tags_offset=0x01e00000
-cmd_line='androidboot.hardware=swift user_debug=31 maxcpus=4 msm_rtb.filter=0x3F pm_levels.sleep_disabled=1 selinux=0'
+base_addr=0x80000000
+ramdisk_offset=0x01000000
+tags_offset=0x00000100
+page_size=2048
+cmd_line="sched_enable_hmp=0 console=ttyHSL0,115200,n8 androidboot.console=ttyHSL0 androidboot.hardware=swift msm_rtb.filter=0x237 ehci-hcd.park=3 lpm_levels.sleep_disabled=1 earlyprintk androidboot.bootdevice=7824900.sdhci androidboot.serialno=GANZCY00151841D androidboot.bootloader=swift1003307 HW_ID=SWIFT_PR  CPU_RV=000520e1 androidboot.bootreason=reboot quiet androidboot.rebootmode=0x77665501 oem_perf_on androidboot.baseband=apq mdss_mdp3.panel=1:dsi:0:qcom,mdss_dsi_h139bln01_400_cmd:1:none"
 board="swift"
 format=gzip
