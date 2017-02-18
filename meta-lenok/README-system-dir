@@ -1,14 +1,28 @@
 /system/ directory build instructions
 =====================================
 
-The /system/ directory available on the dory platform and provided in prebuilt 
-form by android_dory-lp.bb is a tricky mix of an original Android Wear /system
-and some recompiled parts. This is due to the half-closed nature of Android
-Wear. This file explains you how to rebuild manually your own /system dir.
+The /system directory we use for AsteroidOS is a tricky mix of an original
+Android Wear /system and some recompiled parts. This is due to the half-closed
+nature of Android Wear. This file explains you how to build the /system dir for
+AsteroidOS.
 
-We first need to adb pull a /system directory from a living Android Wear 5.1.1
-installation and then modify it with some symlinks:
+We first need to adb pull a /system directory from a living Android Wear
+installation:
+
   adb pull /system/ system
+
+Some files might not be readable for the adb process. Depending on your device,
+you might also need files that are not readable with adb. Hence, you might have
+to boot a prebuilt AsteroidOS or custom Linux image with root privileges to
+transfer all files.
+
+WARNING: If you do so, ensure that you mount the /system partition read-only as
+this partition is cryptographically signed in newer Androids and simply mounting
+the partition (without modifying any files!) will prevent booting Android Wear
+after a reboot.
+
+If you have a /system copy with the required files, execute:
+
   cd system/
   rm -rf app/ fonts/ framework/ media/ priv-app/ xbin/
   sed -i "/persist.hwc.mdpcomp.enable=true/d" build.prop
@@ -18,37 +32,36 @@ installation and then modify it with some symlinks:
   ln -s hwcomposer.msm8226.so hwcomposer.dory.so
   ln -s gralloc.msm8226.so gralloc.dory.so
   ln -s memtrack.msm8226.so memtrack.dory.so
-  mv sensors.invensense.so sensors.dory.so
   cd ../../../
 
 This installation wouldn't be enough because libhybris needs a patched bionic
 and the GPU drivers also need to be recompiled on the QCOM platform with the 
 QCOM_BSP flag. Thankfully, those specific parts are open-source so we can 
-download and then build them. (This may take a while)
-  ### Download
+download and then build them (this may take a while):
+
   curl https://storage.googleapis.com/git-repo-downloads/repo > repo
   chmod a+x repo
-  mkdir -p android-dory/
-  cd android-dory
-  # For now the repo manifest is pretty much dory-specific, maybe we should 
+  mkdir -p android-swift/
+  cd android-swift
+  # For now the repo manifest is pretty much swift-specific, maybe we should 
   # split/merge branches later?
-  ../repo init -u https://github.com/AsteroidOS/android_manifest
-  ../repo sync
+  ../repo init -u https://github.com/AsteroidOS/android_manifest \
+		-b marshmallow-dr1.5-release -g all,-notdefault,-darwin,-mips --depth=1
+  ../repo sync -qc
 
   ### Build (can only be done in bash)
   . build/envsetup.sh
-  export TARGET_USES_C2D_COMPOSITION=true # Needed by copybit
   export TARGET_USES_QCOM_BSP=true        # Fixes GPU problems on QCOM platforms
-  export TARGET_BOARD_PLATFORM=msm8226    # We Specify the SoC by hand
-  mmma hardware/qcom/display/msm8226/     # hwcomposer, gralloc, dependencies...
+  export TARGET_BOARD_PLATFORM=msm8909    # We Specify the SoC by hand
+  
+  ### for a debug build, also set:
+  # export TARGET_BUILD_VARIANT=userdebug
+  # export TARGET_BUILD_TYPE=debug
+  
+  mmma hardware/qcom/display/msm8909/     # hwcomposer, gralloc, dependencies...
   mmma frameworks/native/cmds/servicemanager/
   mmma system/core/logd/
   mmma system/core/init/
-
-  If you get an error like "linux/msm_kgsl.h: No such file or directory", edit
-  hardware/qcom/display/msm8226/common.mk and add this line:
-
-  common_includes += $(LOCAL_PATH)/../../../msm8x26/kernel-headers/
 
   ### Installation
   cp out/target/product/generic/root/init ../system/bin/
@@ -63,7 +76,7 @@ libhybris. There is a script in the libhybris distribution that can pull
 the header files from the downloaded android distribution (above).
 
   git clone https://github.com/libhybris/libhybris
-  ./libhybris/utils/extract_headers.sh android-dory include
+  ./libhybris/utils/extract_headers.sh android-swift include 6 0 1
 
 With the system and include directories, you can create the system-dir tarball:
 
