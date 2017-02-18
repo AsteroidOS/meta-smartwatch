@@ -1,1 +1,1 @@
-DEPENDS_append_dory = " libhybris "
+DEPENDS_append_swift = " libhybris "

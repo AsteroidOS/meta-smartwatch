@@ -43,7 +43,7 @@ CONFIG_SECCOMP=y
 CONFIG_BUILD_ARM_APPENDED_DTB_IMAGE=y
 CONFIG_ZBOOT_ROM_TEXT=0x0
 CONFIG_ZBOOT_ROM_BSS=0x0
-CONFIG_CMDLINE="androidboot.hardware=dory user_debug=31 maxcpus=4 msm_rtb.filter=0x3F enable_adb ramoops.mem_address=0x30000000 ramoops.mem_size=0x200000 selinux=0 loglevel=3"
+CONFIG_CMDLINE="androidboot.hardware=swift user_debug=31 maxcpus=4 msm_rtb.filter=0x3F enable_adb ramoops.mem_address=0x30000000 ramoops.mem_size=0x200000 selinux=0 loglevel=3"
 CONFIG_CPU_FREQ_GOV_POWERSAVE=y
 CONFIG_CPU_FREQ_GOV_USERSPACE=y
 CONFIG_CPU_FREQ_GOV_ONDEMAND=y
