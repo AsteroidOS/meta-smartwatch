@@ -5,13 +5,19 @@
 
 setup_devtmpfs() {
     mount -t devtmpfs -o mode=0755,nr_inodes=0 devtmpfs $1/dev
+
+    mkdir $1/dev/pts
+    mount -t devpts none $1/dev/pts/
+
     mkdir -p $1/dev/usb-ffs/adb
     mount -t functionfs adb $1/dev/usb-ffs/adb
+
     # Create additional nodes which devtmpfs does not provide
     test -c $1/dev/fd || ln -sf /proc/self/fd $1/dev/fd
     test -c $1/dev/stdin || ln -sf fd/0 $1/dev/stdin
     test -c $1/dev/stdout || ln -sf fd/1 $1/dev/stdout
     test -c $1/dev/stderr || ln -sf fd/2 $1/dev/stderr
+    test -c $1/dev/socket || mkdir -m 0755 $1/dev/socket
 }
 
 echo "Mounting relevant filesystems ..."
@@ -30,7 +36,7 @@ echo adb > /sys/class/android_usb/android0/f_ffs/aliases
 echo ffs > /sys/class/android_usb/android0/functions
 echo lge > /sys/class/android_usb/android0/iManufacturer
 echo swift > /sys/class/android_usb/android0/iProduct
-echo asteroidasteroid > /sys/class/android_usb/android0/iSerial # What should we put here??
+echo SWIFTZW3 > /sys/class/android_usb/android0/iSerial # this must be uppercase
 echo 1 > /sys/class/android_usb/android0/enable
 
 info() {
@@ -44,13 +50,6 @@ fail() {
     sleep 15s
     reboot
 }
-
-# Check wether we need to start adbd for interactive debugging
-cat /proc/cmdline | grep enable_adb
-if [ $? -ne 1 ] ; then
-    /usr/bin/android-gadget-setup adb
-    /usr/bin/adbd
-fi
 
 mkdir -m 0755 /rfs
 
@@ -101,10 +100,19 @@ fi
 
 setup_devtmpfs "/rfs"
 
+# Check wether we need to start adbd for interactive debugging
+cat /proc/cmdline | grep enable_adb
+if [ $? -ne 1 ] ; then
+    /usr/bin/android-gadget-setup adb
+    /usr/bin/adbd
+fi
+
 info "Umount not needed filesystems ..."
 umount -l /proc
 umount -l /sys
+umount -l /dev/usb-ffs/adb
 
+mount -t functionfs adb /rfs/dev/usb-ffs/adb
 mount -t proc proc /rfs/proc
 mount -t sysfs sys /rfs/sys
 
