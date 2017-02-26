@@ -12,6 +12,8 @@ DEPENDS = "qtbase qtsensors libhybris mtdev glib-2.0 udev qtwayland virtual/andr
 # Android version we select per machine
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 
+COMPATIBLE_MACHINE = "swift"
+
 SRC_URI = "git://github.com/mer-hybris/qt5-qpa-hwcomposer-plugin.git;protocol=https"
 S = "${WORKDIR}/git/hwcomposer"
 SRCREV = "a85d3518550193aaee69a6a011f290a2859db5ca"
