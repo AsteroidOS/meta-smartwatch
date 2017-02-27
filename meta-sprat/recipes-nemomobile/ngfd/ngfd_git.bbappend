@@ -1,1 +1,1 @@
-RDEPENDS_${PN}_append_dory = " ngfd-plugin-droid-vibrator "
+RDEPENDS_${PN}_append_sprat = " ngfd-plugin-droid-vibrator "

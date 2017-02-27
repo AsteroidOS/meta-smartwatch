@@ -1,3 +1,3 @@
-FILESEXTRAPATHS_prepend_dory := "${THISDIR}/brcm-patchram-plus:"
-SRC_URI_append_dory = " file://patchram.service "
-CFLAGS_append_dory = " -DLPM_DORY"
+FILESEXTRAPATHS_prepend_sprat := "${THISDIR}/brcm-patchram-plus:"
+SRC_URI_append_sprat = " file://patchram.service "
+CFLAGS_append_sprat = " -DLPM_SPRAT"

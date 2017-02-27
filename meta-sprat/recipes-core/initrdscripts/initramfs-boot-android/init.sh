@@ -28,8 +28,8 @@ echo 18d1 > /sys/class/android_usb/android0/idVendor
 echo d001 > /sys/class/android_usb/android0/idProduct
 echo adb > /sys/class/android_usb/android0/f_ffs/aliases
 echo ffs > /sys/class/android_usb/android0/functions
-echo lge > /sys/class/android_usb/android0/iManufacturer
-echo dory > /sys/class/android_usb/android0/iProduct
+echo samsung > /sys/class/android_usb/android0/iManufacturer
+echo sprat > /sys/class/android_usb/android0/iProduct
 echo asteroidasteroid > /sys/class/android_usb/android0/iSerial # What should we put here??
 echo 1 > /sys/class/android_usb/android0/enable
 
