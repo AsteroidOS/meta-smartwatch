@@ -12,10 +12,12 @@ SRC_URI = "git://android.googlesource.com/kernel/msm;branch=android-msm-anthias-
     file://defconfig \
     file://img_info \
     file://0001-Create-copy-of-devfreq_trace.h.patch \
-    file://0001-msm-mdss-mdp-Don-t-use-tracing-features.patch \
-    file://0001-psmouse-base-disable-references-to-lifebook_detect-w.patch \
-    file://0001-static-inline-in-ARM-ftrace.h.patch \
-    file://0001-traps-only-use-unwind_backtrace-if-available.patch"
+    file://0002-msm-mdss-mdp-Don-t-use-tracing-features.patch \
+    file://0003-psmouse-base-disable-references-to-lifebook_detect-w.patch \
+    file://0004-static-inline-in-ARM-ftrace.h.patch \
+    file://0005-traps-only-use-unwind_backtrace-if-available.patch \
+    file://0006-Use-Bluesleep-instead-of-Nitrous-for-BT-power-manage.patch \
+    file://0007-Backport-mainline-4.1-Bluetooth-subsystem.patch"
 SRCREV = "5d054632429188226b8c1e1e545475c89ad4c582"
 LINUX_VERSION ?= "3.10"
 PV = "${LINUX_VERSION}+marshmallow"

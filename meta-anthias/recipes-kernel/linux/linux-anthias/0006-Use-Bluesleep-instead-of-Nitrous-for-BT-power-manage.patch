@@ -1,0 +1,1227 @@
+From 2d6c55d89baa783f07006ae85341cee4c810c087 Mon Sep 17 00:00:00 2001
+From: Florent Revest <revestflo@gmail.com>
+Date: Thu, 2 Mar 2017 12:54:42 +0100
+Subject: [PATCH 1/2] Use Bluesleep instead of Nitrous for BT power management
+
+---
+ .../devicetree/bindings/bluetooth/nitrous.txt      |  44 --
+ arch/arm/boot/dts/qcom/WI500Q_EVB2_msm8226.dtsi    |  20 +-
+ arch/arm/boot/dts/qcom/WI500Q_SR2_msm8226.dtsi     |  20 +-
+ arch/arm/boot/dts/qcom/WI500Q_SR_msm8226.dtsi      |  20 +-
+ arch/arm/mach-msm/Makefile                         |   2 +-
+ arch/arm/mach-msm/board-8226.c                     |  61 +++
+ arch/arm/mach-msm/include/mach/board.h             |   6 +
+ arch/arm/mach-msm/wi500q_rfkill.c                  | 125 +++++
+ drivers/BCM_LPM/Makefile                           |   2 +-
+ drivers/BCM_LPM/bluesleep.c                        |  28 +
+ drivers/BCM_LPM/nitrous.c                          | 599 ---------------------
+ drivers/bluetooth/hci_ldisc.c                      |   4 +
+ drivers/tty/serial/msm_serial_hs.c                 |  21 +-
+ include/linux/platform_data/msm_serial_hs.h        |   3 -
+ include/net/bluetooth/hci.h                        |   1 +
+ net/bluetooth/hci_sock.c                           |   4 +
+ 16 files changed, 259 insertions(+), 701 deletions(-)
+ delete mode 100644 Documentation/devicetree/bindings/bluetooth/nitrous.txt
+ create mode 100644 arch/arm/mach-msm/wi500q_rfkill.c
+ delete mode 100644 drivers/BCM_LPM/nitrous.c
+
+diff --git a/Documentation/devicetree/bindings/bluetooth/nitrous.txt b/Documentation/devicetree/bindings/bluetooth/nitrous.txt
+deleted file mode 100644
+index cc7fc2dc9839..000000000000
+--- a/Documentation/devicetree/bindings/bluetooth/nitrous.txt
++++ /dev/null
+@@ -1,44 +0,0 @@
+-* Nitrous Bluetooth Power Management Driver
+-
+-The Nitrous BT power management is designed to handle the power management
+-between a host processor and a BT controller.  In its current form, the
+-driver is specific to the power management between a MSM processor and a
+-Broadcom BT controller over UART communication.
+-
+-The driver handles the following key power management elements:
+--rfkill.
+--host-wake-gpio/dev-wake-gpio sleep protocol.
+--serial driver power management.
+-
+-On Tx, the driver registers and receives a callback from the serial core to
+-toggle the dev-wake-gpio and utilizes the PM Runtime framework to wake up
+-the serial driver for transmission.
+-
+-On Rx, the driver listens to the host-wake GPIO and wakes up the serial driver
+-to receive incoming data.  The host-wake GPIO is also capable of waking up
+-the host processor from suspend.
+-
+-Required Properties:
+-  - compatible: "goog,nitrous"
+-  - uart-port = UART port number for serial communication.
+-  - power-gpio = GPIO number for controller power.
+-  - host-wake-gpio: GPIO number for host wake signal (controller to host).
+-  - host-wake-polarity: Polarity for host wake GPIO
+-                        (0: active low; 1: active high).
+-  - dev-wake-gpio: GPIO number for controller wake signal (host to controller).
+-  - dev-wake-polarity: Polarity for dev wake GPIO
+-                       (0: active low; 1: active high).
+-
+-Optional Properties:
+-  None
+-
+-Example:
+-	bt_nitrous {
+-		compatible = "goog,nitrous";
+-		uart-port = <6>;
+-		power-gpio = <&msmgpio 10 0>;
+-		host-wake-gpio = <&msmgpio 20 0>;
+-		host-wake-polarity = <0>;
+-		dev-wake-gpio = <&msmgpio 30 0>;
+-		dev-wake-polarity = <0>;
+-	};
+diff --git a/arch/arm/boot/dts/qcom/WI500Q_EVB2_msm8226.dtsi b/arch/arm/boot/dts/qcom/WI500Q_EVB2_msm8226.dtsi
+index e7f0673d06f4..2d3ebcf9bd45 100755
+--- a/arch/arm/boot/dts/qcom/WI500Q_EVB2_msm8226.dtsi
++++ b/arch/arm/boot/dts/qcom/WI500Q_EVB2_msm8226.dtsi
+@@ -285,18 +285,7 @@
+ 				<86 512 0 0>,
+ 				<86 512 500 800>;
+ 	};
+-
+-	bt_nitrous {
+-		compatible = "goog,nitrous";
+-		uart-port = <3>;
+-		power-gpio = <&msmgpio 34 0>;
+-		reset-gpio = <&msmgpio 36 0>;
+-		host-wake-gpio = <&msmgpio 48 0>;
+-		host-wake-polarity = <1>;
+-		dev-wake-gpio = <&msmgpio 45 0>;
+-		dev-wake-polarity = <1>;
+-	};
+-	// ASUS_BSP BerylHou ---
++	// ASUS_BSP BerylHou --- 
+ 
+ 	uart_5:serial@f9922000 {
+ 		compatible = "qcom,msm-lsuart-v14";
+@@ -565,6 +554,13 @@
+ 		compatible = "qcom,msm-pcm-routing";
+ 	};
+ 
++	//ASUS_BSP BerylHou +++ "Config bt_rfkill"
++	rfkill {
++               compatible = "bcm,bcm-rfkill";
++	       status = "ok";
++	};
++	//ASUS_BSP BerylHou ---
++
+ 	qcom,msm-pcm-low-latency {
+ 		compatible = "qcom,msm-pcm-dsp";
+ 		qcom,msm-pcm-dsp-id = <1>;
+diff --git a/arch/arm/boot/dts/qcom/WI500Q_SR2_msm8226.dtsi b/arch/arm/boot/dts/qcom/WI500Q_SR2_msm8226.dtsi
+index c76aa7af88c9..877e54f69b19 100755
+--- a/arch/arm/boot/dts/qcom/WI500Q_SR2_msm8226.dtsi
++++ b/arch/arm/boot/dts/qcom/WI500Q_SR2_msm8226.dtsi
+@@ -278,18 +278,7 @@
+ 				<86 512 0 0>,
+ 				<86 512 500 800>;
+ 	};
+-
+-	bt_nitrous {
+-		compatible = "goog,nitrous";
+-		uart-port = <0>;
+-		power-gpio = <&msmgpio 34 0>;
+-		reset-gpio = <&msmgpio 36 0>;
+-		host-wake-gpio = <&msmgpio 48 0>;
+-		host-wake-polarity = <1>;
+-		dev-wake-gpio = <&msmgpio 61 0>;
+-		dev-wake-polarity = <1>;
+-	};
+-	// ASUS_BSP BerylHou ---
++	// ASUS_BSP BerylHou --- 
+ 
+ 	uart_2:serial@f991f000 { //ASUS_BSP BerylHou +++
+ 		compatible = "qcom,msm-lsuart-v14";
+@@ -564,6 +553,13 @@
+ 		compatible = "qcom,msm-pcm-routing";
+ 	};
+ 
++	//ASUS_BSP BerylHou +++ "Config bt_rfkill"
++	rfkill {
++               compatible = "bcm,bcm-rfkill";
++	       status = "ok";
++	};
++	//ASUS_BSP BerylHou ---
++
+ 	qcom,msm-pcm-low-latency {
+ 		compatible = "qcom,msm-pcm-dsp";
+ 		qcom,msm-pcm-dsp-id = <1>;
+diff --git a/arch/arm/boot/dts/qcom/WI500Q_SR_msm8226.dtsi b/arch/arm/boot/dts/qcom/WI500Q_SR_msm8226.dtsi
+index 01dfe54fb24b..04cb84afe9e6 100755
+--- a/arch/arm/boot/dts/qcom/WI500Q_SR_msm8226.dtsi
++++ b/arch/arm/boot/dts/qcom/WI500Q_SR_msm8226.dtsi
+@@ -278,18 +278,7 @@
+ 				<86 512 0 0>,
+ 				<86 512 500 800>;
+ 	};
+-
+-	bt_nitrous {
+-		compatible = "goog,nitrous";
+-		uart-port = <0>;
+-		power-gpio = <&msmgpio 34 0>;
+-		reset-gpio = <&msmgpio 36 0>;
+-		host-wake-gpio = <&msmgpio 48 0>;
+-		host-wake-polarity = <1>;
+-		dev-wake-gpio = <&msmgpio 61 0>;
+-		dev-wake-polarity = <1>;
+-	};
+-	// ASUS_BSP BerylHou ---
++	// ASUS_BSP BerylHou --- 
+ 
+ 	uart_2:serial@f991f000 { //ASUS_BSP BerylHou +++
+ 		compatible = "qcom,msm-lsuart-v14";
+@@ -564,6 +553,13 @@
+ 		compatible = "qcom,msm-pcm-routing";
+ 	};
+ 
++	//ASUS_BSP BerylHou +++ "Config bt_rfkill"
++	rfkill {
++               compatible = "bcm,bcm-rfkill";
++	       status = "ok";
++	};
++	//ASUS_BSP BerylHou ---
++
+ 	qcom,msm-pcm-low-latency {
+ 		compatible = "qcom,msm-pcm-dsp";
+ 		qcom,msm-pcm-dsp-id = <1>;
+diff --git a/arch/arm/mach-msm/Makefile b/arch/arm/mach-msm/Makefile
+index a3a53bc69204..48ff377e2fe6 100644
+--- a/arch/arm/mach-msm/Makefile
++++ b/arch/arm/mach-msm/Makefile
+@@ -35,7 +35,7 @@ obj-$(CONFIG_MSM_PP2S_FEMTO) += pp2s.o
+ obj-$(CONFIG_ARCH_MSMFERRUM) += board-ferrum.o
+ obj-$(CONFIG_ARCH_MSM8916) += board-8916.o
+ obj-$(CONFIG_ARCH_MSM8226) += board-8226.o board-8226-gpiomux.o
+-obj-$(CONFIG_ARCH_MSM8226) += asus_gpio_pinmux.o
++obj-$(CONFIG_ARCH_MSM8226) += asus_gpio_pinmux.o wi500q_rfkill.o
+ obj-$(CONFIG_ARCH_MSM8226) += clock-8226.o clock-mdss-8974.o
+ obj-$(CONFIG_ARCH_MSM8610) += board-8610.o board-8610-gpiomux.o
+ obj-$(CONFIG_ARCH_MSM8610) += clock-8610.o
+diff --git a/arch/arm/mach-msm/board-8226.c b/arch/arm/mach-msm/board-8226.c
+index 1ae589ed9e7d..c306fc125f8e 100644
+--- a/arch/arm/mach-msm/board-8226.c
++++ b/arch/arm/mach-msm/board-8226.c
+@@ -76,6 +76,37 @@ void __init device_gpiomux_init(void)
+ }
+ //--ASUS_BSP : add for gpio
+ 
++//ASUS_BSP BerylHou +++ "Add for BT porting"
++static struct resource bluesleep_resources[] = {
++	{
++		.name	= "gpio_host_wake", //gpio bt_wake_up_host
++		.start	= -1,
++		.end	= -1, 
++		.flags	= IORESOURCE_IO,
++	},
++	{
++		.name	= "gpio_ext_wake", //gpio host_wake_up_bt
++		.start	= -1, 
++		.end	= -1, 
++		.flags	= IORESOURCE_IO,
++	},
++	{
++		.name	= "host_wake", //IRQ bt wake up host
++		.start	= -1, 
++		.end	= -1, 
++		.flags	= IORESOURCE_IRQ,
++	},
++};
++
++static struct platform_device msm_bluesleep_device = {
++	.name		= "bluesleep",
++	.id		= -1,
++	.num_resources	= ARRAY_SIZE(bluesleep_resources),
++	.resource	= bluesleep_resources,
++};
++
++//ASUS_BSP BerylHou ---
++
+ static struct of_dev_auxdata msm8226_auxdata_lookup[] __initdata = {
+ 	OF_DEV_AUXDATA("qcom,sdhci-msm", 0xF9824900, \
+ 			"msm_sdcc.1", NULL),
+@@ -90,6 +121,35 @@ static struct of_dev_auxdata msm8226_auxdata_lookup[] __initdata = {
+ 	{}
+ };
+ 
++//ASUS_BSP BerylHou +++ "Add for BT porting"
++static void gpio_bt_init(void)
++{
++	printk("[bt] gpio init");
++	
++	bluesleep_resources[0].start = GPIO_BT_WAKE_UP_HOST;
++	bluesleep_resources[0].end = GPIO_BT_WAKE_UP_HOST;
++
++	if (g_ASUS_hwID == WI500Q_EVB2) {
++		bluesleep_resources[1].start = GPIO_HOST_WAKE_UP_BT_EVB2;
++		bluesleep_resources[1].end = GPIO_HOST_WAKE_UP_BT_EVB2;
++	} else {
++		bluesleep_resources[1].start = GPIO_HOST_WAKE_UP_BT_SR;
++		bluesleep_resources[1].end = GPIO_HOST_WAKE_UP_BT_SR;
++	}
++
++	bluesleep_resources[2].start = gpio_to_irq(GPIO_BT_WAKE_UP_HOST);
++	bluesleep_resources[2].end = gpio_to_irq(GPIO_BT_WAKE_UP_HOST);
++
++}
++
++static void __init board_8226_bluesleep_setup(void)
++{
++	printk("set up bt sleep mode\n");
++	gpio_bt_init();
++	platform_device_register(&msm_bluesleep_device);
++}
++//ASUS_BSP BerylHou ---
++
+ static void __init msm8226_reserve(void)
+ {
+ 	of_scan_flat_dt(dt_scan_for_memory_reserve, NULL);
+@@ -160,6 +220,7 @@ void __init msm8226_init(void)
+ 	device_gpiomux_init();
+ //---ASUS_BSP : add for gpio
+ 	msm8226_add_drivers();
++	board_8226_bluesleep_setup(); //ASUS_BSP BerylHou +++ "BT porting"
+ }
+ 
+ static const char *msm8226_dt_match[] __initconst = {
+diff --git a/arch/arm/mach-msm/include/mach/board.h b/arch/arm/mach-msm/include/mach/board.h
+index ca6229239028..1fb468f76358 100644
+--- a/arch/arm/mach-msm/include/mach/board.h
++++ b/arch/arm/mach-msm/include/mach/board.h
+@@ -27,6 +27,12 @@
+ #include <linux/ssbi.h>
+ #include <linux/msm-bus.h>
+ 
++//ASUS_BSP BerylHou +++
++#define GPIO_HOST_WAKE_UP_BT_SR 61
++#define GPIO_HOST_WAKE_UP_BT_EVB2 45
++#define GPIO_BT_WAKE_UP_HOST 48
++//ASUS_BSP BerylHou ---
++
+ #define RF_TYPE_16 0x10
+ #define RF_TYPE_17 0x11
+ #define RF_TYPE_18 0x12
+diff --git a/arch/arm/mach-msm/wi500q_rfkill.c b/arch/arm/mach-msm/wi500q_rfkill.c
+new file mode 100644
+index 000000000000..86551a51071e
+--- /dev/null
++++ b/arch/arm/mach-msm/wi500q_rfkill.c
+@@ -0,0 +1,125 @@
++/* Control bluetooth power for bcm board */
++#include <linux/delay.h>
++#include <linux/device.h>
++#include <linux/module.h>
++#include <linux/platform_device.h>
++#include <linux/rfkill.h>
++#include <asm/gpio.h>
++#include <asm/mach-types.h>
++
++#define GPIO_BT_RESET 36
++#define GPIO_BT_REGEN 34
++
++static struct rfkill *bt_rfk;
++static const char bt_name[] = "bcm20715";
++
++static int bluetooth_set_power(void *data, bool blocked)
++{
++	int rc_reset = 0 , rc_reg = 0;
++	rc_reset = gpio_request(GPIO_BT_RESET, "bt_reset");
++	if (rc_reset)
++		gpio_free(GPIO_BT_RESET);
++
++	rc_reg = gpio_request(GPIO_BT_REGEN, "bt_reg");
++	if (rc_reg)
++		gpio_free(GPIO_BT_REGEN);
++
++	if (rc_reset || rc_reg) {
++		printk ("rfkill: gpio request fail , free gpio \n");
++	} else if (!blocked) {
++		printk("rfkilL: BT power on\n");
++		// BT reg_eng high
++ 		gpio_direction_output(GPIO_BT_REGEN, 0);
++		usleep(300);
++ 		gpio_direction_output(GPIO_BT_REGEN, 1);
++
++		// BT reset high
++ 		gpio_direction_output(GPIO_BT_RESET, 0);
++		usleep(300);	
++		gpio_direction_output(GPIO_BT_RESET, 1);
++		gpio_free(GPIO_BT_REGEN);
++		gpio_free(GPIO_BT_RESET);
++
++	} else {
++		printk("rfkill: BT shutdown \n");
++ 		gpio_direction_output(GPIO_BT_REGEN, 0);
++		gpio_direction_output(GPIO_BT_RESET, 0);
++		gpio_free(GPIO_BT_REGEN);
++		gpio_free(GPIO_BT_RESET);
++	}
++	return 0;
++}
++
++static struct rfkill_ops bcm_rfkill_ops = {
++	.set_block = bluetooth_set_power,
++};
++
++static int bcm_rfkill_probe(struct platform_device *pdev)
++{
++	int rc = 0;
++	bool default_state = true;  /* blocked = off */
++
++	printk("rfkill: bcm_rfkill_probe\n");
++
++
++	bluetooth_set_power(NULL, default_state);
++
++	bt_rfk = rfkill_alloc(bt_name, &pdev->dev, RFKILL_TYPE_BLUETOOTH,
++				&bcm_rfkill_ops , NULL);
++	if (!bt_rfk) {
++		rc = -ENOMEM;
++		printk("rfkill: rfkill alloc fail\n");
++	}
++
++	//rfkill_set_states(bt_rfk, default_state, false);
++	rfkill_init_sw_state(bt_rfk, default_state);
++
++	/* userspace cannot take exclusive control */
++
++	rc = rfkill_register(bt_rfk);
++	if (rc) {
++		printk("rfkill: rfkill register fail \n");
++		rfkill_destroy(bt_rfk);
++	}
++
++	return 0;
++}
++
++static int bcm_rfkill_remove(struct platform_device *dev)
++{
++	rfkill_unregister(bt_rfk);
++	rfkill_destroy(bt_rfk);
++
++	return 0;
++}
++static struct of_device_id bcm_20715_match_table[] = {
++ 	{ .compatible = "bcm,bcm-rfkill", },
++	{}
++};
++
++static struct platform_driver bcm_rfkill_driver = {
++	.probe = bcm_rfkill_probe,
++	.remove = bcm_rfkill_remove,
++	.driver = {
++		.name = "bcm_rfkill",
++		.owner = THIS_MODULE,
++		.of_match_table = bcm_20715_match_table,
++	},
++};
++
++static int __init bcm_rfkill_init(void)
++{
++	printk("rfkill: bcm rfkill init");
++	return platform_driver_register(&bcm_rfkill_driver);
++}
++
++static void __exit bcm_rfkill_exit(void)
++{
++	platform_driver_unregister(&bcm_rfkill_driver);
++}
++
++module_init(bcm_rfkill_init);
++module_exit(bcm_rfkill_exit);
++MODULE_DESCRIPTION("bcm rfkill");
++MODULE_AUTHOR("Beryl Hou <beryl_hou@asus.com>");
++MODULE_LICENSE("GPL");
+diff --git a/drivers/BCM_LPM/Makefile b/drivers/BCM_LPM/Makefile
+index 72013a6043d4..c13de5ffea01 100755
+--- a/drivers/BCM_LPM/Makefile
++++ b/drivers/BCM_LPM/Makefile
+@@ -1 +1 @@
+-obj-$(CONFIG_BCM_BT_LPM) += nitrous.o
++obj-$(CONFIG_BCM_BT_LPM) += bluesleep.o
+diff --git a/drivers/BCM_LPM/bluesleep.c b/drivers/BCM_LPM/bluesleep.c
+index adf3f4c0bca6..7bd1a9c2d149 100644
+--- a/drivers/BCM_LPM/bluesleep.c
++++ b/drivers/BCM_LPM/bluesleep.c
+@@ -489,6 +489,34 @@ static void bluesleep_stop(void)
+ }
+ 
+ /**
++ * Handles HCI device events.
++ * @param this Not used.
++ * @param event The event that occurred.
++ * @param data The HCI device associated with the event.
++ * @return <code>NOTIFY_DONE</code>.
++ */
++void bluesleep_hci_event(unsigned long event)
++{
++ switch (event) {
++ case HCI_DEV_REG:
++		if (!has_lpm_enabled) {
++			has_lpm_enabled = true;
++			bsi->uport = bluesleep_get_uart_port();
++			bluesleep_start();
++		}
++   break;
++ case HCI_DEV_UNREG:
++		bluesleep_stop();
++		has_lpm_enabled = false;
++		bsi->uport = NULL;
++   break;
++ case HCI_DEV_WRITE:
++   bluesleep_outgoing_data();
++   break;
++ }
++}
++
++/**
+  * Read the <code>BT_WAKE</code> GPIO pin value via the proc interface.
+  * When this function returns, <code>page</code> will contain a 1 if the
+  * pin is high, 0 otherwise.
+diff --git a/drivers/BCM_LPM/nitrous.c b/drivers/BCM_LPM/nitrous.c
+deleted file mode 100644
+index f5a3fe9cc846..000000000000
+--- a/drivers/BCM_LPM/nitrous.c
++++ /dev/null
+@@ -1,599 +0,0 @@
+-/*
+- * Bluetooth low power control via GPIO
+- *
+- * Copyright (C) 2015 Google, Inc.
+- *
+- * This program is free software; you can redistribute it and/or modify
+- * it under the terms of the GNU General Public License as published by
+- * the Free Software Foundation; either version 2 of the License, or
+- * (at your option) any later version.
+- *
+- * This program is distributed in the hope that it will be useful,
+- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+- * GNU General Public License for more details.
+- *
+- * You should have received a copy of the GNU General Public License
+- * along with this program; if not, write to the Free Software
+- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+- *
+- * The current implementation is very specific to Qualcomm serial driver
+- * with BCM chipset.
+- */
+-
+-#include <linux/delay.h>
+-#include <linux/gpio.h>
+-#include <linux/hrtimer.h>
+-#include <linux/init.h>
+-#include <linux/interrupt.h>
+-#include <linux/irq.h>
+-#include <linux/module.h>
+-#include <linux/of_gpio.h>
+-#include <linux/platform_data/msm_serial_hs.h>
+-#include <linux/platform_device.h>
+-#include <linux/pm_runtime.h>
+-#include <linux/rfkill.h>
+-#include <linux/wakelock.h>
+-
+-/* Timeout on UART Tx traffic before releasing wakelock. */
+-static const int UART_TIMEOUT_SEC = 1;
+-
+-struct nitrous_bt_lpm {
+-	int gpio_dev_wake;           /* host -> dev wake gpio */
+-	int gpio_host_wake;          /* dev -> host wake gpio */
+-	int gpio_power;              /* power gpio */
+-	int gpio_reset;              /* optional reset gpio */
+-	int irq_host_wake;           /* IRQ associated with host wake gpio */
+-	int dev_wake_pol;            /* 0: active low; 1: active high */
+-	int host_wake_pol;           /* 0: active low; 1: active high */
+-
+-	struct wake_lock dev_lock;   /* Wakelock held during Tx */
+-	struct wake_lock host_lock;  /* Wakelock held during Rx */
+-	struct hrtimer tx_lpm_timer; /* timer for going into LPM during Tx */
+-	bool is_suspended;           /* driver is in suspend state */
+-	bool pending_irq;            /* pending host wake IRQ during suspend */
+-
+-	struct uart_port *uart_port;
+-	struct platform_device *pdev;
+-	struct rfkill *rfkill;
+-	bool rfkill_blocked;         /* blocked: off; not blocked: on */
+-};
+-
+-static struct nitrous_bt_lpm *bt_lpm;  /* Reference for internal data */
+-
+-/* Helper to fetch gpio information from the device tree and then register it */
+-static int read_and_request_gpio(struct platform_device *pdev,
+-				 const char *dt_name, int *gpio,
+-				 unsigned long gpio_flags, const char *label)
+-{
+-	int rc;
+-
+-	*gpio = of_get_named_gpio(pdev->dev.of_node, dt_name, 0);
+-	if (unlikely(*gpio < 0)) {
+-		pr_err("%s: %s not in device tree",  __func__, dt_name);
+-		return -EINVAL;
+-	}
+-
+-	if (!gpio_is_valid(*gpio)) {
+-		pr_err("%s: %s is invalid", __func__, dt_name);
+-		return -EINVAL;
+-	}
+-
+-	rc = gpio_request_one(*gpio, gpio_flags, label);
+-	if (unlikely(rc < 0)) {
+-		pr_err("%s: failed to request gpio: %d (%s), error: %d",
+-			__func__, *gpio, label, rc);
+-		return -EINVAL;
+-	}
+-
+-	return 0;
+-}
+-
+-/*
+- * Power up or down UART driver and hold Tx/Rx wakelock.
+- *
+- * Note that the use of pm_runtime_get here is not ideal as the call is not
+- * blocking.  By the time the UART driver is powered up, the serial core might
+- * have attempted to do a Tx at the UART driver already.  There is currently a
+- * workaround in the MSM serial driver to catch this race.  Over time the clock
+- * on and Tx sequence should be made synchronous.
+- */
+-static bool nitrous_uart_power(struct uart_port *uart_port,
+-			       struct wake_lock *lock, bool on)
+-{
+-	if (wake_lock_active(lock) == on)
+-		return false;
+-
+-	if (on) {
+-		wake_lock(lock);
+-		pm_runtime_get(uart_port->dev);
+-	} else {
+-		pm_runtime_put(uart_port->dev);
+-		wake_unlock(lock);
+-	}
+-
+-	return true;
+-}
+-
+-/*
+- * Wake up or sleep UART and BT device for Tx.
+- */
+-static inline void nitrous_wake_device_locked(struct nitrous_bt_lpm *lpm,
+-					      bool wake)
+-{
+-	if (nitrous_uart_power(lpm->uart_port, &lpm->dev_lock, wake)) {
+-		/*
+-		 * If there is a UART power on/off, assert/deassert dev wake
+-		 * gpio accordingly.
+-		 */
+-		int assert_level = (wake == lpm->dev_wake_pol);
+-		gpio_set_value(lpm->gpio_dev_wake, assert_level);
+-	}
+-}
+-
+-/*
+- * Wake up or sleep UART for Rx.
+- */
+-static inline void nitrous_wake_uart(struct nitrous_bt_lpm *lpm, bool wake)
+-{
+-	nitrous_uart_power(lpm->uart_port, &lpm->host_lock, wake);
+-}
+-
+-/*
+- * Called when the tx_lpm_timer expires and the last Tx transaction should have
+- * been started about UART_TIMEOUT_SEC second(s) ago.  At this time, the Tx
+- * should have been completed.
+- */
+-static enum hrtimer_restart nitrous_tx_lpm_handler(struct hrtimer *timer)
+-{
+-	unsigned long flags;
+-
+-	if (!bt_lpm) {
+-		pr_err("%s: missing bt_lpm\n", __func__);
+-		return HRTIMER_NORESTART;
+-	}
+-
+-	pr_debug("%s\n", __func__);
+-
+-	/* Release UART and BT resources */
+-	spin_lock_irqsave(&bt_lpm->uart_port->lock, flags);
+-	nitrous_wake_device_locked(bt_lpm, false);
+-	spin_unlock_irqrestore(&bt_lpm->uart_port->lock, flags);
+-
+-	return HRTIMER_NORESTART;
+-}
+-
+-/*
+- * Called before UART driver starts transmitting data out. UART and BT resources
+- * are requested to allow a transmission.
+- *
+- * Note that the calling context from the serial core should have the
+- * uart_port locked.
+- */
+-void nitrous_prepare_uart_tx_locked(struct uart_port *port)
+-{
+-	if (!bt_lpm) {
+-		pr_err("%s: missing bt_lpm\n", __func__);
+-		return;
+-	}
+-
+-	if (bt_lpm->rfkill_blocked) {
+-		pr_err("%s: unexpected Tx when rfkill is blocked\n", __func__);
+-		return;
+-	}
+-
+-	hrtimer_cancel(&bt_lpm->tx_lpm_timer);
+-	nitrous_wake_device_locked(bt_lpm, true);
+-	hrtimer_start(&bt_lpm->tx_lpm_timer, ktime_set(UART_TIMEOUT_SEC, 0),
+-		HRTIMER_MODE_REL);
+-}
+-EXPORT_SYMBOL(nitrous_prepare_uart_tx_locked);
+-
+-/*
+- * ISR to handle host wake line from the BT chip.
+- *
+- * If an interrupt is received during system suspend, the handling of the
+- * interrupt will be delayed until the driver is resumed.  This allows the use
+- * of pm runtime framework to wake the serial driver.
+- */
+-static irqreturn_t nitrous_host_wake_isr(int irq, void *dev)
+-{
+-	int host_wake, rc;
+-	struct platform_device *pdev = container_of(dev,
+-			struct platform_device, dev);
+-	struct nitrous_bt_lpm *lpm = platform_get_drvdata(pdev);
+-
+-	if (!lpm) {
+-		pr_err("%s: missing lpm\n", __func__);
+-		return IRQ_HANDLED;
+-	}
+-
+-	if (lpm->rfkill_blocked) {
+-		pr_err("%s: unexpected host wake IRQ\n", __func__);
+-		return IRQ_HANDLED;
+-	}
+-
+-	host_wake = gpio_get_value(lpm->gpio_host_wake);
+-	pr_debug("%s: host wake gpio: %d\n", __func__, host_wake);
+-
+-	/* Invert the interrupt type to catch the next edge */
+-	rc = irq_set_irq_type(irq,
+-		host_wake ? IRQF_TRIGGER_LOW : IRQF_TRIGGER_HIGH);
+-	if (unlikely(rc))
+-		pr_err("%s: error setting irq type %d\n", __func__, rc);
+-
+-	if (lpm->is_suspended) {
+-		/* Mark pending irq flag to delay processing. */
+-		lpm->pending_irq = true;
+-	} else {
+-		/* Wake up UART right the way if not suspended. */
+-		bool uart_enable = (host_wake == lpm->host_wake_pol);
+-		nitrous_wake_uart(lpm, uart_enable);
+-	}
+-
+-	return IRQ_HANDLED;
+-}
+-
+-static int nitrous_lpm_init(struct nitrous_bt_lpm *lpm)
+-{
+-	int rc;
+-
+-	hrtimer_init(&lpm->tx_lpm_timer, CLOCK_MONOTONIC,
+-		HRTIMER_MODE_REL);
+-	lpm->tx_lpm_timer.function = nitrous_tx_lpm_handler;
+-
+-	lpm->irq_host_wake = gpio_to_irq(lpm->gpio_host_wake);
+-
+-	rc = request_irq(lpm->irq_host_wake, nitrous_host_wake_isr,
+-		lpm->host_wake_pol ? IRQF_TRIGGER_HIGH : IRQF_TRIGGER_LOW,
+-		"bt_host_wake", &lpm->pdev->dev);
+-	if (rc < 0) {
+-		pr_err("%s: unable to request IRQ for bt_host_wake GPIO\n",
+-			__func__);
+-		goto err_request_irq;
+-	}
+-
+-	wake_lock_init(&lpm->dev_lock, WAKE_LOCK_SUSPEND, "bt_dev_tx_wake");
+-	wake_lock_init(&lpm->host_lock, WAKE_LOCK_SUSPEND, "bt_host_rx_wake");
+-
+-	/* Configure wake peer callback to be called at the onset of Tx. */
+-	msm_hs_set_wake_peer(lpm->uart_port, nitrous_prepare_uart_tx_locked);
+-
+-	return 0;
+-
+-err_request_irq:
+-	lpm->irq_host_wake = 0;
+-	return rc;
+-}
+-
+-static void nitrous_lpm_cleanup(struct nitrous_bt_lpm *lpm)
+-{
+-	free_irq(lpm->irq_host_wake, NULL);
+-	lpm->irq_host_wake = 0;
+-	msm_hs_set_wake_peer(lpm->uart_port, NULL);
+-	wake_lock_destroy(&lpm->dev_lock);
+-	wake_lock_destroy(&lpm->host_lock);
+-}
+-
+-/*
+- * Set BT power on/off (blocked is true: off; blocked is false: on)
+- */
+-static int nitrous_rfkill_set_power(void *data, bool blocked)
+-{
+-	struct nitrous_bt_lpm *lpm = data;
+-
+-	if (!lpm) {
+-		pr_err("%s: missing lpm\n", __func__);
+-		return -EINVAL;
+-	}
+-
+-	pr_info("%s: %s (blocked=%d)\n", __func__, blocked ? "off" : "on",
+-		blocked);
+-
+-	if (blocked == lpm->rfkill_blocked) {
+-		pr_info("%s already in requsted state. Ignoring.\n", __func__);
+-		return 0;
+-	}
+-
+-	if (!blocked) {
+-		int rc;
+-
+-		/*
+-		 * Power up the BT chip. Datasheet of BCM4343W suggests at
+-		 * least a 10ms time delay between consecutive toggles.
+-		 */
+-		if (gpio_is_valid(lpm->gpio_reset))
+-			gpio_set_value(lpm->gpio_reset, 0);
+-
+-		gpio_set_value(lpm->gpio_power, 0);
+-		msleep(30);
+-		gpio_set_value(lpm->gpio_power, 1);
+-
+-
+-		if (gpio_is_valid(lpm->gpio_reset)) {
+-			usleep(10 * 1000);
+-			gpio_set_value(lpm->gpio_reset, 1);
+-			usleep(10 * 1000);
+-		}
+-
+-		/* Enable host_wake irq to get ready */
+-		rc = irq_set_irq_type(lpm->irq_host_wake,
+-			lpm->host_wake_pol ?
+-				IRQF_TRIGGER_HIGH : IRQF_TRIGGER_LOW);
+-		if (unlikely(rc))
+-			pr_err("%s: error setting irq type %d\n", __func__, rc);
+-		enable_irq(lpm->irq_host_wake);
+-	} else {
+-		/* Disable host wake IRQ and release Rx wakelock*/
+-		disable_irq(lpm->irq_host_wake);
+-		nitrous_wake_device_locked(lpm, false);
+-
+-		/* Cancel pending LPM timer and release Tx wakelock*/
+-		hrtimer_cancel(&lpm->tx_lpm_timer);
+-		nitrous_wake_uart(lpm, false);
+-
+-		/* Power down the BT chip */
+-		if (gpio_is_valid(lpm->gpio_reset))
+-			gpio_set_value(lpm->gpio_reset, 0);
+-		gpio_set_value(lpm->gpio_power, 0);
+-	}
+-
+-	lpm->rfkill_blocked = blocked;
+-
+-	return 0;
+-}
+-
+-static const struct rfkill_ops nitrous_rfkill_ops = {
+-	.set_block = nitrous_rfkill_set_power,
+-};
+-
+-static int nitrous_rfkill_init(struct platform_device *pdev,
+-	struct nitrous_bt_lpm *lpm)
+-{
+-	int rc;
+-
+-	/* This GPIO only exists on some boards.  Make it optional */
+-	rc = read_and_request_gpio(
+-		pdev,
+-		"reset-gpio",
+-		&lpm->gpio_reset,
+-		GPIOF_OUT_INIT_LOW,
+-		"reset_gpio"
+-	);
+-
+-	rc = read_and_request_gpio(
+-		pdev,
+-		"power-gpio",
+-		&lpm->gpio_power,
+-		GPIOF_OUT_INIT_LOW,
+-		"power_gpio"
+-	);
+-	if (unlikely(rc < 0))
+-		goto err_gpio_power_reg;
+-
+-	lpm->rfkill = rfkill_alloc(
+-		"nitrous_bluetooth",
+-		&pdev->dev,
+-		RFKILL_TYPE_BLUETOOTH,
+-		&nitrous_rfkill_ops,
+-		lpm
+-	);
+-	if (unlikely(!lpm->rfkill)) {
+-		rc = -ENOMEM;
+-		goto err_rfkill_alloc;
+-	}
+-
+-	/* Make sure rfkill core is initialized to be blocked initially. */
+-	rfkill_init_sw_state(lpm->rfkill, true);
+-	rc = rfkill_register(lpm->rfkill);
+-	if (unlikely(rc))
+-		goto err_rfkill_register;
+-
+-	/* Power off chip at startup. */
+-	nitrous_rfkill_set_power(lpm, true);
+-	return 0;
+-
+-err_rfkill_register:
+-	rfkill_destroy(lpm->rfkill);
+-	lpm->rfkill = NULL;
+-err_rfkill_alloc:
+-	gpio_free(lpm->gpio_power);
+-err_gpio_power_reg:
+-	lpm->gpio_power = 0;
+-	if (gpio_is_valid(lpm->gpio_reset)) {
+-		gpio_free(lpm->gpio_reset);
+-		lpm->gpio_reset = -1;  /* invalid gpio */
+-	}
+-	return rc;
+-}
+-
+-static void nitrous_rfkill_cleanup(struct nitrous_bt_lpm *lpm)
+-{
+-	nitrous_rfkill_set_power(lpm, true);
+-	rfkill_unregister(lpm->rfkill);
+-	rfkill_destroy(lpm->rfkill);
+-	lpm->rfkill = NULL;
+-	gpio_free(lpm->gpio_power);
+-	lpm->gpio_power = 0;
+-	if (gpio_is_valid(lpm->gpio_reset)) {
+-		gpio_free(lpm->gpio_reset);
+-		lpm->gpio_reset = -1;  /* invalid gpio */
+-	}
+-}
+-
+-static int nitrous_probe(struct platform_device *pdev)
+-{
+-	struct device *dev = &pdev->dev;
+-	struct nitrous_bt_lpm *lpm;
+-	struct device_node *np = dev->of_node;
+-	u32 port_number;
+-	int rc = 0;
+-
+-	lpm = devm_kzalloc(dev, sizeof(struct nitrous_bt_lpm), GFP_KERNEL);
+-	if (!lpm)
+-		return -ENOMEM;
+-
+-	lpm->pdev = pdev;
+-
+-	if (of_property_read_u32(np, "uart-port", &port_number)) {
+-		pr_err("%s: UART port not in dev tree\n",  __func__);
+-		return -EINVAL;
+-	}
+-	lpm->uart_port = msm_hs_get_uart_port(port_number);
+-
+-	if (of_property_read_u32(np, "host-wake-polarity",
+-		&lpm->host_wake_pol)) {
+-		pr_err("%s: host wake polarity not in dev tree.\n", __func__);
+-		return -EINVAL;
+-	}
+-
+-	if (of_property_read_u32(np, "dev-wake-polarity",
+-		&lpm->dev_wake_pol)) {
+-		pr_err("%s: dev wake polarity not in dev tree\n", __func__);
+-		return -EINVAL;
+-	}
+-
+-	rc = read_and_request_gpio(
+-		pdev,
+-		"dev-wake-gpio",
+-		&lpm->gpio_dev_wake,
+-		GPIOF_OUT_INIT_LOW,
+-		"dev_wake_gpio"
+-	);
+-	if (unlikely(rc < 0))
+-		goto err_gpio_dev_req;
+-
+-	rc = read_and_request_gpio(
+-		pdev,
+-		"host-wake-gpio",
+-		&lpm->gpio_host_wake,
+-		GPIOF_IN,
+-		"host_wake_gpio"
+-	);
+-	if (unlikely(rc < 0))
+-		goto err_gpio_host_req;
+-
+-	device_init_wakeup(dev, true);
+-
+-	rc = nitrous_lpm_init(lpm);
+-	if (unlikely(rc))
+-		goto err_lpm_init;
+-
+-	rc = nitrous_rfkill_init(pdev, lpm);
+-	if (unlikely(rc))
+-		goto err_rfkill_init;
+-
+-	platform_set_drvdata(pdev, lpm);
+-	bt_lpm = lpm;
+-
+-	return rc;
+-
+-err_rfkill_init:
+-	nitrous_rfkill_cleanup(lpm);
+-err_lpm_init:
+-	nitrous_lpm_cleanup(lpm);
+-	device_init_wakeup(dev, false);
+-	gpio_free(lpm->gpio_host_wake);
+-err_gpio_host_req:
+-	lpm->gpio_host_wake = 0;
+-	gpio_free(lpm->gpio_dev_wake);
+-err_gpio_dev_req:
+-	lpm->gpio_dev_wake = 0;
+-	devm_kfree(dev, lpm);
+-	return rc;
+-}
+-
+-static int nitrous_remove(struct platform_device *pdev)
+-{
+-	struct nitrous_bt_lpm *lpm = platform_get_drvdata(pdev);
+-
+-	if (!lpm) {
+-		pr_err("%s: missing lpm\n", __func__);
+-		return -EINVAL;
+-	}
+-
+-	nitrous_rfkill_cleanup(lpm);
+-	nitrous_lpm_cleanup(lpm);
+-
+-	gpio_free(lpm->gpio_dev_wake);
+-	gpio_free(lpm->gpio_host_wake);
+-	lpm->gpio_dev_wake = 0;
+-	lpm->gpio_host_wake = 0;
+-	devm_kfree(&pdev->dev, lpm);
+-
+-	return 0;
+-}
+-
+-static int nitrous_suspend(struct device *dev)
+-{
+-	struct platform_device *pdev = to_platform_device(dev);
+-	struct nitrous_bt_lpm *lpm = platform_get_drvdata(pdev);
+-
+-	if (device_may_wakeup(&pdev->dev) && !lpm->rfkill_blocked) {
+-		enable_irq_wake(lpm->irq_host_wake);
+-
+-		/* Reset flag to capture pending irq before resume */
+-		lpm->pending_irq = false;
+-	}
+-
+-	lpm->is_suspended = true;
+-
+-	return 0;
+-}
+-
+-static int nitrous_resume(struct device *dev)
+-{
+-	struct platform_device *pdev = to_platform_device(dev);
+-	struct nitrous_bt_lpm *lpm = platform_get_drvdata(pdev);
+-
+-	if (device_may_wakeup(&pdev->dev) && !lpm->rfkill_blocked) {
+-		disable_irq_wake(lpm->irq_host_wake);
+-
+-		/* Handle pending host wake irq. */
+-		if (lpm->pending_irq) {
+-			pr_info("%s: pending host_wake irq\n", __func__);
+-			nitrous_wake_uart(lpm, true);
+-			lpm->pending_irq = false;
+-		}
+-	}
+-
+-	lpm->is_suspended = false;
+-
+-	return 0;
+-}
+-
+-static struct of_device_id nitrous_match_table[] = {
+-	{.compatible = "goog,nitrous"},
+-	{}
+-};
+-
+-static const struct dev_pm_ops nitrous_pm_ops = {
+-	SET_SYSTEM_SLEEP_PM_OPS(nitrous_suspend, nitrous_resume)
+-};
+-
+-static struct platform_driver nitrous_platform_driver = {
+-	.probe = nitrous_probe,
+-	.remove =  nitrous_remove,
+-	.driver = {
+-		.name = "nitrous_bluetooth",
+-		.owner = THIS_MODULE,
+-		.of_match_table = nitrous_match_table,
+-		.pm = &nitrous_pm_ops,
+-	},
+-};
+-
+-static int __init nitrous_init(void)
+-{
+-	return platform_driver_register(&nitrous_platform_driver);
+-}
+-
+-static void __exit nitrous_exit(void)
+-{
+-	platform_driver_unregister(&nitrous_platform_driver);
+-}
+-
+-module_init(nitrous_init);
+-module_exit(nitrous_exit);
+-MODULE_DESCRIPTION("Nitrous Oxide Driver for Bluetooth");
+-MODULE_AUTHOR("Google");
+-MODULE_LICENSE("GPL");
+diff --git a/drivers/bluetooth/hci_ldisc.c b/drivers/bluetooth/hci_ldisc.c
+index bc68a440d432..4bf3428ee250 100644
+--- a/drivers/bluetooth/hci_ldisc.c
++++ b/drivers/bluetooth/hci_ldisc.c
+@@ -233,6 +233,8 @@ static int hci_uart_close(struct hci_dev *hdev)
+ 	return 0;
+ }
+ 
++void bluesleep_hci_event(unsigned long event);
++
+ /* Send frames from HCI layer */
+ static int hci_uart_send_frame(struct sk_buff *skb)
+ {
+@@ -251,6 +253,8 @@ static int hci_uart_send_frame(struct sk_buff *skb)
+ 
+ 	BT_DBG("%s: type %d len %d", hdev->name, bt_cb(skb)->pkt_type, skb->len);
+ 
++  bluesleep_hci_event(HCI_DEV_WRITE);
++
+ 	hu->proto->enqueue(hu, skb);
+ 
+ 	hci_uart_tx_wakeup(hu);
+diff --git a/drivers/tty/serial/msm_serial_hs.c b/drivers/tty/serial/msm_serial_hs.c
+index 6a8de371ae6a..8fc54fe11c38 100644
+--- a/drivers/tty/serial/msm_serial_hs.c
++++ b/drivers/tty/serial/msm_serial_hs.c
+@@ -257,8 +257,7 @@ struct msm_hs_port {
+ 	struct pinctrl_state *gpio_state_suspend;
+ 	bool flow_control;
+ 	bool obs;
+-	wake_peer_fn wake_peer;
+-        bool tx_pending;    
++  bool tx_pending;
+ };
+ 
+ static struct of_device_id msm_hs_match_table[] = {
+@@ -293,6 +292,7 @@ static void msm_hs_queue_rx_desc(struct msm_hs_port *msm_uport);
+ #define UARTDM_TO_MSM(uart_port) \
+ 	container_of((uart_port), struct msm_hs_port, uport)
+ 
++extern void bluesleep_setup_uart_port(struct uart_port *uport); //ASUS_BSP BerylHou +++
+ 
+ static int msm_hs_ioctl(struct uart_port *uport, unsigned int cmd,
+ 						unsigned long arg)
+@@ -1880,20 +1880,6 @@ static void msm_hs_sps_rx_callback(struct sps_event_notify *notify)
+ 	}
+ }
+ 
+-void msm_hs_set_wake_peer(struct uart_port *uport, wake_peer_fn wake_peer)
+-{
+-	struct msm_hs_port *msm_uport = UARTDM_TO_MSM(uport);
+-	msm_uport->wake_peer = wake_peer;
+-}
+-
+-static void msm_hs_wake_peer(struct uart_port *uport)
+-{
+-	struct msm_hs_port *msm_uport = UARTDM_TO_MSM(uport);
+-
+-	if (msm_uport->wake_peer)
+-		msm_uport->wake_peer(uport);
+-}
+-
+ /*
+  *  Standard API, Current states of modem control inputs
+  *
+@@ -3366,6 +3352,8 @@ static int msm_hs_probe(struct platform_device *pdev)
+ 	if (pdata != NULL && pdata->userid && pdata->userid <= UARTDM_NR)
+ 		uport->line = pdata->userid;
+ 
++	bluesleep_setup_uart_port(uport); //ASUS_BSP BerylHou +++ "set bluesleep uart port"			
++
+ 	ret = uart_add_one_port(&msm_hs_driver, uport);
+ 	if (!ret) {
+ 		msm_hs_clock_unvote(msm_uport);
+@@ -3644,7 +3632,6 @@ static struct uart_ops msm_hs_ops = {
+ 	.config_port = msm_hs_config_port,
+ 	.flush_buffer = NULL,
+ 	.ioctl = msm_hs_ioctl,
+-	.wake_peer = msm_hs_wake_peer,    
+ };
+ 
+ module_init(msm_serial_hs_init);
+diff --git a/include/linux/platform_data/msm_serial_hs.h b/include/linux/platform_data/msm_serial_hs.h
+index 51fe641bf5a3..283bdd1ee0dd 100644
+--- a/include/linux/platform_data/msm_serial_hs.h
++++ b/include/linux/platform_data/msm_serial_hs.h
+@@ -54,8 +54,6 @@ struct msm_serial_hs_platform_data {
+ 	bool obs;
+ };
+ 
+-typedef void (*wake_peer_fn)(struct uart_port *);
+-
+ /* return true when tx is empty */
+ unsigned int msm_hs_tx_empty(struct uart_port *uport);
+ void msm_hs_request_clock_off(struct uart_port *uport);
+@@ -63,5 +61,4 @@ void msm_hs_request_clock_on(struct uart_port *uport);
+ struct uart_port *msm_hs_get_uart_port(int port_index);
+ void msm_hs_set_mctrl(struct uart_port *uport,
+ 				    unsigned int mctrl);
+-void msm_hs_set_wake_peer(struct uart_port *uport, wake_peer_fn wake_peer);                    
+ #endif
+diff --git a/include/net/bluetooth/hci.h b/include/net/bluetooth/hci.h
+index db43501b7599..43c362ae134b 100644
+--- a/include/net/bluetooth/hci.h
++++ b/include/net/bluetooth/hci.h
+@@ -42,6 +42,7 @@
+ #define HCI_DEV_DOWN			4
+ #define HCI_DEV_SUSPEND			5
+ #define HCI_DEV_RESUME			6
++#define HCI_DEV_WRITE			7
+ 
+ /* HCI notify events */
+ #define HCI_NOTIFY_CONN_ADD		1
+diff --git a/net/bluetooth/hci_sock.c b/net/bluetooth/hci_sock.c
+index fa4bf6631425..61740abede2a 100644
+--- a/net/bluetooth/hci_sock.c
++++ b/net/bluetooth/hci_sock.c
+@@ -66,6 +66,8 @@ static struct bt_sock_list hci_sk_list = {
+ 	.lock = __RW_LOCK_UNLOCKED(hci_sk_list.lock)
+ };
+ 
++void bluesleep_hci_event(unsigned long event);
++
+ /* Send frame to RAW socket */
+ void hci_send_to_sock(struct hci_dev *hdev, struct sk_buff *skb)
+ {
+@@ -369,6 +371,8 @@ void hci_sock_dev_event(struct hci_dev *hdev, int event)
+ {
+ 	struct hci_ev_si_device ev;
+ 
++  bluesleep_hci_event(event);
++
+ 	BT_DBG("hdev %s event %d", hdev->name, event);
+ 
+ 	/* Send event to monitor */
+-- 
+2.11.0
+
