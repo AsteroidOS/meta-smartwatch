@@ -35,8 +35,8 @@ echo d001 > /sys/class/android_usb/android0/idProduct
 echo adb > /sys/class/android_usb/android0/f_ffs/aliases
 echo ffs > /sys/class/android_usb/android0/functions
 echo lge > /sys/class/android_usb/android0/iManufacturer
-echo swift > /sys/class/android_usb/android0/iProduct
-echo SWIFTZW3 > /sys/class/android_usb/android0/iSerial # this must be uppercase
+echo lenok > /sys/class/android_usb/android0/iProduct
+echo LENOK > /sys/class/android_usb/android0/iSerial # this must be uppercase
 echo 1 > /sys/class/android_usb/android0/enable
 
 info() {
@@ -104,7 +104,8 @@ setup_devtmpfs "/rfs"
 cat /proc/cmdline | grep enable_adb
 if [ $? -ne 1 ] ; then
     /usr/bin/android-gadget-setup adb
-    /usr/bin/adbd
+	chroot /rfs /usr/bin/adbd & disown
+	sleep 10
 fi
 
 info "Umount not needed filesystems ..."
@@ -118,3 +119,4 @@ mount -t sysfs sys /rfs/sys
 
 info "Switching to rootfs..."
 exec switch_root -c /dev/ttyprintk /rfs /lib/systemd/systemd > /dev/ttyprintk
+#exec switch_root -c /dev/ttyprintk /rfs /usr/bin/adbd > /dev/ttyprintk

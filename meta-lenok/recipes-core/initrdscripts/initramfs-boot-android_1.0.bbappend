@@ -1,2 +1,2 @@
-FILESEXTRAPATHS_prepend_swift := "${THISDIR}/${PN}:"
-COMPATIBLE_MACHINE_swift = "swift"
+FILESEXTRAPATHS_prepend_lenok := "${THISDIR}/${PN}:"
+COMPATIBLE_MACHINE_lenok = "lenok"

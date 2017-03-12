@@ -1,1 +1,1 @@
-DEPENDS_append_swift = " libhybris "
+DEPENDS_append_lenok = " libhybris "

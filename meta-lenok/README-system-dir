@@ -51,14 +51,30 @@ download and then build them (this may take a while):
 
   ### Build (can only be done in bash)
   . build/envsetup.sh
+  export TARGET_USES_C2D_COMPOSITION=true
   export TARGET_USES_QCOM_BSP=true        # Fixes GPU problems on QCOM platforms
-  export TARGET_BOARD_PLATFORM=msm8909    # We Specify the SoC by hand
+  export TARGET_BOARD_PLATFORM=msm8226    # We Specify the SoC by hand
+  export QCOM_BOARD_PLATFORMS=msm8226
   
   ### for a debug build, also set:
   # export TARGET_BUILD_VARIANT=userdebug
   # export TARGET_BUILD_TYPE=debug
+
+	$(TOP)/system/media/audio/include \
+
+  # Fix kernel header include errors (we are missing some Makefile functions
+  # for some reason)
+  echo "kernel_includes += \$(LOCAL_PATH)/../../../msm8x26/kernel-headers/" >> hardware/qcom/display/msm8226/common.mk
+
+  sed -e 's/-Werror//g' -i 
+  echo "LOCAL_CPPFLAGS += -Wno-error" >>
+
+  touch build/
+  export PLATFORM_VERSION=6.0
+
+  # TODO: Patch all the errors that pop up
   
-  mmma hardware/qcom/display/msm8909/     # hwcomposer, gralloc, dependencies...
+  mmma hardware/qcom/display/msm8226/     # hwcomposer, gralloc, dependencies...
   mmma frameworks/native/cmds/servicemanager/
   mmma system/core/logd/
   mmma system/core/init/

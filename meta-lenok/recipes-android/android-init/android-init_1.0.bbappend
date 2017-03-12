@@ -1,1 +1,1 @@
-FILESEXTRAPATHS_prepend_swift := "${THISDIR}/${PN}:"
+FILESEXTRAPATHS_prepend_lenok := "${THISDIR}/${PN}:"
