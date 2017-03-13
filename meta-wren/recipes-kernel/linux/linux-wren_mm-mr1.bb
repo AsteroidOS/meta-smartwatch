@@ -20,6 +20,9 @@ SRC_URI = "git://android.googlesource.com/kernel/msm;branch=android-msm-wren-3.1
     file://0001-Revert-sparrow-wren-bt-Remove-redundancy-code.patch \
     file://0001-Revert-Enable-Nitrous-BT-power-management-driver-for.patch \
     file://0002-Revert-Add-Nitrous-driver-for-BT-power-management.patch \
+    file://0001-Patch-bluesleep.c.patch \
+    file://0001-Backport-mainline-4.1-Bluetooth-subsystem.patch \
+    file://0002-bluesleep-Use-kernel-s-HCI-events-instead-of-proc-bl.patch \
     file://0001-Revert-Sparrow-audio-security-patch-for-CVE-2016-206.patch \
     file://0001-Revert-Add-wake_peer-hook-to-MSM-HS-UART-driver.patch \
     file://0001-Use-generic-dump-function.patch \
