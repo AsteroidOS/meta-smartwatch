@@ -29,9 +29,9 @@ If you have a /system copy with the required files, execute:
   cd vendor/lib/egl/
   ln -s libGLESv2_adreno.so libGLESv2S3D_adreno.so
   cd ../../../lib/hw/
-  ln -s hwcomposer.msm8226.so hwcomposer.dory.so
-  ln -s gralloc.msm8226.so gralloc.dory.so
-  ln -s memtrack.msm8226.so memtrack.dory.so
+  ln -s hwcomposer.msm8226.so hwcomposer.lenok.so
+  ln -s gralloc.msm8226.so gralloc.lenok.so
+  ln -s memtrack.msm8226.so memtrack.lenok.so
   cd ../../../
 
 This installation wouldn't be enough because libhybris needs a patched bionic
@@ -41,11 +41,11 @@ download and then build them (this may take a while):
 
   curl https://storage.googleapis.com/git-repo-downloads/repo > repo
   chmod a+x repo
-  mkdir -p android-swift/
-  cd android-swift
-  # For now the repo manifest is pretty much swift-specific, maybe we should 
+  mkdir -p android-lenok/
+  cd android-lenok
+  # For now the repo manifest is pretty much lenok-specific, maybe we should 
   # split/merge branches later?
-  ../repo init -u https://github.com/AsteroidOS/android_manifest \
+  ../repo init -u https://github.com/atalax/android_manifest \
 		-b marshmallow-dr1.5-release -g all,-notdefault,-darwin,-mips --depth=1
   ../repo sync -qc
 
@@ -55,24 +55,13 @@ download and then build them (this may take a while):
   export TARGET_USES_QCOM_BSP=true        # Fixes GPU problems on QCOM platforms
   export TARGET_BOARD_PLATFORM=msm8226    # We Specify the SoC by hand
   export QCOM_BOARD_PLATFORMS=msm8226
+  export PLATFORM_VERSION=6.0
   
   ### for a debug build, also set:
   # export TARGET_BUILD_VARIANT=userdebug
   # export TARGET_BUILD_TYPE=debug
 
-	$(TOP)/system/media/audio/include \
-
-  # Fix kernel header include errors (we are missing some Makefile functions
-  # for some reason)
-  echo "kernel_includes += \$(LOCAL_PATH)/../../../msm8x26/kernel-headers/" >> hardware/qcom/display/msm8226/common.mk
-
-  sed -e 's/-Werror//g' -i 
-  echo "LOCAL_CPPFLAGS += -Wno-error" >>
-
-  touch build/
-  export PLATFORM_VERSION=6.0
-
-  # TODO: Patch all the errors that pop up
+  curl https://raw.githubusercontent.com/atalax/android_manifest/marshmallow-dr1.5-release/patches/lenok.patch | patch
   
   mmma hardware/qcom/display/msm8226/     # hwcomposer, gralloc, dependencies...
   mmma frameworks/native/cmds/servicemanager/
@@ -92,7 +81,7 @@ libhybris. There is a script in the libhybris distribution that can pull
 the header files from the downloaded android distribution (above).
 
   git clone https://github.com/libhybris/libhybris
-  ./libhybris/utils/extract_headers.sh android-swift include 6 0 1
+  ./libhybris/utils/extract_headers.sh android-lenok include 6 0 1
 
 With the system and include directories, you can create the system-dir tarball:
 

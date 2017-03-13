@@ -104,8 +104,7 @@ setup_devtmpfs "/rfs"
 cat /proc/cmdline | grep enable_adb
 if [ $? -ne 1 ] ; then
     /usr/bin/android-gadget-setup adb
-	chroot /rfs /usr/bin/adbd & disown
-	sleep 10
+	/usr/bin/adbd
 fi
 
 info "Umount not needed filesystems ..."
@@ -119,4 +118,3 @@ mount -t sysfs sys /rfs/sys
 
 info "Switching to rootfs..."
 exec switch_root -c /dev/ttyprintk /rfs /lib/systemd/systemd > /dev/ttyprintk
-#exec switch_root -c /dev/ttyprintk /rfs /usr/bin/adbd > /dev/ttyprintk
