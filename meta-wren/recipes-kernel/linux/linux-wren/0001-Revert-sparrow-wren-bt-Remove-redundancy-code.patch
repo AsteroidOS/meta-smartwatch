@@ -1,0 +1,351 @@
+From 33d12fb139690c8940dff4f174e05a7d39d6bcda Mon Sep 17 00:00:00 2001
+From: Daniel Landau <daniel@landau.fi>
+Date: Sat, 11 Mar 2017 23:11:38 +0200
+Subject: [PATCH] Revert "sparrow/wren:bt: Remove redundancy code."
+
+This reverts commit d0ea3d498bfbfc89b89d2bc2b97f7a50ba25d6c4.
+---
+ arch/arm/boot/dts/qcom/sparrow_er_105_msm8226.dtsi  | 7 +++++++
+ arch/arm/boot/dts/qcom/sparrow_er_msm8226.dtsi      | 7 +++++++
+ arch/arm/boot/dts/qcom/sparrow_evb_msm8226.dtsi     | 7 +++++++
+ arch/arm/boot/dts/qcom/sparrow_pr3_105_msm8226.dtsi | 6 ++++++
+ arch/arm/boot/dts/qcom/sparrow_pr3_msm8226.dtsi     | 6 ++++++
+ arch/arm/boot/dts/qcom/sparrow_pr_105_msm8226.dtsi  | 7 +++++++
+ arch/arm/boot/dts/qcom/sparrow_pr_msm8226.dtsi      | 7 +++++++
+ arch/arm/boot/dts/qcom/sparrow_sr2_msm8226.dtsi     | 7 +++++++
+ arch/arm/boot/dts/qcom/sparrow_sr_pni_msm8226.dtsi  | 7 +++++++
+ arch/arm/boot/dts/qcom/sparrow_sr_ql_msm8226.dtsi   | 7 +++++++
+ arch/arm/boot/dts/qcom/wren_er_105_msm8226.dtsi     | 7 +++++++
+ arch/arm/boot/dts/qcom/wren_er_msm8226.dtsi         | 7 +++++++
+ arch/arm/boot/dts/qcom/wren_evb_sr_msm8226.dtsi     | 7 +++++++
+ arch/arm/boot/dts/qcom/wren_pr3_105_msm8226.dtsi    | 7 +++++++
+ arch/arm/boot/dts/qcom/wren_pr3_msm8226.dtsi        | 7 +++++++
+ arch/arm/boot/dts/qcom/wren_pr_105_msm8226.dtsi     | 7 +++++++
+ arch/arm/boot/dts/qcom/wren_pr_msm8226.dtsi         | 7 +++++++
+ arch/arm/mach-msm/include/mach/board.h              | 6 ++++++
+ 18 files changed, 123 insertions(+)
+
+diff --git a/arch/arm/boot/dts/qcom/sparrow_er_105_msm8226.dtsi b/arch/arm/boot/dts/qcom/sparrow_er_105_msm8226.dtsi
+index 660918622417..8b249db059a0 100755
+--- a/arch/arm/boot/dts/qcom/sparrow_er_105_msm8226.dtsi
++++ b/arch/arm/boot/dts/qcom/sparrow_er_105_msm8226.dtsi
+@@ -568,6 +568,13 @@
+ 		compatible = "qcom,msm-pcm-routing";
+ 	};
+ 
++	//ASUS_BSP BerylHou +++ "Config bt_rfkill"
++	rfkill {
++               compatible = "bcm,bcm-rfkill";
++	       status = "ok";
++	};
++	//ASUS_BSP BerylHou ---
++
+ 	qcom,msm-pcm-low-latency {
+ 		compatible = "qcom,msm-pcm-dsp";
+ 		qcom,msm-pcm-dsp-id = <1>;
+diff --git a/arch/arm/boot/dts/qcom/sparrow_er_msm8226.dtsi b/arch/arm/boot/dts/qcom/sparrow_er_msm8226.dtsi
+index 132b1a7f5392..598adc7d27a5 100755
+--- a/arch/arm/boot/dts/qcom/sparrow_er_msm8226.dtsi
++++ b/arch/arm/boot/dts/qcom/sparrow_er_msm8226.dtsi
+@@ -568,6 +568,13 @@
+ 		compatible = "qcom,msm-pcm-routing";
+ 	};
+ 
++	//ASUS_BSP BerylHou +++ "Config bt_rfkill"
++	rfkill {
++               compatible = "bcm,bcm-rfkill";
++	       status = "ok";
++	};
++	//ASUS_BSP BerylHou ---
++
+ 	qcom,msm-pcm-low-latency {
+ 		compatible = "qcom,msm-pcm-dsp";
+ 		qcom,msm-pcm-dsp-id = <1>;
+diff --git a/arch/arm/boot/dts/qcom/sparrow_evb_msm8226.dtsi b/arch/arm/boot/dts/qcom/sparrow_evb_msm8226.dtsi
+index 6af5b428a9cc..40b03a022428 100755
+--- a/arch/arm/boot/dts/qcom/sparrow_evb_msm8226.dtsi
++++ b/arch/arm/boot/dts/qcom/sparrow_evb_msm8226.dtsi
+@@ -567,6 +567,13 @@
+ 		compatible = "qcom,msm-pcm-routing";
+ 	};
+ 
++	//ASUS_BSP BerylHou +++ "Config bt_rfkill"
++	rfkill {
++               compatible = "bcm,bcm-rfkill";
++	       status = "ok";
++	};
++	//ASUS_BSP BerylHou ---
++
+ 	qcom,msm-pcm-low-latency {
+ 		compatible = "qcom,msm-pcm-dsp";
+ 		qcom,msm-pcm-dsp-id = <1>;
+diff --git a/arch/arm/boot/dts/qcom/sparrow_pr3_105_msm8226.dtsi b/arch/arm/boot/dts/qcom/sparrow_pr3_105_msm8226.dtsi
+index 4ae9452c49b7..12bb24ab4848 100755
+--- a/arch/arm/boot/dts/qcom/sparrow_pr3_105_msm8226.dtsi
++++ b/arch/arm/boot/dts/qcom/sparrow_pr3_105_msm8226.dtsi
+@@ -568,6 +568,12 @@
+ 		compatible = "qcom,msm-pcm-routing";
+ 	};
+ 
++	//ASUS_BSP BerylHou +++ "Config bt_rfkill"
++	rfkill {
++               compatible = "bcm,bcm-rfkill";
++	       status = "ok";
++	};
++	//ASUS_BSP BerylHou ---
+ 
+ 	qcom,msm-pcm-low-latency {
+ 		compatible = "qcom,msm-pcm-dsp";
+diff --git a/arch/arm/boot/dts/qcom/sparrow_pr3_msm8226.dtsi b/arch/arm/boot/dts/qcom/sparrow_pr3_msm8226.dtsi
+index dba8907d52ab..4a66d60e39ab 100755
+--- a/arch/arm/boot/dts/qcom/sparrow_pr3_msm8226.dtsi
++++ b/arch/arm/boot/dts/qcom/sparrow_pr3_msm8226.dtsi
+@@ -568,6 +568,12 @@
+ 		compatible = "qcom,msm-pcm-routing";
+ 	};
+ 
++	//ASUS_BSP BerylHou +++ "Config bt_rfkill"
++	rfkill {
++               compatible = "bcm,bcm-rfkill";
++	       status = "ok";
++	};
++	//ASUS_BSP BerylHou ---
+ 
+ 	qcom,msm-pcm-low-latency {
+ 		compatible = "qcom,msm-pcm-dsp";
+diff --git a/arch/arm/boot/dts/qcom/sparrow_pr_105_msm8226.dtsi b/arch/arm/boot/dts/qcom/sparrow_pr_105_msm8226.dtsi
+index f2b540293d32..d462e61f88a3 100755
+--- a/arch/arm/boot/dts/qcom/sparrow_pr_105_msm8226.dtsi
++++ b/arch/arm/boot/dts/qcom/sparrow_pr_105_msm8226.dtsi
+@@ -568,6 +568,13 @@
+ 		compatible = "qcom,msm-pcm-routing";
+ 	};
+ 
++	//ASUS_BSP BerylHou +++ "Config bt_rfkill"
++	rfkill {
++               compatible = "bcm,bcm-rfkill";
++	       status = "ok";
++	};
++	//ASUS_BSP BerylHou ---
++
+ 	qcom,msm-pcm-low-latency {
+ 		compatible = "qcom,msm-pcm-dsp";
+ 		qcom,msm-pcm-dsp-id = <1>;
+diff --git a/arch/arm/boot/dts/qcom/sparrow_pr_msm8226.dtsi b/arch/arm/boot/dts/qcom/sparrow_pr_msm8226.dtsi
+index 49733411e1ef..87a2aed2cdae 100755
+--- a/arch/arm/boot/dts/qcom/sparrow_pr_msm8226.dtsi
++++ b/arch/arm/boot/dts/qcom/sparrow_pr_msm8226.dtsi
+@@ -568,6 +568,13 @@
+ 		compatible = "qcom,msm-pcm-routing";
+ 	};
+ 
++	//ASUS_BSP BerylHou +++ "Config bt_rfkill"
++	rfkill {
++               compatible = "bcm,bcm-rfkill";
++	       status = "ok";
++	};
++	//ASUS_BSP BerylHou ---
++
+ 	qcom,msm-pcm-low-latency {
+ 		compatible = "qcom,msm-pcm-dsp";
+ 		qcom,msm-pcm-dsp-id = <1>;
+diff --git a/arch/arm/boot/dts/qcom/sparrow_sr2_msm8226.dtsi b/arch/arm/boot/dts/qcom/sparrow_sr2_msm8226.dtsi
+index 64fcb8b3aaff..b027dcf6ad20 100755
+--- a/arch/arm/boot/dts/qcom/sparrow_sr2_msm8226.dtsi
++++ b/arch/arm/boot/dts/qcom/sparrow_sr2_msm8226.dtsi
+@@ -568,6 +568,13 @@
+ 		compatible = "qcom,msm-pcm-routing";
+ 	};
+ 
++	//ASUS_BSP BerylHou +++ "Config bt_rfkill"
++	rfkill {
++               compatible = "bcm,bcm-rfkill";
++	       status = "ok";
++	};
++	//ASUS_BSP BerylHou ---
++
+ 	qcom,msm-pcm-low-latency {
+ 		compatible = "qcom,msm-pcm-dsp";
+ 		qcom,msm-pcm-dsp-id = <1>;
+diff --git a/arch/arm/boot/dts/qcom/sparrow_sr_pni_msm8226.dtsi b/arch/arm/boot/dts/qcom/sparrow_sr_pni_msm8226.dtsi
+index eda06f6491a7..e2271970501d 100755
+--- a/arch/arm/boot/dts/qcom/sparrow_sr_pni_msm8226.dtsi
++++ b/arch/arm/boot/dts/qcom/sparrow_sr_pni_msm8226.dtsi
+@@ -566,6 +566,13 @@
+ 		compatible = "qcom,msm-pcm-routing";
+ 	};
+ 
++	//ASUS_BSP BerylHou +++ "Config bt_rfkill"
++	rfkill {
++               compatible = "bcm,bcm-rfkill";
++	       status = "ok";
++	};
++	//ASUS_BSP BerylHou ---
++
+ 	qcom,msm-pcm-low-latency {
+ 		compatible = "qcom,msm-pcm-dsp";
+ 		qcom,msm-pcm-dsp-id = <1>;
+diff --git a/arch/arm/boot/dts/qcom/sparrow_sr_ql_msm8226.dtsi b/arch/arm/boot/dts/qcom/sparrow_sr_ql_msm8226.dtsi
+index 68d0cdb18216..377af4158814 100755
+--- a/arch/arm/boot/dts/qcom/sparrow_sr_ql_msm8226.dtsi
++++ b/arch/arm/boot/dts/qcom/sparrow_sr_ql_msm8226.dtsi
+@@ -566,6 +566,13 @@
+ 		compatible = "qcom,msm-pcm-routing";
+ 	};
+ 
++	//ASUS_BSP BerylHou +++ "Config bt_rfkill"
++	rfkill {
++               compatible = "bcm,bcm-rfkill";
++	       status = "ok";
++	};
++	//ASUS_BSP BerylHou ---
++
+ 	qcom,msm-pcm-low-latency {
+ 		compatible = "qcom,msm-pcm-dsp";
+ 		qcom,msm-pcm-dsp-id = <1>;
+diff --git a/arch/arm/boot/dts/qcom/wren_er_105_msm8226.dtsi b/arch/arm/boot/dts/qcom/wren_er_105_msm8226.dtsi
+index 84807b1c6869..3d909d629a5c 100755
+--- a/arch/arm/boot/dts/qcom/wren_er_105_msm8226.dtsi
++++ b/arch/arm/boot/dts/qcom/wren_er_105_msm8226.dtsi
+@@ -563,6 +563,13 @@
+ 		compatible = "qcom,msm-pcm-routing";
+ 	};
+ 
++	//ASUS_BSP BerylHou +++ "Config bt_rfkill"
++	rfkill {
++               compatible = "bcm,bcm-rfkill";
++	       status = "ok";
++	};
++	//ASUS_BSP BerylHou ---
++
+ 	qcom,msm-pcm-low-latency {
+ 		compatible = "qcom,msm-pcm-dsp";
+ 		qcom,msm-pcm-dsp-id = <1>;
+diff --git a/arch/arm/boot/dts/qcom/wren_er_msm8226.dtsi b/arch/arm/boot/dts/qcom/wren_er_msm8226.dtsi
+index 638a1749f712..c44b57fd0df6 100755
+--- a/arch/arm/boot/dts/qcom/wren_er_msm8226.dtsi
++++ b/arch/arm/boot/dts/qcom/wren_er_msm8226.dtsi
+@@ -563,6 +563,13 @@
+ 		compatible = "qcom,msm-pcm-routing";
+ 	};
+ 
++	//ASUS_BSP BerylHou +++ "Config bt_rfkill"
++	rfkill {
++               compatible = "bcm,bcm-rfkill";
++	       status = "ok";
++	};
++	//ASUS_BSP BerylHou ---
++
+ 	qcom,msm-pcm-low-latency {
+ 		compatible = "qcom,msm-pcm-dsp";
+ 		qcom,msm-pcm-dsp-id = <1>;
+diff --git a/arch/arm/boot/dts/qcom/wren_evb_sr_msm8226.dtsi b/arch/arm/boot/dts/qcom/wren_evb_sr_msm8226.dtsi
+index a10fbb131ef7..448a94fc1e34 100755
+--- a/arch/arm/boot/dts/qcom/wren_evb_sr_msm8226.dtsi
++++ b/arch/arm/boot/dts/qcom/wren_evb_sr_msm8226.dtsi
+@@ -563,6 +563,13 @@
+ 		compatible = "qcom,msm-pcm-routing";
+ 	};
+ 
++	//ASUS_BSP BerylHou +++ "Config bt_rfkill"
++	rfkill {
++               compatible = "bcm,bcm-rfkill";
++	       status = "ok";
++	};
++	//ASUS_BSP BerylHou ---
++
+ 	qcom,msm-pcm-low-latency {
+ 		compatible = "qcom,msm-pcm-dsp";
+ 		qcom,msm-pcm-dsp-id = <1>;
+diff --git a/arch/arm/boot/dts/qcom/wren_pr3_105_msm8226.dtsi b/arch/arm/boot/dts/qcom/wren_pr3_105_msm8226.dtsi
+index 0f3b8e67452e..c98733a52917 100755
+--- a/arch/arm/boot/dts/qcom/wren_pr3_105_msm8226.dtsi
++++ b/arch/arm/boot/dts/qcom/wren_pr3_105_msm8226.dtsi
+@@ -563,6 +563,13 @@
+ 		compatible = "qcom,msm-pcm-routing";
+ 	};
+ 
++	//ASUS_BSP BerylHou +++ "Config bt_rfkill"
++	rfkill {
++               compatible = "bcm,bcm-rfkill";
++	       status = "ok";
++	};
++	//ASUS_BSP BerylHou ---
++
+ 	qcom,msm-pcm-low-latency {
+ 		compatible = "qcom,msm-pcm-dsp";
+ 		qcom,msm-pcm-dsp-id = <1>;
+diff --git a/arch/arm/boot/dts/qcom/wren_pr3_msm8226.dtsi b/arch/arm/boot/dts/qcom/wren_pr3_msm8226.dtsi
+index d2f1d4d21127..fcb049f73fc7 100755
+--- a/arch/arm/boot/dts/qcom/wren_pr3_msm8226.dtsi
++++ b/arch/arm/boot/dts/qcom/wren_pr3_msm8226.dtsi
+@@ -563,6 +563,13 @@
+ 		compatible = "qcom,msm-pcm-routing";
+ 	};
+ 
++	//ASUS_BSP BerylHou +++ "Config bt_rfkill"
++	rfkill {
++               compatible = "bcm,bcm-rfkill";
++	       status = "ok";
++	};
++	//ASUS_BSP BerylHou ---
++
+ 	qcom,msm-pcm-low-latency {
+ 		compatible = "qcom,msm-pcm-dsp";
+ 		qcom,msm-pcm-dsp-id = <1>;
+diff --git a/arch/arm/boot/dts/qcom/wren_pr_105_msm8226.dtsi b/arch/arm/boot/dts/qcom/wren_pr_105_msm8226.dtsi
+index e24fdeaecef8..779a9fb0eecd 100755
+--- a/arch/arm/boot/dts/qcom/wren_pr_105_msm8226.dtsi
++++ b/arch/arm/boot/dts/qcom/wren_pr_105_msm8226.dtsi
+@@ -563,6 +563,13 @@
+ 		compatible = "qcom,msm-pcm-routing";
+ 	};
+ 
++	//ASUS_BSP BerylHou +++ "Config bt_rfkill"
++	rfkill {
++               compatible = "bcm,bcm-rfkill";
++	       status = "ok";
++	};
++	//ASUS_BSP BerylHou ---
++
+ 	qcom,msm-pcm-low-latency {
+ 		compatible = "qcom,msm-pcm-dsp";
+ 		qcom,msm-pcm-dsp-id = <1>;
+diff --git a/arch/arm/boot/dts/qcom/wren_pr_msm8226.dtsi b/arch/arm/boot/dts/qcom/wren_pr_msm8226.dtsi
+index de8306a3dd85..26aa00f9f755 100755
+--- a/arch/arm/boot/dts/qcom/wren_pr_msm8226.dtsi
++++ b/arch/arm/boot/dts/qcom/wren_pr_msm8226.dtsi
+@@ -563,6 +563,13 @@
+ 		compatible = "qcom,msm-pcm-routing";
+ 	};
+ 
++	//ASUS_BSP BerylHou +++ "Config bt_rfkill"
++	rfkill {
++               compatible = "bcm,bcm-rfkill";
++	       status = "ok";
++	};
++	//ASUS_BSP BerylHou ---
++
+ 	qcom,msm-pcm-low-latency {
+ 		compatible = "qcom,msm-pcm-dsp";
+ 		qcom,msm-pcm-dsp-id = <1>;
+diff --git a/arch/arm/mach-msm/include/mach/board.h b/arch/arm/mach-msm/include/mach/board.h
+index ca6229239028..1fb468f76358 100644
+--- a/arch/arm/mach-msm/include/mach/board.h
++++ b/arch/arm/mach-msm/include/mach/board.h
+@@ -27,6 +27,12 @@
+ #include <linux/ssbi.h>
+ #include <linux/msm-bus.h>
+ 
++//ASUS_BSP BerylHou +++
++#define GPIO_HOST_WAKE_UP_BT_SR 61
++#define GPIO_HOST_WAKE_UP_BT_EVB2 45
++#define GPIO_BT_WAKE_UP_HOST 48
++//ASUS_BSP BerylHou ---
++
+ #define RF_TYPE_16 0x10
+ #define RF_TYPE_17 0x11
+ #define RF_TYPE_18 0x12
+-- 
+2.12.0
+

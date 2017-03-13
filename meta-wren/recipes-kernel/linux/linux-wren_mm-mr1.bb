@@ -17,6 +17,12 @@ SRC_URI = "git://android.googlesource.com/kernel/msm;branch=android-msm-wren-3.1
     file://0001-Remove-unecessary-include-to-axc_PM8226Charger.h.patch \
     file://0001-msm-mdss-mdp-Don-t-use-tracing-features.patch \
     file://0001-Makefile-patch-fixes-ASUS_SW_VER-error.patch \
+    file://0001-Revert-sparrow-wren-bt-Remove-redundancy-code.patch \
+    file://0001-Revert-Enable-Nitrous-BT-power-management-driver-for.patch \
+    file://0002-Revert-Add-Nitrous-driver-for-BT-power-management.patch \
+    file://0001-Revert-Sparrow-audio-security-patch-for-CVE-2016-206.patch \
+    file://0001-Revert-Add-wake_peer-hook-to-MSM-HS-UART-driver.patch \
+    file://0001-Use-generic-dump-function.patch \
     file://defconfig \
     file://img_info "
 SRCREV = "00f21f748f01888888909f9f58280f5a363cd5f9"

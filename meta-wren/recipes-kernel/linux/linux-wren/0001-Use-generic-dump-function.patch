@@ -1,0 +1,25 @@
+From a68dd7aad04ab93f8a0ac88ae7d9b9c1d0c87bae Mon Sep 17 00:00:00 2001
+From: Daniel Landau <daniel@landau.fi>
+Date: Sun, 12 Mar 2017 14:34:50 +0200
+Subject: [PATCH] Use generic dump function
+
+---
+ arch/arm/kernel/traps.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm/kernel/traps.c b/arch/arm/kernel/traps.c
+index 951f31c62ac8..d3a97ddf877e 100644
+--- a/arch/arm/kernel/traps.c
++++ b/arch/arm/kernel/traps.c
+@@ -229,7 +229,7 @@ void save_stack_trace_asus(struct task_struct *tsk, struct stack_trace *trace)
+ {
+     asus_save_stack = 1;
+     asus_strace = trace;
+-    unwind_backtrace(NULL, tsk);
++    dump_backtrace(NULL, tsk);
+     asus_save_stack = 0;
+ }
+ 
+-- 
+2.12.0
+
