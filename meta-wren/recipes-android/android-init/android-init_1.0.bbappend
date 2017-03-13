@@ -1,1 +1,1 @@
-FILESEXTRAPATHS_prepend_sparrow := "${THISDIR}/${PN}:"
+FILESEXTRAPATHS_prepend_wren := "${THISDIR}/${PN}:"

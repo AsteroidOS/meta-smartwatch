@@ -6,9 +6,9 @@ SUMMARY = "Android kernel for the Asus ZenWatch 2"
 HOMEPAGE = "https://android.googlesource.com/"
 LICENSE = "GPLv2"
 LIC_FILES_CHKSUM = "file://COPYING;md5=d7810fab7487fb0aad327b76f1be7cd7"
-COMPATIBLE_MACHINE = "sparrow"
+COMPATIBLE_MACHINE = "wren"
 
-SRC_URI = "git://android.googlesource.com/kernel/msm;branch=android-msm-sparrow-3.10-marshmallow-mr1-wear-release;protocol=https \
+SRC_URI = "git://android.googlesource.com/kernel/msm;branch=android-msm-wren-3.10-marshmallow-mr1-wear-release;protocol=https \
     file://0001-patch-psmouse-base-disable.patch \
     file://0001-static-inline-in-ARM-ftrace.h.patch \
     file://0001-Add-files-needed-for-device_trace.h.patch \
@@ -19,7 +19,7 @@ SRC_URI = "git://android.googlesource.com/kernel/msm;branch=android-msm-sparrow-
     file://0001-Makefile-patch-fixes-ASUS_SW_VER-error.patch \
     file://defconfig \
     file://img_info "
-SRCREV = "3d2fa521411917b5a1683fec42ad2a8e50aee79f"
+SRCREV = "00f21f748f01888888909f9f58280f5a363cd5f9"
 LINUX_VERSION ?= "3.10"
 PV = "${LINUX_VERSION}+marshmallow"
 S = "${WORKDIR}/git"

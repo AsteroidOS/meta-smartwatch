@@ -31,7 +31,7 @@ echo 7770 > /sys/class/android_usb/android0/idProduct
 echo adb > /sys/class/android_usb/android0/f_ffs/aliases
 echo ffs > /sys/class/android_usb/android0/functions
 echo asus > /sys/class/android_usb/android0/iManufacturer
-echo sparrow > /sys/class/android_usb/android0/iProduct
+echo wren > /sys/class/android_usb/android0/iProduct
 echo asteroidasteroid > /sys/class/android_usb/android0/iSerial # What should we put here??
 echo 1 > /sys/class/android_usb/android0/enable
 

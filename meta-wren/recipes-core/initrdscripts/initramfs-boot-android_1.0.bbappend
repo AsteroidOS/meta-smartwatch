@@ -1,2 +1,2 @@
-FILESEXTRAPATHS_prepend_sparrow := "${THISDIR}/${PN}:"
-COMPATIBLE_MACHINE_sparrow = "sparrow"
+FILESEXTRAPATHS_prepend_wren := "${THISDIR}/${PN}:"
+COMPATIBLE_MACHINE_wren = "wren"
