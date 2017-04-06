@@ -1,11 +1,11 @@
-From 5a54dcef86974dcac9879da9b7007f1cbef5efd1 Mon Sep 17 00:00:00 2001
+From 0c92bab6b6c2c143a97612fd3dddf93dcf32b157 Mon Sep 17 00:00:00 2001
 From: Florent Revest <revestflo@gmail.com>
 Date: Sun, 18 Sep 2016 11:37:50 +0200
-Subject: [PATCH] Backport mainline 4.1 Bluetooth subsystem
+Subject: [PATCH 2/4] Backport mainline 4.1 Bluetooth subsystem
 
 ---
  drivers/bluetooth/Kconfig          |   80 +-
- drivers/bluetooth/Makefile         |   10 +-
+ drivers/bluetooth/Makefile         |    6 +
  drivers/bluetooth/ath3k.c          |  302 +-
  drivers/bluetooth/bfusb.c          |   47 +-
  drivers/bluetooth/bluecard_cs.c    |   74 +-
@@ -92,7 +92,7 @@ Subject: [PATCH] Backport mainline 4.1 Bluetooth subsystem
  net/bluetooth/smp.c                | 3774 ++++++++++++++++---
  net/bluetooth/smp.h                |  209 ++
  net/core/skbuff.c                  |   14 +-
- 88 files changed, 28528 insertions(+), 8296 deletions(-)
+ 88 files changed, 28526 insertions(+), 8294 deletions(-)
  create mode 100644 drivers/bluetooth/btbcm.c
  create mode 100644 drivers/bluetooth/btbcm.h
  create mode 100644 drivers/bluetooth/btintel.c
@@ -278,7 +278,7 @@ index a07081e..e7ed276 100644
  
  endmenu
 diff --git a/drivers/bluetooth/Makefile b/drivers/bluetooth/Makefile
-index 310da84..775f35d 100644
+index 6aa2903..ae32a43 100644
 --- a/drivers/bluetooth/Makefile
 +++ b/drivers/bluetooth/Makefile
 @@ -15,11 +15,13 @@ obj-$(CONFIG_BT_HCIBTUART)	+= btuart_cs.o
@@ -290,8 +290,7 @@ index 310da84..775f35d 100644
  obj-$(CONFIG_BT_MRVL)		+= btmrvl.o
  obj-$(CONFIG_BT_MRVL_SDIO)	+= btmrvl_sdio.o
  obj-$(CONFIG_BT_WILINK)		+= btwilink.o
--obj-$(CONFIG_MSM_BT_POWER)	+= bluetooth-power.o
-+obj-$(CONFIG_MSM_BT_POWER)     += bluetooth-power.o
+ obj-$(CONFIG_MSM_BT_POWER)	+= bluetooth-power.o
 +obj-$(CONFIG_BT_BCM)		+= btbcm.o
  
  btmrvl-y			:= btmrvl_main.o
@@ -303,10 +302,9 @@ index 310da84..775f35d 100644
 +hci_uart-$(CONFIG_BT_HCIUART_INTEL)	+= hci_intel.o
 +hci_uart-$(CONFIG_BT_HCIUART_BCM)	+= hci_bcm.o
  hci_uart-objs				:= $(hci_uart-y)
--obj-$(CONFIG_MSM_BT_SLEEP)		+= bluesleep.o
-+obj-$(CONFIG_MSM_BT_SLEEP)             += bluesleep.o
+ obj-$(CONFIG_MSM_BT_SLEEP)		+= nitrous.o
 +
-+ccflags-y += -D__CHECK_ENDIAN__
++ccflags-y	+= -D__CHECK_ENDIAN__
 diff --git a/drivers/bluetooth/ath3k.c b/drivers/bluetooth/ath3k.c
 index 7778e6a..c6848d3 100644
 --- a/drivers/bluetooth/ath3k.c
@@ -3654,7 +3652,7 @@ index 43d35a6..1a3bd06 100644
  
  
 diff --git a/drivers/bluetooth/btsdio.c b/drivers/bluetooth/btsdio.c
-index 4a99097..83f6437 100644
+index 4a99097..83f6437dd 100644
 --- a/drivers/bluetooth/btsdio.c
 +++ b/drivers/bluetooth/btsdio.c
 @@ -73,6 +73,7 @@ struct btsdio_data {
@@ -50996,5 +50994,5 @@ index adc8a10..121c1fe 100644
  /**
   *	pskb_expand_head - reallocate header of &sk_buff
 -- 
-2.9.3
+2.10.2
 

@@ -9,7 +9,10 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=d7810fab7487fb0aad327b76f1be7cd7"
 COMPATIBLE_MACHINE = "lenok"
 
 SRC_URI = "git://android.googlesource.com/kernel/msm;branch=android-msm-lenok-3.10-marshmallow-mr1-wear-release;protocol=https \
-	file://0001-static-inline-in-ARM-ftrace.h.patch \
+	file://0001-arm-LLVMLinux-use-static-inline-in-ARM-ftrace.h.patch \
+	file://0002-Backport-mainline-4.1-Bluetooth-subsystem.patch \
+	file://0003-Revert-nitrous-commits.patch \
+	file://0004-bluesleep-Use-kernel-s-HCI-events-instead-of-proc-bl.patch \
     file://defconfig \
     file://img_info"
 SRCREV = "2e918211eabb2843d87ac3c02baf5b03d84790f7"

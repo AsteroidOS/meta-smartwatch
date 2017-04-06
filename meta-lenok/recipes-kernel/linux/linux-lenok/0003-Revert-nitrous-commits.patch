@@ -1,0 +1,177 @@
+From c689c78aa26166722fc41ceca976a9d0a2053567 Mon Sep 17 00:00:00 2001
+From: Josef Gajdusek <atx@atx.name>
+Date: Thu, 6 Apr 2017 20:12:43 +0200
+Subject: [PATCH 3/4] Revert nitrous commits
+
+This commit reverts a bunch of Nitrous-adding commits as Asteroid uses
+bluesleep instead.
+---
+ .../arm/boot/dts/apq8026-bass/apq8026-bass-bt.dtsi | 28 +++++++++--------
+ .../boot/dts/apq8026-lenok/apq8026-lenok-bt.dtsi   | 18 ++++++-----
+ drivers/bluetooth/Makefile                         |  2 +-
+ drivers/bluetooth/nitrous.c                        | 35 +++++++---------------
+ 4 files changed, 38 insertions(+), 45 deletions(-)
+
+diff --git a/arch/arm/boot/dts/apq8026-bass/apq8026-bass-bt.dtsi b/arch/arm/boot/dts/apq8026-bass/apq8026-bass-bt.dtsi
+index 2cb1e1f..cc9721a 100644
+--- a/arch/arm/boot/dts/apq8026-bass/apq8026-bass-bt.dtsi
++++ b/arch/arm/boot/dts/apq8026-bass/apq8026-bass-bt.dtsi
+@@ -44,18 +44,20 @@
+ 		qcom,msm-obs;
+ 	};
+ 
++	bt_rfkill {
++		compatible = "lge,bluetooth_rfkill";
++		gpio-bt-reset = <&msmgpio 45 0>;
++	};
+ 
+-       bt_nitrous {
+-                compatible = "goog,nitrous";
+-                uart-port = <99>;
+-                power-gpio = <&msmgpio 45 0>;
+-                host-wake-gpio = <&msmgpio 48 0>;
+-                host-wake-polarity = <0>;
+-                dev-wake-gpio = <&msmgpio 47 0>;
+-                dev-wake-polarity = <0>;
+-                interrupt-parent = <&msmgpio>;
+-                interrupts = <48 0>;
+-                interrupt-names = "host_wake";
+-        };
+-};
+ 
++	/* To register BT wake-up devices for BT sleep */
++	bt_sleep {
++		compatible = "lge,bcm_bluesleep";
++		host-wake-gpio = <&msmgpio 48 0>;
++		ext-wake-gpio = <&msmgpio 47 0>;
++		interrupt-parent = <&msmgpio>;
++		interrupts = <48 0>;
++		interrupt-names = "host_wake";
++		tx-timer-interval = <1>;
++	};
++};
+diff --git a/arch/arm/boot/dts/apq8026-lenok/apq8026-lenok-bt.dtsi b/arch/arm/boot/dts/apq8026-lenok/apq8026-lenok-bt.dtsi
+index 0a3f031..8b5bb2e 100644
+--- a/arch/arm/boot/dts/apq8026-lenok/apq8026-lenok-bt.dtsi
++++ b/arch/arm/boot/dts/apq8026-lenok/apq8026-lenok-bt.dtsi
+@@ -43,16 +43,20 @@
+ 		qcom,msm-obs;
+ 	};
+ 
+-	bt_nitrous {
+-		compatible = "goog,nitrous";
+-		uart-port = <99>;
+-		power-gpio = <&msmgpio 45 0>;
++	bt_rfkill {
++		compatible = "lge,bluetooth_rfkill";
++		gpio-bt-reset = <&msmgpio 45 0>;
++	};
++
++
++	/* To register BT wake-up devices for BT sleep */
++	bt_sleep {
++		compatible = "lge,bcm_bluesleep";
+ 		host-wake-gpio = <&msmgpio 48 0>;
+-		host-wake-polarity = <0>;
+-		dev-wake-gpio = <&msmgpio 47 0>;
+-		dev-wake-polarity = <0>;
++		ext-wake-gpio = <&msmgpio 47 0>;
+ 		interrupt-parent = <&msmgpio>;
+ 		interrupts = <48 0>;
+ 		interrupt-names = "host_wake";
++		tx-timer-interval = <1>;
+ 	};
+ };
+diff --git a/drivers/bluetooth/Makefile b/drivers/bluetooth/Makefile
+index ae32a43..b51d8fa 100644
+--- a/drivers/bluetooth/Makefile
++++ b/drivers/bluetooth/Makefile
+@@ -35,6 +35,6 @@ hci_uart-$(CONFIG_BT_HCIUART_3WIRE)	+= hci_h5.o
+ hci_uart-$(CONFIG_BT_HCIUART_INTEL)	+= hci_intel.o
+ hci_uart-$(CONFIG_BT_HCIUART_BCM)	+= hci_bcm.o
+ hci_uart-objs				:= $(hci_uart-y)
+-obj-$(CONFIG_MSM_BT_SLEEP)		+= nitrous.o
+ 
+ ccflags-y	+= -D__CHECK_ENDIAN__
++obj-$(CONFIG_MSM_BT_SLEEP)		+= bluesleep.o
+diff --git a/drivers/bluetooth/nitrous.c b/drivers/bluetooth/nitrous.c
+index 10ec179..857ebb2 100644
+--- a/drivers/bluetooth/nitrous.c
++++ b/drivers/bluetooth/nitrous.c
+@@ -176,11 +176,6 @@ void nitrous_prepare_uart_tx_locked(struct uart_port *port)
+ 		return;
+ 	}
+ 
+-	if (bt_lpm->rfkill_blocked) {
+-		pr_err("%s: unexpected Tx when rfkill is blocked\n", __func__);
+-		return;
+-	}
+-
+ 	hrtimer_cancel(&bt_lpm->tx_lpm_timer);
+ 	nitrous_wake_device_locked(bt_lpm, true);
+ 	hrtimer_start(&bt_lpm->tx_lpm_timer, ktime_set(UART_TIMEOUT_SEC, 0),
+@@ -208,11 +203,6 @@ static irqreturn_t nitrous_host_wake_isr(int irq, void *dev)
+ 		return IRQ_HANDLED;
+ 	}
+ 
+-	if (lpm->rfkill_blocked) {
+-		pr_err("%s: unexpected host wake IRQ\n", __func__);
+-		return IRQ_HANDLED;
+-	}
+-
+ 	host_wake = gpio_get_value(lpm->gpio_host_wake);
+ 	pr_debug("%s: host wake gpio: %d\n", __func__, host_wake);
+ 
+@@ -253,8 +243,8 @@ static int nitrous_lpm_init(struct nitrous_bt_lpm *lpm)
+ 		goto err_request_irq;
+ 	}
+ 
+-	wake_lock_init(&lpm->dev_lock, WAKE_LOCK_SUSPEND, "bt_dev_tx_wake");
+-	wake_lock_init(&lpm->host_lock, WAKE_LOCK_SUSPEND, "bt_host_rx_wake");
++	wake_lock_init(&lpm->dev_lock, WAKE_LOCK_SUSPEND, "bt_dev_rx_wake");
++	wake_lock_init(&lpm->host_lock, WAKE_LOCK_SUSPEND, "bt_host_tx_wake");
+ 
+ 	/* Configure wake peer callback to be called at the onset of Tx. */
+ 	msm_hs_set_wake_peer(lpm->uart_port, nitrous_prepare_uart_tx_locked);
+@@ -500,12 +490,11 @@ static int nitrous_suspend(struct device *dev)
+ 	struct platform_device *pdev = to_platform_device(dev);
+ 	struct nitrous_bt_lpm *lpm = platform_get_drvdata(pdev);
+ 
+-	if (device_may_wakeup(&pdev->dev) && !lpm->rfkill_blocked) {
++	if (device_may_wakeup(&pdev->dev))
+ 		enable_irq_wake(lpm->irq_host_wake);
+ 
+-		/* Reset flag to capture pending irq before resume */
+-		lpm->pending_irq = false;
+-	}
++	/* Reset flag to capture pending irq before resume */
++	lpm->pending_irq = false;
+ 
+ 	lpm->is_suspended = true;
+ 
+@@ -516,16 +505,14 @@ static int nitrous_resume(struct device *dev)
+ {
+ 	struct platform_device *pdev = to_platform_device(dev);
+ 	struct nitrous_bt_lpm *lpm = platform_get_drvdata(pdev);
+-
+-	if (device_may_wakeup(&pdev->dev) && !lpm->rfkill_blocked) {
++	if (device_may_wakeup(&pdev->dev))
+ 		disable_irq_wake(lpm->irq_host_wake);
+ 
+-		/* Handle pending host wake irq. */
+-		if (lpm->pending_irq) {
+-			pr_info("%s: pending host_wake irq\n", __func__);
+-			nitrous_wake_uart(lpm, true);
+-			lpm->pending_irq = false;
+-		}
++	/* Handle pending host wake irq. */
++	if (lpm->pending_irq) {
++		pr_info("%s: pending host_wake irq\n", __func__);
++		nitrous_wake_uart(lpm, true);
++		lpm->pending_irq = false;
+ 	}
+ 
+ 	lpm->is_suspended = false;
+-- 
+2.10.2
+
