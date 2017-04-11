@@ -2,7 +2,7 @@ inherit gettext
 
 SUMMARY = "Downloads the Asus ZenWatch 2 /system and /usr/include/android folders and installs them for libhybris"
 LICENSE = "CLOSED"
-SRC_URI = "http://lrsservers.ddns.net/download/devices/asus/sparrow/asteroidos/system.tar.gz"
+SRC_URI = "https://dl.dropboxusercontent.com/s/kdmv8amgcz4tucv/system-sparrow.tar.gz"
 SRC_URI[md5sum] = "8fcf9da496125dee0a2e87b1c12f524c"
 SRC_URI[sha256sum] = "9468f9b6e31afbdbf9b23bf0d7c173bd70d883e03282db27586239a08d3e99af"
 PV = "lollipop"
