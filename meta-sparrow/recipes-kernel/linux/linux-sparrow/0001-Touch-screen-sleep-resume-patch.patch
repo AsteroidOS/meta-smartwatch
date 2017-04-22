@@ -1,0 +1,47 @@
+From b4fa95328fd21f1286b6d8eaa9ec1391378af506 Mon Sep 17 00:00:00 2001
+From: Lrs121 <lrs@lrsservers.net>
+Date: Fri, 21 Apr 2017 19:39:59 -0700
+Subject: [PATCH] Touch screen sleep resume patch
+
+The touch screen enters an improper state after sleeping and
+does not reset or re-enter the proper state on resume.
+
+"[T]he device never gets in the right state again after sleep"
+Credit: XDA-User DaanNL
+---
+ drivers/input/touchscreen/it7260_ts_i2c.c | 8 +++++---
+ 1 file changed, 5 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/input/touchscreen/it7260_ts_i2c.c b/drivers/input/touchscreen/it7260_ts_i2c.c
+index b254e4d..f498b2d 100644
+--- a/drivers/input/touchscreen/it7260_ts_i2c.c
++++ b/drivers/input/touchscreen/it7260_ts_i2c.c
+@@ -1491,13 +1491,13 @@ static void readTouchDataPoint_Ambient(void)
+ 	if (!isTouchLocked) {
+ 		if (i2cReadNoReadyCheck(BUF_QUERY, &devStatus, sizeof(devStatus)) == 2) {
+ 			if (!((devStatus & PT_INFO_BITS) & PT_INFO_YES)) {
+-				isTouchLocked = true;
++				//isTouchLocked = true;
+ 				if (!TP_DLMODE) {
+ 					LOGE("[%d] %s called when no data available (0x%02X), set isTouchLocked = %d.\n",
+ 						__LINE__, __func__, devStatus, isTouchLocked);
+ 				}
+-				wake_unlock(&touch_lock);
+-				return;
++				//wake_unlock(&touch_lock);
++				//return;
+ 			}
+ 		}
+ 		if (i2cReadNoReadyCheck(BUF_POINT_INFO, (void*)&pointData, sizeof(pointData)) != 2) {
+@@ -2021,6 +2021,8 @@ static int IT7260_ts_resume(struct i2c_client *i2cdev)
+ {
+ 	LOGI("Enter ts resume!\n");
+ 	isDriverAvailable = true;
++    driverInLowPower = false;
++    isTouchLocked = false;
+ 	return 0;
+ }
+ 
+-- 
+2.9.3
+
