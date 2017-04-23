@@ -19,8 +19,9 @@ S = "${WORKDIR}/git/hwcomposer"
 SRCREV = "a85d3518550193aaee69a6a011f290a2859db5ca"
 
 SRC_URI_append_swift = " \
-    file://0002-Add-QCOM_BSP-define-switch.patch;striplevel=2 \
-    file://004-Includes-sync.h-which-provides-sync_wait.patch;striplevel=2 \
+    file://0001-Add-QCOM_BSP-define-switch.patch;striplevel=2 \
+    file://0002-Includes-sync.h-which-provides-sync_wait.patch;striplevel=2 \
+    file://0003-Fixes-build-with-Qt-5.8.patch;striplevel=2 \
 "
 
 inherit qmake5
