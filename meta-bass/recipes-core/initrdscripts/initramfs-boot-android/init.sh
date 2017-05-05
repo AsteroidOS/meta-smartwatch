@@ -97,7 +97,7 @@ else
     # from system partition.
     umount /sdcard
 
-    mount -t auto -o rw,noatime,nodiratime /dev/$system_partition /rfs
+    mount -t auto -o rw,noatime,nodiratime /dev/$sdcard_partition /rfs
     [ $? -eq 0 ] || fail "Failed to mount /rootfs"
 fi
 
