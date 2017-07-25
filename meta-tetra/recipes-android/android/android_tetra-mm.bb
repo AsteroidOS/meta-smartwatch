@@ -2,10 +2,10 @@ inherit gettext
 
 SUMMARY = "Downloads the Sony Smartwatch3 /system and /usr/include/android folders and installs them for libhybris"
 LICENSE = "CLOSED"
-SRC_URI = "https://dl.dropboxusercontent.com/s/ts0j8c3et40cnol/system-tetra.tar.gz"
-SRC_URI[md5sum] = "b7f52dacf32516d8b99a2e6103941090"
-SRC_URI[sha256sum] = "2288c52aef9cdb58839f515c86a908e1d62261295e075cb780660038a1ed43a7"
-PV = "lollipop"
+SRC_URI = "https://www.dropbox.com/s/ao3dihq3rvlfklj/system-tetra.tar.gz?dl=0"
+SRC_URI[md5sum] = "2a8fba401e58615a4856b2420a6ac24f"
+SRC_URI[sha256sum] = "3eeab306d17b2738e6dfce5676db3de5f48eb6460c70ea6b047a23402280ce43"
+PV = "marshmallow"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 INHIBIT_PACKAGE_STRIP = "1"
