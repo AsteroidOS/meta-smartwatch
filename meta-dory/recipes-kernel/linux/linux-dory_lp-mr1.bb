@@ -20,18 +20,10 @@ PV = "${LINUX_VERSION}+lollipop"
 S = "${WORKDIR}/git"
 B = "${S}"
 
-# Removes some headers that are installed incorrectly
-
-do_configure_prepend() {
-    # Fixes build with GCC5
-    echo "#include <linux/compiler-gcc4.h>" > ${S}/include/linux/compiler-gcc5.h
-    echo "#include <linux/compiler-gcc5.h>" > ${S}/include/linux/compiler-gcc6.h
-}
-
 do_install_append() {
     rm -rf ${D}/usr/src/usr/
 }
 
 BOOT_PARTITION = "/dev/mmcblk0p15"
 
-inherit mkboot
+inherit mkboot old-kernel-gcc-hdrs
