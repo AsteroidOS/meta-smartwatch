@@ -17,13 +17,7 @@ PV = "${LINUX_VERSION}+marshmallow"
 S = "${WORKDIR}/git"
 B = "${S}"
 
-# Removes some headers that are installed incorrectly
-
 do_configure_prepend() {
-    # Fixes build with GCC5
-    echo "#include <linux/compiler-gcc4.h>" > ${S}/include/linux/compiler-gcc5.h
-    echo "#include <linux/compiler-gcc5.h>" > ${S}/include/linux/compiler-gcc6.h
-
     sed -i "s/ASUS_SW_VER/\"aos1\"/" ${S}/kernel/asusevtlog.c
 }
 
@@ -33,4 +27,4 @@ do_install_append() {
 
 BOOT_PARTITION = "/dev/sda"
 
-inherit mkboot
+inherit mkboot old-kernel-gcc-hdrs
