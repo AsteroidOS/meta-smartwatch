@@ -21,10 +21,6 @@ S = "${WORKDIR}/git"
 B = "${S}"
 
 do_configure_prepend() {
-    # Fixes build with GCC5
-    echo "#include <linux/compiler-gcc4.h>" > ${S}/include/linux/compiler-gcc5.h
-    echo "#include <linux/compiler-gcc5.h>" > ${S}/include/linux/compiler-gcc6.h
-
     # This Kbuild is wanted by do_install
     mkdir -p ${S}/include/uapi/linux/broadcom
     touch ${S}/include/uapi/linux/broadcom/Kbuild
@@ -37,4 +33,4 @@ do_install_append() {
 BOOT_PARTITION = "/dev/mmcblk0p29"
 MKBOOTIMG_ARGS = "--base 0x82000000"
 
-inherit mkbootimg
+inherit mkbootimg old-kernel-gcc-hdrs
