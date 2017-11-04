@@ -4,6 +4,7 @@ on init
     symlink /dev/fb0 /dev/graphics/fb0
     chown system root /sys/class/timed_output/vibrator/enable
 
+    mkdir /data/gps/ 0770 root root
     write /sys/class/gpio/export 23
     chown gps system /sys/class/gpio/gpio23/value
     chown gps system /sys/class/gpio/gpio23/direction
