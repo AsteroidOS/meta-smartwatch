@@ -1,0 +1,35 @@
+From 84cf7efb980652965728ef8149c89c4b501fa8fb Mon Sep 17 00:00:00 2001
+From: Florent Revest <revestflo@gmail.com>
+Date: Sat, 4 Nov 2017 23:34:25 +0100
+Subject: [PATCH 2/2] java_sony_brooks_020: Use the bcm-bzhw driver instead of
+ bcm-bt-lpm which is adapted to the HCI stack used by BlueZ instead of the
+ "userial" API used by libbt-vendor in Bluedroid
+
+---
+ arch/arm/boot/dts/java_sony_brooks_020.dts | 10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
+
+diff --git a/arch/arm/boot/dts/java_sony_brooks_020.dts b/arch/arm/boot/dts/java_sony_brooks_020.dts
+index a356c494b9a..efc82823acc 100644
+--- a/arch/arm/boot/dts/java_sony_brooks_020.dts
++++ b/arch/arm/boot/dts/java_sony_brooks_020.dts
+@@ -188,11 +188,11 @@
+ 		hs-ref-frequency = <26000000>;
+ 	};
+ 
+-        bcm-bt-btlpm {
+-                compatible = "bcm,bcm-bt-lpm";
+-                bt-wake-gpio = <&gpio 32 0>;
+-                host-wake-gpio = <&gpio 72 0>;
+-        };
++    bzhw {
++        compatible = "bcm,bzhw";
++        bt-wake-gpio = <32>;
++        host-wake-gpio = <72>;
++    };
+ 
+ 	spi0: spi@0x3E004000 {
+ 		enable-dma = <1>;
+-- 
+2.14.3
+
