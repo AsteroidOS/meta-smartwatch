@@ -1,9 +1,14 @@
 on init
     write /dev/.coldboot_done 1
+
+# Graphics
     mkdir /dev/graphics/
     symlink /dev/fb0 /dev/graphics/fb0
+
+# Vibrator
     chown system root /sys/class/timed_output/vibrator/enable
 
+# GPS
     mkdir /data/gps/ 0770 root root
     write /sys/class/gpio/export 23
     chown gps system /sys/class/gpio/gpio23/value
@@ -11,6 +16,10 @@ on init
     write /sys/class/gpio/gpio23/direction out
     write /sys/class/gpio/gpio23/value 0
 
+# Bluetooth
+    write /sys/class/gpio/gpio28/value 1
+
+# CPU
     write /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor "ondemand"
     write /sys/devices/system/cpu/cpu1/online 0
     write /sys/devices/system/cpu/cpu2/online 0
