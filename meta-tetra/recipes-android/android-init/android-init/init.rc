@@ -4,6 +4,12 @@ on init
     symlink /dev/fb0 /dev/graphics/fb0
     chown system root /sys/class/timed_output/vibrator/enable
 
+    write /sys/class/gpio/export 23
+    chown gps system /sys/class/gpio/gpio23/value
+    chown gps system /sys/class/gpio/gpio23/direction
+    write /sys/class/gpio/gpio23/direction out
+    write /sys/class/gpio/gpio23/value 0
+
     write /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor "ondemand"
     write /sys/devices/system/cpu/cpu1/online 0
     write /sys/devices/system/cpu/cpu2/online 0
@@ -19,3 +25,8 @@ service logd /system/bin/logd
 
 service servicemanager /system/bin/servicemanager
     class core
+
+service gpsd /system/bin/glgps -c /system/etc/gps/glconfig.xml
+    class core
+    socket gps seqpacket 0660 root root
+    ioprio be 0
