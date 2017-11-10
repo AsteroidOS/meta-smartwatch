@@ -15,7 +15,9 @@ SRC_URI = "git://android.googlesource.com/kernel/bcm;branch=android-bcm-tetra-3.
     file://0002-Bluetooth-fixes-a-poorly-done-patch.patch \
     file://0003-ion-don-t-use-lmk.patch \
     file://0004-bcm_bzhw-Use-inverted-IRQ-lines-polarity.patch \
-	file://0005-java_sony_brooks_020-Use-the-bcm-bzhw-driver-instead.patch "
+	file://0005-java_sony_brooks_020-Use-the-bcm-bzhw-driver-instead.patch \
+    file://0006-Backport-v4.1-drivers-using-.-gentree.py-integrate-c.patch \
+    file://0007-Integrate-hci_brcm-and-bcm_bzhw-to-the-backported-BT.patch"
 SRCREV = "34ff7fc1fe7a771816ee65eb38fb0f74dd3feda7"
 LINUX_VERSION ?= "3.10"
 PV = "${LINUX_VERSION}+lollipop"
