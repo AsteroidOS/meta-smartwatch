@@ -1,0 +1,78 @@
+From 1fc52263f64ec22fb784a5264942198fe7bc3c39 Mon Sep 17 00:00:00 2001
+From: Florent Revest <revestflo@gmail.com>
+Date: Mon, 1 Jan 2018 20:34:45 +0100
+Subject: [PATCH] synaptics_i2c_rmi4: Adds a wakelock when the screen is
+ pressed. This fixes an issue where unlocking the watch with a long press
+ would take >10 seconds before working because the watch would get back to
+ sleep as soon as the IRQ would be received
+
+---
+ drivers/input/touchscreen/synaptics_i2c_rmi4.c | 10 ++++++++++
+ drivers/input/touchscreen/synaptics_i2c_rmi4.h |  2 ++
+ 2 files changed, 12 insertions(+)
+
+diff --git a/drivers/input/touchscreen/synaptics_i2c_rmi4.c b/drivers/input/touchscreen/synaptics_i2c_rmi4.c
+index b7b403d6c74..10edbe6e048 100644
+--- a/drivers/input/touchscreen/synaptics_i2c_rmi4.c
++++ b/drivers/input/touchscreen/synaptics_i2c_rmi4.c
+@@ -32,6 +32,7 @@
+ #include <linux/of_gpio.h>
+ #include "synaptics_i2c_rmi4.h"
+ #include <linux/input/mt.h>
++#include <linux/wakelock.h>
+ 
+ #define DRIVER_NAME "synaptics_rmi4_i2c"
+ #define INPUT_PHYS_NAME "synaptics_rmi4_i2c/input0"
+@@ -1346,6 +1347,11 @@ static int synaptics_rmi4_f12_abs_report(struct synaptics_rmi4_data *rmi4_data,
+ #endif
+ 	input_sync(rmi4_data->input_dev);
+ 
++	if(touch_count > 0)
++		wake_lock(&rmi4_data->wake_lock);
++	else
++		wake_unlock(&rmi4_data->wake_lock);
++
+ 	return touch_count;
+ }
+ 
+@@ -3487,6 +3493,8 @@ static int synaptics_rmi4_probe(struct i2c_client *client,
+ 
+ 	device_init_wakeup(&client->dev, rmi4_data->board->wakeup);
+ 
++	wake_lock_init(&rmi4_data->wake_lock, WAKE_LOCK_SUSPEND, "synaptics_i2c_rmi4");
++
+ 	return retval;
+ 
+ err_sysfs:
+@@ -3562,6 +3570,8 @@ static int synaptics_rmi4_remove(struct i2c_client *client)
+ 	struct synaptics_rmi4_device_info *rmi;
+ 	int retval;
+ 
++	wake_lock_destroy(&rmi4_data->wake_lock);
++
+ 	device_init_wakeup(&client->dev, 0);
+ 
+ 	rmi = &(rmi4_data->rmi4_mod_info);
+diff --git a/drivers/input/touchscreen/synaptics_i2c_rmi4.h b/drivers/input/touchscreen/synaptics_i2c_rmi4.h
+index d9a72c7f0c7..f35f99a51c1 100644
+--- a/drivers/input/touchscreen/synaptics_i2c_rmi4.h
++++ b/drivers/input/touchscreen/synaptics_i2c_rmi4.h
+@@ -36,6 +36,7 @@
+ #endif
+ #include <linux/debugfs.h>
+ #include <linux/time.h>
++#include <linux/wakelock.h>
+ 
+ #define PDT_PROPS (0x00EF)
+ #define PDT_START (0x00E9)
+@@ -273,6 +274,7 @@ struct synaptics_rmi4_data {
+ 	struct pinctrl_state *gpio_state_active;
+ 	struct pinctrl_state *gpio_state_suspend;
+ 	int idle_mode;
++	struct wake_lock wake_lock;
+ };
+ 
+ enum exp_fn {
+-- 
+2.14.3
+
