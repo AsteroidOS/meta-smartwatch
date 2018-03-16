@@ -1,0 +1,11 @@
+[Unit]
+Description=Reinit servicemanager after some time
+
+[Service]
+Type=simple
+ExecStartPre=/bin/sh -ec 'while [ ! -f /dev/.coldboot_done ]; do sleep 1; done; sleep 10'
+ExecStart=/system/bin/servicemanager
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
