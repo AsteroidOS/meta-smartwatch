@@ -1,4 +1,4 @@
-From 07118aa84d167a2bdb38f2d896a34cb03c7937e9 Mon Sep 17 00:00:00 2001
+From 1bb16d3aec2ae8c7910cc2e00d62dc890d3fb6f5 Mon Sep 17 00:00:00 2001
 From: Florent Revest <revestflo@gmail.com>
 Date: Tue, 14 Feb 2017 16:53:03 +0100
 Subject: [PATCH] bluesleep: Use kernel's HCI events instead of
@@ -116,6 +116,3 @@ index a5cf13bf289d..c5b77df9eb52 100644
  	BT_DBG("hdev %s event %d", hdev->name, event);
  
  	/* Send event to monitor */
--- 
-2.11.0
-

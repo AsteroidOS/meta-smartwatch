@@ -1,4 +1,4 @@
-From ef4fea130eeb70eff4f3a549fd3f6e9b11437550 Mon Sep 17 00:00:00 2001
+From 7c97036effb82d039166ad7f0ba1e93d9d30f792 Mon Sep 17 00:00:00 2001
 From: ZaneZam <cyxman@yahoo.com>
 Date: Thu, 26 Mar 2015 14:50:10 +0100
 Subject: [PATCH] arm: LLVMLinux: use static inline in ARM ftrace.h
@@ -13,14 +13,14 @@ Signed-off-by: Behan Webster <behanw@converseincode.com>
 Reviewed-by: Mark Charlebois <charlebm@gmail.com>
 
 source: http://www.serverphorums.com/read.php?12,880351,880351#msg-880351
+
 ---
-https://github.com/zanezam/boeffla-kernel-cm-bacon/commit/ef4fea130eeb70eff4f3a549fd3f6e9b11437550.patch
  arch/arm/include/asm/ftrace.h    | 2 +-
  arch/arm/kernel/return_address.c | 2 ++
  2 files changed, 3 insertions(+), 1 deletion(-)
 
 diff --git a/arch/arm/include/asm/ftrace.h b/arch/arm/include/asm/ftrace.h
-index f89515a..2bb8cac 100644
+index 39eb16b0066f..bfe2a2f5a644 100644
 --- a/arch/arm/include/asm/ftrace.h
 +++ b/arch/arm/include/asm/ftrace.h
 @@ -45,7 +45,7 @@ void *return_address(unsigned int);
@@ -33,11 +33,11 @@ index f89515a..2bb8cac 100644
  	return NULL;
  }
 diff --git a/arch/arm/kernel/return_address.c b/arch/arm/kernel/return_address.c
-index f1aef84..49477f0 100644
+index fafedd86885d..6b6b4d077bec 100644
 --- a/arch/arm/kernel/return_address.c
 +++ b/arch/arm/kernel/return_address.c
-@@ -62,10 +62,12 @@ void *return_address(unsigned int level)
- /* #warning "TODO: return_address should use unwind tables" */
+@@ -63,10 +63,12 @@ void *return_address(unsigned int level)
+ #warning "TODO: return_address should use unwind tables"
  #endif
  
 +/*
@@ -48,3 +48,4 @@ index f1aef84..49477f0 100644
 +*/
  
  #endif /* if defined(CONFIG_FRAME_POINTER) && !defined(CONFIG_ARM_UNWIND) / else */
+ 

@@ -1,16 +1,16 @@
-From d7b02a2f6f5f1daa739a3cf1c356733430e126f3 Mon Sep 17 00:00:00 2001
+From 73ec8d364784f99f7062ebf5db6d0b1405d8286b Mon Sep 17 00:00:00 2001
 From: Florent Revest <revestflo@gmail.com>
 Date: Sun, 14 May 2017 15:53:26 +0200
 Subject: [PATCH] msm_pwm_vibrator: Convert timed_output APIs to ff_memless
  input APIs
 
 ---
- arch/arm/configs/bass_defconfig                |   4 +-
- drivers/input/ff-memless.c                     |   2 +-
- drivers/misc/Kconfig                           |   2 +-
- drivers/misc/msm_pwm_vibrator.c                | 314 ++++++++-----------------
- drivers/platform/msm/qpnp-power-on.c           |  43 ----
- include/linux/platform_data/msm_pwm_vibrator.h |  13 +-
+ arch/arm/configs/bass_defconfig               |   4 +-
+ drivers/input/ff-memless.c                    |   2 +-
+ drivers/misc/Kconfig                          |   2 +-
+ drivers/misc/msm_pwm_vibrator.c               | 314 ++++++------------
+ drivers/platform/msm/qpnp-power-on.c          |  43 ---
+ .../linux/platform_data/msm_pwm_vibrator.h    |  13 +-
  6 files changed, 105 insertions(+), 273 deletions(-)
 
 diff --git a/arch/arm/configs/bass_defconfig b/arch/arm/configs/bass_defconfig
@@ -763,6 +763,3 @@ index bc1d2d72be92..485de9797fa9 100644
  };
  
  #endif
--- 
-2.11.0
-
