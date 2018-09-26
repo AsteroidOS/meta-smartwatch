@@ -1,0 +1,48 @@
+From 8c95526129d729e784e6685da37136431f090b99 Mon Sep 17 00:00:00 2001
+From: Florent Revest <revestflo@gmail.com>
+Date: Tue, 27 Jun 2017 13:44:03 +0200
+Subject: [PATCH 03/11] Removes some references to the low memory killer
+
+---
+ drivers/misc/mediatek/mlog/mlog_logger.c | 3 ++-
+ mm/vmscan.c                              | 3 +--
+ 2 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/misc/mediatek/mlog/mlog_logger.c b/drivers/misc/mediatek/mlog/mlog_logger.c
+index 222507541..6fc85d0f5 100644
+--- a/drivers/misc/mediatek/mlog/mlog_logger.c
++++ b/drivers/misc/mediatek/mlog/mlog_logger.c
+@@ -537,7 +537,8 @@ static void mlog_procinfo(void)
+ #ifdef CONFIG_ANDROID_LOW_MEMORY_KILLER_AUTODETECT_OOM_ADJ_VALUES
+ 		oom_score_adj = lowmem_oom_score_adj_to_oom_adj(p->signal->oom_score_adj);
+ #else
+-		oom_score_adj = p->signal->oom_adj;
++//		oom_score_adj = p->signal->oom_adj;
++		oom_score_adj = 0;
+ #endif
+ 
+ 		if (max_adj < oom_score_adj || oom_score_adj < min_adj)
+diff --git a/mm/vmscan.c b/mm/vmscan.c
+index 58eb00678..ce19fdf76 100644
+--- a/mm/vmscan.c
++++ b/mm/vmscan.c
+@@ -1856,7 +1856,6 @@ module_param_named(threshold, vmscan_threshold, int, S_IRUGO | S_IWUSR);
+ //#define LOGTAG "VMSCAN"
+ static unsigned long t=0;
+ static unsigned long history[2] = {0};
+-extern int lowmem_minfree[9];
+ #endif
+ 
+ #endif // CONFIG_ZRAM
+@@ -2015,7 +2014,7 @@ static void get_scan_count(struct lruvec *lruvec, struct scan_control *sc,
+ 
+ 		} else {
+ 			cached = global_page_state(NR_FILE_PAGES) - global_page_state(NR_SHMEM) - total_swapcache_pages();
+-			if(cached > lowmem_minfree[2]) {
++			if(cached > 4*1024) {
+ 				anon_prio = vmscan_swappiness(sc);
+ 				file_prio = vmscan_swap_sum - vmscan_swappiness(sc);
+ 				//pr_debug(ANDROID_LOG_ERROR, LOGTAG, "2 anon_prio: %d, file_prio: %d \n",  anon_prio, file_prio);
+-- 
+2.19.0
+

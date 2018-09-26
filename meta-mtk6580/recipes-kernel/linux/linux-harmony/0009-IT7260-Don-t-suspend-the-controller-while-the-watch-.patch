@@ -1,0 +1,315 @@
+From e111ff94104138537313e55740c4a001e3d1218c Mon Sep 17 00:00:00 2001
+From: Florent Revest <revestflo@gmail.com>
+Date: Thu, 31 Aug 2017 14:45:49 +0100
+Subject: [PATCH 09/11] IT7260: Don't suspend the controller while the watch is
+ asleep to leverage the tap to unlock feature
+
+---
+ .../mediatek/it7250/IT7260_driver.c           | 201 +-----------------
+ 1 file changed, 2 insertions(+), 199 deletions(-)
+
+diff --git a/drivers/input/touchscreen/mediatek/it7250/IT7260_driver.c b/drivers/input/touchscreen/mediatek/it7250/IT7260_driver.c
+index 3cb0640ab..b444bfddb 100755
+--- a/drivers/input/touchscreen/mediatek/it7250/IT7260_driver.c
++++ b/drivers/input/touchscreen/mediatek/it7250/IT7260_driver.c
+@@ -67,16 +67,12 @@
+ extern struct tpd_device *tpd;
+ 
+ static int tpd_flag = 0;
+-static int tpd_halt=0;
+ #ifdef I2C_SUPPORT_RS_DMA
+ static u8 *I2CDMABuf_va = NULL;
+ static u32 I2CDMABuf_pa = NULL;
+ #endif
+ static struct task_struct *thread = NULL;
+ static DECLARE_WAIT_QUEUE_HEAD(waiter);
+-#ifdef DOUBLE_CLICK_WAKE
+-extern  int gesture_function_enable;
+-#endif
+ enum wk_wdt_type {
+     WK_WDT_LOC_TYPE,
+     WK_WDT_EXT_TYPE,
+@@ -90,7 +86,6 @@ long FWversion;
+ #include "mt_pm_ldo.h"
+   extern struct tpd_device *tpd;
+ static  struct regulator *tempregs = NULL;
+-static int power_flag=0;// 0 power off,default, 1 power on
+ #define POWER_OFF                  0
+ #define POWER_ON                   1
+ #define GTP_GPIO_OUTPUT(pin,level)      do{\
+@@ -114,8 +109,6 @@ static  void it7260_power_switch(s32 state)
+ 	int ret = 0;
+ 	switch (state) {
+ 		case POWER_ON:
+-			if(power_flag==0)
+-			{
+ 				if(NULL == tpd->reg)
+ 				{
+ 				  	tpd->reg=regulator_get(tpd->tpd_dev,TPD_POWER_SOURCE_CUSTOM); // get pointer to regulator structure
+@@ -133,30 +126,8 @@ static  void it7260_power_switch(s32 state)
+ 				ret=regulator_enable(tpd->reg);  //enable regulator
+ 				if (ret)
+ 					printk("regulator_enable() failed!\n");
+-
+-				power_flag=1;
+-			}
+-			else
+-			{
+-		  	}
+ 			break;
+ 		case POWER_OFF:
+-			if(power_flag==1)
+-			{
+-				printk("Power switch off!\n");
+-				if(!IS_ERR_OR_NULL(tpd->reg))
+-				{
+-					ret=regulator_disable(tpd->reg); //disable regulator
+-					if (ret)
+-						printk("regulator_disable() failed!\n");
+-					regulator_put(tpd->reg);
+-					tpd->reg = NULL;
+-					power_flag=0;
+-				}
+-			}
+-			else
+-			{
+-			}
+ 			break;
+ 		  default:
+ 			printk("Invalid power switch command!");
+@@ -396,7 +367,6 @@ int ite7260_ioctl(struct file *filp, unsigned int cmd, unsigned long arg) {
+ 
+ 			pr_info("Disabling IRQ.\n");
+ 			//disable_irq(gl_ts->client->irq);
+-			tpd_halt = 1;
+ 			mt_eint_mask(CUST_EINT_TOUCH_PANEL_NUM);
+ 		}
+ 
+@@ -405,7 +375,6 @@ int ite7260_ioctl(struct file *filp, unsigned int cmd, unsigned long arg) {
+ 			pr_info("Enabling IRQ.\n");
+ 
+ 			//enable_irq(gl_ts->client->irq);
+-			tpd_halt = 0;
+ 				mt_eint_unmask(CUST_EINT_TOUCH_PANEL_NUM);
+ 
+ 		}
+@@ -855,10 +824,6 @@ static int tpd_i2c_probe(struct i2c_client *client, const struct i2c_device_id *
+ 
+ 	sysfs_create_group(&(client->dev.kobj), &it7260_attr_group);
+ 
+-	#ifdef DOUBLE_CLICK_WAKE
+-	input_set_capability(tpd->dev, EV_KEY, KEY_POWER);
+-	#endif
+-	
+     tpd_load_status = 1;  
+     return TPD_OK;
+ 
+@@ -946,142 +911,6 @@ void tpd_up(int raw_x, int raw_y, int x, int y, int p) {
+     TPD_EM_PRINT(raw_x, raw_y, x, y, p, 0);
+ }
+ 
+-#ifdef DOUBLE_CLICK_WAKE
+-static void check_gesture(int gesture_id)
+-{
+-	switch(gesture_id)
+-	{
+-		case GESTURE_DOUBLECLICK:	
+-				input_report_key(tpd->dev, KEY_POWER, 1);
+-			    input_sync(tpd->dev);
+-			     input_report_key(tpd->dev, KEY_POWER, 0);
+-			    input_sync(tpd->dev);		    
+-			break;
+-#if 0
+-		case GESTURE_LEFT:		     
+-		      input_report_key(tpd->dev, KEY_LEFT, 1);
+-			    input_sync(tpd->dev);
+-			     input_report_key(tpd->dev, KEY_LEFT, 0);
+-			    input_sync(tpd->dev);
+-			break;
+-		case GESTURE_RIGHT:						
+-  				input_report_key(tpd->dev, KEY_RIGHT, 1);
+-			    input_sync(tpd->dev);
+-			     input_report_key(tpd->dev, KEY_RIGHT, 0);
+-			    input_sync(tpd->dev);
+- 
+-			break;
+-		case GESTURE_UP:	
+-			input_report_key(tpd->dev, KEY_UP, 1);
+-			    input_sync(tpd->dev);
+-			     input_report_key(tpd->dev, KEY_UP, 0);
+-			    input_sync(tpd->dev);
+-			    
+-			break;
+-		case GESTURE_DOWN:		
+-				input_report_key(tpd->dev, KEY_DOWN, 1);
+-			    input_sync(tpd->dev);
+-			     input_report_key(tpd->dev, KEY_DOWN, 0);
+-			    input_sync(tpd->dev);
+-		    
+-			break;
+-
+-
+-		case GESTURE_O:	
+-							input_report_key(tpd->dev, KEY_POWER, 1);
+-			    input_sync(tpd->dev);
+-			     input_report_key(tpd->dev, KEY_POWER, 0);
+-			    input_sync(tpd->dev);
+-					input_report_key(tpd->dev, KEY_O, 1);
+-			    input_sync(tpd->dev);
+-			    input_report_key(tpd->dev, KEY_O, 0);
+-			    input_sync(tpd->dev);
+-			break;
+-		case GESTURE_W:			
+-							input_report_key(tpd->dev, KEY_POWER, 1);
+-			    input_sync(tpd->dev);
+-			     input_report_key(tpd->dev, KEY_POWER, 0);
+-			    input_sync(tpd->dev);
+-		input_report_key(tpd->dev, KEY_W, 1);
+-			    input_sync(tpd->dev);
+-			     input_report_key(tpd->dev, KEY_W, 0);
+-			    input_sync(tpd->dev);
+-			    
+-			break;
+-		case GESTURE_M:		
+-							input_report_key(tpd->dev, KEY_POWER, 1);
+-			    input_sync(tpd->dev);
+-			     input_report_key(tpd->dev, KEY_POWER, 0);
+-			    input_sync(tpd->dev);
+-	input_report_key(tpd->dev, KEY_M, 1);
+-			    input_sync(tpd->dev);
+-			     input_report_key(tpd->dev, KEY_M, 0);
+-			    input_sync(tpd->dev);
+-			    
+-			break;
+-		case GESTURE_E:		
+-							input_report_key(tpd->dev, KEY_POWER, 1);
+-			    input_sync(tpd->dev);
+-			     input_report_key(tpd->dev, KEY_POWER, 0);
+-			    input_sync(tpd->dev);
+-		input_report_key(tpd->dev, KEY_E, 1);
+-			    input_sync(tpd->dev);
+-			     input_report_key(tpd->dev, KEY_E, 0);
+-			    input_sync(tpd->dev);
+-			    
+-			break;
+-		case GESTURE_C:		
+-							input_report_key(tpd->dev, KEY_POWER, 1);
+-			    input_sync(tpd->dev);
+-			     input_report_key(tpd->dev, KEY_POWER, 0);
+-			    input_sync(tpd->dev);
+-		input_report_key(tpd->dev, KEY_C, 1);
+-			 input_sync(tpd->dev);
+-			 input_report_key(tpd->dev, KEY_C, 0);
+-			 input_sync(tpd->dev);
+-			break;
+-
+-		case GESTURE_S:		
+-							input_report_key(tpd->dev, KEY_POWER, 1);
+-			    input_sync(tpd->dev);
+-			     input_report_key(tpd->dev, KEY_POWER, 0);
+-			    input_sync(tpd->dev);
+-	input_report_key(tpd->dev, KEY_S, 1);
+-		 input_sync(tpd->dev);
+-		 input_report_key(tpd->dev, KEY_S, 0);
+-		 input_sync(tpd->dev);
+-		break;
+-
+-		case GESTURE_V:
+-							input_report_key(tpd->dev, KEY_POWER, 1);
+-			    input_sync(tpd->dev);
+-			     input_report_key(tpd->dev, KEY_POWER, 0);
+-			    input_sync(tpd->dev);
+-				input_report_key(tpd->dev, KEY_V, 1);
+-		 input_sync(tpd->dev);
+-		 input_report_key(tpd->dev, KEY_V, 0);
+-		 input_sync(tpd->dev);
+-		break;
+-
+-		case GESTURE_Z:	
+-							input_report_key(tpd->dev, KEY_POWER, 1);
+-			    input_sync(tpd->dev);
+-			     input_report_key(tpd->dev, KEY_POWER, 0);
+-			    input_sync(tpd->dev);
+-		input_report_key(tpd->dev, KEY_Z, 1);
+-		 input_sync(tpd->dev);
+-		 input_report_key(tpd->dev, KEY_Z, 0);
+-		 input_sync(tpd->dev);
+-			break;
+-#endif
+-		default:
+-		
+-			break;
+-	}
+-
+-}
+-#endif
+-
+ static int x[2] = { (int) -1, (int) -1 };
+ static int y[2] = { (int) -1, (int) -1 };
+ static bool finger[2] = { 0, 0 };
+@@ -1104,7 +933,6 @@ static int touch_event_handler( void *unused )
+ 	mt_eint_unmask(CUST_EINT_TOUCH_PANEL_NUM);
+     do{
+         set_current_state(TASK_INTERRUPTIBLE);
+-        while (tpd_halt) {tpd_flag = 0; msleep(20);}
+         wait_event_interruptible(waiter, tpd_flag != 0);
+         tpd_flag = 0;
+         TPD_DEBUG_SET_TIME;
+@@ -1139,17 +967,6 @@ static int touch_event_handler( void *unused )
+ #endif
+ 	    // gesture
+ 		    if (pucPoint[0] & 0xF0) {
+-		    	#ifdef DOUBLE_CLICK_WAKE
+-				if((gesture_function_enable == 1) && (tpd_halt == 1 ))
+-				{
+-			    	 if (pucPoint[0] == 0x10)
+-			    	 {
+-			    	 	check_gesture(GESTURE_DOUBLECLICK);
+-						continue;
+-			    	  }
+-				}
+-		    	#endif
+-//			printk("-----------------------------------------------pucPoint[0] & 0xF0---------------------.\n");
+ 		    #ifdef TPD_HAVE_PHYSICAL_BUTTON
+ 		    	//physical key
+ 		    	if (  pucPoint[0] & 0x40  && pucPoint[0] & 0x01){
+@@ -1300,26 +1117,13 @@ static void tpd_suspend(struct i2c_client *client, pm_message_t message)
+ {
+     int ret = 0;
+ 
+-#ifdef  DOUBLE_CLICK_WAKE
+     unsigned char Wrbuf_sleep[4] = { 0x20, 0x04, 0x00, 0x02 };
+  	unsigned char Wrbuf_idle[4] = { 0x20, 0x04, 0x00, 0x01 };
+-  if(gesture_function_enable == 1 )
+-  {
+-    TPD_DEBUG("IT7260 call suspend,enter ilde\n");    
++
+     ret = tpd_i2c_write(i2c_client, Wrbuf_idle, 4);   
+     msleep(20); 
+-	if(ret != 4){
++	if(ret != 4)
+         TPD_DEBUG("[mtk-tpd] i2c write communcate error during suspend: 0x%x\n", ret);
+-    }else
+-    {
+-    }
+-  }else
+-#endif
+-	{
+-		tpd_halt = 1;
+-		mt_eint_mask(CUST_EINT_TOUCH_PANEL_NUM); 
+-		it7260_power_switch(POWER_OFF);
+-  	}
+ }
+ 
+ /* Function to manage power-on resume */
+@@ -1348,7 +1152,6 @@ static void tpd_resume(struct i2c_client *client)
+     }
+ 
+ 	mt_eint_unmask(CUST_EINT_TOUCH_PANEL_NUM); 
+-    tpd_halt = 0;
+     // liuzhiyong 20120619 update code ++ 
+ //	tpd_up(0, 0, 0, 0, 0);
+ 	tpd_up(0, 0, 0, 0, 0);
+-- 
+2.19.0
+
