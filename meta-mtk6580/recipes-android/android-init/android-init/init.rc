@@ -1,0 +1,84 @@
+on init
+    export ANDROID_ROOT /system
+    mkdir /dev/graphics/
+    symlink /dev/fb0 /dev/graphics/fb0
+    mkdir /data/gps_mnl
+    mkdir /data/misc
+    mkdir /data/ccci_cfg
+    write /data/ccci_cfg/md_new_ver.1 flags
+    mkdir /protect_s/
+    mkdir /protect_s/md
+    mkdir /protect_f/
+    mkdir /protect_f/md
+    mkdir /dev/block/platform/mtk-msdc.0/by-name/
+    symlink /dev/mmcblk0p16 /dev/block/platform/mtk-msdc.0/by-name/secro
+    chown system root /sys/class/timed_output/vibrator/enable
+
+    load_all_props
+    class_start core
+
+service logd /system/bin/logd
+    class core
+    socket logd stream 0666 root root
+    socket logdr seqpacket 0666 root root
+    socket logdw dgram 0222 root root
+
+service servicemanager /system/bin/servicemanager
+    class core
+
+service wmtLoader /system/bin/wmt_loader
+    class core
+    oneshot
+
+service conn_launcher /system/bin/6620_launcher -p /system/etc/firmware/
+    class core
+
+service gsm0710muxd /system/bin/gsm0710muxd -s /dev/ttyC0 -f 512 -n 8 -m basic
+    class core
+    oneshot
+
+service gsm0710muxdmd2 /system/bin/gsm0710muxdmd2 -s /dev/ccci2_tty0 -f 512 -n 8 -m basic
+    class core
+    disabled
+    oneshot
+
+service ril-daemon-mtk /system/bin/mtkrild
+    class core
+    socket rild stream 660 root root
+    socket rild2 stream 660 root root
+    socket rild3 stream 660 root root
+    socket rild4 stream 660 root root
+    socket rild-ims stream 660 root root
+    socket rild-debug stream 660 root root
+    socket rild-oem stream 660 root root
+    socket rild-mtk-ut stream 660 root root
+    socket rild-mtk-ut-2 stream 660 root root
+    socket rild-mtk-modem stream 660 root root
+    socket rild-atci stream 660 root root
+    oneshot
+
+service ccci_fsd /system/bin/ccci_fsd 0
+    class core
+    oneshot
+
+service ccci_mdinit /system/bin/ccci_mdinit 0
+    class core
+    oneshot
+
+service mdlogger /system/bin/mdlogger
+    class core
+    disabled
+
+service agpsd /system/bin/mtk_agpsd
+    class core
+    socket agpsd stream 660 root root
+    socket agpsd2 stream 660 root root
+    socket agpsd3 stream 660 root root
+
+service mnld /system/bin/mnld
+    class core
+    socket mnld stream 660 root root
+
+service nvram_daemon /system/bin/nvram_daemon
+    class core
+    oneshot
