@@ -1,0 +1,32 @@
+From e43f22e8e9c9b2733866af9077ea7c2eb9815ebd Mon Sep 17 00:00:00 2001
+From: Florent Revest <revestflo@gmail.com>
+Date: Mon, 24 Sep 2018 01:17:41 +0200
+Subject: [PATCH] =?UTF-8?q?compositor:=20Fix=20new=20window=20animation=20?=
+ =?UTF-8?q?on=20screens=20rotated=20by=20180=C2=B0?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+---
+ qml/compositor/compositor.qml | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/qml/compositor/compositor.qml b/qml/compositor/compositor.qml
+index fee7280..93ae1de 100644
+--- a/qml/compositor/compositor.qml
++++ b/qml/compositor/compositor.qml
+@@ -222,7 +222,10 @@ Item {
+                 setCurrentWindow(homeWindow)
+             } else if (!isNotificationWindow && !isAgentWindow && !isDialogWindow) {
+                 w.smoothBorders = true
+-                w.x = width
++                if(root.rotation == 0)
++                    w.x = width
++                else
++                    w.x = -width
+                 w.moveInAnim.start()
+                 cancelAnimation.start()
+                 setCurrentWindow(w)
+-- 
+2.19.0
+

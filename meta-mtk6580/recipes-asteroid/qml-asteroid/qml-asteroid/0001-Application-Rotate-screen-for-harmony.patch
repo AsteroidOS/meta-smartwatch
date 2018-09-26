@@ -1,0 +1,22 @@
+From 2b4fd1a055cc71e355dcd685f83ee30e0d817a29 Mon Sep 17 00:00:00 2001
+From: Florent Revest <revestflo@gmail.com>
+Date: Sat, 8 Jul 2017 11:28:05 +0100
+Subject: [PATCH] Application: Rotate screen for harmony
+
+---
+ src/controls/qml/Application.qml | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/src/controls/qml/Application.qml b/src/controls/qml/Application.qml
+index ae4ab96..54610c8 100644
+--- a/src/controls/qml/Application.qml
++++ b/src/controls/qml/Application.qml
+@@ -32,6 +32,8 @@ Application_p {
+         bottomIndicator.animate();
+     }
+ 
++    rotation: 180
++
+     FlatMesh {
+         id: fm
+         anchors.fill: parent

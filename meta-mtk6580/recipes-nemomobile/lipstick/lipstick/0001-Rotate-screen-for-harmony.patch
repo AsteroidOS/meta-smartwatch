@@ -1,0 +1,25 @@
+From a8c863afa7b5f22edc2b551b5ef01a63402f81e5 Mon Sep 17 00:00:00 2001
+From: Florent Revest <revestflo@gmail.com>
+Date: Sat, 8 Jul 2017 14:12:06 +0100
+Subject: [PATCH] Rotate screen for harmony
+
+---
+ src/compositor/lipstickcompositor.cpp | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/src/compositor/lipstickcompositor.cpp b/src/compositor/lipstickcompositor.cpp
+index 5653eaa..5b40362 100644
+--- a/src/compositor/lipstickcompositor.cpp
++++ b/src/compositor/lipstickcompositor.cpp
+@@ -403,6 +403,8 @@ void LipstickCompositor::initialize()
+     if (!systemBus.registerObject("/", this)) {
+         qWarning("Unable to register object at path /: %s", systemBus.lastError().message().toUtf8().constData());
+     }
++
++    setScreenOrientation(Qt::InvertedLandscapeOrientation);
+ }
+ 
+ void LipstickCompositor::windowDestroyed(LipstickCompositorWindow *item)
+-- 
+2.7.4
+
