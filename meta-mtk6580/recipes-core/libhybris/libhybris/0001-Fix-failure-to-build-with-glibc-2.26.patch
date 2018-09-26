@@ -1,0 +1,39 @@
+From 9128c0ac80ff713b3b459adb810c2c78a504a69f Mon Sep 17 00:00:00 2001
+From: Dimitri John Ledkov <xnox@ubuntu.com>
+Date: Wed, 20 Sep 2017 13:00:32 +0530
+Subject: [PATCH] Fix failure to build with glibc 2.26
+
+ - cfree is deprecated, use free instead
+ - add sys/uio.h include for writev definition
+
+ (Patch originially on ubuntu archive, copied by Bhushan)
+---
+ common/hooks.c | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/common/hooks.c b/common/hooks.c
+index 7d03004..930f674 100644
+--- a/common/hooks.c
++++ b/common/hooks.c
+@@ -47,6 +47,7 @@
+ #include <signal.h>
+ #include <setjmp.h>
+ #include <sys/signalfd.h>
++#include <sys/uio.h>
+ 
+ #include <sys/ipc.h>
+ #include <sys/shm.h>
+@@ -1572,6 +1573,10 @@ void *__get_tls_hooks()
+ extern size_t strlcat(char *dst, const char *src, size_t siz);
+ extern size_t strlcpy(char *dst, const char *src, size_t siz);
+ 
++#if !defined(cfree)
++#define cfree free
++#endif
++
+ static struct _hook hooks[] = {
+     {"property_get", property_get },
+     {"property_set", property_set },
+-- 
+2.19.0
+
