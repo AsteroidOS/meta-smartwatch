@@ -5,7 +5,7 @@ SUMMARY = "Android kernel for harmony"
 HOMEPAGE = "https://github.com/OpenWatchProject/"
 LICENSE = "GPLv2"
 LIC_FILES_CHKSUM = "file://COPYING;md5=d7810fab7487fb0aad327b76f1be7cd7"
-COMPATIBLE_MACHINE = "harmony"
+COMPATIBLE_MACHINE = "harmony|inharmony"
 
 SRC_URI = "git://github.com/OpenWatchProject/android_kernel_mediatek_mt6580;protocol=https;branch=android-8.1 \
     file://defconfig \

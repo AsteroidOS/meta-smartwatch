@@ -7,7 +7,7 @@ PV = "lollipop"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 INHIBIT_PACKAGE_STRIP = "1"
-COMPATIBLE_MACHINE = "harmony"
+COMPATIBLE_MACHINE = "harmony|inharmony"
 INSANE_SKIP_${PN} = "already-stripped"
 S = "${WORKDIR}"
 B = "${S}/system-harmony/"
