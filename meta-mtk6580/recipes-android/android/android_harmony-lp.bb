@@ -10,7 +10,7 @@ INHIBIT_PACKAGE_STRIP = "1"
 COMPATIBLE_MACHINE = "harmony"
 INSANE_SKIP_${PN} = "already-stripped"
 S = "${WORKDIR}"
-B = "${S}"
+B = "${S}/system-harmony/"
 
 PROVIDES += "virtual/android-system-image"
 PROVIDES += "virtual/android-headers"
