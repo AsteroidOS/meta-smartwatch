@@ -13,6 +13,7 @@ SRC_URI = "git://android.googlesource.com/kernel/msm;branch=android-msm-bass-3.1
     file://0002-Backport-mainline-4.1-Bluetooth-subsystem.patch;striplevel=1 \
     file://0003-bluesleep-Use-kernel-s-HCI-events-instead-of-proc-bl.patch \
     file://0004-msm_pwm_vibrator-Convert-timed_output-APIs-to-ff_mem.patch \
+    file://0005-firmware_class-Load-firmwares-from-Android-directori.patch \
     file://0006-ARM-uaccess-remove-put_user-code-duplication.patch \
     file://defconfig \
     file://img_info "
