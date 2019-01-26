@@ -10,14 +10,14 @@ COMPATIBLE_MACHINE = "sparrow"
 
 SRC_URI = "git://android.googlesource.com/kernel/msm;branch=android-msm-sparrow-3.10-marshmallow-mr1-wear-release;protocol=https \
     file://0001-patch-psmouse-base-disable.patch \
-    file://0001-static-inline-in-ARM-ftrace.h.patch \
-    file://0001-Add-files-needed-for-device_trace.h.patch \
-    file://0001-Create-copy-of-devfreq_trace.h.patch \
-    file://0001-Patch-battery-values.patch \
-    file://0001-Touch-screen-sleep-resume-patch.patch \
-    file://0001-Remove-unecessary-include-to-axc_PM8226Charger.h.patch \
-    file://0001-msm-mdss-mdp-Don-t-use-tracing-features.patch \
-    file://0001-Makefile-patch-fixes-ASUS_SW_VER-error.patch \
+    file://0002-static-inline-in-ARM-ftrace.h.patch \
+    file://0003-Add-files-needed-for-device_trace.h.patch \
+    file://0004-Create-copy-of-devfreq_trace.h.patch \
+    file://0005-Patch-battery-values.patch \
+    file://0006-Touch-screen-sleep-resume-patch.patch \
+    file://0007-Remove-unecessary-include-to-axc_PM8226Charger.h.patch \
+    file://0008-msm-mdss-mdp-Don-t-use-tracing-features.patch \
+    file://0009-Makefile-patch-fixes-ASUS_SW_VER-error.patch \
     file://defconfig \
     file://img_info "
 SRCREV = "3d2fa521411917b5a1683fec42ad2a8e50aee79f"
