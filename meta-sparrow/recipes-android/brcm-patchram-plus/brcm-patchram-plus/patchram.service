@@ -3,7 +3,8 @@ Description=Load firmware into broadcom bluetooth chip
 
 [Service]
 Type=simple
-ExecStart=/bin/echo This script should be device specific
+ExecStartPre=/usr/sbin/rfkill unblock bluetooth
+ExecStart=/usr/bin/brcm_patchram_plus --enable_lpm --enable_hci --no2bytes --patchram /system/etc/firmware/bt/BCM4343A1_001.002.009.0031.0097.hcd /dev/ttyHS0
 
 [Install]
 WantedBy=basic.target
