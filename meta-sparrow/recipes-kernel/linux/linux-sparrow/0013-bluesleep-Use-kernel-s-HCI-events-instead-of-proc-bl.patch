@@ -1,0 +1,111 @@
+From 07118aa84d167a2bdb38f2d896a34cb03c7937e9 Mon Sep 17 00:00:00 2001
+From: Florent Revest <revestflo@gmail.com>
+Date: Tue, 14 Feb 2017 16:53:03 +0100
+Subject: [PATCH] bluesleep: Use kernel's HCI events instead of
+ /proc/bluetooth/sleep/ write to interface with BlueZ instead of Bluedroid
+
+---
+ drivers/BCM_LPM/bluesleep.c   | 28 ++++++++++++++++++++++++++++
+ drivers/bluetooth/hci_ldisc.c |  4 ++++
+ include/net/bluetooth/hci.h   |  1 +
+ net/bluetooth/hci_sock.c      |  4 ++++
+ 4 files changed, 38 insertions(+)
+
+diff --git a/drivers/BCM_LPM/bluesleep.c b/drivers/BCM_LPM/bluesleep.c
+index adf3f4c0bca6..725ccb109591 100644
+--- a/drivers/BCM_LPM/bluesleep.c
++++ b/drivers/BCM_LPM/bluesleep.c
+@@ -368,6 +368,34 @@ static ssize_t bluesleep_write_proc_lpm(struct file *filp, const char __user *bu
+ 	return count;
+ }
+ 
++/**
++ * Handles HCI device events.
++ * @param this Not used.
++ * @param event The event that occurred.
++ * @param data The HCI device associated with the event.
++ * @return <code>NOTIFY_DONE</code>.
++ */
++void bluesleep_hci_event(unsigned long event)
++{
++	switch (event) {
++	case HCI_DEV_REG:
++		has_lpm_enabled = true;
++        bsi->uport = bluesleep_get_uart_port();
++		/* if bluetooth started, start bluesleep*/
++		bluesleep_start();
++		break;
++	case HCI_DEV_UNREG:
++		bluesleep_stop();
++		has_lpm_enabled = false;
++		bsi->uport = NULL;
++		/* if bluetooth stopped, stop bluesleep also */
++		break;
++	case HCI_DEV_WRITE:
++		bluesleep_outgoing_data();
++		break;
++	}
++}
++
+ static ssize_t bluesleep_read_proc_btwrite(struct file *filp, char __user *buff, size_t count, loff_t *pos)
+ {
+ 	return sprintf(buff, "unsupported to read\n");
+diff --git a/drivers/bluetooth/hci_ldisc.c b/drivers/bluetooth/hci_ldisc.c
+index 5c9a73f02664..f21432799e0f 100644
+--- a/drivers/bluetooth/hci_ldisc.c
++++ b/drivers/bluetooth/hci_ldisc.c
+@@ -248,6 +248,8 @@ static int hci_uart_close(struct hci_dev *hdev)
+ 	return 0;
+ }
+ 
++void bluesleep_hci_event(unsigned long event);
++
+ /* Send frames from HCI layer */
+ static int hci_uart_send_frame(struct hci_dev *hdev, struct sk_buff *skb)
+ {
+@@ -258,6 +260,8 @@ static int hci_uart_send_frame(struct hci_dev *hdev, struct sk_buff *skb)
+ 
+ 	BT_DBG("%s: type %d len %d", hdev->name, bt_cb(skb)->pkt_type, skb->len);
+ 
++	bluesleep_hci_event(HCI_DEV_WRITE);
++
+ 	hu->proto->enqueue(hu, skb);
+ 
+ 	hci_uart_tx_wakeup(hu);
+diff --git a/include/net/bluetooth/hci.h b/include/net/bluetooth/hci.h
+index d95da83cb1b0..54be456bcc9c 100644
+--- a/include/net/bluetooth/hci.h
++++ b/include/net/bluetooth/hci.h
+@@ -44,6 +44,7 @@
+ #define HCI_DEV_DOWN			4
+ #define HCI_DEV_SUSPEND			5
+ #define HCI_DEV_RESUME			6
++#define HCI_DEV_WRITE			7
+ 
+ /* HCI notify events */
+ #define HCI_NOTIFY_CONN_ADD		1
+diff --git a/net/bluetooth/hci_sock.c b/net/bluetooth/hci_sock.c
+index fa4bf6631425..22de140c2344 100644
+--- a/net/bluetooth/hci_sock.c
++++ b/net/bluetooth/hci_sock.c
+@@ -66,6 +66,8 @@ static struct bt_sock_list hci_sk_list = {
+ 	.lock = __RW_LOCK_UNLOCKED(hci_sk_list.lock)
+ };
+ 
++void bluesleep_hci_event(unsigned long event);
++
+ /* Send frame to RAW socket */
+ void hci_send_to_sock(struct hci_dev *hdev, struct sk_buff *skb)
+ {
+@@ -369,6 +371,8 @@ void hci_sock_dev_event(struct hci_dev *hdev, int event)
+ {
+ 	struct hci_ev_si_device ev;
+ 
++	bluesleep_hci_event(event);
++
+ 	BT_DBG("hdev %s event %d", hdev->name, event);
+ 
+ 	/* Send event to monitor */
+-- 
+2.17.1
+
