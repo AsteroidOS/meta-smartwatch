@@ -1,0 +1,26 @@
+From d7bb55d4102fc29d3450be6aa1c1e6c6ac398678 Mon Sep 17 00:00:00 2001
+From: Florent Revest <revestflo@gmail.com>
+Date: Sun, 2 Dec 2018 13:38:53 +0100
+Subject: [PATCH] firmware_class: Load firmwares from Android directories
+
+---
+ drivers/base/firmware_class.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/drivers/base/firmware_class.c b/drivers/base/firmware_class.c
+index 584e9a2bfdec..1c655d96836a 100644
+--- a/drivers/base/firmware_class.c
++++ b/drivers/base/firmware_class.c
+@@ -289,6 +289,9 @@ static void fw_free_buf(struct firmware_buf *buf)
+ static char fw_path_para[256];
+ static const char * const fw_path[] = {
+ 	fw_path_para,
++	"/vendor/firmware",
++	"/system/etc/firmware",
++	"/etc/firmware",
+ 	"/lib/firmware/updates/" UTS_RELEASE,
+ 	"/lib/firmware/updates",
+ 	"/lib/firmware/" UTS_RELEASE,
+-- 
+2.19.1
+

@@ -17,7 +17,11 @@ SRC_URI = "git://android.googlesource.com/kernel/bcm;branch=android-bcm-tetra-3.
     file://0004-bcm_bzhw-Use-inverted-IRQ-lines-polarity.patch \
 	file://0005-java_sony_brooks_020-Use-the-bcm-bzhw-driver-instead.patch \
     file://0006-Backport-v4.1-drivers-using-.-gentree.py-integrate-c.patch \
-    file://0007-Integrate-hci_brcm-and-bcm_bzhw-to-the-backported-BT.patch"
+    file://0007-Integrate-hci_brcm-and-bcm_bzhw-to-the-backported-BT.patch \
+    file://0008-firmware_class-Load-firmwares-from-Android-directori.patch \
+    file://0009-ARM-uaccess-remove-put_user-code-duplication.patch \
+    file://0010-give-up-on-gcc-ilog2-constant-optimizations.patch \
+    file://0011-broadcom-modem-rpc-Disable-logs-which-cause-a-compil.patch"
 SRCREV = "34ff7fc1fe7a771816ee65eb38fb0f74dd3feda7"
 LINUX_VERSION ?= "3.10"
 PV = "${LINUX_VERSION}+lollipop"
