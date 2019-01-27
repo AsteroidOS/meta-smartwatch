@@ -4,7 +4,7 @@ Description=Load firmware into BCM43341 bluetooth chip
 [Service]
 Type=simple
 ExecStartPre=/usr/sbin/rfkill unblock bluetooth
-ExecStart=/usr/bin/brcm_patchram_plus -d --enable_lpm --enable_hci --no2bytes --patchram /vendor/firmware/BCM43341B0_002.001.014.0122.0181.hcd /dev/ttyS1
+ExecStart=/usr/bin/brcm_patchram_plus --enable_lpm --enable_hci --no2bytes --patchram /vendor/firmware/BCM43341B0_002.001.014.0122.0181.hcd /dev/ttyS1
 
 [Install]
 WantedBy=basic.target
