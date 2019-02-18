@@ -1,9 +1,10 @@
-From 835671771928e58d7f8f50ba03f06bb2396ba760 Mon Sep 17 00:00:00 2001
+From 68164a6264ccd563bbd1b8a63a832bada51369e7 Mon Sep 17 00:00:00 2001
 From: Lrs121 <lrs@lrsservers.net>
 Date: Thu, 30 Jun 2016 12:09:06 -0700
 Subject: [PATCH] Add files needed for device_trace.h
 
 Tons of missing files break build
+
 ---
  include/trace/mdss_mdp.h       | 908 +++++++++++++++++++++++++++++++++++++++++
  include/trace/mdss_mdp_trace.h | 255 ++++++++++++
@@ -13,7 +14,7 @@ Tons of missing files break build
 
 diff --git a/include/trace/mdss_mdp.h b/include/trace/mdss_mdp.h
 new file mode 100644
-index 0000000..c59fd85
+index 000000000000..c59fd8535f86
 --- /dev/null
 +++ b/include/trace/mdss_mdp.h
 @@ -0,0 +1,908 @@
@@ -927,7 +928,7 @@ index 0000000..c59fd85
 +#endif /* MDSS_MDP_H */
 diff --git a/include/trace/mdss_mdp_trace.h b/include/trace/mdss_mdp_trace.h
 new file mode 100644
-index 0000000..05d0b54
+index 000000000000..05d0b543da48
 --- /dev/null
 +++ b/include/trace/mdss_mdp_trace.h
 @@ -0,0 +1,255 @@
@@ -1186,6 +1187,3 @@ index 0000000..05d0b54
 +
 +/* This part must be outside protection */
 +#include <trace/define_trace.h>
--- 
-2.7.4
-

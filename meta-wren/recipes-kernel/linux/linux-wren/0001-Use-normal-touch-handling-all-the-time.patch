@@ -1,4 +1,4 @@
-From a193e732fa6fff2ce42001dcd7ff3b3694d69ed0 Mon Sep 17 00:00:00 2001
+From 3c5e6b13684050d94de945e9daa00a4a90b6a4e4 Mon Sep 17 00:00:00 2001
 From: Daniel Landau <daniel@landau.fi>
 Date: Sat, 11 Mar 2017 10:37:08 +0200
 Subject: [PATCH] Use normal touch handling all the time
@@ -8,10 +8,10 @@ Subject: [PATCH] Use normal touch handling all the time
  1 file changed, 4 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/input/touchscreen/it7260_ts_i2c.c b/drivers/input/touchscreen/it7260_ts_i2c.c
-index a45eb7137e0d..97cc2cb9d867 100644
+index b254e4d79220..e0c97e8a7f27 100644
 --- a/drivers/input/touchscreen/it7260_ts_i2c.c
 +++ b/drivers/input/touchscreen/it7260_ts_i2c.c
-@@ -1619,8 +1619,10 @@ static irqreturn_t IT7260_ts_threaded_handler(int irq, void *devid)
+@@ -1625,8 +1625,10 @@ static irqreturn_t IT7260_ts_threaded_handler(int irq, void *devid)
  {
  	smp_rmb();
  	if (driverInLowPower) {
@@ -24,6 +24,3 @@ index a45eb7137e0d..97cc2cb9d867 100644
  		/* XXX: call readTouchDataPoint() here maybe ? */
  	} else {
  		readTouchDataPoint();
--- 
-2.11.1
-

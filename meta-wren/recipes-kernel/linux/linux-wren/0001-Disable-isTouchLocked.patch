@@ -1,4 +1,4 @@
-From 8e51b149e6894a2ecdba578a228e37644ecf00db Mon Sep 17 00:00:00 2001
+From 1b2f83c3dc6c5475e531f90664ea1d78fa4f17c8 Mon Sep 17 00:00:00 2001
 From: Daniel Landau <daniel@landau.fi>
 Date: Thu, 9 Mar 2017 18:44:12 +0200
 Subject: [PATCH] Disable isTouchLocked
@@ -8,10 +8,10 @@ Subject: [PATCH] Disable isTouchLocked
  1 file changed, 9 insertions(+), 9 deletions(-)
 
 diff --git a/drivers/input/touchscreen/it7260_ts_i2c.c b/drivers/input/touchscreen/it7260_ts_i2c.c
-index a45eb7137e0d..3b3d5f1bfaa2 100644
+index e0c97e8a7f27..28bcad6de31b 100644
 --- a/drivers/input/touchscreen/it7260_ts_i2c.c
 +++ b/drivers/input/touchscreen/it7260_ts_i2c.c
-@@ -666,7 +666,7 @@ static void chipLowPowerMode(bool low)
+@@ -672,7 +672,7 @@ static void chipLowPowerMode(bool low)
  					LOGI("[%d] %s enable IRQ wake fail. ret = %d.\n", __LINE__, __func__, ret);
  				}
  			}
@@ -20,7 +20,7 @@ index a45eb7137e0d..3b3d5f1bfaa2 100644
  			LOGI("[%d] %s set isTouchLocked = %d.\n", __LINE__, __func__, isTouchLocked);
  			wake_unlock(&touch_lock);
  			queue_delayed_work(IT7260_wq, &gl_ts->touchidle_on_work, 500);
-@@ -1295,7 +1295,7 @@ static void exitIdleEvt(struct work_struct *work) {
+@@ -1301,7 +1301,7 @@ static void exitIdleEvt(struct work_struct *work) {
  		AMB_TOUCH_HAD_SEND_FLAG = 1;
  		exit_idle_event_time = getMsTime();
  		if (exit_idle_event_time - last_time_send_palm > 800) {
@@ -29,7 +29,7 @@ index a45eb7137e0d..3b3d5f1bfaa2 100644
  			LOGI("[%d] %s Touch DOWN x = 1, y = 1.\n", __LINE__, __func__);
  			input_mt_slot(gl_ts->touch_dev,0);
  			input_mt_report_slot_state(gl_ts->touch_dev, MT_TOOL_FINGER, true);
-@@ -1379,7 +1379,7 @@ static void readTouchDataPoint(void)
+@@ -1385,7 +1385,7 @@ static void readTouchDataPoint(void)
  
  	if ((pointData.palm & PD_PALM_FLAG_BIT) && !isTouchLocked && !hadPalmDown) {
  		if (jiffies - last_time_exit_low > HZ/4) {
@@ -38,7 +38,7 @@ index a45eb7137e0d..3b3d5f1bfaa2 100644
  			hadPalmDown = true;
  			sendPalmEvt();
  			queue_delayed_work(IT7260_wq, &gl_ts->afterpalm_work, 30);
-@@ -1485,7 +1485,7 @@ static void readTouchDataPoint_Ambient(void)
+@@ -1491,7 +1491,7 @@ static void readTouchDataPoint_Ambient(void)
  	if (!isTouchLocked) {
  		if (i2cReadNoReadyCheck(BUF_QUERY, &devStatus, sizeof(devStatus)) == 2) {
  			if (!((devStatus & PT_INFO_BITS) & PT_INFO_YES)) {
@@ -47,7 +47,7 @@ index a45eb7137e0d..3b3d5f1bfaa2 100644
  				if (!TP_DLMODE) {
  					LOGE("[%d] %s called when no data available (0x%02X), set isTouchLocked = %d.\n",
  						__LINE__, __func__, devStatus, isTouchLocked);
-@@ -1495,7 +1495,7 @@ static void readTouchDataPoint_Ambient(void)
+@@ -1501,7 +1501,7 @@ static void readTouchDataPoint_Ambient(void)
  			}
  		}
  		if (i2cReadNoReadyCheck(BUF_POINT_INFO, (void*)&pointData, sizeof(pointData)) != 2) {
@@ -56,7 +56,7 @@ index a45eb7137e0d..3b3d5f1bfaa2 100644
  			LOGE("[%d] %s failed to read point data buffer, set isTouchLocked = %d.\n",
  				__LINE__, __func__, isTouchLocked);
  			wake_unlock(&touch_lock);
-@@ -1506,7 +1506,7 @@ static void readTouchDataPoint_Ambient(void)
+@@ -1512,7 +1512,7 @@ static void readTouchDataPoint_Ambient(void)
  				LOGE("[%d] %s send touch event by type 0x%02X\n", __LINE__, __func__, pointData.flags);
  			} else {
  				LOGE("[%d] %s dropping non-point data of type 0x%02X\n", __LINE__, __func__, pointData.flags);
@@ -65,7 +65,7 @@ index a45eb7137e0d..3b3d5f1bfaa2 100644
  				wake_unlock(&touch_lock);
  				return;
  			}
-@@ -1577,7 +1577,7 @@ static void readTouchDataPoint_Ambient(void)
+@@ -1583,7 +1583,7 @@ static void readTouchDataPoint_Ambient(void)
  				LOGI("[%d] %s Move action do not wake up, DOWN_DELTA_TIME = %llu.\n", __LINE__, __func__, suspend_touch_up - suspend_touch_down);
  			}
  			if (driverInLowPower) {
@@ -74,7 +74,7 @@ index a45eb7137e0d..3b3d5f1bfaa2 100644
  				LOGI("[%d] %s set isTouchLocked = %d. \n", __LINE__, __func__, isTouchLocked);
  			}
  			wake_unlock(&touch_lock);
-@@ -1588,7 +1588,7 @@ static void readTouchDataPoint_Ambient(void)
+@@ -1594,7 +1594,7 @@ static void readTouchDataPoint_Ambient(void)
  			queue_delayed_work(IT7260_wq, &gl_ts->exit_idle_work, 5);
  		} else if (pressure1 == 0 && pressure2 == 0 && (!(pointData.palm & PD_PALM_FLAG_BIT))){
  			if (driverInLowPower) {
@@ -83,7 +83,7 @@ index a45eb7137e0d..3b3d5f1bfaa2 100644
  				LOGI("[%d] %s set isTouchLocked = %d. \n", __LINE__, __func__, isTouchLocked);
  			}
  			wake_unlock(&touch_lock);
-@@ -2023,7 +2023,7 @@ static int IT7260_ts_suspend(struct i2c_client *i2cdev, pm_message_t pmesg)
+@@ -2031,7 +2031,7 @@ static int IT7260_ts_suspend(struct i2c_client *i2cdev, pm_message_t pmesg)
  	static const uint8_t cmdLowPower[] = { CMD_PWR_CTL, 0x00, PWR_CTL_LOW_POWER_MODE};
  	LOGI("Enter ts suspend!\n");
  	ret = -1;
@@ -92,6 +92,3 @@ index a45eb7137e0d..3b3d5f1bfaa2 100644
  	driverInLowPower = true;
  	isDriverAvailable = false;
  
--- 
-2.11.1
-

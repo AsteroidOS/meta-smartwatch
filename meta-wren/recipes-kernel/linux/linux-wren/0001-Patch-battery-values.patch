@@ -1,4 +1,4 @@
-From 50bba26abe14b1d18cf0da95201a355220d43ec1 Mon Sep 17 00:00:00 2001
+From d6647a11cb9a31fc8706018865fc43a1b4ea8296 Mon Sep 17 00:00:00 2001
 From: Lrs121 <lrs@lrsservers.net>
 Date: Thu, 30 Jun 2016 11:37:54 -0700
 Subject: [PATCH] Patch battery values
@@ -7,12 +7,13 @@ Pulls the values from qpnp-adc-common-sparrow.h
 and inserts them in line
 
 Credit to XDA User T10NAZ
+
 ---
  drivers/hwmon/qpnp-adc-common.c | 95 +++++++++++++++++++++++++++++++++++++++++
  1 file changed, 95 insertions(+)
 
 diff --git a/drivers/hwmon/qpnp-adc-common.c b/drivers/hwmon/qpnp-adc-common.c
-index e93bbbf..b49f3d3 100644
+index e93bbbf5d466..b49f3d31a26b 100644
 --- a/drivers/hwmon/qpnp-adc-common.c
 +++ b/drivers/hwmon/qpnp-adc-common.c
 @@ -54,6 +54,101 @@
@@ -117,6 +118,3 @@ index e93bbbf..b49f3d3 100644
  static const struct qpnp_vadc_map_pt adcmap_qrd_btm_threshold[] = {
  	{-200,	1540},
  	{-180,	1517},
--- 
-2.7.4
-

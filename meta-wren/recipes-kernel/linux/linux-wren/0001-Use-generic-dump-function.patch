@@ -1,4 +1,4 @@
-From a68dd7aad04ab93f8a0ac88ae7d9b9c1d0c87bae Mon Sep 17 00:00:00 2001
+From 522ab60ed00a6e9ba7dceaa4a7d56e0159b9d439 Mon Sep 17 00:00:00 2001
 From: Daniel Landau <daniel@landau.fi>
 Date: Sun, 12 Mar 2017 14:34:50 +0200
 Subject: [PATCH] Use generic dump function
@@ -20,6 +20,3 @@ index 951f31c62ac8..d3a97ddf877e 100644
      asus_save_stack = 0;
  }
  
--- 
-2.12.0
-

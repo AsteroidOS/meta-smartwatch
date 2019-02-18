@@ -1,4 +1,4 @@
-From c211809f692e87e08a3107cbcbdab7531018f0d5 Mon Sep 17 00:00:00 2001
+From e3a11dce1092b2a7cc4d7ad416d2203758b59521 Mon Sep 17 00:00:00 2001
 From: Florent Revest <revestflo@gmail.com>
 Date: Mon, 16 Jan 2017 15:09:57 +0100
 Subject: [PATCH] msm-mdss-mdp: Don't use tracing features
@@ -328,6 +328,3 @@ index 6e3f3c6bc534..35ff1fb9aee2 100644
  
  	return ret;
  error:
--- 
-2.11.0
-

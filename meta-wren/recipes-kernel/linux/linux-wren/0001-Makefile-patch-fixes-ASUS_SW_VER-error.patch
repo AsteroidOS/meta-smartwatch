@@ -1,4 +1,4 @@
-From 4a24b83bb8b3f413a8a56c935499d6d17426fb7a Mon Sep 17 00:00:00 2001
+From 39b5c99f334d45079061cc37c25c68b315bd1b8e Mon Sep 17 00:00:00 2001
 From: Lrs121 <lrs@lrsservers.net>
 Date: Wed, 29 Jun 2016 12:35:40 -0700
 Subject: [PATCH] Makefile patch fixes ASUS_SW_VER error
@@ -7,12 +7,13 @@ Used the Makefile listed at
 http://forum.xda-developers.com/showpost.php?s=c9ea927a06e33a5d696fd1de7b15f19c&p=65954322&postcount=5
 
 Credits to XDA-USER: T10NAZ
+
 ---
  Makefile | 21 +++++++++++++++++++++
  1 file changed, 21 insertions(+)
 
 diff --git a/Makefile b/Makefile
-index 0bd2d5d..de5d028 100644
+index 0bd2d5de54fb..de5d028396e8 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -671,6 +671,27 @@ ifeq ($(shell $(CONFIG_SHELL) $(srctree)/scripts/gcc-goto.sh $(CC)), y)
@@ -43,6 +44,3 @@ index 0bd2d5d..de5d028 100644
  # Add user supplied CPPFLAGS, AFLAGS and CFLAGS as the last assignments
  KBUILD_CPPFLAGS += $(KCPPFLAGS)
  KBUILD_AFLAGS += $(KAFLAGS)
--- 
-2.7.4
-

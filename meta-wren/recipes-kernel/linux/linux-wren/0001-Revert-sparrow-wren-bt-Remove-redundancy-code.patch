@@ -1,9 +1,10 @@
-From 33d12fb139690c8940dff4f174e05a7d39d6bcda Mon Sep 17 00:00:00 2001
+From 54b107fae7defd67178a12c06df22299b1be1cf6 Mon Sep 17 00:00:00 2001
 From: Daniel Landau <daniel@landau.fi>
 Date: Sat, 11 Mar 2017 23:11:38 +0200
 Subject: [PATCH] Revert "sparrow/wren:bt: Remove redundancy code."
 
 This reverts commit d0ea3d498bfbfc89b89d2bc2b97f7a50ba25d6c4.
+
 ---
  arch/arm/boot/dts/qcom/sparrow_er_105_msm8226.dtsi  | 7 +++++++
  arch/arm/boot/dts/qcom/sparrow_er_msm8226.dtsi      | 7 +++++++
@@ -346,6 +347,3 @@ index ca6229239028..1fb468f76358 100644
  #define RF_TYPE_16 0x10
  #define RF_TYPE_17 0x11
  #define RF_TYPE_18 0x12
--- 
-2.12.0
-

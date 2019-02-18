@@ -1,9 +1,10 @@
-From 9c4c2da73f0ba9d40cf02875dc14a0a3ac76654f Mon Sep 17 00:00:00 2001
+From ce663392ad3e840e2fb12a5fd890d3fe3954fa38 Mon Sep 17 00:00:00 2001
 From: Daniel Landau <daniel@landau.fi>
 Date: Sat, 11 Mar 2017 22:53:32 +0200
-Subject: [PATCH 2/2] Revert "Add Nitrous driver for BT power management."
+Subject: [PATCH] Revert "Add Nitrous driver for BT power management."
 
 This reverts commit 33c9d25da4893a793d448fb37f0dbc892956290d.
+
 ---
  .../devicetree/bindings/bluetooth/nitrous.txt      |  44 --
  drivers/BCM_LPM/nitrous.c                          | 599 ---------------------
@@ -666,6 +667,3 @@ index f5a3fe9cc846..000000000000
 -MODULE_DESCRIPTION("Nitrous Oxide Driver for Bluetooth");
 -MODULE_AUTHOR("Google");
 -MODULE_LICENSE("GPL");
--- 
-2.12.0
-

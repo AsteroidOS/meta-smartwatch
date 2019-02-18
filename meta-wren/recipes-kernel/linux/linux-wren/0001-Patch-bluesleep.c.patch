@@ -1,4 +1,4 @@
-From 66c444dbdc67d5703258a3a3f6e56e9f7fb06c54 Mon Sep 17 00:00:00 2001
+From 5f98217d9297b29ac3e3a1b95c928cca903b5b9a Mon Sep 17 00:00:00 2001
 From: Daniel Landau <daniel@landau.fi>
 Date: Sat, 11 Mar 2017 23:49:28 +0200
 Subject: [PATCH] Patch bluesleep.c
@@ -10,7 +10,7 @@ Subject: [PATCH] Patch bluesleep.c
  3 files changed, 94 insertions(+)
 
 diff --git a/drivers/BCM_LPM/bluesleep.c b/drivers/BCM_LPM/bluesleep.c
-index adf3f4c0bca6..7dc207a774dc 100644
+index adf3f4c0bca6..611bf39e98e1 100644
 --- a/drivers/BCM_LPM/bluesleep.c
 +++ b/drivers/BCM_LPM/bluesleep.c
 @@ -69,12 +69,23 @@
@@ -172,6 +172,3 @@ index cb14dee59787..5cd9ffd630d0 100644
  struct uart_port *msm_hs_get_uart_port(int port_index);
  void msm_hs_set_mctrl(struct uart_port *uport,
  				    unsigned int mctrl);
--- 
-2.12.0
-

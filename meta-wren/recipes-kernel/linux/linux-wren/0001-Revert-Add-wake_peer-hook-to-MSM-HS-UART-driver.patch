@@ -1,16 +1,17 @@
-From a0fbbd3cb72d890d22314b00051c438bcd861457 Mon Sep 17 00:00:00 2001
+From b3a33f2af52827f02614305a2822a94eecda2b32 Mon Sep 17 00:00:00 2001
 From: Daniel Landau <daniel@landau.fi>
 Date: Sun, 12 Mar 2017 13:58:42 +0200
 Subject: [PATCH] Revert "Add wake_peer hook to MSM HS UART driver."
 
 This reverts commit 4f3251a5db771bbed039b2ac27030d38b53c473c.
+
 ---
  drivers/tty/serial/msm_serial_hs.c          | 23 ++++++-----------------
  include/linux/platform_data/msm_serial_hs.h |  3 ---
  2 files changed, 6 insertions(+), 20 deletions(-)
 
 diff --git a/drivers/tty/serial/msm_serial_hs.c b/drivers/tty/serial/msm_serial_hs.c
-index f694b9b28a8d..ca8e05abb42b 100644
+index f194d6d57460..286c24004666 100644
 --- a/drivers/tty/serial/msm_serial_hs.c
 +++ b/drivers/tty/serial/msm_serial_hs.c
 @@ -257,7 +257,6 @@ struct msm_hs_port {
@@ -60,7 +61,7 @@ index f694b9b28a8d..ca8e05abb42b 100644
  	return 1;
  }
  
-@@ -3368,6 +3355,9 @@ static int msm_hs_probe(struct platform_device *pdev)
+@@ -3376,6 +3363,9 @@ static int msm_hs_probe(struct platform_device *pdev)
  	uport->line = pdev->id;
  	if (pdata != NULL && pdata->userid && pdata->userid <= UARTDM_NR)
  		uport->line = pdata->userid;
@@ -70,7 +71,7 @@ index f694b9b28a8d..ca8e05abb42b 100644
  	ret = uart_add_one_port(&msm_hs_driver, uport);
  	if (!ret) {
  		msm_hs_clock_unvote(msm_uport);
-@@ -3646,7 +3636,6 @@ static struct uart_ops msm_hs_ops = {
+@@ -3654,7 +3644,6 @@ static struct uart_ops msm_hs_ops = {
  	.config_port = msm_hs_config_port,
  	.flush_buffer = NULL,
  	.ioctl = msm_hs_ioctl,
@@ -79,7 +80,7 @@ index f694b9b28a8d..ca8e05abb42b 100644
  
  module_init(msm_serial_hs_init);
 diff --git a/include/linux/platform_data/msm_serial_hs.h b/include/linux/platform_data/msm_serial_hs.h
-index cb14dee59787..283bdd1ee0dd 100644
+index 5cd9ffd630d0..aa019b167e1d 100644
 --- a/include/linux/platform_data/msm_serial_hs.h
 +++ b/include/linux/platform_data/msm_serial_hs.h
 @@ -54,8 +54,6 @@ struct msm_serial_hs_platform_data {
@@ -91,12 +92,9 @@ index cb14dee59787..283bdd1ee0dd 100644
  /* return true when tx is empty */
  unsigned int msm_hs_tx_empty(struct uart_port *uport);
  void msm_hs_request_clock_off(struct uart_port *uport);
-@@ -63,5 +61,4 @@ void msm_hs_request_clock_on(struct uart_port *uport);
+@@ -64,5 +62,4 @@ int msm_hs_get_clock_state(struct uart_port *uport);
  struct uart_port *msm_hs_get_uart_port(int port_index);
  void msm_hs_set_mctrl(struct uart_port *uport,
  				    unsigned int mctrl);
 -void msm_hs_set_wake_peer(struct uart_port *uport, wake_peer_fn wake_peer);
  #endif
--- 
-2.12.0
-
