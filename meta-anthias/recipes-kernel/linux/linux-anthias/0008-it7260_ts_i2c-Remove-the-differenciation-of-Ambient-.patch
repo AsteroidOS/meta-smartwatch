@@ -1,4 +1,4 @@
-From 64a1a524520dfadbfdf9f6251dda8378fad55503 Mon Sep 17 00:00:00 2001
+From a94454e7a94358967d0a2a3f787e764bba7bde51 Mon Sep 17 00:00:00 2001
 From: Florent Revest <revestflo@gmail.com>
 Date: Sat, 21 Jul 2018 00:10:46 +0200
 Subject: [PATCH] it7260_ts_i2c: Remove the differenciation of 'Ambient mode
@@ -6,7 +6,7 @@ Subject: [PATCH] it7260_ts_i2c: Remove the differenciation of 'Ambient mode
  suspended once
 
 ---
- drivers/input/touchscreen/it7260_ts_i2c.c | 76 +----------------------
+ drivers/input/touchscreen/it7260_ts_i2c.c | 76 +------------------------------
  1 file changed, 1 insertion(+), 75 deletions(-)
 
 diff --git a/drivers/input/touchscreen/it7260_ts_i2c.c b/drivers/input/touchscreen/it7260_ts_i2c.c
@@ -96,6 +96,3 @@ index d84a11a6b588..13ab929cfb37 100644
  	} else if (isTouchLocked) {
  		msleep(10);
  		if (isDriverAvailable) {
--- 
-2.18.0
-

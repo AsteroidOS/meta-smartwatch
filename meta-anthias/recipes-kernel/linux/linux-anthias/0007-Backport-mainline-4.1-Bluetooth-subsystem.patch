@@ -1,7 +1,7 @@
-From 13f3bfef83c11ffe3c6d8d333f16e68eea509c49 Mon Sep 17 00:00:00 2001
+From 307a3e5682bb6302534f4bff83e56aa343e219e7 Mon Sep 17 00:00:00 2001
 From: Florent Revest <revestflo@gmail.com>
 Date: Thu, 2 Mar 2017 13:46:09 +0100
-Subject: [PATCH 2/2] Backport mainline 4.1 Bluetooth subsystem
+Subject: [PATCH] Backport mainline 4.1 Bluetooth subsystem
 
 ---
  drivers/bluetooth/Kconfig          |   58 +-
@@ -50971,6 +50971,3 @@ index adc8a10934a8..121c1fe6f005 100644
  
  /**
   *	pskb_expand_head - reallocate header of &sk_buff
--- 
-2.11.0
-

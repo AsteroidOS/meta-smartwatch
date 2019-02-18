@@ -1,7 +1,7 @@
-From ece7405456210ae55a344b3a49a6f75d6094536e Mon Sep 17 00:00:00 2001
+From b9aae67c8f0f479b8940baa562ec73d2f1ffa781 Mon Sep 17 00:00:00 2001
 From: Florent Revest <revestflo@gmail.com>
 Date: Fri, 10 Feb 2017 19:55:54 +0100
-Subject: [PATCH 1/2] psmouse-base: disable references to lifebook_detect which
+Subject: [PATCH] psmouse-base: disable references to lifebook_detect which
  needs x86
 
 ---
@@ -47,6 +47,3 @@ index cff065f6261c..436902c64a20 100644
  	}
  
  /*
--- 
-2.11.0
-

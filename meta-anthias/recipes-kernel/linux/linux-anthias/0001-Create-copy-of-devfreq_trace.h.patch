@@ -1,12 +1,13 @@
-From ede9e490b9b0a3f64c2df6ec8017f155a23a31f8 Mon Sep 17 00:00:00 2001
+From 2c8286b220789706bc72a4d4006390393b69c1c6 Mon Sep 17 00:00:00 2001
 From: Lrs121 <lrs@lrsservers.net>
 Date: Fri, 10 Feb 2017 19:56:41 +0100
-Subject: [PATCH 2/2] Create copy of devfreq_trace.h
+Subject: [PATCH] Create copy of devfreq_trace.h
 
 define_trace.h calls include to include/trace/devfreq_trace.h
 which does not natively exist so lets create it
 
 Credits to T10NAZ
+
 ---
  include/trace/devfreq_trace.h | 44 +++++++++++++++++++++++++++++++++++++++++++
  1 file changed, 44 insertions(+)
@@ -62,6 +63,3 @@ index 000000000000..1ab13f16612b
 +/* This part must be outside protection */
 +#include <trace/define_trace.h>
 +
--- 
-2.11.0
-

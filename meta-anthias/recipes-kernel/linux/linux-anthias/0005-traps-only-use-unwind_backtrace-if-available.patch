@@ -1,4 +1,4 @@
-From 8e7d93593804e6fe8aed52819fef35377c849ef0 Mon Sep 17 00:00:00 2001
+From ab23f3a219c5972c23e83044ad35747030efcfdb Mon Sep 17 00:00:00 2001
 From: Florent Revest <revestflo@gmail.com>
 Date: Fri, 10 Feb 2017 21:33:22 +0100
 Subject: [PATCH] traps: only use unwind_backtrace if available
@@ -21,6 +21,3 @@ index 951f31c62ac8..0d5d5c87cb96 100644
      asus_save_stack = 0;
  }
  
--- 
-2.11.0
-

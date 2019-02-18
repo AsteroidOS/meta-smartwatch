@@ -1,7 +1,7 @@
-From 2d6c55d89baa783f07006ae85341cee4c810c087 Mon Sep 17 00:00:00 2001
+From 530c834baab0f28d3ebf0daa52b61b7c40fe5b37 Mon Sep 17 00:00:00 2001
 From: Florent Revest <revestflo@gmail.com>
 Date: Thu, 2 Mar 2017 12:54:42 +0100
-Subject: [PATCH 1/2] Use Bluesleep instead of Nitrous for BT power management
+Subject: [PATCH] Use Bluesleep instead of Nitrous for BT power management
 
 ---
  .../devicetree/bindings/bluetooth/nitrous.txt      |  44 --
@@ -1222,6 +1222,3 @@ index fa4bf6631425..61740abede2a 100644
  	BT_DBG("hdev %s event %d", hdev->name, event);
  
  	/* Send event to monitor */
--- 
-2.11.0
-
