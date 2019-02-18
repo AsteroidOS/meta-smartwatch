@@ -13,8 +13,10 @@ SRC_URI = "git://android.googlesource.com/kernel/msm;branch=android-msm-lenok-3.
 	file://0002-Backport-mainline-4.1-Bluetooth-subsystem.patch \
 	file://0003-Revert-nitrous-commits.patch \
 	file://0004-bluesleep-Use-kernel-s-HCI-events-instead-of-proc-bl.patch \
-    file://defconfig \
-    file://img_info"
+	file://0005-firmware_class-Load-firmwares-from-Android-directori.patch \
+	file://0006-ARM-uaccess-remove-put_user-code-duplication.patch \
+	file://defconfig \
+	file://img_info"
 SRCREV = "2e918211eabb2843d87ac3c02baf5b03d84790f7"
 LINUX_VERSION ?= "3.10"
 PV = "${LINUX_VERSION}+marshmallow"
