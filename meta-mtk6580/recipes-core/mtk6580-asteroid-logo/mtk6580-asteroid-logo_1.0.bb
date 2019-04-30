@@ -19,6 +19,7 @@ do_compile() {
 do_deploy() {
     base_name=logo-${MACHINE}${IMAGE_VERSION_SUFFIX}.bin
     symlink_name=logo-${MACHINE}.bin
+    mkdir -p ${DEPLOY_DIR_IMAGE}/${base_name}
     cp ${S}/logo.bin ${DEPLOY_DIR_IMAGE}/${base_name}
     ln -sf ${base_name} ${DEPLOY_DIR_IMAGE}/${symlink_name}
 }
