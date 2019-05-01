@@ -5,6 +5,10 @@ on init
     symlink /dev/fb0 /dev/graphics/fb0
     chown system root /sys/class/timed_output/vibrator/enable
 
+    load_all_props
+    restorecon_recursive /persist
+    restorecon /persist/bdaddr.txt
+
     class_start core
 
 service logd /system/bin/logd
@@ -14,4 +18,7 @@ service logd /system/bin/logd
     socket logdw dgram 0222 root root
 
 service servicemanager /system/bin/servicemanager
+    class core
+
+service sensors /system/bin/sensors.qcom
     class core
