@@ -1,6 +1,7 @@
 on init
     load_all_props
     setprop ro.board.platform mt2601
+    chown system root /sys/class/timed_output/vibrator/enable
     class_start core
 
 service logd /system/bin/logd
