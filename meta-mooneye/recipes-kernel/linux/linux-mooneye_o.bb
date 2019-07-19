@@ -8,14 +8,17 @@ LICENSE = "GPLv2"
 LIC_FILES_CHKSUM = "file://COPYING;md5=d7810fab7487fb0aad327b76f1be7cd7"
 COMPATIBLE_MACHINE = "mooneye"
 
-SRC_URI = "git://android.googlesource.com/kernel/mediatek;branch=android-mediatek-mooneye-3.18-nougat-mr1-wear;protocol=https \
+SRC_URI = "git://android.googlesource.com/kernel/mediatek;branch=android-mediatek-mooneye-4.4-oreo-wear-dr;protocol=https \
     file://0001-Fix-various-drivers-compilation-with-a-recent-GCC.patch \
     file://0002-firmware_class-Load-firmwares-from-Android-directori.patch \
     file://0003-ARM-uaccess-remove-put_user-code-duplication.patch \
+    file://0004-Backport-HCI_STP-from-Mediatek.patch \
+    file://0005-hci-don-t-set-MWS-command.patch \
+    file://0006-hci_core-handle-incorrect-specified-max-page-number.patch \
     file://defconfig \
     file://img_info"
-SRCREV = "9e5996b838eaf1a545efe8f7ad6e708f47e00e0c"
-LINUX_VERSION ?= "3.18"
+SRCREV = "faeb8c03bca6c09f8817f4d509e0280b53af8b99"
+LINUX_VERSION ?= "4.4"
 PV = "${LINUX_VERSION}+oreo"
 S = "${WORKDIR}/git"
 B = "${S}"
