@@ -18,7 +18,6 @@ SRC_URI = "git://android.googlesource.com/kernel/bcm;branch=android-bcm-tetra-3.
 	file://0005-java_sony_brooks_020-Use-the-bcm-bzhw-driver-instead.patch \
     file://0006-Backport-v4.1-drivers-using-.-gentree.py-integrate-c.patch \
     file://0007-Integrate-hci_brcm-and-bcm_bzhw-to-the-backported-BT.patch \
-    file://0008-firmware_class-Load-firmwares-from-Android-directori.patch \
     file://0009-ARM-uaccess-remove-put_user-code-duplication.patch \
     file://0010-give-up-on-gcc-ilog2-constant-optimizations.patch \
     file://0011-broadcom-modem-rpc-Disable-logs-which-cause-a-compil.patch"
