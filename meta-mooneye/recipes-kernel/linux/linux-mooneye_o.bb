@@ -10,7 +10,6 @@ COMPATIBLE_MACHINE = "mooneye"
 
 SRC_URI = "git://android.googlesource.com/kernel/mediatek;branch=android-mediatek-mooneye-4.4-oreo-wear-dr;protocol=https \
     file://0001-Fix-various-drivers-compilation-with-a-recent-GCC.patch \
-    file://0002-firmware_class-Load-firmwares-from-Android-directori.patch \
     file://0003-ARM-uaccess-remove-put_user-code-duplication.patch \
     file://0004-Backport-HCI_STP-from-Mediatek.patch \
     file://0005-hci-don-t-set-MWS-command.patch \
