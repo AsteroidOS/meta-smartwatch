@@ -14,6 +14,7 @@ SRC_URI = "git://android.googlesource.com/kernel/mediatek;branch=android-mediate
     file://0004-Backport-HCI_STP-from-Mediatek.patch \
     file://0005-hci-don-t-set-MWS-command.patch \
     file://0006-hci_core-handle-incorrect-specified-max-page-number.patch \
+    file://0007-platform_uart-Avoid-a-kernel-panic-when-restoring-an.patch \
     file://defconfig \
     file://img_info"
 SRCREV = "faeb8c03bca6c09f8817f4d509e0280b53af8b99"
