@@ -11,7 +11,6 @@ COMPATIBLE_MACHINE = "swift"
 SRC_URI = "git://android.googlesource.com/kernel/msm;branch=android-msm-swift-3.18-marshmallow-mr1-wear-release;protocol=https \
     file://defconfig \
     file://img_info \
-    file://0002-firmware_class-Load-firmwares-from-Android-directori.patch \
     file://0003-ARM-uaccess-remove-put_user-code-duplication.patch"
 SRCREV = "2f958570bcf7457da4827dc8da5ff3195d447cb3"
 LINUX_VERSION ?= "3.18"
