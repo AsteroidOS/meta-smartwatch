@@ -12,7 +12,6 @@ SRC_URI = "git://android.googlesource.com/kernel/msm;branch=android-msm-sprat-3.
     file://defconfig \
     file://img_info \
     file://0001-Backport-mainline-4.1-Bluetooth-subsystem.patch \
-    file://0002-firmware_class-Load-firmwares-from-Android-directori.patch \
     file://0003-ARM-uaccess-remove-put_user-code-duplication.patch"
 SRCREV = "e0702f61b2736fe749bc31aa06fbdc5349074c1a"
 LINUX_VERSION ?= "3.10"
