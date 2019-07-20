@@ -18,7 +18,6 @@ SRC_URI = "git://android.googlesource.com/kernel/msm;branch=android-msm-sparrow-
     file://0007-Remove-unecessary-include-to-axc_PM8226Charger.h.patch \
     file://0008-msm-mdss-mdp-Don-t-use-tracing-features.patch \
     file://0009-Makefile-patch-fixes-ASUS_SW_VER-error.patch \
-    file://0010-firmware_class-Load-firmwares-from-Android-directori.patch \
     file://0011-ARM-uaccess-remove-put_user-code-duplication.patch \
     file://0012-Backport-mainline-4.1-Bluetooth-subsystem.patch \
     file://0013-bluesleep-Use-kernel-s-HCI-events-instead-of-proc-bl.patch \
