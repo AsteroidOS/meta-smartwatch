@@ -11,6 +11,7 @@ installation:
   adb pull /system/ system
   cd system/
   rm -rf app/ fake-libs fonts/ framework/ media/ priv-app/ usr/ xbin/ manifest.xml etc/init vendor/etc/init
+  cp system/vendor/lib/hw/sensors.cywee.so system/lib/hw/sensors.default.so
 
 This installation wouldn't be enough because libhybris needs a patched bionic
 Thankfully, bionic is open-source so we can download AOSP and build it. (This

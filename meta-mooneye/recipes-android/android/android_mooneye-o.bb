@@ -3,8 +3,8 @@ inherit gettext
 SUMMARY = "Downloads the Ticwatch E & S /system and /usr/include/android folders and installs them for libhybris"
 LICENSE = "CLOSED"
 SRC_URI = "https://dl.dropboxusercontent.com/s/ubcsdhlbv09jxxo/system-mooneye.tar.gz"
-SRC_URI[md5sum] = "61269ef82bed73a2b3ba791916e1a194"
-SRC_URI[sha256sum] = "bc6e8f6ea14a3d75f5f3f313b150785254eb46e350501eaed83e80fd06ddf146"
+SRC_URI[md5sum] = "c1d225bca2257d13724600b3edac0e44"
+SRC_URI[sha256sum] = "9c89cbbd9ececff94467912498b19b239a6b8f6a3a72927cf75d0400e391ac99"
 PV = "oreo"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
