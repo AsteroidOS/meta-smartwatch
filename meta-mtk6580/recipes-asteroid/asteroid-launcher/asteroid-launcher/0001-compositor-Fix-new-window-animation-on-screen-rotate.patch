@@ -1,4 +1,4 @@
-From e43f22e8e9c9b2733866af9077ea7c2eb9815ebd Mon Sep 17 00:00:00 2001
+From 2cf4afd5d48a42c497bca9704bd2ac1cb7ef4180 Mon Sep 17 00:00:00 2001
 From: Florent Revest <revestflo@gmail.com>
 Date: Mon, 24 Sep 2018 01:17:41 +0200
 Subject: [PATCH] =?UTF-8?q?compositor:=20Fix=20new=20window=20animation=20?=
@@ -27,6 +27,3 @@ index fee7280..93ae1de 100644
                  w.moveInAnim.start()
                  cancelAnimation.start()
                  setCurrentWindow(w)
--- 
-2.19.0
-
