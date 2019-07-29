@@ -1,8 +1,8 @@
 SUMMARY = "Downloads the harmony /system and /usr/include/android folders and installs them for libhybris"
 LICENSE = "CLOSED"
 SRC_URI = "https://dl.dropboxusercontent.com/s/eslcib5qxz9cmtx/system-harmony.tar.xz"
-SRC_URI[md5sum] = "e17dc083ce94e333bbf0395936edd7fc"
-SRC_URI[sha256sum] = "6a44badc6224e0205e4ea65642cdb05219419a79758ac1aac41f5bd8eccb9f48"
+SRC_URI[md5sum] = "87ecad94692889032b659ef88627913b"
+SRC_URI[sha256sum] = "095c338c3d0df37c445c7c2a900687e802520e2482063ea59814a42441e5a8bd"
 PV = "lollipop"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
