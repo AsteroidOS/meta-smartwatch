@@ -82,3 +82,15 @@ service mnld /system/bin/mnld
 service nvram_daemon /system/bin/nvram_daemon
     class core
     oneshot
+
+service miniafservice /usr/libexec/hal-droid/system/bin/miniafservice
+    class core
+
+service minisfservice /usr/libexec/hal-droid/system/bin/minisfservice
+    class core
+
+service minimediaservice /usr/libexec/hal-droid/system/bin/minimediaservice
+    class core
+
+service guiext-server /system/bin/guiext-server
+    class core
