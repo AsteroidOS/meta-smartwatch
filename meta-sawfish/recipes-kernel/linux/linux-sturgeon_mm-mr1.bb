@@ -12,6 +12,7 @@ SRC_URI = "git://android.googlesource.com/kernel/msm;branch=android-msm-sturgeon
     file://defconfig \
     file://img_info \
     file://0002-fix-gcc5-build.patch \
+    file://0003-ARM-uaccess-remove-put_user-code-duplication.patch
 "
 #    file://0001-Backport-mainline-4.1-Bluetooth-subsystem.patch
 
@@ -21,18 +22,10 @@ PV = "${LINUX_VERSION}+marshmallow"
 S = "${WORKDIR}/git"
 B = "${S}"
 
-# Removes some headers that are installed incorrectly
-
-do_configure_prepend() {
-    # Fixes build with GCC5
-    echo "#include <linux/compiler-gcc4.h>" > ${S}/include/linux/compiler-gcc5.h
-    echo "#include <linux/compiler-gcc5.h>" > ${S}/include/linux/compiler-gcc6.h
-}
-
 do_install_append() {
     rm -rf ${D}/usr/src/usr/
 }
 
 BOOT_PARTITION = "/dev/mmcblk0p15"
 
-inherit mkboot
+inherit mkboot old-kernel-gcc-hdrs
