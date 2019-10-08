@@ -5,7 +5,7 @@ LICENSE = "CLOSED"
 SRC_URI = "https://dl.condi.me/asteroidos/system-sturgeon-afccd1453b4.tar.gz"
 SRC_URI[md5sum] = "fe077c68f81d96322b0daf41e27b8f80"
 SRC_URI[sha256sum] = "afccd1453b4ffed740e348cc050a1f902ebc8e4043c762a90f10c5fd51e48bd6"
-PV = "mashmallow"
+PV = "marshmallow"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 INHIBIT_PACKAGE_STRIP = "1"
