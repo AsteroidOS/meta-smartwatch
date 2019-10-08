@@ -12,7 +12,7 @@ SRC_URI = "git://android.googlesource.com/kernel/msm;branch=android-msm-sturgeon
     file://defconfig \
     file://img_info \
     file://0002-fix-gcc5-build.patch \
-    file://0003-ARM-uaccess-remove-put_user-code-duplication.patch
+    file://0003-ARM-uaccess-remove-put_user-code-duplication.patch \
 "
 #    file://0001-Backport-mainline-4.1-Bluetooth-subsystem.patch
 
