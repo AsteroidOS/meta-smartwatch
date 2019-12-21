@@ -1,4 +1,6 @@
 on init
+    write /sys/kernel/boot_adsp/boot 1
+
     mkdir /dev/graphics/
     symlink /dev/fb0 /dev/graphics/fb0
     chown system root /sys/class/timed_output/vibrator/enable
@@ -12,4 +14,7 @@ service logd /system/bin/logd
     socket logdw dgram 0222 root root
 
 service servicemanager /system/bin/servicemanager
+    class core
+
+service sensorhd /system/bin/shd
     class core
