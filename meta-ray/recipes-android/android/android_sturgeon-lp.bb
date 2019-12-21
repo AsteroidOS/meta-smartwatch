@@ -2,9 +2,9 @@ inherit gettext
 
 SUMMARY = "Downloads the Huawei Watch /system and /usr/include/android folders and installs them for libhybris"
 LICENSE = "CLOSED"
-SRC_URI = "https://dl.dropboxusercontent.com/s/j0j51skszj9d810/system-5.1.1-LCB43B.tar.gz"
-SRC_URI[md5sum] = "7e33c50f6c8433f47caf2cf68e81a894"
-SRC_URI[sha256sum] = "c0c0676f231e594c261ab07a889ddfbd3cde0286c390ee94802fbdbb6a90cd88"
+SRC_URI = "https://dl.dropboxusercontent.com/s/mpk9xhntu8irjdj/system-5.1.1-LCB43B.tar.gz"
+SRC_URI[md5sum] = "7f9f0f24db422f847e2963ebe719026f"
+SRC_URI[sha256sum] = "aee3c9d77155e3ac68153387eea048fa72708a6d4b21af31d94939543b0939f9"
 PV = "lollipop"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
@@ -21,6 +21,9 @@ do_install() {
     install -d ${D}/system/
     cp -r system/* ${D}/system/
 
+    install -d ${D}/usr/
+    cp -r usr/* ${D}/usr/
+
     install -d ${D}${includedir}/android
     cp -r include/* ${D}${includedir}/android/
 
@@ -36,5 +39,5 @@ do_package_qa() {
 }
 
 PACKAGES =+ "android-system android-headers"
-FILES_android-system = "/system /vendor"
+FILES_android-system = "/system /vendor /usr"
 FILES_android-headers = "${libdir}/pkgconfig ${includedir}/android"
