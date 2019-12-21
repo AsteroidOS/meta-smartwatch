@@ -6,7 +6,7 @@ form by android_sturgeon-lp.bb is a tricky mix of an original Android Wear /syst
 and some recompiled parts. This is due to the half-closed nature of Android
 Wear. This file explains you how to rebuild manually your own /system dir.
 
-We first need to adb pull a /system directory from a living Android Wear 5.1.1
+We first need to adb pull a /system directory from a living Android Wear 5.0.1
 installation and then modify it with some symlinks:
   adb pull /system/ system
   cd system/
@@ -18,8 +18,12 @@ installation and then modify it with some symlinks:
   ln -s hwcomposer.msm8226.so hwcomposer.sturgeon.so
   ln -s gralloc.msm8226.so gralloc.sturgeon.so
   ln -s memtrack.msm8226.so memtrack.sturgeon.so
-  ln -s ../../vendor/lib/hw/sensors.sturgeon.so sensors.sturgeon.so
   cd ../../../
+
+We also need the firmware files for the ADSP. We can also pull the /firmware
+directory from a living Android Wear 5.0.1 installation:
+  adb pull /firmware/ firmware
+  cp -r firmware/image/* system/vendor/firmware/
 
 This installation wouldn't be enough because libhybris needs a patched bionic
 and the GPU drivers also need to be recompiled on the QCOM platform with the 
@@ -53,8 +57,15 @@ download and then build them. (This may take a while)
 
   ### Installation
   cp out/target/product/generic/root/init ../system/bin/
-  cp -r out/target/product/generic/system/* ../system/
+  cp -r out/target/product/generic/system/bin/* ../system/bin/
   chmod +x ../system/bin/*
+
+  cp -r out/target/product/generic/system/usr/* ../system/usr/
+  mkdir -p ../usr/libexec/hal-droid/system/lib/
+  cp -r out/target/product/generic/system/lib/* ../usr/libexec/hal-droid/system/lib/
+  rm -r ../usr/libexec/hal-droid/system/lib/hw/
+  cp -r out/target/product/generic/system/lib/hw/* ../system/lib/hw/
+
 
 libhybris headers
 =================
@@ -68,4 +79,4 @@ the header files from the downloaded android distribution (above).
 
 With the system and include directories, you can create the system-dir tarball:
 
-  tar zcvf system.tar.gz system include
+  tar zcvf system-5.1.1-LCB43B.tar.gz system include usr
