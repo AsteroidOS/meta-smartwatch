@@ -15,6 +15,7 @@ SRC_URI = " git://android.googlesource.com/kernel/msm;branch=android-msm-huawei-
     file://0002-fix-gcc5-build.patch \
     file://0003-ARM-uaccess-remove-put_user-code-duplication.patch \
     file://0004-tap-to-wake-fix.patch \
+    file://0005-bluesleep-Use-kernel-s-HCI-events-instead-of-proc-bl.patch \
 "
 
 SRCREV = "5d816b671b94800d8c487254182402dc538af2d6"
