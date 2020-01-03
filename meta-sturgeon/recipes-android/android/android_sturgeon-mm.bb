@@ -2,10 +2,13 @@ inherit gettext
 
 SUMMARY = "Downloads the Huawei Watch /system and /usr/include/android folders and installs them for libhybris"
 LICENSE = "CLOSED"
-SRC_URI = "https://dl.dropboxusercontent.com/s/mpk9xhntu8irjdj/system-5.1.1-LCB43B.tar.gz"
-SRC_URI[md5sum] = "7f9f0f24db422f847e2963ebe719026f"
-SRC_URI[sha256sum] = "aee3c9d77155e3ac68153387eea048fa72708a6d4b21af31d94939543b0939f9"
-PV = "lollipop"
+
+SRC_URI = "https://dl.dropboxusercontent.com/s/c608fmtjwn2rzrj/system-LCB43B-MEC23L.tar.gz \
+    file://60-i2c.rules \
+"
+SRC_URI[md5sum] = "795aabe6c9123503da516e8f87f95315"
+SRC_URI[sha256sum] = "0016bab328907369e4289d694e1b7ac48eb56ac33ee680ba1e6a6a6c0846e3ba"
+PV = "marshmallow"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 INHIBIT_PACKAGE_STRIP = "1"
@@ -18,6 +21,10 @@ PROVIDES += "virtual/android-system-image"
 PROVIDES += "virtual/android-headers"
 
 do_install() {
+    # Allow pulseaudio to control I2C devices, for speaker.
+    install -d ${D}${sysconfdir}/udev/rules.d
+    install -m 0644 ${WORKDIR}/60-i2c.rules ${D}${sysconfdir}/udev/rules.d/
+
     install -d ${D}/system/
     cp -r system/* ${D}/system/
 
@@ -32,6 +39,8 @@ do_install() {
     rm ${D}${includedir}/android/android-headers.pc
     cd ${D}
     ln -s system/vendor vendor
+    # Make symlink for speaker functionality.
+    ln -s /system/etc/Tfa98xx.cnt etc/Tfa98xx.cnt
 }
 
 # FIXME: QA Issue: Architecture did not match (40 to 164) on /work/dory-oe-linux-gnueabi/android/lollipop-r0/packages-split/android-system/system/vendor/firmware/adsp.b00 [arch]
@@ -39,5 +48,5 @@ do_package_qa() {
 }
 
 PACKAGES =+ "android-system android-headers"
-FILES_android-system = "/system /vendor /usr"
+FILES_android-system = "/system /vendor /usr ${sysconfdir}/udev ${sysconfdir}/Tfa98xx.cnt"
 FILES_android-headers = "${libdir}/pkgconfig ${includedir}/android"
