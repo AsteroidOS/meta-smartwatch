@@ -3,7 +3,7 @@ Description=Load firmware into broadcom bluetooth chip
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/brcm_patchram_plus --enable_lpm --enable_hci --no2bytes --patchram /vendor/firmware/BCM4343A1_001.002.009.0031.0097.hcd /dev/ttyHS0
+ExecStart=/usr/bin/brcm_patchram_plus --baudrate 3000000 --enable_lpm --enable_hci --no2bytes --patchram /vendor/firmware/BCM4343A1_001.002.009.0031.0097.hcd /dev/ttyHS0
 ExecStartPre=/bin/sh -ec 'while [ ! -f /dev/.coldboot_done ]; do sleep 1; done; sleep 15'
 
 [Install]
