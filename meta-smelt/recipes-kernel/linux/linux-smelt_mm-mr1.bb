@@ -6,9 +6,9 @@ SUMMARY = "Android kernel for the Huawei Watch"
 HOMEPAGE = "https://android.googlesource.com/"
 LICENSE = "GPLv2"
 LIC_FILES_CHKSUM = "file://COPYING;md5=d7810fab7487fb0aad327b76f1be7cd7"
-COMPATIBLE_MACHINE = "sturgeon"
+COMPATIBLE_MACHINE = "smelt"
 
-SRC_URI = " git://android.googlesource.com/kernel/msm;branch=android-msm-sturgeon-3.10-marshmallow-dr1-wear-release;protocol=https \
+SRC_URI = " git://android.googlesource.com/kernel/msm;branch=android-msm-smelt-3.10-marshmallow-dr1-wear-release;protocol=https \
     file://defconfig \
     file://img_info \
     file://0001-Revert-Enable-Nitrous-BT-power-management-driver.patch \

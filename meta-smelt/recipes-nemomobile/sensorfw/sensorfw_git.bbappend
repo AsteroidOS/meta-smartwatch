@@ -1,4 +1,4 @@
-FILESEXTRAPATHS_prepend_sturgeon := "${THISDIR}/sensorfw:"
-SRC_URI_append_sturgeon = " file://sensorfwd.service"
+FILESEXTRAPATHS_prepend_smelt := "${THISDIR}/sensorfw:"
+SRC_URI_append_smelt = " file://sensorfwd.service"
 
-DEPENDS_append_sturgeon = " libhybris "
+DEPENDS_append_smelt = " libhybris "

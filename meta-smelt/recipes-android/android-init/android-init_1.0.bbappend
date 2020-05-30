@@ -1,1 +1,1 @@
-FILESEXTRAPATHS_prepend_sturgeon := "${THISDIR}/${PN}:"
+FILESEXTRAPATHS_prepend_smelt := "${THISDIR}/${PN}:"

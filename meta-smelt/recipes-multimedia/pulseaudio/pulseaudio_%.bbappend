@@ -1,1 +1,1 @@
-RDEPENDS_pulseaudio-server_append_sturgeon = " pulseaudio-modules-droid "
+RDEPENDS_pulseaudio-server_append_smelt = " pulseaudio-modules-droid "

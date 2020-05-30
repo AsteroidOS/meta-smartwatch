@@ -1,1 +1,1 @@
-RDEPENDS_${PN}_append_sturgeon = " ngfd-plugin-droid-vibrator "
+RDEPENDS_${PN}_append_smelt = " ngfd-plugin-droid-vibrator "
