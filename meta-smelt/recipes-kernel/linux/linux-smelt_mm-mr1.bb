@@ -8,18 +8,21 @@ LICENSE = "GPLv2"
 LIC_FILES_CHKSUM = "file://COPYING;md5=d7810fab7487fb0aad327b76f1be7cd7"
 COMPATIBLE_MACHINE = "smelt"
 
+#file://0001-Revert-Enable-Nitrous-BT-power-management-driver.patch 
+#file://0002-Revert-Add-Nitrous-driver-for-BT-power-management.patch 
+#file://0003-Revert-net-bluetooth-fix-CVE-2015-8956.patch 
+#file://0004-Backport-mainline-4.1-Bluetooth-subsystem.patch 
+#file://0005-fix-gcc5-build.patch 
+#file://0006-ARM-uaccess-remove-put_user-code-duplication.patch 
+#file://0007-tap-to-wake-fix.patch 
+#file://0008-bluesleep-Use-kernel-s-HCI-events-instead-of-proc-bl.patch 
+#file://0009-synaptics_i2c_rmi4-Adds-a-wakelock-when-the-screen-i.patch 
 SRC_URI = " git://android.googlesource.com/kernel/msm;branch=android-msm-smelt-3.10-marshmallow-mr1-wear-release;protocol=https \
     file://defconfig \
     file://img_info \
-    file://0001-Revert-Enable-Nitrous-BT-power-management-driver.patch \
-    file://0002-Revert-Add-Nitrous-driver-for-BT-power-management.patch \
-    file://0003-Revert-net-bluetooth-fix-CVE-2015-8956.patch \
-    file://0004-Backport-mainline-4.1-Bluetooth-subsystem.patch \
+    file://0002-fix-input-undefined.patch \
     file://0005-fix-gcc5-build.patch \
     file://0006-ARM-uaccess-remove-put_user-code-duplication.patch \
-    file://0007-tap-to-wake-fix.patch \
-    file://0008-bluesleep-Use-kernel-s-HCI-events-instead-of-proc-bl.patch \
-    file://0009-synaptics_i2c_rmi4-Adds-a-wakelock-when-the-screen-i.patch \
 "
 
 SRCREV = "49608c8bfc75360f7ac54f539ce326b90034bc9d"
@@ -32,6 +35,6 @@ do_install_append() {
     rm -rf ${D}/usr/src/usr/
 }
 
-BOOT_PARTITION = "/dev/mmcblk0p29"
+BOOT_PARTITION = "/dev/mmcblk0p24"
 
 inherit mkboot old-kernel-gcc-hdrs

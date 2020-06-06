@@ -1,0 +1,26 @@
+diff --git a/drivers/input/mouse/lifebook.h b/drivers/input/mouse/lifebook.h
+index 4c4326c6..e4c2453b 100644
+--- a/drivers/input/mouse/lifebook.h
++++ b/drivers/input/mouse/lifebook.h
+@@ -19,7 +19,7 @@ int lifebook_init(struct psmouse *psmouse);
+ inline void lifebook_module_init(void)
+ {
+ }
+-inline int lifebook_detect(struct psmouse *psmouse, bool set_properties)
++static inline int lifebook_detect(struct psmouse *psmouse, bool set_properties)
+ {
+ 	return -ENOSYS;
+ }
+diff --git a/drivers/input/mouse/sentelic.h b/drivers/input/mouse/sentelic.h
+index aa697ece..9e69e94d 100644
+--- a/drivers/input/mouse/sentelic.h
++++ b/drivers/input/mouse/sentelic.h
+@@ -123,7 +123,7 @@ struct fsp_data {
+ extern int fsp_detect(struct psmouse *psmouse, bool set_properties);
+ extern int fsp_init(struct psmouse *psmouse);
+ #else
+-inline int fsp_detect(struct psmouse *psmouse, bool set_properties)
++static inline int fsp_detect(struct psmouse *psmouse, bool set_properties)
+ {
+ 	return -ENOSYS;
+ }
