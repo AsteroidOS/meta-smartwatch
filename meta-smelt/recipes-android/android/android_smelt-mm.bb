@@ -1,12 +1,10 @@
 inherit gettext
 
-SUMMARY = "Downloads the Huawei Watch /system and /usr/include/android folders and installs them for libhybris"
+SUMMARY = "Downloads the Moto 360 2015 /system and /usr/include/android folders and installs them for libhybris"
 LICENSE = "CLOSED"
-SRC_URI = "https://dl.dropboxusercontent.com/s/fef0pd38yf9rfrm/system-MEC23G.tar.gz \
-    file://60-i2c.rules \
-"
-SRC_URI[md5sum] = "6ebfb06ad963f530e3bce8510b48f209"
-SRC_URI[sha256sum] = "94718639c1286cad828192d7b499a0662b3c5b08ca0981ab6771636b74bbffdf"
+SRC_URI = "https://dl.dropboxusercontent.com/s/fef0pd38yf9rfrm/system-MEC23G.tar.gz"
+SRC_URI[md5sum] = "aae63b48092962c549f9d0552e4a0574"
+SRC_URI[sha256sum] = "cc4e026f106bf7550185df935f55547868fddc7e9d4f6b183860b634e65f1cdc"
 PV = "marshmallow"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
@@ -20,10 +18,6 @@ PROVIDES += "virtual/android-system-image"
 PROVIDES += "virtual/android-headers"
 
 do_install() {
-    # Allow pulseaudio to control I2C devices, for speaker.
-    install -d ${D}${sysconfdir}/udev/rules.d
-    install -m 0644 ${WORKDIR}/60-i2c.rules ${D}${sysconfdir}/udev/rules.d/
-
     install -d ${D}/system/
     cp -r system/* ${D}/system/
 
@@ -38,8 +32,6 @@ do_install() {
     rm ${D}${includedir}/android/android-headers.pc
     cd ${D}
     ln -s system/vendor vendor
-    # Make symlink for speaker functionality.
-    ln -s /system/etc/Tfa98xx.cnt etc/Tfa98xx.cnt
 }
 
 # FIXME: QA Issue: Architecture did not match (40 to 164) on /work/dory-oe-linux-gnueabi/android/lollipop-r0/packages-split/android-system/system/vendor/firmware/adsp.b00 [arch]
@@ -47,5 +39,5 @@ do_package_qa() {
 }
 
 PACKAGES =+ "android-system android-headers"
-FILES_android-system = "/system /vendor /usr ${sysconfdir}/udev ${sysconfdir}/Tfa98xx.cnt"
+FILES_android-system = "/system /vendor /usr ${sysconfdir}/udev"
 FILES_android-headers = "${libdir}/pkgconfig ${includedir}/android"
