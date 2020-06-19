@@ -16,8 +16,9 @@ service logd /system/bin/logd
 service servicemanager /system/bin/servicemanager
     class core
 
-service sensorhd /system/bin/shd
-    class core
+service m4setup /system/bin/m4setup
+    user root
+    oneshot
 
-on property:sys.powerctl=*
-    powerctl ${sys.powerctl}
+on property:hw.m4.download_complete=true
+    start m4setup
