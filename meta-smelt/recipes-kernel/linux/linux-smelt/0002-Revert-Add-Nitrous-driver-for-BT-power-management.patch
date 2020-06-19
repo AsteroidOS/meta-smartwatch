@@ -1,9 +1,10 @@
-From 2aa16e72ad11774d956c6c51cc2d522eff5c24da Mon Sep 17 00:00:00 2001
+From 9e60d313a1a554e91e2affa337e8256d1bdda911 Mon Sep 17 00:00:00 2001
 From: MagneFire <IDaNLContact@gmail.com>
-Date: Wed, 25 Dec 2019 14:53:13 +0100
+Date: Fri, 19 Jun 2020 16:10:28 +0200
 Subject: [PATCH] Revert "Add Nitrous driver for BT power management."
 
-This reverts commit 7804a4c22d7370483c30f99b870cc9c70c299c72.
+This reverts commit 409b3f9bbb09aa7f6387f27ea35e20d650d15252.
+
 ---
  .../devicetree/bindings/bluetooth/nitrous.txt |  44 --
  drivers/bluetooth/nitrous.c                   | 569 ------------------
@@ -13,7 +14,7 @@ This reverts commit 7804a4c22d7370483c30f99b870cc9c70c299c72.
 
 diff --git a/Documentation/devicetree/bindings/bluetooth/nitrous.txt b/Documentation/devicetree/bindings/bluetooth/nitrous.txt
 deleted file mode 100644
-index cc7fc2dc983..00000000000
+index cc7fc2dc9839..000000000000
 --- a/Documentation/devicetree/bindings/bluetooth/nitrous.txt
 +++ /dev/null
 @@ -1,44 +0,0 @@
@@ -63,7 +64,7 @@ index cc7fc2dc983..00000000000
 -	};
 diff --git a/drivers/bluetooth/nitrous.c b/drivers/bluetooth/nitrous.c
 deleted file mode 100644
-index d994958c75a..00000000000
+index d994958c75a5..000000000000
 --- a/drivers/bluetooth/nitrous.c
 +++ /dev/null
 @@ -1,569 +0,0 @@
@@ -636,6 +637,3 @@ index d994958c75a..00000000000
 -MODULE_DESCRIPTION("Nitrous Oxide Driver for Bluetooth");
 -MODULE_AUTHOR("Google");
 -MODULE_LICENSE("GPL");
--- 
-2.24.1
-
