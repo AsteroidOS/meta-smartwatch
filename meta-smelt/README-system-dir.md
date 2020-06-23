@@ -2,65 +2,45 @@
 
 This document describes how to build the system-dir tarball, needed for the smelt platform to function properly. The archive contains original Android Wear parts (mostly /system/) and recompiled parts for libhybris compatibility (/include/ and /usr/libexec/hal-droid/system/lib/).
 
+## 0. Connect the watch via USB.
+
+The Moto 360 2015 doesn't expose a USB connection. It is however possible to connect to the watch using an adapter cable.
+
+The first step is to remove the plastic outer ring. This is fairly straightforward as the ring can be lifted when putting a finger nail underneeth the small lip.
+
+Then you can either solder to the appropriate pads or 3D print a dock.
+
+See https://forum.xda-developers.com/showpost.php?p=76733989&postcount=29 on which pad corresponds to which USB pin.
+
+See https://www.thingiverse.com/thing:4366014 on a 3D prinable dock that can be used to interface with the watch (Additionally needs pogo pins).
+
+
+Back side of Moto 360     |  Exposed USB pins
+:------------------------:|:-------------------------:
+![](images/moto_back.jpg) |  ![](images/moto_pins.jpg)
 
 ## 1. Know how to boot to fastboot and recovery
 
-You will need to know how to get into the fastboot menu and the Android recovery. These are depicted in the images below.
-
-Fastboot menu             |  Android Recovery
-:------------------------:|:-------------------------:
-![](images/fastboot.jpg)  |  ![](images/recovery.jpg)
+You will need to know how to get into the fastboot menu.
 
 To get into the fastboot menu you can use the `adb reboot bootloader` command when booted to Android Wear. Make sure you have ADB debugging enabled on Android Wear.
-From the fastboot menu you can boot to the Android Recovery.
+
+Another way to get to the fastboot menu is by using the power button. Make sure that the watch is off.
+
+Now press and hold the power button. It'll vibrate once. Keep holding until it vibrates another two times. Fastboot menu will popup.
 
 ## 2. Getting the system files.
 
-It is very likely that you are currently running an up-to-date version of WearOS on the Huawei Watch. This version may be incompatible/unsupported by AsteroidOS. We need to go back to an older version to get the system and firmware files known to work with AsteroidOS.
+A marshmallow base is needed for the Moto 360 2015. This can be easily found on online resources (search "MEC23G Moto 360").
+The boot and system images are required. The boot image contains the firmware for the touchscreen to work. And the system image contains the needed blobs for the graphics and sensors to work.
 
-When you follow this document correctly the flow of system build numbers will be: up-to-date version -> M6E69F -> M9E41V.
+It is assumed that you know how to extract these images (Google is your friend :D).
 
-Below you can find some links where you can find the system files for ME69F and update file for M9E41V:
-* M6E69F full system: https://androidfilehost.com/?fid=745425885120748838 or http://www.rootjunkysdl.com/files/Huawei%20Watch/Firmware/smelt-m6e69f-wear-stock.zip
-* M9E41V OTA file: https://my.hidrive.com/lnk/GrljFu3i
-
-### 2.1 Install M6E69F
-
-Use the following commands to downgrade the system, make sure that your watch is currently in fastboot mode:
-
-```sh
-fastboot flash bootloader bootloader-smelt-m6e69f.img
-fastboot reboot-bootloader
-```
-Wait for fastboot menu to be available again. Then downgrade the system. You may need to extract a zip archive to find the boot.img, recovery.img, system.img, userdata.img and cache.img files.
-
-```sh
-fastboot flash boot boot.img
-fastboot flash recovery recovery.img
-fastboot flash system system.img
-fastboot flash userdata userdata.img
-fastboot flash cache cache.img
-fastboot -w
-```
-
-### 2.2 Update M6E69F to M9E41V
-
-Now boot to the Android Recovery and select `Apply update from ADB`. Use the `adb sideload update.zip` command on your host PC to start the update. Make sure to clear cache afterwards.
-
-### 2.3 Get M9E41V system and firmware files
-
-We need the system files and firmware files.
-Use the following commands to get them:
-```sh
-adb pull /system/ system
-adb pull /firmware/ firmware
-```
-
-### 2.4 Prepare /system
+### 2.1 Prepare /system
 
 We can now copy the firmware files to the proper directory and adjust some symlinks:
 ```sh
-cp -r firmware/image/* system/vendor/firmware/
+cp -r boot/initramfs/firmware/image/* system/vendor/firmware/
 
 cd system/
 rm -rf app/ fonts/ framework/ media/ priv-app/ xbin/
@@ -133,9 +113,11 @@ git clone https://github.com/libhybris/libhybris
 
 ```
 
+Add `#define QCOM_BSP` to `include/android-config.h` if you want the command `test_hwcomposer` to work properly.
+
 ## 5. Putting it all together
 
 With the system and include directories, you can create the system-dir tarball:
 ```sh
-tar zcvf system-M9E41V.tar.gz system include usr
+tar zcvf system-MEC23G.tar.gz system include usr
 ```
