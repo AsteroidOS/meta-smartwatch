@@ -3,8 +3,8 @@ inherit gettext
 SUMMARY = "Downloads the Moto 360 2015 /system and /usr/include/android folders and installs them for libhybris"
 LICENSE = "CLOSED"
 SRC_URI = "https://dl.dropboxusercontent.com/s/fef0pd38yf9rfrm/system-MEC23G.tar.gz"
-SRC_URI[md5sum] = "aae63b48092962c549f9d0552e4a0574"
-SRC_URI[sha256sum] = "cc4e026f106bf7550185df935f55547868fddc7e9d4f6b183860b634e65f1cdc"
+SRC_URI[md5sum] = "2311bf425de2ebc40ea491493db20e8a"
+SRC_URI[sha256sum] = "43c08c40fbfab869ddc9745be48c957856d3add4c03fc037e2d2cd44ea7f6878"
 PV = "marshmallow"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
