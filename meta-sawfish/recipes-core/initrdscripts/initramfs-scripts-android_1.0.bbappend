@@ -1,2 +1,2 @@
-FILESEXTRAPATHS_prepend_sturgeon := "${THISDIR}/${PN}:"
-COMPATIBLE_MACHINE_sturgeon = "sturgeon"
+FILESEXTRAPATHS_prepend_sawshark := "${THISDIR}/${PN}:"
+COMPATIBLE_MACHINE_sawshark = "sawshark"
