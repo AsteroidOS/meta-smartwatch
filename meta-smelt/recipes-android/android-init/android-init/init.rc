@@ -5,6 +5,8 @@ on init
     symlink /dev/fb0 /dev/graphics/fb0
     chown system root /sys/class/timed_output/vibrator/enable
 
+    write /sys/kernel/debug/mdp/allow_cx_vddmin 1
+
     class_start core
 
 service logd /system/bin/logd
