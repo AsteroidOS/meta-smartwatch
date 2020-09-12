@@ -2,9 +2,9 @@ inherit gettext
 
 SUMMARY = "Downloads the Asus ZenWatch 2 /system and /usr/include/android folders and installs them for libhybris"
 LICENSE = "CLOSED"
-SRC_URI = "https://landau.fi/2017/asteroid/wren/system.tar.gz"
-SRC_URI[md5sum] = "cfd77d6a841c8c1ec7f18ac46fdd042c"
-SRC_URI[sha256sum] = "ed3853a9ec6c6566f0c672563ba26fbf94ed7d9fc4c64a4aba7a7251201c84be"
+SRC_URI = "https://landau.fi/2020/asteroid/wren/system.tar.gz"
+SRC_URI[md5sum] = "6671debe2bee41e247ac3a1a76fe0430"
+SRC_URI[sha256sum] = "37b111ea9962b277c5edf964964b1de211f870e1e0b2dfcc0d163a53ed8668a6"
 PV = "lollipop"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
