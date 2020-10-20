@@ -5,7 +5,7 @@ on init
     symlink /dev/fb0 /dev/graphics/fb0
     chown system root /sys/class/timed_output/vibrator/enable
 
-    load_all_props
+    load_system_props
     restorecon_recursive /persist
     restorecon /persist/bdaddr.txt
 
