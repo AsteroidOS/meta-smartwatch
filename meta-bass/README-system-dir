@@ -18,6 +18,8 @@ installation and then modify it with some symlinks:
   ln -s hwcomposer.msm8226.so hwcomposer.bass.so
   ln -s gralloc.msm8226.so gralloc.bass.so
   ln -s memtrack.msm8226.so memtrack.bass.so
+  cd ../../vendor/lib/hw/
+  ln -s sensors.msm8226.so sensors.bass.so
   cd ../../../
 
 This installation wouldn't be enough because libhybris needs a patched bionic
