@@ -4,7 +4,7 @@ Description=Load firmware into BCM4343A0 bluetooth chip
 [Service]
 Type=simple
 ExecStartPre=/usr/sbin/rfkill unblock bluetooth
-ExecStart=/usr/bin/brcm_patchram_plus --baudrate 3000000 --enable_lpm --enable_hci --no2bytes --patchram /vendor/firmware/BCM4343A0.hcd /dev/ttyHS99
+ExecStart=/usr/bin/brcm_patchram_plus --baudrate 3000000 --enable_lpm --enable_hci --no2bytes --patchram /vendor/firmware/4343A0.hcd /dev/ttyHS99
 
 [Install]
 WantedBy=basic.target
