@@ -1,4 +1,4 @@
-From 16a863cd2af8e957d045baf3bc8d8d8f7a96298c Mon Sep 17 00:00:00 2001
+From 6c7a9d9b54bad4737b9efa56b87251cbee83fe55 Mon Sep 17 00:00:00 2001
 From: Florent Revest <revestflo@gmail.com>
 Date: Tue, 17 Oct 2017 19:21:51 +0200
 Subject: [PATCH] Adapt to what tetra's hwcomposer expects
@@ -8,7 +8,7 @@ Subject: [PATCH] Adapt to what tetra's hwcomposer expects
  1 file changed, 7 insertions(+), 7 deletions(-)
 
 diff --git a/hwcomposer/hwcomposer_backend_v11.cpp b/hwcomposer/hwcomposer_backend_v11.cpp
-index 26ee1cc..d7c20bc 100644
+index 1db55ff..c2ebcae 100644
 --- a/hwcomposer/hwcomposer_backend_v11.cpp
 +++ b/hwcomposer/hwcomposer_backend_v11.cpp
 @@ -118,18 +118,18 @@ void HWComposer::present(HWComposerNativeWindowBuffer *buffer)
@@ -43,7 +43,7 @@ index 26ee1cc..d7c20bc 100644
  
      if (mlist[0]->retireFenceFd != -1) {
          close(mlist[0]->retireFenceFd);
-@@ -291,7 +291,7 @@ HwComposerBackend_v11::createWindow(int width, int height)
+@@ -292,7 +292,7 @@ HwComposerBackend_v11::createWindow(int width, int height)
  
  
      HWComposer *hwc_win = new HWComposer(width, height, HAL_PIXEL_FORMAT_RGBA_8888,
@@ -52,15 +52,15 @@ index 26ee1cc..d7c20bc 100644
      return (EGLNativeWindowType) static_cast<ANativeWindow *>(hwc_win);
  }
  
-@@ -345,7 +345,7 @@ HwComposerBackend_v11::sleepDisplay(bool sleep)
-     } else {
+@@ -385,7 +385,7 @@ HwComposerBackend_v11::sleepDisplay(bool sleep)
+ 
  #ifdef HWC_DEVICE_API_VERSION_1_4
          if (hwc_version == HWC_DEVICE_API_VERSION_1_4) {
 -            HWC_PLUGIN_EXPECT_ZERO(hwc_device->setPowerMode(hwc_device, 0, HWC_POWER_MODE_NORMAL));
-+//            HWC_PLUGIN_EXPECT_ZERO(hwc_device->setPowerMode(hwc_device, 0, HWC_POWER_MODE_NORMAL));
++            //HWC_PLUGIN_EXPECT_ZERO(hwc_device->setPowerMode(hwc_device, 0, HWC_POWER_MODE_NORMAL));
          } else
  #endif
  #ifdef HWC_DEVICE_API_VERSION_1_5
 -- 
-2.7.4
+2.29.0
 
