@@ -2,10 +2,10 @@ inherit gettext
 
 SUMMARY = "Downloads the Sony Smartwatch3 /system and /usr/include/android folders and installs them for libhybris"
 LICENSE = "CLOSED"
-SRC_URI = "https://dl.dropboxusercontent.com/s/eq32cguwrcsx75w/system-tetra.tar.gz"
-SRC_URI[md5sum] = "3022549f3a36b1dc9ca5b31073d6ae49"
-SRC_URI[sha256sum] = "6d070fe1bf0caad4e80c23a5a1103ba3693246223cbfa7060a001c3f92862165"
-PV = "lollipop"
+SRC_URI = "https://dl.dropboxusercontent.com/s/nto7696eqkpg13v/system-M1D64T.tar.gz"
+SRC_URI[md5sum] = "09e69635f33da4e7a03456b9602c5201"
+SRC_URI[sha256sum] = "39a602c803be284452b52b87ef399be092e2f8d09f6b9a6398ef08c82233cc8d"
+PV = "marshmallow"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 INHIBIT_PACKAGE_STRIP = "1"
@@ -20,6 +20,9 @@ PROVIDES += "virtual/android-headers"
 do_install() {
     install -d ${D}/system/
     cp -r system/* ${D}/system/
+
+    install -d ${D}/usr/
+    cp -r usr/* ${D}/usr/
 
     install -d ${D}${includedir}/android
     cp -r include/* ${D}${includedir}/android/
@@ -36,5 +39,5 @@ do_package_qa() {
 }
 
 PACKAGES =+ "android-system android-headers"
-FILES_android-system = "/system /vendor"
+FILES_android-system = "/system /vendor /usr"
 FILES_android-headers = "${libdir}/pkgconfig ${includedir}/android"
