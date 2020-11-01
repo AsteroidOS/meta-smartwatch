@@ -9,12 +9,17 @@ on init
     chown system root /sys/class/timed_output/vibrator/enable
 
 # GPS
+    mkdir /data/ 0770 root root
     mkdir /data/gps/ 0770 root root
     write /sys/class/gpio/export 23
     chown gps system /sys/class/gpio/gpio23/value
     chown gps system /sys/class/gpio/gpio23/direction
     write /sys/class/gpio/gpio23/direction out
     write /sys/class/gpio/gpio23/value 0
+
+# Sensors
+    mkdir /data/misc/ 0770 root root
+    mkdir /data/misc/em718x/ 0770 root root
 
 # Bluetooth
     write /sys/class/gpio/gpio28/value 1
