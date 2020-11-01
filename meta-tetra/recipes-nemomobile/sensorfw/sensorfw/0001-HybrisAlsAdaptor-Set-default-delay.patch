@@ -1,0 +1,26 @@
+From 27b0f7cbd6b704d480ee4e5adb44b585012bc204 Mon Sep 17 00:00:00 2001
+From: MagneFire <IDaNLContact@gmail.com>
+Date: Mon, 26 Oct 2020 21:20:24 +0100
+Subject: [PATCH] HybrisAlsAdaptor: Set default delay. Fixes excessive lags on
+ tetra.
+
+---
+ adaptors/hybrisalsadaptor/hybrisalsadaptor.cpp | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/adaptors/hybrisalsadaptor/hybrisalsadaptor.cpp b/adaptors/hybrisalsadaptor/hybrisalsadaptor.cpp
+index c1c3f24..4736d1b 100644
+--- a/adaptors/hybrisalsadaptor/hybrisalsadaptor.cpp
++++ b/adaptors/hybrisalsadaptor/hybrisalsadaptor.cpp
+@@ -42,6 +42,8 @@ HybrisAlsAdaptor::HybrisAlsAdaptor(const QString& id) :
+     	sensordLogW() << "Path does not exists: " << powerStatePath;
+     	powerStatePath.clear();
+     }
++    // Set default delay.
++    setInterval(200, 0);
+ }
+ 
+ HybrisAlsAdaptor::~HybrisAlsAdaptor()
+-- 
+2.29.0
+
