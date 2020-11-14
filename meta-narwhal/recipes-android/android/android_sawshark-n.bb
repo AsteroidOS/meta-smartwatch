@@ -1,13 +1,13 @@
 inherit gettext
 
-SUMMARY = "Downloads the Huawei Watch /system and /usr/include/android folders and installs them for libhybris"
+SUMMARY = "Downloads the Huawei Watch 2 /system and /usr/include/android folders and installs them for libhybris"
 LICENSE = "CLOSED"
-SRC_URI = "https://dl.dropboxusercontent.com/s/9p1prbo0s4c62gt/system-M9E41V.tar.gz \
+SRC_URI = "https://dl.dropboxusercontent.com/s/w29tu6vvqyii8y3/system-NXH20B.tar.gz \
     file://60-i2c.rules \
 "
-SRC_URI[md5sum] = "0af5c6bcd38e5200332dc0b4099c0fda"
-SRC_URI[sha256sum] = "7f63eafb20fa41985a02cd4b58b2a0468b6a612a2150a701d7949d2c8477fa3a"
-PV = "marshmallow"
+SRC_URI[md5sum] = "62fd2442be19c3134a2a9fcca7809f52"
+SRC_URI[sha256sum] = "6b4473e19f98781f8f6673484c0f94ac87dee6c0ba3700397b685e788f86627e"
+PV = "nougat"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 INHIBIT_PACKAGE_STRIP = "1"
@@ -40,6 +40,9 @@ do_install() {
     ln -s system/vendor vendor
     # Make symlink for speaker functionality.
     ln -s /system/etc/Tfa98xx.cnt etc/Tfa98xx.cnt
+
+    install -d ${D}/
+    install -m 644 system/property_contexts ${D}/
 }
 
 # FIXME: QA Issue: Architecture did not match (40 to 164) on /work/dory-oe-linux-gnueabi/android/lollipop-r0/packages-split/android-system/system/vendor/firmware/adsp.b00 [arch]
@@ -47,5 +50,5 @@ do_package_qa() {
 }
 
 PACKAGES =+ "android-system android-headers"
-FILES_android-system = "/system /vendor /usr ${sysconfdir}/udev ${sysconfdir}/Tfa98xx.cnt"
+FILES_android-system = "/system /vendor /usr ${sysconfdir}/udev ${sysconfdir}/Tfa98xx.cnt /property_contexts"
 FILES_android-headers = "${libdir}/pkgconfig ${includedir}/android"
