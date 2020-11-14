@@ -12,10 +12,10 @@ both implementations.
  1 file changed, 78 insertions(+), 52 deletions(-)
 
 diff --git a/arch/arm/include/asm/uaccess.h b/arch/arm/include/asm/uaccess.h
-index 7e1f76027f66..efadf5c7fdb2 100644
+index 4767eb9caa7..4952cec15b8 100644
 --- a/arch/arm/include/asm/uaccess.h
 +++ b/arch/arm/include/asm/uaccess.h
-@@ -22,6 +22,35 @@
+@@ -29,6 +29,35 @@
  #define VERIFY_READ 0
  #define VERIFY_WRITE 1
  
@@ -51,7 +51,7 @@ index 7e1f76027f66..efadf5c7fdb2 100644
  /*
   * The exception table consists of pairs of addresses: the first is the
   * address of an instruction that is allowed to fault, and the second is
-@@ -152,46 +181,23 @@ extern int __put_user_2(void *, unsigned int);
+@@ -207,47 +236,23 @@ extern int __put_user_2(void *, unsigned int);
  extern int __put_user_4(void *, unsigned int);
  extern int __put_user_8(void *, unsigned long long);
  
@@ -68,8 +68,9 @@ index 7e1f76027f66..efadf5c7fdb2 100644
 +#define __put_user_check(__pu_val, __ptr, __err, __s)							\
  	({								\
  		unsigned long __limit = current_thread_info()->addr_limit - 1; \
+-		const typeof(*(p)) __user *__tmp_p = (p);		\
 -		register const typeof(*(p)) __r2 asm("r2") = (x);	\
--		register const typeof(*(p)) __user *__p asm("r0") = (p);\
+-		register const typeof(*(p)) __user *__p asm("r0") = __tmp_p; \
 +		register typeof(__pu_val) __r2 asm("r2") = __pu_val;	\
 +		register const void __user *__p asm("r0") = __ptr;	\
  		register unsigned long __l asm("r1") = __limit;		\
@@ -109,7 +110,7 @@ index 7e1f76027f66..efadf5c7fdb2 100644
  #else /* CONFIG_MMU */
  
  /*
-@@ -209,7 +215,7 @@ static inline void set_fs(mm_segment_t fs)
+@@ -265,7 +270,7 @@ static inline void set_fs(mm_segment_t fs)
  }
  
  #define get_user(x,p)	__get_user(x,p)
@@ -118,7 +119,7 @@ index 7e1f76027f66..efadf5c7fdb2 100644
  
  #endif /* CONFIG_MMU */
  
-@@ -309,33 +315,53 @@ do {									\
+@@ -365,33 +370,53 @@ do {									\
  	: "r" (addr), "i" (-EFAULT)				\
  	: "cc")
  
@@ -150,14 +151,14 @@ index 7e1f76027f66..efadf5c7fdb2 100644
  ({									\
  	long __pu_err = 0;						\
 -	__put_user_err((x),(ptr),__pu_err);				\
-+	__put_user_switch((x), (ptr), __pu_err, __put_user_nocheck);	\
++	__put_user_switch((x), (ptr), __pu_err, __put_user_nocheck);				\
  	__pu_err;							\
  })
  
  #define __put_user_error(x,ptr,err)					\
  ({									\
 -	__put_user_err((x),(ptr),err);					\
-+	__put_user_switch((x), (ptr), (err), __put_user_nocheck);	\
++	__put_user_switch((x), (ptr), (err), __put_user_nocheck);					\
  	(void) 0;							\
  })
  
