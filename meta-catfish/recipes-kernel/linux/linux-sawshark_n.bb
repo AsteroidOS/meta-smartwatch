@@ -11,7 +11,7 @@ COMPATIBLE_MACHINE = "sawshark"
 SRC_URI = " git://android.googlesource.com/kernel/msm;branch=android-msm-sawshark-3.18-nougat-mr1-wear-release-1;protocol=https \
     file://defconfig \
     file://img_info \
-    file://0005-fix-gcc5-build.patch \
+    file://0006-ARM-uaccess-remove-put_user-code-duplication.patch \
 "
 
 SRCREV = "6c03f79a1f550065cc27ac6afed1e27e103d3935"
