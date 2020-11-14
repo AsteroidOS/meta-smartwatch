@@ -68,9 +68,12 @@ sed -i "/persist.hwc.mdpcomp.enable=true/d" build.prop
 cd vendor/lib/egl/
 ln -s libGLESv2_adreno.so libGLESv2S3D_adreno.so
 cd ../../../lib/hw/
-ln -s /usr/libexec/hal-droid/system/lib/hw/hwcomposer.msm8226.so hwcomposer.sawshark.so
-ln -s /usr/libexec/hal-droid/system/lib/hw/gralloc.msm8226.so gralloc.sawshark.so
-ln -s /usr/libexec/hal-droid/system/lib/hw/memtrack.msm8226.so memtrack.sawshark.so
+ln -s /usr/libexec/hal-droid/system/lib/hw/hwcomposer.msm8909.so hwcomposer.sawshark.so
+ln -s /usr/libexec/hal-droid/system/lib/hw/gralloc.msm8909.so gralloc.sawshark.so
+ln -s /usr/libexec/hal-droid/system/lib/hw/memtrack.msm8909.so memtrack.sawshark.so
+ln -s /usr/libexec/hal-droid/system/lib/hw/hwcomposer.msm8909.so hwcomposer.sawfish.so
+ln -s /usr/libexec/hal-droid/system/lib/hw/gralloc.msm8909.so gralloc.sawfish.so
+ln -s /usr/libexec/hal-droid/system/lib/hw/memtrack.msm8909.so memtrack.sawfish.so
 cd ../../../
 ```
 
@@ -96,13 +99,13 @@ cd android-sawshark
 Build everything:
 ```sh
 . build/envsetup.sh
-export TARGET_USES_C2D_COMPOSITION=true # Needed by copybit
 export TARGET_USES_QCOM_BSP=true        # Fixes GPU problems on QCOM platforms
-export TARGET_BOARD_PLATFORM=msm8226    # We Specify the SoC by hand
-export QCOM_BOARD_PLATFORMS=msm8226
-export PLATFORM_VERSION=6.0.1
+export TARGET_BOARD_PLATFORM=msm8909    # We Specify the SoC by hand
+export QCOM_BOARD_PLATFORMS=msm8909
+export PLATFORM_VERSION=7.1.1
+export LC_ALL=C                         # Fix _nl_intern_locale_data: Assertion `cnt < (sizeof (_nl_value_type_LC_TIME) / sizeof (_nl_value_type_LC_TIME[0]))' failed
 
-mmma hardware/qcom/display/msm8226/     # hwcomposer, gralloc, dependencies...
+mmma hardware/qcom/display/msm8909/     # hwcomposer, gralloc, dependencies...
 mmma frameworks/native/cmds/servicemanager/
 mmma system/core/logd/
 mmma system/core/init/
@@ -129,7 +132,7 @@ libhybris. There is a script in the libhybris distribution that can pull
 the header files from the downloaded android distribution (above).
 ```sh
 git clone https://github.com/libhybris/libhybris
-./libhybris/utils/extract-headers.sh -v 6.0.1 -p /usr/include/android android-sawshark include
+./libhybris/utils/extract-headers.sh -v 7.1.1 -p /usr/include/android android-sawshark include
 
 ```
 
@@ -137,5 +140,5 @@ git clone https://github.com/libhybris/libhybris
 
 With the system and include directories, you can create the system-dir tarball:
 ```sh
-tar zcvf system-M9E41V.tar.gz system include usr
+tar zcvf system-NXH20B.tar.gz system include usr
 ```
