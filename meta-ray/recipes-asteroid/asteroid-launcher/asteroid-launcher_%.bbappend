@@ -1,2 +1,2 @@
-FILESEXTRAPATHS_prepend_sawshark := "${THISDIR}/asteroid-launcher:"
-SRC_URI_append_sawshark = " file://default.conf"
+FILESEXTRAPATHS_prepend_sawfish := "${THISDIR}/asteroid-launcher:"
+SRC_URI_append_sawfish = " file://default.conf"

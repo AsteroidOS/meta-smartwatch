@@ -1,2 +1,2 @@
-FILESEXTRAPATHS_prepend_sawshark := "${THISDIR}/${PN}:"
-COMPATIBLE_MACHINE_sawshark = "sawshark"
+FILESEXTRAPATHS_prepend_sawfish := "${THISDIR}/${PN}:"
+COMPATIBLE_MACHINE_sawfish = "sawfish"
