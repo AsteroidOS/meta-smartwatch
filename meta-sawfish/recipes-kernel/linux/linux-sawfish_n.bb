@@ -6,9 +6,9 @@ SUMMARY = "Android kernel for the Huawei Watch 2"
 HOMEPAGE = "https://android.googlesource.com/"
 LICENSE = "GPLv2"
 LIC_FILES_CHKSUM = "file://COPYING;md5=d7810fab7487fb0aad327b76f1be7cd7"
-COMPATIBLE_MACHINE = "sawshark"
+COMPATIBLE_MACHINE = "sawfish"
 
-SRC_URI = " git://android.googlesource.com/kernel/msm;branch=android-msm-sawshark-3.18-nougat-mr1-wear-release-1;protocol=https \
+SRC_URI = " git://android.googlesource.com/kernel/msm;branch=android-msm-sawfish-3.18-nougat-mr1-wear-release-1;protocol=https \
     file://defconfig \
     file://img_info \
     file://0006-ARM-uaccess-remove-put_user-code-duplication.patch \

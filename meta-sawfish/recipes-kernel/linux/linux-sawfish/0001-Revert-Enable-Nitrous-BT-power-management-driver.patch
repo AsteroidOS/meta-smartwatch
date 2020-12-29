@@ -5,15 +5,15 @@ Subject: [PATCH] Revert "Enable Nitrous BT power management driver."
 
 This reverts commit 4a3675d38d3b51976551983cd748fdbca63cb302.
 ---
- .../apq8026-sawshark-bcm.dtsi                 | 23 +++++++++++--------
+ .../apq8026-sawfish-bcm.dtsi                 | 23 +++++++++++--------
  arch/arm/mach-msm/Makefile                    |  2 +-
  drivers/bluetooth/Makefile                    |  2 +-
  3 files changed, 15 insertions(+), 12 deletions(-)
 
-diff --git a/arch/arm/boot/dts/apq8026-sawshark/apq8026-sawshark-bcm.dtsi b/arch/arm/boot/dts/apq8026-sawshark/apq8026-sawshark-bcm.dtsi
+diff --git a/arch/arm/boot/dts/apq8026-sawfish/apq8026-sawfish-bcm.dtsi b/arch/arm/boot/dts/apq8026-sawfish/apq8026-sawfish-bcm.dtsi
 index a2ede985762..0ad5ad33e9a 100644
---- a/arch/arm/boot/dts/apq8026-sawshark/apq8026-sawshark-bcm.dtsi
-+++ b/arch/arm/boot/dts/apq8026-sawshark/apq8026-sawshark-bcm.dtsi
+--- a/arch/arm/boot/dts/apq8026-sawfish/apq8026-sawfish-bcm.dtsi
++++ b/arch/arm/boot/dts/apq8026-sawfish/apq8026-sawfish-bcm.dtsi
 @@ -11,6 +11,16 @@
   */
  
