@@ -71,9 +71,6 @@ cd ../../../lib/hw/
 ln -s /usr/libexec/hal-droid/system/lib/hw/hwcomposer.msm8909.so hwcomposer.sawfish.so
 ln -s /usr/libexec/hal-droid/system/lib/hw/gralloc.msm8909.so gralloc.sawfish.so
 ln -s /usr/libexec/hal-droid/system/lib/hw/memtrack.msm8909.so memtrack.sawfish.so
-ln -s /usr/libexec/hal-droid/system/lib/hw/hwcomposer.msm8909.so hwcomposer.sawfish.so
-ln -s /usr/libexec/hal-droid/system/lib/hw/gralloc.msm8909.so gralloc.sawfish.so
-ln -s /usr/libexec/hal-droid/system/lib/hw/memtrack.msm8909.so memtrack.sawfish.so
 cd ../../../
 ```
 
@@ -99,6 +96,7 @@ cd android-sawfish
 Build everything:
 ```sh
 . build/envsetup.sh
+export TARGET_USES_C2D_COMPOSITION=true # Needed by copybit
 export TARGET_USES_QCOM_BSP=true        # Fixes GPU problems on QCOM platforms
 export TARGET_BOARD_PLATFORM=msm8909    # We Specify the SoC by hand
 export QCOM_BOARD_PLATFORMS=msm8909
