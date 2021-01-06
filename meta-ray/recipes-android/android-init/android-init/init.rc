@@ -5,6 +5,8 @@ on init
     symlink /dev/fb0 /dev/graphics/fb0
     chown system root /sys/class/timed_output/vibrator/enable
 
+    mkdir /data/
+
     class_start core
 
 service logd /system/bin/logd
@@ -19,5 +21,14 @@ service servicemanager /system/bin/servicemanager
 service sensorhd /system/bin/shd
     class core
 
+service bt_vendor /system/bin/bt_vendor.sh
+    class core
+
 on property:sys.powerctl=*
     powerctl ${sys.powerctl}
+
+on property:sys.bt_modem.type=MODEM-BOARD
+    write /dev/kmsg "Start Modem service"
+
+on property:sys.bt_modem.type=BT-BOARD
+    write /dev/kmsg "Start BT service"
