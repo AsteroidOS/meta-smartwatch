@@ -23,6 +23,7 @@ service sensorhd /system/bin/shd
 
 service bt_vendor /system/bin/bt_vendor.sh
     class core
+    oneshot
 
 on property:sys.powerctl=*
     powerctl ${sys.powerctl}
