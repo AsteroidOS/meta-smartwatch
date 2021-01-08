@@ -87,7 +87,7 @@ chmod a+x repo
 mkdir -p android-sawfish/
 cd android-sawfish
 
-../repo init -u https://github.com/AsteroidOS/android_manifest -b marshmallow-dr1.5-release -g all,-notdefault,-darwin,-mips --depth=1
+../repo init -u https://github.com/MagneFire/android_manifest -b nougat-mr1.8-release -g all,-notdefault,-darwin,-mips --depth=1
 ../repo sync
 ```
 
@@ -96,7 +96,7 @@ cd android-sawfish
 Build everything:
 ```sh
 . build/envsetup.sh
-export TARGET_USES_C2D_COMPOSITION=true # Needed by copybit
+#export TARGET_USES_C2D_COMPOSITION=true # Needed by copybit
 export TARGET_USES_QCOM_BSP=true        # Fixes GPU problems on QCOM platforms
 export TARGET_BOARD_PLATFORM=msm8909    # We Specify the SoC by hand
 export QCOM_BOARD_PLATFORMS=msm8909
@@ -107,6 +107,7 @@ mmma hardware/qcom/display/msm8909/     # hwcomposer, gralloc, dependencies...
 mmma frameworks/native/cmds/servicemanager/
 mmma system/core/logd/
 mmma system/core/init/
+mma libminisf
 ```
 
 ### 3.3 Installation
@@ -129,9 +130,13 @@ The second part of this tarball contains header files to compile against
 libhybris. There is a script in the libhybris distribution that can pull
 the header files from the downloaded android distribution (above).
 ```sh
-git clone https://github.com/libhybris/libhybris
-./libhybris/utils/extract-headers.sh -v 7.1.1 -p /usr/include/android android-sawfish include
+android-sawfish/libhybris/utils/extract-headers.sh -v 7.1.1 -p /usr/include/android android-sawfish include
 
+```
+
+Make sure that packages that use android libraries actually know about the modified libraries.
+```sh
+sed -i  '/\CONFIG GOES HERE/a #define QCOM_BSP\n#define QTI_BSP' include/android-config.h
 ```
 
 ## 5. Putting it all together
