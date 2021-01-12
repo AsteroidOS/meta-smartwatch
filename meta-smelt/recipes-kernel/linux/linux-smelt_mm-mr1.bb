@@ -11,13 +11,14 @@ COMPATIBLE_MACHINE = "smelt"
 SRC_URI = " git://android.googlesource.com/kernel/msm;branch=android-msm-smelt-3.10-marshmallow-mr1-wear-release;protocol=https \
     file://defconfig \
     file://img_info \
-    file://0001-Revert-Enable-Nitrous-BT-power-management-driver.patch \
-    file://0002-Revert-Add-Nitrous-driver-for-BT-power-management.patch \
-    file://0003-fix-input-undefined.patch \
-    file://0004-Backport-mainline-4.1-Bluetooth-subsystem.patch \
-    file://0005-fix-gcc5-build.patch \
-    file://0006-ARM-uaccess-remove-put_user-code-duplication.patch \
-    file://0007-bluesleep-Use-kernel-s-HCI-events-instead-of-proc-bl.patch \
+    file://0001-scripts-dtc-Remove-redundant-YYLOC-global-declaratio.patch \
+    file://0002-Revert-Enable-Nitrous-BT-power-management-driver.patch \
+    file://0003-Revert-Add-Nitrous-driver-for-BT-power-management.patch \
+    file://0004-fix-input-undefined.patch \
+    file://0005-Backport-mainline-4.1-Bluetooth-subsystem.patch \
+    file://0006-fix-gcc5-build.patch \
+    file://0007-ARM-uaccess-remove-put_user-code-duplication.patch \
+    file://0008-bluesleep-Use-kernel-s-HCI-events-instead-of-proc-bl.patch \
 "
 
 SRCREV = "49608c8bfc75360f7ac54f539ce326b90034bc9d"
