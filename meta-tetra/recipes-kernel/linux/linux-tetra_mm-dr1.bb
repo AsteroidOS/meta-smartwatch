@@ -11,13 +11,14 @@ COMPATIBLE_MACHINE = "tetra"
 SRC_URI = "git://android.googlesource.com/kernel/bcm;branch=android-bcm-tetra-3.10-marshmallow-dr1-wear-release;protocol=https \
     file://defconfig \
     file://img_info \
-    file://0001-Fix-build-with-OE.patch \
-    file://0002-Bluetooth-fixes-a-poorly-done-patch.patch \
-    file://0003-ion-don-t-use-lmk.patch \
-    file://0004-bcm_bzhw-Use-inverted-IRQ-lines-polarity.patch \
-    file://0005-java_sony_brooks_020-Use-the-bcm-bzhw-driver-instead.patch \
-    file://0006-Backport-v4.1-drivers-using-.-gentree.py-integrate-c.patch \
-    file://0007-Integrate-hci_brcm-and-bcm_bzhw-to-the-backported-BT.patch \
+    file://0001-scripts-dtc-Remove-redundant-YYLOC-global-declaratio.patch \
+    file://0002-Fix-build-with-OE.patch \
+    file://0003-Bluetooth-fixes-a-poorly-done-patch.patch \
+    file://0004-ion-don-t-use-lmk.patch \
+    file://0005-bcm_bzhw-Use-inverted-IRQ-lines-polarity.patch \
+    file://0006-java_sony_brooks_020-Use-the-bcm-bzhw-driver-instead.patch \
+    file://0007-Backport-v4.1-drivers-using-.-gentree.py-integrate-c.patch \
+    file://0008-Integrate-hci_brcm-and-bcm_bzhw-to-the-backported-BT.patch \
     file://0009-ARM-uaccess-remove-put_user-code-duplication.patch \
     file://0010-give-up-on-gcc-ilog2-constant-optimizations.patch \
     file://0011-broadcom-modem-rpc-Disable-logs-which-cause-a-compil.patch"
