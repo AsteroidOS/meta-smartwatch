@@ -8,11 +8,11 @@ Subject: [PATCH] Adapt to what tetra's hwcomposer expects
  1 file changed, 7 insertions(+), 7 deletions(-)
 
 diff --git a/hwcomposer/hwcomposer_backend_v11.cpp b/hwcomposer/hwcomposer_backend_v11.cpp
-index 1db55ff..c2ebcae 100644
+index 136698e..a70805b 100644
 --- a/hwcomposer/hwcomposer_backend_v11.cpp
 +++ b/hwcomposer/hwcomposer_backend_v11.cpp
-@@ -118,18 +118,18 @@ void HWComposer::present(HWComposerNativeWindowBuffer *buffer)
- {
+@@ -132,8 +132,8 @@ void HWComposer::present(HWComposerNativeWindowBuffer *buffer)
+ 
      QPA_HWC_TIMING_SAMPLE(presentTime);
  
 -    fblayer->handle = buffer->handle;
@@ -20,30 +20,31 @@ index 1db55ff..c2ebcae 100644
 +    mlist[0]->hwLayers[0].handle = buffer->handle;
 +    mlist[0]->hwLayers[0].releaseFenceFd = -1;
  
- #ifdef QPA_HWC_SYNC_BEFORE_SET
-     int acqFd = getFenceBufferFd(buffer);
-     if (acqFd >= 0) {
-         sync_wait(acqFd, -1);
-         close(acqFd);
--        fblayer->acquireFenceFd = -1;
-+        mlist[0]->hwLayers[0].acquireFenceFd = -1;
+     int retireFenceFd = -1;
+ 
+@@ -147,10 +147,10 @@ void HWComposer::present(HWComposerNativeWindowBuffer *buffer)
+         if (acqFd >= 0) {
+             sync_wait(acqFd, -1);
+             close(acqFd);
+-            fblayer->acquireFenceFd = -1;
++            mlist[0]->hwLayers[0].acquireFenceFd = -1;
+         }
+     } else {
+-        fblayer->acquireFenceFd = getFenceBufferFd(buffer);
++        mlist[0]->hwLayers[0].acquireFenceFd = getFenceBufferFd(buffer);
      }
- #else
--    fblayer->acquireFenceFd = getFenceBufferFd(buffer);
-+    mlist[0]->hwLayers[0].acquireFenceFd = getFenceBufferFd(buffer);
- #endif
  
      QPA_HWC_TIMING_SAMPLE(syncTime);
-@@ -144,7 +144,7 @@ void HWComposer::present(HWComposerNativeWindowBuffer *buffer)
+@@ -167,7 +167,7 @@ void HWComposer::present(HWComposerNativeWindowBuffer *buffer)
  
      QPA_HWC_TIMING_SAMPLE(setTime);
  
 -    setFenceBufferFd(buffer, fblayer->releaseFenceFd);
 +    setFenceBufferFd(buffer, mlist[0]->hwLayers[0].releaseFenceFd);
  
-     if (mlist[0]->retireFenceFd != -1) {
-         close(mlist[0]->retireFenceFd);
-@@ -292,7 +292,7 @@ HwComposerBackend_v11::createWindow(int width, int height)
+     if (m_waitOnRetireFence && retireFenceFd != -1) {
+         sync_wait(retireFenceFd, -1);
+@@ -318,7 +318,7 @@ HwComposerBackend_v11::createWindow(int width, int height)
  
  
      HWComposer *hwc_win = new HWComposer(width, height, HAL_PIXEL_FORMAT_RGBA_8888,
@@ -52,15 +53,6 @@ index 1db55ff..c2ebcae 100644
      return (EGLNativeWindowType) static_cast<ANativeWindow *>(hwc_win);
  }
  
-@@ -385,7 +385,7 @@ HwComposerBackend_v11::sleepDisplay(bool sleep)
- 
- #ifdef HWC_DEVICE_API_VERSION_1_4
-         if (hwc_version == HWC_DEVICE_API_VERSION_1_4) {
--            HWC_PLUGIN_EXPECT_ZERO(hwc_device->setPowerMode(hwc_device, 0, HWC_POWER_MODE_NORMAL));
-+            //HWC_PLUGIN_EXPECT_ZERO(hwc_device->setPowerMode(hwc_device, 0, HWC_POWER_MODE_NORMAL));
-         } else
- #endif
- #ifdef HWC_DEVICE_API_VERSION_1_5
 -- 
 2.29.0
 
