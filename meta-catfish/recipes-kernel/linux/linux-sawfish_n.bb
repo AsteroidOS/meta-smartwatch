@@ -11,6 +11,7 @@ COMPATIBLE_MACHINE = "sawfish"
 SRC_URI = " git://android.googlesource.com/kernel/msm;branch=android-msm-sawshark-3.18-nougat-mr1-wear;protocol=https \
     file://defconfig \
     file://img_info \
+    file://0001-scripts-dtc-Remove-redundant-YYLOC-global-declaratio.patch \
     file://0006-ARM-uaccess-remove-put_user-code-duplication.patch \
 "
 
