@@ -65,6 +65,7 @@ cp -r firmware/image/* system/vendor/firmware/
 cd system/
 rm -rf app/ fonts/ framework/ media/ priv-app/ xbin/
 sed -i "/persist.hwc.mdpcomp.enable=true/d" build.prop
+sed -i -e '$asys.hwc.gpu_perf_mode=1' build.prop
 cd vendor/lib/egl/
 ln -s libGLESv2_adreno.so libGLESv2S3D_adreno.so
 cd ../../../lib/hw/
