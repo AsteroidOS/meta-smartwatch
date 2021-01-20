@@ -15,6 +15,9 @@ service logd /system/bin/logd
     socket logdr seqpacket 0666 root root
     socket logdw dgram 0222 root root
 
+service logcat /system/bin/logcat -f /dev/kmsg
+    class core
+
 service servicemanager /system/bin/servicemanager
     class core
 
