@@ -1,0 +1,41 @@
+From 08d8d61c938a59929e4ab7f7682d767cbd4b6dac Mon Sep 17 00:00:00 2001
+From: MagneFire <IDaNLContact@gmail.com>
+Date: Fri, 22 Jan 2021 19:23:38 +0100
+Subject: [PATCH] mdss_mdp_pipe: Don't allocate first RGB pipe. The first Rgb
+ pipe is used at boot. For some reason it isn't released for use with the
+ compositor. Hacky workaround: Don't alocate pipe the first time.
+
+---
+ drivers/video/msm/mdss/mdss_mdp_pipe.c | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/drivers/video/msm/mdss/mdss_mdp_pipe.c b/drivers/video/msm/mdss/mdss_mdp_pipe.c
+index 8765d1c1c47..41adda67380 100644
+--- a/drivers/video/msm/mdss/mdss_mdp_pipe.c
++++ b/drivers/video/msm/mdss/mdss_mdp_pipe.c
+@@ -646,6 +646,8 @@ static void mdss_mdp_fixed_qos_arbiter_setup(struct mdss_data_type *mdata,
+ 	mdss_mdp_clk_ctrl(MDP_BLOCK_POWER_OFF);
+ }
+ 
++u32 firstRgbPipe = 1;
++
+ static struct mdss_mdp_pipe *mdss_mdp_pipe_init(struct mdss_mdp_mixer *mixer,
+ 	u32 type, u32 off, struct mdss_mdp_pipe *left_blend_pipe)
+ {
+@@ -671,6 +673,13 @@ static struct mdss_mdp_pipe *mdss_mdp_pipe_init(struct mdss_mdp_mixer *mixer,
+ 	case MDSS_MDP_PIPE_TYPE_RGB:
+ 		pipe_pool = mdata->rgb_pipes;
+ 		npipes = mdata->nrgb_pipes;
++		if (firstRgbPipe) {
++			firstRgbPipe = 0;
++			// The first Rgb pipe is used at boot.
++			// For some reason it isn't released for use with the compositor.
++			// Hacky workaround: Don't alocate pipe the first time.
++			goto cursor_done;
++		}
+ 		break;
+ 
+ 	case MDSS_MDP_PIPE_TYPE_DMA:
+-- 
+2.30.0
+
