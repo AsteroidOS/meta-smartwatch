@@ -18,6 +18,9 @@ service logd /system/bin/logd
 service servicemanager /system/bin/servicemanager
     class core
 
+service healthd /system/bin/healthd
+    class core
+
 service m4setup /system/bin/m4setup
     user root
     oneshot
