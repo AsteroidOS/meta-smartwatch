@@ -5,6 +5,9 @@ on init
     symlink /dev/fb0 /dev/graphics/fb0
     chown system root /sys/class/timed_output/vibrator/enable
 
+    chown system system /sys/bus/i2c/devices/5-004a/interactivemode
+    chown system system /sys/class/leds/lcd-backlight/interactive
+
     write /sys/kernel/debug/mdp/allow_cx_vddmin 1
 
     class_start core
