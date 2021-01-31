@@ -11,14 +11,15 @@ COMPATIBLE_MACHINE = "anthias"
 SRC_URI = "git://android.googlesource.com/kernel/msm;branch=android-msm-anthias-3.10-marshmallow-dr1-wear-release;protocol=https \
     file://defconfig \
     file://img_info \
-    file://0001-Create-copy-of-devfreq_trace.h.patch \
-    file://0002-msm-mdss-mdp-Don-t-use-tracing-features.patch \
-    file://0003-psmouse-base-disable-references-to-lifebook_detect-w.patch \
-    file://0004-static-inline-in-ARM-ftrace.h.patch \
-    file://0005-traps-only-use-unwind_backtrace-if-available.patch \
-    file://0006-Use-Bluesleep-instead-of-Nitrous-for-BT-power-manage.patch \
-    file://0007-Backport-mainline-4.1-Bluetooth-subsystem.patch \
-    file://0008-it7260_ts_i2c-Remove-the-differenciation-of-Ambient-.patch \
+    file://0001-scripts-dtc-Remove-redundant-YYLOC-global-declaratio.patch \
+    file://0002-Create-copy-of-devfreq_trace.h.patch \
+    file://0003-msm-mdss-mdp-Don-t-use-tracing-features.patch \
+    file://0004-psmouse-base-disable-references-to-lifebook_detect-w.patch \
+    file://0005-static-inline-in-ARM-ftrace.h.patch \
+    file://0006-traps-only-use-unwind_backtrace-if-available.patch \
+    file://0007-Use-Bluesleep-instead-of-Nitrous-for-BT-power-manage.patch \
+    file://0008-Backport-mainline-4.1-Bluetooth-subsystem.patch \
+    file://0009-it7260_ts_i2c-Remove-the-differenciation-of-Ambient-.patch \
     file://0010-ARM-uaccess-remove-put_user-code-duplication.patch "
 SRCREV = "5d054632429188226b8c1e1e545475c89ad4c582"
 LINUX_VERSION ?= "3.10"
