@@ -1,4 +1,4 @@
-From d929e3fb630a7ae1d20fc6bb27dd9293753f56b4 Mon Sep 17 00:00:00 2001
+From 7bfad1890bbeb7d12be88651c2b9af3a00c8368d Mon Sep 17 00:00:00 2001
 From: Lrs121 <lrs@lrsservers.net>
 Date: Thu, 30 Jun 2016 12:06:46 -0700
 Subject: [PATCH] Remove unecessary include to axc_PM8226Charger.h

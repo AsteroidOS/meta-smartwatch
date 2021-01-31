@@ -1,4 +1,4 @@
-From 268e2e5f99b0ebde49ca2ffc8c84033de7024f30 Mon Sep 17 00:00:00 2001
+From 7e53114b1f8b917ef9f4fe1e1cf6908526b7ffc7 Mon Sep 17 00:00:00 2001
 From: Lrs121 <lrs@lrsservers.net>
 Date: Thu, 30 Jun 2016 11:43:44 -0700
 Subject: [PATCH] Create copy of devfreq_trace.h

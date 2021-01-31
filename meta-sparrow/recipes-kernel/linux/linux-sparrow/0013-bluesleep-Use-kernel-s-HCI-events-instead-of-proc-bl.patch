@@ -1,7 +1,8 @@
-From 07118aa84d167a2bdb38f2d896a34cb03c7937e9 Mon Sep 17 00:00:00 2001
+From 53b142f6d430143df6e20ed58fb4e9957d6003f4 Mon Sep 17 00:00:00 2001
 From: Florent Revest <revestflo@gmail.com>
 Date: Tue, 14 Feb 2017 16:53:03 +0100
 Subject: [PATCH] bluesleep: Use kernel's HCI events instead of
+
  /proc/bluetooth/sleep/ write to interface with BlueZ instead of Bluedroid
 
 ---
@@ -9,7 +10,7 @@ Subject: [PATCH] bluesleep: Use kernel's HCI events instead of
  drivers/bluetooth/hci_ldisc.c |  4 ++++
  include/net/bluetooth/hci.h   |  1 +
  net/bluetooth/hci_sock.c      |  4 ++++
- 4 files changed, 38 insertions(+)
+ 4 files changed, 37 insertions(+)
 
 diff --git a/drivers/BCM_LPM/bluesleep.c b/drivers/BCM_LPM/bluesleep.c
 index adf3f4c0bca6..725ccb109591 100644
@@ -85,19 +86,19 @@ index d95da83cb1b0..54be456bcc9c 100644
  /* HCI notify events */
  #define HCI_NOTIFY_CONN_ADD		1
 diff --git a/net/bluetooth/hci_sock.c b/net/bluetooth/hci_sock.c
-index fa4bf6631425..22de140c2344 100644
+index a5cf13bf289d..c5b77df9eb52 100644
 --- a/net/bluetooth/hci_sock.c
 +++ b/net/bluetooth/hci_sock.c
-@@ -66,6 +66,8 @@ static struct bt_sock_list hci_sk_list = {
- 	.lock = __RW_LOCK_UNLOCKED(hci_sk_list.lock)
- };
+@@ -152,6 +152,8 @@ static bool is_filtered_packet(struct sock *sk, struct sk_buff *skb)
+ 	return false;
+ }
  
 +void bluesleep_hci_event(unsigned long event);
 +
  /* Send frame to RAW socket */
  void hci_send_to_sock(struct hci_dev *hdev, struct sk_buff *skb)
  {
-@@ -369,6 +371,8 @@ void hci_sock_dev_event(struct hci_dev *hdev, int event)
+@@ -394,6 +396,8 @@ void hci_sock_dev_event(struct hci_dev *hdev, int event)
  {
  	struct hci_ev_si_device ev;
  
@@ -106,6 +107,3 @@ index fa4bf6631425..22de140c2344 100644
  	BT_DBG("hdev %s event %d", hdev->name, event);
  
  	/* Send event to monitor */
--- 
-2.17.1
-

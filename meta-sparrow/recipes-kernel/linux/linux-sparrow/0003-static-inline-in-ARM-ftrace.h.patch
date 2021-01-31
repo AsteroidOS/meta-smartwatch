@@ -1,4 +1,4 @@
-From 043721446ca96e6d7a712957e2d7ab960294a31d Mon Sep 17 00:00:00 2001
+From 824db1f747c054bce2cc4ed2a3b413767f7b342f Mon Sep 17 00:00:00 2001
 From: ZaneZam <cyxman@yahoo.com>
 Date: Thu, 26 Mar 2015 14:50:10 +0100
 Subject: [PATCH] arm: LLVMLinux: use static inline in ARM ftrace.h
