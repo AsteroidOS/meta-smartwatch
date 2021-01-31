@@ -38,3 +38,4 @@ do_package_qa() {
 PACKAGES =+ "android-system android-headers"
 FILES_android-system = "/system /vendor"
 FILES_android-headers = "${libdir}/pkgconfig ${includedir}/android"
+EXCLUDE_FROM_SHLIBS = "1"
