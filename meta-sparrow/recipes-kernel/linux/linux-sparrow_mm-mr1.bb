@@ -9,15 +9,16 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=d7810fab7487fb0aad327b76f1be7cd7"
 COMPATIBLE_MACHINE = "sparrow"
 
 SRC_URI = "git://android.googlesource.com/kernel/msm;branch=android-msm-sparrow-3.10-marshmallow-mr1-wear-release;protocol=https \
-    file://0001-patch-psmouse-base-disable.patch \
-    file://0002-static-inline-in-ARM-ftrace.h.patch \
-    file://0003-Add-files-needed-for-device_trace.h.patch \
-    file://0004-Create-copy-of-devfreq_trace.h.patch \
-    file://0005-Patch-battery-values.patch \
-    file://0006-Touch-screen-sleep-resume-patch.patch \
-    file://0007-Remove-unecessary-include-to-axc_PM8226Charger.h.patch \
-    file://0008-msm-mdss-mdp-Don-t-use-tracing-features.patch \
-    file://0009-Makefile-patch-fixes-ASUS_SW_VER-error.patch \
+    file://0001-scripts-dtc-Remove-redundant-YYLOC-global-declaratio.patch \
+    file://0002-patch-psmouse-base-disable.patch \
+    file://0003-static-inline-in-ARM-ftrace.h.patch \
+    file://0004-Add-files-needed-for-device_trace.h.patch \
+    file://0005-Create-copy-of-devfreq_trace.h.patch \
+    file://0006-Patch-battery-values.patch \
+    file://0007-Touch-screen-sleep-resume-patch.patch \
+    file://0008-Remove-unecessary-include-to-axc_PM8226Charger.h.patch \
+    file://0009-msm-mdss-mdp-Don-t-use-tracing-features.patch \
+    file://0010-Makefile-patch-fixes-ASUS_SW_VER-error.patch \
     file://0011-ARM-uaccess-remove-put_user-code-duplication.patch \
     file://0012-Backport-mainline-4.1-Bluetooth-subsystem.patch \
     file://0013-bluesleep-Use-kernel-s-HCI-events-instead-of-proc-bl.patch \
