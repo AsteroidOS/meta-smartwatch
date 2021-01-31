@@ -10,7 +10,7 @@ INHIBIT_PACKAGE_STRIP = "1"
 COMPATIBLE_MACHINE = "harmony|inharmony"
 INSANE_SKIP_${PN} = "already-stripped"
 S = "${WORKDIR}"
-B = "${S}/system-harmony/"
+B = "${S}/system-harmony"
 
 PROVIDES += "virtual/android-system-image"
 PROVIDES += "virtual/android-headers"
@@ -43,3 +43,4 @@ do_package_qa() {
 PACKAGES =+ "android-system android-headers"
 FILES_android-system = "/system /vendor /usr /etc/firmware"
 FILES_android-headers = "${libdir}/pkgconfig ${includedir}/android"
+EXCLUDE_FROM_SHLIBS = "1"
