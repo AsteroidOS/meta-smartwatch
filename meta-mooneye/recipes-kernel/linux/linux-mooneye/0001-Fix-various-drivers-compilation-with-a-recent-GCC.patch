@@ -1,27 +1,29 @@
-From f42bb030ea28ea0e7a6be90cf709410ebfd6caf1 Mon Sep 17 00:00:00 2001
+From 5c9bb44ad1e42ea88b349d498b976ec27e980b06 Mon Sep 17 00:00:00 2001
 From: Florent Revest <revestflo@gmail.com>
 Date: Thu, 2 May 2019 00:28:46 +0200
 Subject: [PATCH] Fix various drivers compilation with a recent GCC
 
 ---
  Makefile                                      |  4 ++-
+ drivers/input/touchscreen/mediatek/Makefile   |  2 ++
  .../common/common_main/core/wmt_core.c        |  2 +-
  .../connectivity/wlan/gen3/mgmt/rlm.c         | 25 ++++++++++---------
  drivers/misc/mediatek/leds/mtk_leds_drv.c     |  2 +-
  drivers/misc/mediatek/m4u/mt2601/m4u.c        |  6 -----
  .../mediatek/power/mt2601/charging_hw_pmic.c  |  6 ++---
+ drivers/misc/mediatek/pwm/Makefile            |  1 +
  .../sensorhub/CwMcuSensor/CwMcuSensor.h       |  2 +-
  .../CwMcuSensor/CwMcuSensor_factory.c         |  2 +-
  .../misc/mediatek/uart/mt2601/platform_uart.c | 17 +++++--------
  drivers/misc/mediatek/usb20/mt2601/usb20.c    |  2 +-
  .../misc/mediatek/usb20/mt2601/usb20_host.c   |  2 +-
- 11 files changed, 31 insertions(+), 39 deletions(-)
+ 13 files changed, 34 insertions(+), 39 deletions(-)
 
 diff --git a/Makefile b/Makefile
-index c9c199df72e4..52380dcdfec6 100644
+index 65732aa56e4e..e5b4838a5808 100644
 --- a/Makefile
 +++ b/Makefile
-@@ -396,7 +396,9 @@ KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
+@@ -398,7 +398,9 @@ KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
  		   -fno-strict-aliasing -fno-common \
  		   -Werror-implicit-function-declaration \
  		   -Wno-format-security \
@@ -32,6 +34,19 @@ index c9c199df72e4..52380dcdfec6 100644
  
  
  KBUILD_AFLAGS_KERNEL :=
+diff --git a/drivers/input/touchscreen/mediatek/Makefile b/drivers/input/touchscreen/mediatek/Makefile
+index 2d2639c252fa..8d4e9007d917 100644
+--- a/drivers/input/touchscreen/mediatek/Makefile
++++ b/drivers/input/touchscreen/mediatek/Makefile
+@@ -12,6 +12,8 @@ obj-y   +=  tpd_init.o
+ obj-y   +=  tpd_misc.o
+ obj-y   +=  tpd_setting.o
+ 
++CFLAGS_tpd_button.o := -Wno-restrict
++
+ obj-$(CONFIG_TOUCHSCREEN_MTK_GT1151)	+= GT1151/
+ obj-$(CONFIG_TOUCHSCREEN_MTK_GT911)	+= GT911/
+ obj-$(CONFIG_TOUCHSCREEN_MTK_GSLX680)	+= gslX680/
 diff --git a/drivers/misc/mediatek/connectivity/common/common_main/core/wmt_core.c b/drivers/misc/mediatek/connectivity/common/common_main/core/wmt_core.c
 index 26cb70b434ec..9ff61e818046 100644
 --- a/drivers/misc/mediatek/connectivity/common/common_main/core/wmt_core.c
@@ -135,6 +150,18 @@ index c7daba90927f..9f18eb853f52 100644
   }
  
  
+diff --git a/drivers/misc/mediatek/pwm/Makefile b/drivers/misc/mediatek/pwm/Makefile
+index dfcca552fb6e..ec2877926f9b 100644
+--- a/drivers/misc/mediatek/pwm/Makefile
++++ b/drivers/misc/mediatek/pwm/Makefile
+@@ -16,6 +16,7 @@ ifneq ($(CONFIG_ARCH_MT2601),y)
+ obj-$(CONFIG_MTK_PWM)	+= mtk_pwm.o
+ else
+ obj-$(CONFIG_MTK_PWM)	+= mt_pwm.o
++CFLAGS_mt_pwm.o := -Wno-restrict
+ endif
+ 
+ obj-y += $(subst ",,$(CONFIG_MTK_PLATFORM))/
 diff --git a/drivers/misc/mediatek/sensorhub/CwMcuSensor/CwMcuSensor.h b/drivers/misc/mediatek/sensorhub/CwMcuSensor/CwMcuSensor.h
 index 2b49b7777b29..bcab48200810 100644
 --- a/drivers/misc/mediatek/sensorhub/CwMcuSensor/CwMcuSensor.h
@@ -232,5 +259,5 @@ index 7cc7f2431bad..35e5aeda4906 100644
  #ifdef CONFIG_USB_MTK_OTG
  
 -- 
-2.20.1
+2.30.0
 
