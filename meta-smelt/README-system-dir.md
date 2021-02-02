@@ -45,12 +45,15 @@ cp -r boot/initramfs/firmware/image/* system/vendor/firmware/
 cd system/
 rm -rf app/ fonts/ framework/ media/ priv-app/ xbin/
 sed -i "/persist.hwc.mdpcomp.enable=true/d" build.prop
+sed -i 's/16000|32000|48000/8000|11025|12000|16000|22050|24000|32000|44100|48000/g' etc/audio_policy.conf
 cd vendor/lib/egl/
 ln -s libGLESv2_adreno.so libGLESv2S3D_adreno.so
 cd ../../../lib/hw/
 ln -s /usr/libexec/hal-droid/system/lib/hw/hwcomposer.msm8226.so hwcomposer.smelt.so
 ln -s /usr/libexec/hal-droid/system/lib/hw/gralloc.msm8226.so gralloc.smelt.so
 ln -s /usr/libexec/hal-droid/system/lib/hw/memtrack.msm8226.so memtrack.smelt.so
+ln -s audio.a2dp.msm8226.so audio.a2dp.smelt.so
+ln -s audio.primary.msm8226.so audio.primary.smelt.so
 cd ../../../
 ```
 
