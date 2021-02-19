@@ -14,6 +14,10 @@ SRC_URI = " git://android.googlesource.com/kernel/msm;branch=android-msm-sawshar
     file://0001-scripts-dtc-Remove-redundant-YYLOC-global-declaratio.patch \
     file://0006-ARM-uaccess-remove-put_user-code-duplication.patch \
     file://0003-mdss-Import-video-driver-from-Marshmallow.patch \
+    file://0004-Backport-mainline-4.1-Bluetooth-subsystem.patch \
+    file://0005-Revert-BT-Delete-the-file-board-8909-rfkill.c.patch \
+    file://0006-bluetooth-Import-Bluesleep-driver.patch \
+    file://0007-bluesleep-Use-kernel-s-HCI-events-instead-of-proc-bl.patch \
 "
 
 SRCREV = "66cf3d5be07a599af417695e4f22f304af667979"
