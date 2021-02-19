@@ -1,5 +1,18 @@
+From 6443035d1c4f6acf1ff6e9d3d264fd1f5ed5090c Mon Sep 17 00:00:00 2001
+From: MagneFire <IDaNLContact@gmail.com>
+Date: Fri, 19 Feb 2021 22:59:58 +0100
+Subject: [PATCH 4/4] bluesleep: Use kernel's HCI events instead of
+ /proc/bluetooth/sleep/ write to interface with BlueZ instead of Bluedroid.
+
+---
+ drivers/bluetooth/bluesleep.c | 51 +++++++++++++++++++++++++++++------
+ drivers/bluetooth/hci_ldisc.c |  4 +++
+ include/net/bluetooth/hci.h   |  1 +
+ net/bluetooth/hci_sock.c      |  4 +++
+ 4 files changed, 52 insertions(+), 8 deletions(-)
+
 diff --git a/drivers/bluetooth/bluesleep.c b/drivers/bluetooth/bluesleep.c
-index 9879fd20fcf..d8cb38fc9f4 100644
+index 9879fd20fcf..47d596edbd6 100644
 --- a/drivers/bluetooth/bluesleep.c
 +++ b/drivers/bluetooth/bluesleep.c
 @@ -54,6 +54,7 @@
@@ -10,49 +23,10 @@ index 9879fd20fcf..d8cb38fc9f4 100644
  
  #define BT_SLEEP_DBG
  #ifndef BT_SLEEP_DBG
-@@ -76,6 +77,15 @@
- #define AID_BLUETOOTH 1002
- #define AID_NET_BT_STACK 3008
- 
-+
-+/* from msm_serial_hs.c */
-+enum msm_hs_clk_states_e {
-+	MSM_HS_CLK_PORT_OFF,     /* port not in use */
-+	MSM_HS_CLK_OFF,          /* clock disabled */
-+	MSM_HS_CLK_REQUEST_OFF,  /* disable after TX and RX flushed */
-+	MSM_HS_CLK_ON,           /* clock enabled */
-+};
-+
- enum {
-     DEBUG_USER_STATE = 1U << 0,
-     DEBUG_SUSPEND = 1U << 1,
-@@ -99,15 +109,18 @@ struct bluesleep_info {
- 
- /* work function */
- static void bluesleep_sleep_work(struct work_struct *work);
-+static void bluesleep_uart_awake_work(struct work_struct *work);
- 
- /* work queue */
- DECLARE_DELAYED_WORK(sleep_workqueue, bluesleep_sleep_work);
-+DECLARE_DELAYED_WORK(uart_awake_wq, bluesleep_uart_awake_work);
- 
- /* Macros for handling sleep work */
- #define bluesleep_rx_busy() schedule_delayed_work(&sleep_workqueue, 0)
- #define bluesleep_tx_busy() schedule_delayed_work(&sleep_workqueue, 0)
- #define bluesleep_rx_idle() schedule_delayed_work(&sleep_workqueue, 0)
- #define bluesleep_tx_idle() schedule_delayed_work(&sleep_workqueue, 0)
-+#define bluesleep_uart_work()   schedule_delayed_work(&uart_awake_wq, 0)
- 
- /* 3 second timeout */
- #define TX_TIMER_INTERVAL 3
-@@ -153,21 +166,57 @@ struct proc_dir_entry *bluetooth_dir, *sleep_dir;
+@@ -153,21 +154,27 @@ struct proc_dir_entry *bluetooth_dir, *sleep_dir;
  /*
  * Local functions
  */
-+static int bluesleep_get_uart_state(void)
-+{
-+	return msm_hs_get_clock_state(bsi->uport);
-+}
 +static void hsuart_power_on(void)
 +{
 +	printk(KERN_INFO "HSUART CLOCK: ON\n");
@@ -65,24 +39,8 @@ index 9879fd20fcf..d8cb38fc9f4 100644
 +	msm_hs_set_mctrl(bsi->uport, 0);
 +	msm_hs_request_clock_off(bsi->uport);
 +}
-+static void bluesleep_uart_awake_work(struct work_struct *work)
-+{
-+	int clk_state;
-+	if (!bsi->uport) {
-+		BT_DBG("hsuart_power called. But uport is null");
-+		return;
-+	}
-+	clk_state = bluesleep_get_uart_state();
-+	if (clk_state == MSM_HS_CLK_OFF) {
-+		if (has_lpm_enabled)
-+			hsuart_power_on();
-+	} else if (clk_state == MSM_HS_CLK_REQUEST_OFF) {
-+		bluesleep_uart_work();
-+	}
-+}
  static void hsuart_power(int on)
  {
-+	int clk_state;
  	if (test_bit(BT_SUSPEND, &flags))
  		return;
 -
@@ -91,17 +49,7 @@ index 9879fd20fcf..d8cb38fc9f4 100644
 -		msm_hs_request_clock_on(bsi->uport);
 -		msm_hs_set_mctrl(bsi->uport, TIOCM_RTS);
 -
-+		if (test_bit(BT_TXDATA, &flags)) {
-+			 hsuart_power_on();
-+			 return;
-+		}
-+		clk_state = bluesleep_get_uart_state();
-+		if (clk_state == MSM_HS_CLK_REQUEST_OFF) {
-+			printk(KERN_INFO "HSUART CLOCK: wait...\n");
-+			bluesleep_uart_work();
-+		} else {
-+			hsuart_power_on();
-+		}
++		hsuart_power_on();
  	} else {
 -		msm_hs_set_mctrl(bsi->uport, 0);
 -		msm_hs_request_clock_off(bsi->uport);
@@ -111,7 +59,7 @@ index 9879fd20fcf..d8cb38fc9f4 100644
  }
  
  /**
-@@ -453,6 +502,36 @@ static void bluesleep_stop(void)
+@@ -453,6 +460,34 @@ static void bluesleep_stop(void)
  	wake_lock_timeout(&bsi->wake_lock, HZ / 2);
  }
  
@@ -133,8 +81,6 @@ index 9879fd20fcf..d8cb38fc9f4 100644
 +		break;
 +	case HCI_DEV_UNREG:
 +		bluesleep_stop();
-+		/* flush pending works */
-+		flush_delayed_work(&uart_awake_wq);
 +		has_lpm_enabled = false;
 +		bsi->uport = NULL;
 +		/* if bluetooth stopped, stop bluesleep also */
@@ -148,17 +94,8 @@ index 9879fd20fcf..d8cb38fc9f4 100644
  static int bluesleep_write_proc_btwrite(struct file *file,
  					const char __user * buffer,
  					size_t count, loff_t * ppos)
-@@ -487,6 +566,8 @@ static int bluesleep_write_proc_lpm(struct file *file,
- 	if (b == '0') {
- 		/* HCI_DEV_UNREG */
- 		bluesleep_stop();
-+		/* flush pending works */
-+		flush_delayed_work(&uart_awake_wq);
- 		has_lpm_enabled = false;
- 		bsi->uport = NULL;
- 	} else {
 diff --git a/drivers/bluetooth/hci_ldisc.c b/drivers/bluetooth/hci_ldisc.c
-index 5c9a73f02664..f21432799e0f 100644
+index 5c9a73f0266..f21432799e0 100644
 --- a/drivers/bluetooth/hci_ldisc.c
 +++ b/drivers/bluetooth/hci_ldisc.c
 @@ -248,6 +248,8 @@ static int hci_uart_close(struct hci_dev *hdev)
@@ -180,7 +117,7 @@ index 5c9a73f02664..f21432799e0f 100644
  
  	hci_uart_tx_wakeup(hu);
 diff --git a/include/net/bluetooth/hci.h b/include/net/bluetooth/hci.h
-index d95da83cb1b0..54be456bcc9c 100644
+index d95da83cb1b..54be456bcc9 100644
 --- a/include/net/bluetooth/hci.h
 +++ b/include/net/bluetooth/hci.h
 @@ -44,6 +44,7 @@
@@ -192,7 +129,7 @@ index d95da83cb1b0..54be456bcc9c 100644
  /* HCI notify events */
  #define HCI_NOTIFY_CONN_ADD		1
 diff --git a/net/bluetooth/hci_sock.c b/net/bluetooth/hci_sock.c
-index a5cf13bf289d..c5b77df9eb52 100644
+index a5cf13bf289..c5b77df9eb5 100644
 --- a/net/bluetooth/hci_sock.c
 +++ b/net/bluetooth/hci_sock.c
 @@ -152,6 +152,8 @@ static bool is_filtered_packet(struct sock *sk, struct sk_buff *skb)
@@ -214,4 +151,5 @@ index a5cf13bf289d..c5b77df9eb52 100644
  
  	/* Send event to monitor */
 -- 
-2.11.0
+2.30.1
+
