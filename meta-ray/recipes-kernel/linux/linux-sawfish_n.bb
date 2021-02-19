@@ -13,6 +13,7 @@ SRC_URI = " git://android.googlesource.com/kernel/msm;branch=android-msm-sawshar
     file://img_info \
     file://0001-scripts-dtc-Remove-redundant-YYLOC-global-declaratio.patch \
     file://0006-ARM-uaccess-remove-put_user-code-duplication.patch \
+    file://0003-mdss-Import-video-driver-from-Marshmallow.patch \
 "
 
 SRCREV = "66cf3d5be07a599af417695e4f22f304af667979"
