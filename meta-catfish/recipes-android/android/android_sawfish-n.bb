@@ -5,8 +5,8 @@ LICENSE = "CLOSED"
 SRC_URI = "https://dl.dropboxusercontent.com/s/u1o3mtnlojg49jt/system-NXH20B.tar.gz \
     file://60-i2c.rules \
 "
-SRC_URI[md5sum] = "5706089e9b9fad638cbf75111e984bc3"
-SRC_URI[sha256sum] = "9641692d6efaff01d6bda696cd5004be08ea88e1c22591b919aca53940b199ae"
+SRC_URI[md5sum] = "f9c576ef60fc4046155cb1e3432962bc"
+SRC_URI[sha256sum] = "2fc8a0d7d67962244ffd5479cbd2cbd65d318ac92da92359260153ab27756271"
 PV = "nougat"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
