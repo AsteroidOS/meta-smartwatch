@@ -1,0 +1,61 @@
+From d64065d9bb5dbc006079ea1c14a9e52e09ddfcd6 Mon Sep 17 00:00:00 2001
+From: MagneFire <IDaNLContact@gmail.com>
+Date: Sat, 20 Feb 2021 21:38:33 +0100
+Subject: [PATCH] Bluetooth: Fix incorrect gpio definition in device tree and
+ use different method to get gpio irq. It turns out that the vendor provided
+ gpio definition for the Bluesleep driver is incorrect. For some reason the
+ platform_get_resource_byname() method doesn't appear to work when getting the
+ host_wake_irq, to solve this use the gpio_to_irq() function also used by the
+ Nitrous driver.
+
+---
+ arch/arm/boot/dts/apq8009w-sawshark/apq8009w-bt.dtsi | 6 ++++--
+ drivers/bluetooth/bluesleep.c                        | 6 ++++--
+ 2 files changed, 8 insertions(+), 4 deletions(-)
+
+diff --git a/arch/arm/boot/dts/apq8009w-sawshark/apq8009w-bt.dtsi b/arch/arm/boot/dts/apq8009w-sawshark/apq8009w-bt.dtsi
+index 86c657e09ca..01a8b4bdbfe 100644
+--- a/arch/arm/boot/dts/apq8009w-sawshark/apq8009w-bt.dtsi
++++ b/arch/arm/boot/dts/apq8009w-sawshark/apq8009w-bt.dtsi
+@@ -13,10 +13,12 @@
+ &soc {
+ 	qcom,bluesleep {
+ 		compatible = "qcom,bluesleep";
+-		host-wake-gpio = <&msm_gpio 38 0>;
+-		ext-wake-gpio = <&msm_gpio 47 0>;
++		host-wake-gpio = <&msm_gpio 47 0>;
++		ext-wake-gpio = <&msm_gpio 38 0>;
+ 		interrupt-parent = <&msm_gpio>;
+ 		interrupts = <47 0>;
++		interrupt-names = "host_wake";
++		tx-timer-interval = <1>;
+ 		pinctrl-names = "default","sleep";
+ 		pinctrl-0 = <&bt_wakeup_ap_active>;
+ 		pinctrl-1 = <&bt_wakeup_ap_suspend>;
+diff --git a/drivers/bluetooth/bluesleep.c b/drivers/bluetooth/bluesleep.c
+index 47d596edbd6..b4ce58ce8b3 100644
+--- a/drivers/bluetooth/bluesleep.c
++++ b/drivers/bluetooth/bluesleep.c
+@@ -640,7 +640,7 @@ static int bluesleep_probe(struct platform_device *pdev)
+ 		}
+ 	}
+ 	clear_bit(BT_EXT_WAKE, &flags);
+-
++/*
+ 	res = platform_get_resource_byname(pdev, IORESOURCE_IRQ, "host_wake");
+ 	if (!res) {
+ 		BT_ERR("couldn't find host_wake irq");
+@@ -652,7 +652,9 @@ static int bluesleep_probe(struct platform_device *pdev)
+ 		BT_ERR("couldn't find host_wake irq");
+ 		ret = -ENODEV;
+ 		goto free_bt_ext_wake;
+-	}
++	}*/
++
++	bsi->host_wake_irq = gpio_to_irq(bsi->host_wake);
+ 
+ 	bsi->irq_polarity = POLARITY_LOW;	/*low edge (falling edge) */
+ 
+-- 
+2.30.1
+
