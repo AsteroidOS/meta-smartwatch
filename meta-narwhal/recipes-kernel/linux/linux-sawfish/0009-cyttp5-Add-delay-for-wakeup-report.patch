@@ -1,0 +1,28 @@
+From b0a31d292cbc0bf5863dc311502f995438108af2 Mon Sep 17 00:00:00 2001
+From: MagneFire <IDaNLContact@gmail.com>
+Date: Sun, 21 Feb 2021 22:21:06 +0100
+Subject: [PATCH] cyttp5: Add delay for wakeup report. AsteroidOS requires the
+ user to keep pressing the screen for ~200ms to wake the screen. However, the
+ method used here simply sends a quick event, which doesn't work in our
+ implementation. To solve this we simply need to make sure the the finger is
+ held down for atleast 200ms, this is done by emulating a 300ms touch.
+
+---
+ drivers/input/touchscreen/cyttsp5_cs445a/cyttsp5_mt_common.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/drivers/input/touchscreen/cyttsp5_cs445a/cyttsp5_mt_common.c b/drivers/input/touchscreen/cyttsp5_cs445a/cyttsp5_mt_common.c
+index 96bba785c6e..84f591a1dc9 100644
+--- a/drivers/input/touchscreen/cyttsp5_cs445a/cyttsp5_mt_common.c
++++ b/drivers/input/touchscreen/cyttsp5_cs445a/cyttsp5_mt_common.c
+@@ -274,6 +274,7 @@ static void cyttsp5_mt_gesture_report(struct cyttsp5_core_data *cd)
+ 		input_mt_slot(cd->md.input, 0);
+ 		input_mt_report_slot_state(cd->md.input, MT_TOOL_FINGER, 1);
+ 		input_sync(cd->md.input);
++		msleep(300);
+ 		input_mt_slot(cd->md.input, 0);
+ 		input_mt_report_slot_state(cd->md.input, MT_TOOL_FINGER, 0);
+ 		input_sync(cd->md.input);
+-- 
+2.30.1
+
