@@ -1,0 +1,28 @@
+From d1b1fc59fc4c428b5f5da1e118c8be4766ab1d1a Mon Sep 17 00:00:00 2001
+From: MagneFire <IDaNLContact@gmail.com>
+Date: Tue, 9 Mar 2021 13:55:52 +0100
+Subject: [PATCH] it7260: Add delay for wakeup report. AsteroidOS requires the
+ user to keep pressing the screen for ~200ms to wake the screen. However, the
+ method used here simply sends a quick event, which doesn't work in our
+ implementation. To solve this we simply need to make sure the the finger is
+ held down for at least 200ms, this is done by emulating a 300ms touch.
+
+---
+ drivers/input/touchscreen/it7260_ts_i2c.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/drivers/input/touchscreen/it7260_ts_i2c.c b/drivers/input/touchscreen/it7260_ts_i2c.c
+index d84a11a6..4e1b4660 100644
+--- a/drivers/input/touchscreen/it7260_ts_i2c.c
++++ b/drivers/input/touchscreen/it7260_ts_i2c.c
+@@ -1074,6 +1074,7 @@ static void readTouchDataPoint_Ambient(void)
+ 				input_report_abs(gl_ts->touch_dev, ABS_MT_POSITION_X, 160);
+ 				input_report_abs(gl_ts->touch_dev, ABS_MT_POSITION_Y, 160);
+ 				input_sync(gl_ts->touch_dev);
++				msleep(300);
+ 				input_mt_slot(gl_ts->touch_dev, 0);
+ 				input_mt_report_slot_state(gl_ts->touch_dev, MT_TOOL_FINGER, false);
+ 				input_sync(gl_ts->touch_dev);
+-- 
+2.30.1
+
