@@ -2,9 +2,9 @@ inherit gettext
 
 SUMMARY = "Downloads the Asus Zenwatch 1 /system and /usr/include/android folders and installs them for libhybris"
 LICENSE = "CLOSED"
-SRC_URI = "https://dl.dropboxusercontent.com/s/8gzrfqridtqikio/system-anthias.tar.gz"
-SRC_URI[md5sum] = "1ce516c6d6c50117787440e6ec6f5435"
-SRC_URI[sha256sum] = "014f931c611ba167c2d0980027ec8f3b17169dff9d04cd0c6731bc5798bbb6ea"
+SRC_URI = "https://dl.dropboxusercontent.com/s/qbcy5909i7d20mv/system.tar.gz"
+SRC_URI[md5sum] = "cda68e9b45b72a41794b53cecec84e00"
+SRC_URI[sha256sum] = "5b326b71dea1ac85f0bfb9f75857a0ecd6ae8bf233147dd90f9e45f11f22b722"
 PV = "lollipop"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
