@@ -16,3 +16,6 @@ service logd /system/bin/logd
 
 service servicemanager /system/bin/servicemanager
     class core
+
+service rmt_storage /system/bin/rmt_storage
+    class core
