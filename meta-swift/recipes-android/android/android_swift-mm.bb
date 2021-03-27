@@ -24,6 +24,9 @@ do_install() {
     install -d ${D}/firmware/
     cp -r firmware/* ${D}/firmware/
 
+    install -d ${D}/usr/
+    cp -r usr/* ${D}/usr/
+
     install -d ${D}${includedir}/android
     cp -r include/* ${D}${includedir}/android/
 
@@ -39,6 +42,6 @@ do_package_qa() {
 }
 
 PACKAGES =+ "android-system android-headers"
-FILES_android-system = "/system /vendor /firmware"
+FILES_android-system = "/system /vendor /usr /firmware"
 FILES_android-headers = "${libdir}/pkgconfig ${includedir}/android"
 EXCLUDE_FROM_SHLIBS = "1"
