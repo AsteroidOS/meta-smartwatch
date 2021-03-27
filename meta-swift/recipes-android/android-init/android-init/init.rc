@@ -19,3 +19,6 @@ service servicemanager /system/bin/servicemanager
 
 service rmt_storage /system/bin/rmt_storage
     class core
+
+service sensors /system/bin/sensors.qcom
+    class core
