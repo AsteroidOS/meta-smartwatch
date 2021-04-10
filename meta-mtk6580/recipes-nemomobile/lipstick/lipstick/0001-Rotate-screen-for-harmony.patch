@@ -8,13 +8,13 @@ Subject: [PATCH] Rotate screen for harmony
  1 file changed, 2 insertions(+)
 
 diff --git a/src/compositor/lipstickcompositor.cpp b/src/compositor/lipstickcompositor.cpp
-index 5653eaa..5b40362 100644
+index 4dce9d7b..cf5a796e 100644
 --- a/src/compositor/lipstickcompositor.cpp
 +++ b/src/compositor/lipstickcompositor.cpp
-@@ -403,6 +403,8 @@ void LipstickCompositor::initialize()
-     if (!systemBus.registerObject("/", this)) {
-         qWarning("Unable to register object at path /: %s", systemBus.lastError().message().toUtf8().constData());
-     }
+@@ -397,6 +397,8 @@ void LipstickCompositor::initialize()
+     QDBusMessage message = QDBusMessage::createMethodCall(MCE_SERVICE, MCE_REQUEST_PATH, MCE_REQUEST_IF, MCE_DISPLAY_LPM_SET_SUPPORTED);
+     message.setArguments(QVariantList() << ambientSupported());
+     QDBusConnection::systemBus().asyncCall(message);
 +
 +    setScreenOrientation(Qt::InvertedLandscapeOrientation);
  }
