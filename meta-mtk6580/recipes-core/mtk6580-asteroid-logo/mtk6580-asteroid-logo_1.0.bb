@@ -8,7 +8,7 @@ SRCREV = "e1612901b9f160d6b2d7d0c2872bb33595f83b60"
 
 S = "${WORKDIR}/git"
 
-inherit deploy
+inherit deploy image-artifact-names
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 
