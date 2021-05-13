@@ -1,6 +1,4 @@
 on init
-    write /dev/.coldboot_done 1
-
 # Graphics
     mkdir /dev/graphics/
     symlink /dev/fb0 /dev/graphics/fb0
@@ -11,15 +9,6 @@ on init
 # Sensors
     mkdir /data/misc/ 0770 root root
     mkdir /data/misc/em718x/ 0770 root root
-
-# Bluetooth
-    write /sys/class/gpio/gpio28/value 1
-
-# CPU
-    write /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor "ondemand"
-    write /sys/devices/system/cpu/cpu1/online 0
-    write /sys/devices/system/cpu/cpu2/online 0
-    write /sys/devices/system/cpu/cpu3/online 0
 
     class_start core
 
