@@ -18,4 +18,6 @@ do_install() {
     install -m 755 simg_dump.py ${D}${bindir}/
 }
 
+DEPENDS += "zlib"
+
 BBCLASSEXTEND = "native nativesdk"
