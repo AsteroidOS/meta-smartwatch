@@ -1,2 +1,2 @@
-SRC_URI_append_bass = " file://0002-egl-Adapt-wayland-egl-to-upstream-and-use-upstream-w.patch;striplevel=2 \
-                            file://0003-hybris-gles-Add-GLESv3-headers.patch;striplevel=2 "
+SRC_URI_append_bass = " file://0004-Report-support-for-only-2.0-instead-of-3.0.patch;striplevel=2"
+SRCREV_bass = "8883e9aca7de870a4a93b31e82cfc600c51cef5d"
