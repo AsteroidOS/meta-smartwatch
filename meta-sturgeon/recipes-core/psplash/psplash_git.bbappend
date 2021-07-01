@@ -1,1 +1,1 @@
-SPLASH_IMAGES = "file://psplash-img-280.png;outsuffix=default"
+SPLASH_IMAGES = "file://psplash-img-400.png;outsuffix=default"
