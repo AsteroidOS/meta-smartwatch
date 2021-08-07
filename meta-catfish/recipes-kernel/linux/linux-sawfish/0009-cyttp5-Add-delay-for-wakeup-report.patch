@@ -1,4 +1,4 @@
-From b0a31d292cbc0bf5863dc311502f995438108af2 Mon Sep 17 00:00:00 2001
+From 1406f47c0ac4cb40e61d6b65fb63cc75d2b7cc57 Mon Sep 17 00:00:00 2001
 From: MagneFire <IDaNLContact@gmail.com>
 Date: Sun, 21 Feb 2021 22:21:06 +0100
 Subject: [PATCH] cyttp5: Add delay for wakeup report. AsteroidOS requires the
@@ -8,14 +8,35 @@ Subject: [PATCH] cyttp5: Add delay for wakeup report. AsteroidOS requires the
  held down for atleast 200ms, this is done by emulating a 300ms touch.
 
 ---
- drivers/input/touchscreen/cyttsp5_cs445a/cyttsp5_mt_common.c | 1 +
- 1 file changed, 1 insertion(+)
+ .../touchscreen/cyttsp5_cs445a/cyttsp5_mt_common.c     | 10 +++++++++-
+ 1 file changed, 9 insertions(+), 1 deletion(-)
 
 diff --git a/drivers/input/touchscreen/cyttsp5_cs445a/cyttsp5_mt_common.c b/drivers/input/touchscreen/cyttsp5_cs445a/cyttsp5_mt_common.c
-index 96bba785c6e..84f591a1dc9 100644
+index 96bba785c6e..c8713f6bff1 100644
 --- a/drivers/input/touchscreen/cyttsp5_cs445a/cyttsp5_mt_common.c
 +++ b/drivers/input/touchscreen/cyttsp5_cs445a/cyttsp5_mt_common.c
-@@ -274,6 +274,7 @@ static void cyttsp5_mt_gesture_report(struct cyttsp5_core_data *cd)
+@@ -23,7 +23,7 @@
+ 
+ #include "cyttsp5_regs.h"
+ #include <linux/input/mt.h>
+-
++#include <linux/wakelock.h>
+ 
+ #define MT_PARAM_SIGNAL(md, sig_ost) PARAM_SIGNAL(md->pdata->frmwrk, sig_ost)
+ #define MT_PARAM_MIN(md, sig_ost) PARAM_MIN(md->pdata->frmwrk, sig_ost)
+@@ -33,6 +33,7 @@
+ 
+ extern int gesture_id;
+ extern u32 cyttsp_gesture_count[GESTURE_MAX];
++static struct wake_lock touch_lock;
+ 
+ static void cyttsp5_mt_lift_all(struct cyttsp5_mt_data *md)
+ {
+@@ -271,12 +272,15 @@ static void cyttsp5_mt_gesture_report(struct cyttsp5_core_data *cd)
+ 	if (KEY_WAKEUP == reprot_gesture_key_value) {
+ 		tp_log_warning("%s:reprot_gesture_key_value = %d\n", __func__, reprot_gesture_key_value);
+ 
++		wake_lock(&touch_lock);
  		input_mt_slot(cd->md.input, 0);
  		input_mt_report_slot_state(cd->md.input, MT_TOOL_FINGER, 1);
  		input_sync(cd->md.input);
@@ -23,6 +44,28 @@ index 96bba785c6e..84f591a1dc9 100644
  		input_mt_slot(cd->md.input, 0);
  		input_mt_report_slot_state(cd->md.input, MT_TOOL_FINGER, 0);
  		input_sync(cd->md.input);
++		wake_unlock(&touch_lock);
+ 	}
+ 
+ 	return;
+@@ -768,6 +772,8 @@ int cyttsp5_mt_probe(struct device *dev)
+ 
+ 	cyttsp5_init_function_ptrs(md);
+ 
++	wake_lock_init(&touch_lock, WAKE_LOCK_SUSPEND, "touch-lock");
++
+ 	mutex_init(&md->mt_lock);
+ 	md->dev = dev;
+ 	md->pdata = mt_pdata;
+@@ -841,6 +847,8 @@ int cyttsp5_mt_release(struct device *dev)
+ 	struct cyttsp5_core_data *cd = dev_get_drvdata(dev);
+ 	struct cyttsp5_mt_data *md = &cd->md;
+ 
++	wake_lock_destroy(&touch_lock);
++
+ 	if (md->input_device_registered) {
+ 		input_unregister_device(md->input);
+ 	} else {
 -- 
-2.30.1
+2.32.0
 
