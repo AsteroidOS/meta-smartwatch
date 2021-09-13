@@ -1,4 +1,4 @@
-From e33a814e772cdc36436c8c188d8c42d019fda639 Mon Sep 17 00:00:00 2001
+From 3cdb087dcecf85cc60c898cfd87817c7111999a1 Mon Sep 17 00:00:00 2001
 From: Dirk Mueller <dmueller@suse.com>
 Date: Tue, 14 Jan 2020 18:53:41 +0100
 Subject: [PATCH] scripts/dtc: Remove redundant YYLOC global declaration
@@ -30,13 +30,14 @@ Signed-off-by: David Gibson <david@gibson.dropbear.id.au>
 [robh: cherry-pick from upstream]
 Cc: stable@vger.kernel.org
 Signed-off-by: Rob Herring <robh@kernel.org>
+
 ---
  scripts/dtc/dtc-lexer.l              | 2 +-
  scripts/dtc/dtc-parser.tab.c_shipped | 2 +-
  2 files changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/scripts/dtc/dtc-lexer.l b/scripts/dtc/dtc-lexer.l
-index 3b41bfca636..9b9c29e6f31 100644
+index 3b41bfca636c..9b9c29e6f311 100644
 --- a/scripts/dtc/dtc-lexer.l
 +++ b/scripts/dtc/dtc-lexer.l
 @@ -39,7 +39,7 @@ LINECOMMENT	"//".*\n
@@ -49,10 +50,10 @@ index 3b41bfca636..9b9c29e6f31 100644
  /* CAUTION: this will stop working if we ever use yyless() or yyunput() */
  #define	YY_USER_ACTION \
 diff --git a/scripts/dtc/dtc-parser.tab.c_shipped b/scripts/dtc/dtc-parser.tab.c_shipped
-index ee1d8c3042f..c8c8ca8b744 100644
+index c8769d550cfb..b5b924c57096 100644
 --- a/scripts/dtc/dtc-parser.tab.c_shipped
 +++ b/scripts/dtc/dtc-parser.tab.c_shipped
-@@ -73,7 +73,7 @@
+@@ -70,7 +70,7 @@
  #include "dtc.h"
  #include "srcpos.h"
  
@@ -61,6 +62,3 @@ index ee1d8c3042f..c8c8ca8b744 100644
  
  extern int yylex(void);
  extern void print_error(char const *fmt, ...);
--- 
-2.30.0
-
