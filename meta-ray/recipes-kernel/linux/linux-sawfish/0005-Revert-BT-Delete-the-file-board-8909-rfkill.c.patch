@@ -1,9 +1,10 @@
-From de6e63d84d7c3261d3ac13f19d4d3e4788cf9dab Mon Sep 17 00:00:00 2001
+From 20d415da98ea8ab2f13295d8f48387ce57529123 Mon Sep 17 00:00:00 2001
 From: MagneFire <IDaNLContact@gmail.com>
 Date: Tue, 16 Feb 2021 23:33:20 +0100
-Subject: [PATCH 2/4] Revert "BT: Delete the file board-8909-rfkill.c"
+Subject: [PATCH] Revert "BT: Delete the file board-8909-rfkill.c"
 
 This reverts commit 67b5153e14ae16f0613fa5db3934cc5e01963015.
+
 ---
  arch/arm/mach-msm/board-8909-rfkill.c | 204 ++++++++++++++++++++++++++
  1 file changed, 204 insertions(+)
@@ -11,7 +12,7 @@ This reverts commit 67b5153e14ae16f0613fa5db3934cc5e01963015.
 
 diff --git a/arch/arm/mach-msm/board-8909-rfkill.c b/arch/arm/mach-msm/board-8909-rfkill.c
 new file mode 100644
-index 00000000000..e85dfd76a46
+index 000000000000..e85dfd76a468
 --- /dev/null
 +++ b/arch/arm/mach-msm/board-8909-rfkill.c
 @@ -0,0 +1,204 @@
@@ -219,6 +220,3 @@ index 00000000000..e85dfd76a46
 +MODULE_DESCRIPTION("bluetooth rfkill");
 +MODULE_AUTHOR("Nick Pelly <npelly@google.com>");
 +MODULE_LICENSE("GPL");
--- 
-2.30.1
-

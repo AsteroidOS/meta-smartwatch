@@ -1,7 +1,7 @@
-From 27950b5fbc71a153cf72e524d1707a7edcb69f81 Mon Sep 17 00:00:00 2001
+From e1abe3fc9ebb2091c2773a32edbea5ab91ce9c63 Mon Sep 17 00:00:00 2001
 From: MagneFire <IDaNLContact@gmail.com>
 Date: Tue, 16 Feb 2021 20:39:25 +0100
-Subject: [PATCH 1/4] Backport mainline 4.1 Bluetooth subsystem
+Subject: [PATCH] Backport mainline 4.1 Bluetooth subsystem
 
 ---
  .gitignore                        |    1 +
@@ -109,7 +109,7 @@ Subject: [PATCH 1/4] Backport mainline 4.1 Bluetooth subsystem
  create mode 100644 net/bluetooth/selftest.h
 
 diff --git a/.gitignore b/.gitignore
-index e213b27f392..977b5246e2b 100644
+index e213b27f3921..977b5246e2bb 100644
 --- a/.gitignore
 +++ b/.gitignore
 @@ -9,6 +9,7 @@
@@ -121,7 +121,7 @@ index e213b27f392..977b5246e2b 100644
  *.o
  *.o.*
 diff --git a/drivers/bluetooth/Kconfig b/drivers/bluetooth/Kconfig
-index fbe7d620348..efbd87be150 100644
+index fbe7d6203488..efbd87be1508 100644
 --- a/drivers/bluetooth/Kconfig
 +++ b/drivers/bluetooth/Kconfig
 @@ -2,9 +2,17 @@
@@ -197,7 +197,7 @@ index fbe7d620348..efbd87be150 100644
  	tristate "HCI BCM203x USB driver"
  	depends on USB
 diff --git a/drivers/bluetooth/Makefile b/drivers/bluetooth/Makefile
-index d3c0544c036..e72287dedbd 100644
+index d3c0544c0368..e72287dedbde 100644
 --- a/drivers/bluetooth/Makefile
 +++ b/drivers/bluetooth/Makefile
 @@ -11,16 +11,18 @@ obj-$(CONFIG_BT_HCIDTL1)	+= dtl1_cs.o
@@ -230,7 +230,7 @@ index d3c0544c036..e72287dedbd 100644
  
  ccflags-y += -D__CHECK_ENDIAN__
 diff --git a/drivers/bluetooth/ath3k.c b/drivers/bluetooth/ath3k.c
-index 7b658ece797..c6848d3ca8f 100644
+index 2440b502443f..7731206fd90f 100644
 --- a/drivers/bluetooth/ath3k.c
 +++ b/drivers/bluetooth/ath3k.c
 @@ -1,6 +1,5 @@
@@ -419,7 +419,7 @@ index 7b658ece797..c6848d3ca8f 100644
  
  	/* Atheros AR5BBU22 with sflash firmware */
  	{ USB_DEVICE(0x0489, 0xE036), .driver_info = BTUSB_ATH3012 },
-@@ -337,42 +278,8 @@ static int ath3k_get_version(struct usb_device *udev,
+@@ -351,42 +292,8 @@ static int ath3k_get_version(struct usb_device *udev,
  	return ret;
  }
  
@@ -463,7 +463,7 @@ index 7b658ece797..c6848d3ca8f 100644
  {
  	u8 *send_buf;
  	int err, pipe, len, size, count, sent = 0;
-@@ -386,7 +293,7 @@ static int ath3k_load_fwfile(struct usb_device *udev,
+@@ -400,7 +307,7 @@ static int ath3k_load_fwfile(struct usb_device *udev,
  		return -ENOMEM;
  	}
  
@@ -472,7 +472,7 @@ index 7b658ece797..c6848d3ca8f 100644
  	memcpy(send_buf, firmware->data, size);
  
  	pipe = usb_sndctrlpipe(udev, 0);
-@@ -459,18 +366,13 @@ static int ath3k_set_normal_mode(struct usb_device *udev)
+@@ -473,18 +380,13 @@ static int ath3k_set_normal_mode(struct usb_device *udev)
  			NULL, 0, USB_CTRL_SET_TIMEOUT);
  }
  
@@ -494,7 +494,7 @@ index 7b658ece797..c6848d3ca8f 100644
  	int ret;
  
  	ret = ath3k_get_state(udev, &fw_state);
-@@ -479,105 +381,50 @@ static int ath3k_load_patch(struct usb_device *udev,
+@@ -493,105 +395,50 @@ static int ath3k_load_patch(struct usb_device *udev,
  		return ret;
  	}
  
@@ -621,7 +621,7 @@ index 7b658ece797..c6848d3ca8f 100644
  	int clk_value, ret;
  
  	ret = ath3k_get_state(udev, &fw_state);
-@@ -586,15 +433,14 @@ static int ath3k_load_syscfg(struct usb_device *udev,
+@@ -600,15 +447,14 @@ static int ath3k_load_syscfg(struct usb_device *udev,
  		return -EBUSY;
  	}
  
@@ -643,7 +643,7 @@ index 7b658ece797..c6848d3ca8f 100644
  	case ATH3K_XTAL_FREQ_26M:
  		clk_value = 26;
  		break;
-@@ -609,22 +455,8 @@ static int ath3k_load_syscfg(struct usb_device *udev,
+@@ -623,22 +469,8 @@ static int ath3k_load_syscfg(struct usb_device *udev,
  		break;
  	}
  
@@ -668,7 +668,7 @@ index 7b658ece797..c6848d3ca8f 100644
  
  	ret = request_firmware(&firmware, filename, &udev->dev);
  	if (ret < 0) {
-@@ -632,58 +464,24 @@ static int ath3k_load_syscfg(struct usb_device *udev,
+@@ -646,58 +478,24 @@ static int ath3k_load_syscfg(struct usb_device *udev,
  		return ret;
  	}
  
@@ -728,7 +728,7 @@ index 7b658ece797..c6848d3ca8f 100644
  	/* match device ID in ath3k blacklist table */
  	if (!id->driver_info) {
  		const struct usb_device_id *match;
-@@ -699,12 +497,12 @@ static int ath3k_probe(struct usb_interface *intf,
+@@ -713,12 +511,12 @@ static int ath3k_probe(struct usb_interface *intf,
  		if (le16_to_cpu(udev->descriptor.bcdDevice) > 0x0001)
  			return -ENODEV;
  
@@ -745,7 +745,7 @@ index 7b658ece797..c6848d3ca8f 100644
  			return ret;
 diff --git a/drivers/bluetooth/btbcm.c b/drivers/bluetooth/btbcm.c
 new file mode 100644
-index 00000000000..4bba86677ad
+index 000000000000..4bba86677adc
 --- /dev/null
 +++ b/drivers/bluetooth/btbcm.c
 @@ -0,0 +1,397 @@
@@ -1148,7 +1148,7 @@ index 00000000000..4bba86677ad
 +MODULE_LICENSE("GPL");
 diff --git a/drivers/bluetooth/btbcm.h b/drivers/bluetooth/btbcm.h
 new file mode 100644
-index 00000000000..eb6ab5f9483
+index 000000000000..eb6ab5f9483d
 --- /dev/null
 +++ b/drivers/bluetooth/btbcm.h
 @@ -0,0 +1,60 @@
@@ -1214,7 +1214,7 @@ index 00000000000..eb6ab5f9483
 +#endif
 diff --git a/drivers/bluetooth/btintel.c b/drivers/bluetooth/btintel.c
 new file mode 100644
-index 00000000000..2d43d4279b0
+index 000000000000..2d43d4279b00
 --- /dev/null
 +++ b/drivers/bluetooth/btintel.c
 @@ -0,0 +1,101 @@
@@ -1321,7 +1321,7 @@ index 00000000000..2d43d4279b0
 +MODULE_LICENSE("GPL");
 diff --git a/drivers/bluetooth/btintel.h b/drivers/bluetooth/btintel.h
 new file mode 100644
-index 00000000000..4bda6ab34f6
+index 000000000000..4bda6ab34f60
 --- /dev/null
 +++ b/drivers/bluetooth/btintel.h
 @@ -0,0 +1,89 @@
@@ -1415,7 +1415,7 @@ index 00000000000..4bda6ab34f6
 +
 +#endif
 diff --git a/drivers/bluetooth/btmrvl_drv.h b/drivers/bluetooth/btmrvl_drv.h
-index 38ad66289ad..4b36e265bbc 100644
+index 38ad66289ad6..4b36e265bbc9 100644
 --- a/drivers/bluetooth/btmrvl_drv.h
 +++ b/drivers/bluetooth/btmrvl_drv.h
 @@ -28,9 +28,27 @@
@@ -1481,7 +1481,7 @@ index 38ad66289ad..4b36e265bbc 100644
  #ifdef CONFIG_DEBUG_FS
  void btmrvl_debugfs_init(struct hci_dev *hdev);
 diff --git a/drivers/bluetooth/btmrvl_main.c b/drivers/bluetooth/btmrvl_main.c
-index 1d7db206488..3423b113464 100644
+index 1d7db2064889..3423b1134646 100644
 --- a/drivers/bluetooth/btmrvl_main.c
 +++ b/drivers/bluetooth/btmrvl_main.c
 @@ -22,6 +22,7 @@
@@ -1773,7 +1773,7 @@ index 1d7db206488..3423b113464 100644
  	kfree(priv);
  
 diff --git a/drivers/bluetooth/btmrvl_sdio.c b/drivers/bluetooth/btmrvl_sdio.c
-index 550bce089fa..88d01994258 100644
+index 550bce089fa6..88d019942584 100644
 --- a/drivers/bluetooth/btmrvl_sdio.c
 +++ b/drivers/bluetooth/btmrvl_sdio.c
 @@ -24,6 +24,7 @@
@@ -2206,7 +2206,7 @@ index 550bce089fa..88d01994258 100644
  
  	/* We will keep the power when hs enabled successfully */
 diff --git a/drivers/bluetooth/btmrvl_sdio.h b/drivers/bluetooth/btmrvl_sdio.h
-index 453559f98a7..1a3bd064c44 100644
+index 453559f98a75..1a3bd064c442 100644
 --- a/drivers/bluetooth/btmrvl_sdio.h
 +++ b/drivers/bluetooth/btmrvl_sdio.h
 @@ -81,6 +81,9 @@ struct btmrvl_sdio_card_reg {
@@ -2236,7 +2236,7 @@ index 453559f98a7..1a3bd064c44 100644
  
  
 diff --git a/drivers/bluetooth/btusb.c b/drivers/bluetooth/btusb.c
-index 15e5cf629ea..231f559e5a0 100644
+index 15e5cf629ea4..231f559e5a04 100644
 --- a/drivers/bluetooth/btusb.c
 +++ b/drivers/bluetooth/btusb.c
 @@ -4,6 +4,7 @@
@@ -4239,7 +4239,7 @@ index 15e5cf629ea..231f559e5a0 100644
  module_param(disable_scofix, bool, 0644);
  MODULE_PARM_DESC(disable_scofix, "Disable fixup of wrong SCO buffer size");
 diff --git a/drivers/bluetooth/btwilink.c b/drivers/bluetooth/btwilink.c
-index f038dba19e3..55c135b7757 100644
+index f038dba19e36..55c135b7757a 100644
 --- a/drivers/bluetooth/btwilink.c
 +++ b/drivers/bluetooth/btwilink.c
 @@ -349,7 +349,6 @@ static struct platform_driver btwilink_driver = {
@@ -4251,7 +4251,7 @@ index f038dba19e3..55c135b7757 100644
  };
  
 diff --git a/drivers/bluetooth/hci_ath.c b/drivers/bluetooth/hci_ath.c
-index 0bc8a6a6a14..ec8fa0e0f03 100644
+index 0bc8a6a6a148..ec8fa0e0f036 100644
 --- a/drivers/bluetooth/hci_ath.c
 +++ b/drivers/bluetooth/hci_ath.c
 @@ -45,39 +45,29 @@ struct ath_struct {
@@ -4469,7 +4469,7 @@ index 0bc8a6a6a14..ec8fa0e0f03 100644
  int __exit ath_deinit(void)
 diff --git a/drivers/bluetooth/hci_bcm.c b/drivers/bluetooth/hci_bcm.c
 new file mode 100644
-index 00000000000..1ec0b4a5ffa
+index 000000000000..1ec0b4a5ffa6
 --- /dev/null
 +++ b/drivers/bluetooth/hci_bcm.c
 @@ -0,0 +1,153 @@
@@ -4627,7 +4627,7 @@ index 00000000000..1ec0b4a5ffa
 +	return hci_uart_unregister_proto(&bcm_proto);
 +}
 diff --git a/drivers/bluetooth/hci_bcsp.c b/drivers/bluetooth/hci_bcsp.c
-index 21cc45b34f1..dc8e3d4356a 100644
+index 21cc45b34f13..dc8e3d4356a0 100644
 --- a/drivers/bluetooth/hci_bcsp.c
 +++ b/drivers/bluetooth/hci_bcsp.c
 @@ -47,8 +47,6 @@
@@ -4680,7 +4680,7 @@ index 21cc45b34f1..dc8e3d4356a 100644
  
  int __exit bcsp_deinit(void)
 diff --git a/drivers/bluetooth/hci_h4.c b/drivers/bluetooth/hci_h4.c
-index e5062552e90..f7190f01e13 100644
+index e5062552e90e..f7190f01e135 100644
 --- a/drivers/bluetooth/hci_h4.c
 +++ b/drivers/bluetooth/hci_h4.c
 @@ -40,17 +40,14 @@
@@ -4897,7 +4897,7 @@ index e5062552e90..f7190f01e13 100644
 +	return skb;
 +}
 diff --git a/drivers/bluetooth/hci_h5.c b/drivers/bluetooth/hci_h5.c
-index a22838669b4..3455cecc9ec 100644
+index a22838669b4e..3455cecc9ecf 100644
 --- a/drivers/bluetooth/hci_h5.c
 +++ b/drivers/bluetooth/hci_h5.c
 @@ -168,6 +168,27 @@ wakeup:
@@ -4983,7 +4983,7 @@ index a22838669b4..3455cecc9ec 100644
  int __exit h5_deinit(void)
 diff --git a/drivers/bluetooth/hci_intel.c b/drivers/bluetooth/hci_intel.c
 new file mode 100644
-index 00000000000..5dd07bf0523
+index 000000000000..5dd07bf05236
 --- /dev/null
 +++ b/drivers/bluetooth/hci_intel.c
 @@ -0,0 +1,31 @@
@@ -5019,7 +5019,7 @@ index 00000000000..5dd07bf0523
 +
 +#include "hci_uart.h"
 diff --git a/drivers/bluetooth/hci_ldisc.c b/drivers/bluetooth/hci_ldisc.c
-index f78b6204d5f..5c9a73f0266 100644
+index f78b6204d5f2..5c9a73f02664 100644
 --- a/drivers/bluetooth/hci_ldisc.c
 +++ b/drivers/bluetooth/hci_ldisc.c
 @@ -2,9 +2,9 @@
@@ -5382,7 +5382,7 @@ index f78b6204d5f..5c9a73f0266 100644
  
  	/* Release tty registration of line discipline */
 diff --git a/drivers/bluetooth/hci_ll.c b/drivers/bluetooth/hci_ll.c
-index 69a90b1b5ff..9ee24b075f7 100644
+index 69a90b1b5ff5..9ee24b075f79 100644
 --- a/drivers/bluetooth/hci_ll.c
 +++ b/drivers/bluetooth/hci_ll.c
 @@ -370,10 +370,10 @@ static inline int ll_check_data_len(struct hci_dev *hdev, struct ll_struct *ll,
@@ -5426,7 +5426,7 @@ index 69a90b1b5ff..9ee24b075f7 100644
  
  int __exit ll_deinit(void)
 diff --git a/drivers/bluetooth/hci_uart.h b/drivers/bluetooth/hci_uart.h
-index 986feb7b49a..72120a5ba13 100644
+index 986feb7b49aa..72120a5ba13c 100644
 --- a/drivers/bluetooth/hci_uart.h
 +++ b/drivers/bluetooth/hci_uart.h
 @@ -2,9 +2,9 @@
@@ -5563,7 +5563,7 @@ index 986feb7b49a..72120a5ba13 100644
 +int bcm_deinit(void);
  #endif
 diff --git a/drivers/bluetooth/hci_vhci.c b/drivers/bluetooth/hci_vhci.c
-index 6653473f275..5bb5872ffee 100644
+index 6653473f2757..5bb5872ffee6 100644
 --- a/drivers/bluetooth/hci_vhci.c
 +++ b/drivers/bluetooth/hci_vhci.c
 @@ -160,11 +160,13 @@ static int vhci_create_device(struct vhci_data *data, __u8 opcode)
@@ -5624,7 +5624,7 @@ index 6653473f275..5bb5872ffee 100644
  	.open		= vhci_open,
  	.release	= vhci_release,
 diff --git a/include/linux/skbuff.h b/include/linux/skbuff.h
-index 87283eb14cc..2822cca3933 100644
+index 87283eb14cc9..2822cca3933f 100644
 --- a/include/linux/skbuff.h
 +++ b/include/linux/skbuff.h
 @@ -2206,6 +2206,7 @@ static inline struct page *__skb_alloc_pages(gfp_t gfp_mask,
@@ -5648,7 +5648,7 @@ index 87283eb14cc..2822cca3933 100644
  	__wsum (*update)(const void *mem, int len, __wsum wsum);
  	__wsum (*combine)(__wsum csum, __wsum csum2, int offset, int len);
 diff --git a/include/linux/wait.h b/include/linux/wait.h
-index fc0e99395fb..6c4d0d1b08f 100644
+index fc0e99395fbb..6c4d0d1b08ff 100644
 --- a/include/linux/wait.h
 +++ b/include/linux/wait.h
 @@ -159,6 +159,7 @@ void wake_up_atomic_t(atomic_t *);
@@ -5672,7 +5672,7 @@ index fc0e99395fb..6c4d0d1b08f 100644
   * @word: the word being waited on, a kernel virtual address
 diff --git a/include/net/bluetooth/a2mp.h b/include/net/bluetooth/a2mp.h
 new file mode 100644
-index 00000000000..487b54c1308
+index 000000000000..487b54c1308f
 --- /dev/null
 +++ b/include/net/bluetooth/a2mp.h
 @@ -0,0 +1,150 @@
@@ -5828,7 +5828,7 @@ index 00000000000..487b54c1308
 +#endif /* __A2MP_H */
 diff --git a/include/net/bluetooth/amp.h b/include/net/bluetooth/amp.h
 new file mode 100644
-index 00000000000..7ea3db77ba8
+index 000000000000..7ea3db77ba89
 --- /dev/null
 +++ b/include/net/bluetooth/amp.h
 @@ -0,0 +1,54 @@
@@ -5887,7 +5887,7 @@ index 00000000000..7ea3db77ba8
 +
 +#endif /* __AMP_H */
 diff --git a/include/net/bluetooth/bluetooth.h b/include/net/bluetooth/bluetooth.h
-index 8fa733db636..8ec93e5f0db 100644
+index 8fa733db636c..8ec93e5f0db9 100644
 --- a/include/net/bluetooth/bluetooth.h
 +++ b/include/net/bluetooth/bluetooth.h
 @@ -1,7 +1,6 @@
@@ -5976,7 +5976,7 @@ index 8fa733db636..8ec93e5f0db 100644
  
  #endif /* __BLUETOOTH_H */
 diff --git a/include/net/bluetooth/hci.h b/include/net/bluetooth/hci.h
-index cb8d4b314bc..d95da83cb1b 100644
+index cb8d4b314bcf..d95da83cb1b0 100644
 --- a/include/net/bluetooth/hci.h
 +++ b/include/net/bluetooth/hci.h
 @@ -49,7 +49,6 @@
@@ -6347,7 +6347,7 @@ index cb8d4b314bc..d95da83cb1b 100644
  
  /* Internal events generated by Bluetooth stack */
 diff --git a/include/net/bluetooth/hci_core.h b/include/net/bluetooth/hci_core.h
-index 0ba57793f46..890ce75be86 100644
+index 0ba57793f463..890ce75be868 100644
 --- a/include/net/bluetooth/hci_core.h
 +++ b/include/net/bluetooth/hci_core.h
 @@ -75,6 +75,13 @@ struct discovery_state {
@@ -7118,7 +7118,7 @@ index 0ba57793f46..890ce75be86 100644
  			       u8 *bdaddr_type);
  
 diff --git a/include/net/bluetooth/l2cap.h b/include/net/bluetooth/l2cap.h
-index ead99f032f7..bbc75ea6eb9 100644
+index ead99f032f7a..bbc75ea6eb9d 100644
 --- a/include/net/bluetooth/l2cap.h
 +++ b/include/net/bluetooth/l2cap.h
 @@ -28,6 +28,7 @@
@@ -7227,7 +7227,7 @@ index ead99f032f7..bbc75ea6eb9 100644
  	while (len > 0) {
  		if (vec->iov_len) {
 diff --git a/include/net/bluetooth/mgmt.h b/include/net/bluetooth/mgmt.h
-index 414cd2f9a43..b831242d48a 100644
+index 414cd2f9a437..b831242d48a4 100644
 --- a/include/net/bluetooth/mgmt.h
 +++ b/include/net/bluetooth/mgmt.h
 @@ -43,6 +43,8 @@
@@ -7420,7 +7420,7 @@ index 414cd2f9a43..b831242d48a 100644
 +	__u8    instance;
 +} __packed;
 diff --git a/include/net/bluetooth/rfcomm.h b/include/net/bluetooth/rfcomm.h
-index 578b83127af..4190af53a46 100644
+index 578b83127af1..4190af53a46a 100644
 --- a/include/net/bluetooth/rfcomm.h
 +++ b/include/net/bluetooth/rfcomm.h
 @@ -24,8 +24,6 @@
@@ -7434,7 +7434,7 @@ index 578b83127af..4190af53a46 100644
  #define RFCOMM_AUTH_TIMEOUT (HZ * 25)
 diff --git a/include/net/bluetooth/smp.h b/include/net/bluetooth/smp.h
 new file mode 100644
-index 00000000000..f8ba07f3e5f
+index 000000000000..f8ba07f3e5fa
 --- /dev/null
 +++ b/include/net/bluetooth/smp.h
 @@ -0,0 +1,146 @@
@@ -7585,7 +7585,7 @@ index 00000000000..f8ba07f3e5f
 +
 +#endif /* __SMP_H */
 diff --git a/kernel/sched/wait.c b/kernel/sched/wait.c
-index 4dae1885db6..53737a8583a 100644
+index 4dae1885db6f..53737a8583a3 100644
 --- a/kernel/sched/wait.c
 +++ b/kernel/sched/wait.c
 @@ -394,6 +394,22 @@ __wait_on_bit(wait_queue_head_t *wq, struct wait_bit_queue *q,
@@ -7612,7 +7612,7 @@ index 4dae1885db6..53737a8583a 100644
  				    wait_bit_action_f *action, unsigned mode)
  {
 diff --git a/net/bluetooth/6lowpan.c b/net/bluetooth/6lowpan.c
-index cfbb39e6fdf..1742b849fcf 100644
+index cfbb39e6fdfd..1742b849fcff 100644
 --- a/net/bluetooth/6lowpan.c
 +++ b/net/bluetooth/6lowpan.c
 @@ -31,7 +31,7 @@
@@ -8435,7 +8435,7 @@ index cfbb39e6fdf..1742b849fcf 100644
  
  	if (listen_chan) {
 diff --git a/net/bluetooth/Kconfig b/net/bluetooth/Kconfig
-index 600fb29288f..81f837f6d93 100644
+index 600fb29288f4..81f837f6d934 100644
 --- a/net/bluetooth/Kconfig
 +++ b/net/bluetooth/Kconfig
 @@ -10,6 +10,7 @@ menuconfig BT
@@ -8508,7 +8508,7 @@ index 600fb29288f..81f837f6d93 100644
 +
  source "drivers/bluetooth/Kconfig"
 diff --git a/net/bluetooth/Makefile b/net/bluetooth/Makefile
-index 886e9aa3ecf..c85a6afc6fe 100644
+index 886e9aa3ecf1..c85a6afc6fe1 100644
 --- a/net/bluetooth/Makefile
 +++ b/net/bluetooth/Makefile
 @@ -7,12 +7,12 @@ obj-$(CONFIG_BT_RFCOMM)	+= rfcomm/
@@ -8529,7 +8529,7 @@ index 886e9aa3ecf..c85a6afc6fe 100644
  
  subdir-ccflags-y += -D__CHECK_ENDIAN__
 diff --git a/net/bluetooth/a2mp.c b/net/bluetooth/a2mp.c
-index 5dcade511fd..fe79321211b 100644
+index 5dcade511fdb..fe79321211b7 100644
 --- a/net/bluetooth/a2mp.c
 +++ b/net/bluetooth/a2mp.c
 @@ -19,9 +19,11 @@
@@ -8613,7 +8613,7 @@ index 5dcade511fd..fe79321211b 100644
  {
  	struct amp_mgr *mgr;
 diff --git a/net/bluetooth/a2mp.h b/net/bluetooth/a2mp.h
-index 487b54c1308..296f665adb0 100644
+index 487b54c1308f..296f665adb09 100644
 --- a/net/bluetooth/a2mp.h
 +++ b/net/bluetooth/a2mp.h
 @@ -17,8 +17,6 @@
@@ -8643,7 +8643,7 @@ index 487b54c1308..296f665adb0 100644
  void a2mp_send_getinfo_rsp(struct hci_dev *hdev);
  void a2mp_send_getampassoc_rsp(struct hci_dev *hdev, u8 status);
 diff --git a/net/bluetooth/af_bluetooth.c b/net/bluetooth/af_bluetooth.c
-index 34a47d04117..759451160ec 100644
+index 34a47d04117d..759451160ec9 100644
 --- a/net/bluetooth/af_bluetooth.c
 +++ b/net/bluetooth/af_bluetooth.c
 @@ -31,7 +31,9 @@
@@ -8867,7 +8867,7 @@ index 34a47d04117..759451160ec 100644
  
  	l2cap_exit();
 diff --git a/net/bluetooth/amp.c b/net/bluetooth/amp.c
-index 2640d78f30b..ee016f03910 100644
+index 2640d78f30b8..ee016f039100 100644
 --- a/net/bluetooth/amp.c
 +++ b/net/bluetooth/amp.c
 @@ -134,6 +134,7 @@ struct hci_conn *phylink_add(struct hci_dev *hdev, struct amp_mgr *mgr,
@@ -8913,7 +8913,7 @@ index 2640d78f30b..ee016f03910 100644
  	return ret;
  }
 diff --git a/net/bluetooth/bnep/Kconfig b/net/bluetooth/bnep/Kconfig
-index 71791fc9f6b..9b70317c49d 100644
+index 71791fc9f6b1..9b70317c49dc 100644
 --- a/net/bluetooth/bnep/Kconfig
 +++ b/net/bluetooth/bnep/Kconfig
 @@ -1,6 +1,6 @@
@@ -8925,7 +8925,7 @@ index 71791fc9f6b..9b70317c49d 100644
  	help
  	  BNEP (Bluetooth Network Encapsulation Protocol) is Ethernet
 diff --git a/net/bluetooth/bnep/bnep.h b/net/bluetooth/bnep/bnep.h
-index 5a5b16f365e..c91bda650f5 100644
+index 5a5b16f365e9..c91bda650f58 100644
 --- a/net/bluetooth/bnep/bnep.h
 +++ b/net/bluetooth/bnep/bnep.h
 @@ -12,7 +12,8 @@
@@ -8950,7 +8950,7 @@ index 5a5b16f365e..c91bda650f5 100644
  struct bnep_connadd_req {
  	int   sock;		/* Connected socket */
 diff --git a/net/bluetooth/bnep/core.c b/net/bluetooth/bnep/core.c
-index ec2cf37c7c9..9bb2d9223f0 100644
+index 52650ff1a3cd..b0d95f761c25 100644
 --- a/net/bluetooth/bnep/core.c
 +++ b/net/bluetooth/bnep/core.c
 @@ -231,7 +231,14 @@ static int bnep_rx_control(struct bnep_session *s, void *data, int len)
@@ -9033,12 +9033,12 @@ index ec2cf37c7c9..9bb2d9223f0 100644
 +		}
 +	} else {
 +		skb_reset_mac_header(skb);
-+
+ 
+-	s->eh.h_proto = get_unaligned((__be16 *) (skb->data - 2));
 +		/* Verify and pull out header */
 +		if (!skb_pull(skb, __bnep_rx_hlen[type & BNEP_TYPE_MASK]))
 +			goto badframe;
- 
--	s->eh.h_proto = get_unaligned((__be16 *) (skb->data - 2));
++
 +		s->eh.h_proto = get_unaligned((__be16 *) (skb->data - 2));
 +	}
  
@@ -9078,9 +9078,9 @@ index ec2cf37c7c9..9bb2d9223f0 100644
  	struct net_device *dev;
  	struct bnep_session *s, *ss;
  	u8 dst[ETH_ALEN], src[ETH_ALEN];
-@@ -533,14 +566,20 @@ int bnep_add_connection(struct bnep_connadd_req *req, struct socket *sock)
- 
- 	BT_DBG("");
+@@ -536,14 +569,20 @@ int bnep_add_connection(struct bnep_connadd_req *req, struct socket *sock)
+ 	if (!l2cap_is_socket(sock))
+ 		return -EBADFD;
  
 +	if (!l2cap_is_socket(sock))
 +		return -EBADFD;
@@ -9102,7 +9102,7 @@ index ec2cf37c7c9..9bb2d9223f0 100644
  	if (!dev)
  		return -ENOMEM;
  
-@@ -564,6 +603,7 @@ int bnep_add_connection(struct bnep_connadd_req *req, struct socket *sock)
+@@ -567,6 +606,7 @@ int bnep_add_connection(struct bnep_connadd_req *req, struct socket *sock)
  	s->sock  = sock;
  	s->role  = req->role;
  	s->state = BT_CONNECTED;
@@ -9110,7 +9110,7 @@ index ec2cf37c7c9..9bb2d9223f0 100644
  
  	s->msg.msg_flags = MSG_NOSIGNAL;
  
-@@ -609,11 +649,15 @@ failed:
+@@ -612,11 +652,15 @@ failed:
  
  int bnep_del_connection(struct bnep_conndel_req *req)
  {
@@ -9126,7 +9126,7 @@ index ec2cf37c7c9..9bb2d9223f0 100644
  	down_read(&bnep_session_sem);
  
  	s = __bnep_get_session(req->dst);
-@@ -629,10 +673,12 @@ int bnep_del_connection(struct bnep_conndel_req *req)
+@@ -632,10 +676,12 @@ int bnep_del_connection(struct bnep_conndel_req *req)
  
  static void __bnep_copy_ci(struct bnep_conninfo *ci, struct bnep_session *s)
  {
@@ -9141,7 +9141,7 @@ index ec2cf37c7c9..9bb2d9223f0 100644
  	ci->role  = s->role;
  }
 diff --git a/net/bluetooth/bnep/netdev.c b/net/bluetooth/bnep/netdev.c
-index 601b7b21ab5..6ceb5d36a32 100644
+index 601b7b21ab58..6ceb5d36a32b 100644
 --- a/net/bluetooth/bnep/netdev.c
 +++ b/net/bluetooth/bnep/netdev.c
 @@ -156,7 +156,7 @@ static int bnep_net_proto_filter(struct sk_buff *skb, struct bnep_session *s)
@@ -9172,7 +9172,7 @@ index 601b7b21ab5..6ceb5d36a32 100644
  
  	ether_setup(dev);
 diff --git a/net/bluetooth/bnep/sock.c b/net/bluetooth/bnep/sock.c
-index 9340bf18063..bde2bdd9e92 100644
+index 9340bf18063c..bde2bdd9e929 100644
 --- a/net/bluetooth/bnep/sock.c
 +++ b/net/bluetooth/bnep/sock.c
 @@ -37,7 +37,7 @@ static int bnep_sock_release(struct socket *sock)
@@ -9215,7 +9215,7 @@ index 9340bf18063..bde2bdd9e92 100644
  	if (sock->type != SOCK_RAW)
  		return -ESOCKTNOSUPPORT;
 diff --git a/net/bluetooth/cmtp/Kconfig b/net/bluetooth/cmtp/Kconfig
-index 94cbf42ce15..939da0fbdd8 100644
+index 94cbf42ce155..939da0fbdd88 100644
 --- a/net/bluetooth/cmtp/Kconfig
 +++ b/net/bluetooth/cmtp/Kconfig
 @@ -1,6 +1,6 @@
@@ -9227,7 +9227,7 @@ index 94cbf42ce15..939da0fbdd8 100644
  	  CMTP (CAPI Message Transport Protocol) is a transport layer
  	  for CAPI messages.  CMTP is required for the Bluetooth Common
 diff --git a/net/bluetooth/cmtp/capi.c b/net/bluetooth/cmtp/capi.c
-index c53e11ed711..b0c6c6af76e 100644
+index c53e11ed7112..b0c6c6af76ef 100644
 --- a/net/bluetooth/cmtp/capi.c
 +++ b/net/bluetooth/cmtp/capi.c
 @@ -74,7 +74,7 @@ static struct cmtp_application *cmtp_application_add(struct cmtp_session *sessio
@@ -9396,7 +9396,7 @@ index c53e11ed711..b0c6c6af76e 100644
  	detach_capi_ctr(&session->ctrl);
  }
 diff --git a/net/bluetooth/cmtp/core.c b/net/bluetooth/cmtp/core.c
-index 1d1b5daede1..298ed37010e 100644
+index 1d1b5daede19..298ed37010e6 100644
 --- a/net/bluetooth/cmtp/core.c
 +++ b/net/bluetooth/cmtp/core.c
 @@ -75,10 +75,11 @@ static void __cmtp_unlink_session(struct cmtp_session *session)
@@ -9511,7 +9511,7 @@ index 1d1b5daede1..298ed37010e 100644
  
  	session = __cmtp_get_session(&req->bdaddr);
 diff --git a/net/bluetooth/cmtp/sock.c b/net/bluetooth/cmtp/sock.c
-index 8d7d3c16c8b..d82787d417b 100644
+index 8d7d3c16c8b6..d82787d417bd 100644
 --- a/net/bluetooth/cmtp/sock.c
 +++ b/net/bluetooth/cmtp/sock.c
 @@ -50,7 +50,7 @@ static int cmtp_sock_release(struct socket *sock)
@@ -9534,7 +9534,7 @@ index 8d7d3c16c8b..d82787d417b 100644
  		return -ESOCKTNOSUPPORT;
 diff --git a/net/bluetooth/ecc.c b/net/bluetooth/ecc.c
 new file mode 100644
-index 00000000000..e1709f8467a
+index 000000000000..e1709f8467ac
 --- /dev/null
 +++ b/net/bluetooth/ecc.c
 @@ -0,0 +1,816 @@
@@ -10356,7 +10356,7 @@ index 00000000000..e1709f8467a
 +}
 diff --git a/net/bluetooth/ecc.h b/net/bluetooth/ecc.h
 new file mode 100644
-index 00000000000..8d6a2f4d190
+index 000000000000..8d6a2f4d1905
 --- /dev/null
 +++ b/net/bluetooth/ecc.h
 @@ -0,0 +1,54 @@
@@ -10415,7 +10415,7 @@ index 00000000000..8d6a2f4d190
 +bool ecdh_shared_secret(const u8 public_key[64], const u8 private_key[32],
 +		        u8 secret[32]);
 diff --git a/net/bluetooth/hci_conn.c b/net/bluetooth/hci_conn.c
-index c930923a94b..05809dc02e0 100644
+index c930923a94ba..05809dc02e0a 100644
 --- a/net/bluetooth/hci_conn.c
 +++ b/net/bluetooth/hci_conn.c
 @@ -1,7 +1,6 @@
@@ -11225,7 +11225,7 @@ index c930923a94b..05809dc02e0 100644
  	list_for_each_entry_safe(chan, n, &conn->chan_list, list)
  		hci_chan_del(chan);
 diff --git a/net/bluetooth/hci_core.c b/net/bluetooth/hci_core.c
-index ad481457a3b..ec78ac6cadb 100644
+index ad481457a3b4..ec78ac6cadb7 100644
 --- a/net/bluetooth/hci_core.c
 +++ b/net/bluetooth/hci_core.c
 @@ -37,6 +37,8 @@
@@ -15271,7 +15271,7 @@ index ad481457a3b..ec78ac6cadb 100644
 -}
 diff --git a/net/bluetooth/hci_debugfs.c b/net/bluetooth/hci_debugfs.c
 new file mode 100644
-index 00000000000..7db4220941c
+index 000000000000..7db4220941cc
 --- /dev/null
 +++ b/net/bluetooth/hci_debugfs.c
 @@ -0,0 +1,1142 @@
@@ -16419,7 +16419,7 @@ index 00000000000..7db4220941c
 +}
 diff --git a/net/bluetooth/hci_debugfs.h b/net/bluetooth/hci_debugfs.h
 new file mode 100644
-index 00000000000..4444dc8cedc
+index 000000000000..4444dc8cedc2
 --- /dev/null
 +++ b/net/bluetooth/hci_debugfs.h
 @@ -0,0 +1,48 @@
@@ -16474,7 +16474,7 @@ index 00000000000..4444dc8cedc
 diff --git a/net/bluetooth/hci_event.c b/net/bluetooth/hci_event.c
 old mode 100644
 new mode 100755
-index dad587e1240..f2c7737e0fa
+index dad587e1240b..f2c7737e0fac
 --- a/net/bluetooth/hci_event.c
 +++ b/net/bluetooth/hci_event.c
 @@ -30,10 +30,15 @@
@@ -18574,7 +18574,7 @@ index dad587e1240..f2c7737e0fa
  }
 diff --git a/net/bluetooth/hci_request.c b/net/bluetooth/hci_request.c
 new file mode 100644
-index 00000000000..b7369220c9e
+index 000000000000..b7369220c9ef
 --- /dev/null
 +++ b/net/bluetooth/hci_request.c
 @@ -0,0 +1,566 @@
@@ -19146,7 +19146,7 @@ index 00000000000..b7369220c9e
 +}
 diff --git a/net/bluetooth/hci_request.h b/net/bluetooth/hci_request.h
 new file mode 100644
-index 00000000000..bf6df92f42d
+index 000000000000..bf6df92f42db
 --- /dev/null
 +++ b/net/bluetooth/hci_request.h
 @@ -0,0 +1,57 @@
@@ -19208,7 +19208,7 @@ index 00000000000..bf6df92f42d
 +void hci_update_background_scan(struct hci_dev *hdev);
 +void __hci_update_background_scan(struct hci_request *req);
 diff --git a/net/bluetooth/hci_sock.c b/net/bluetooth/hci_sock.c
-index 80732d33c5d..a5cf13bf289 100644
+index 80732d33c5de..a5cf13bf289d 100644
 --- a/net/bluetooth/hci_sock.c
 +++ b/net/bluetooth/hci_sock.c
 @@ -30,6 +30,12 @@
@@ -19855,7 +19855,7 @@ index 80732d33c5d..a5cf13bf289 100644
  	if (err < 0)
  		return err;
 diff --git a/net/bluetooth/hci_sysfs.c b/net/bluetooth/hci_sysfs.c
-index 4f78b28686f..6fca135d49c 100644
+index 4f78b28686ff..6fca135d49cd 100644
 --- a/net/bluetooth/hci_sysfs.c
 +++ b/net/bluetooth/hci_sysfs.c
 @@ -5,6 +5,7 @@
@@ -19931,7 +19931,7 @@ index 4f78b28686f..6fca135d49c 100644
  
  void bt_sysfs_cleanup(void)
 diff --git a/net/bluetooth/hidp/Kconfig b/net/bluetooth/hidp/Kconfig
-index 9332bc7aa85..bc8610b2407 100644
+index 9332bc7aa851..bc8610b24077 100644
 --- a/net/bluetooth/hidp/Kconfig
 +++ b/net/bluetooth/hidp/Kconfig
 @@ -1,6 +1,6 @@
@@ -19943,7 +19943,7 @@ index 9332bc7aa85..bc8610b2407 100644
  	help
  	  HIDP (Human Interface Device Protocol) is a transport layer
 diff --git a/net/bluetooth/hidp/core.c b/net/bluetooth/hidp/core.c
-index a34ea517697..dd228e6f1c8 100644
+index 084ae63d3d89..e0992bd938c1 100644
 --- a/net/bluetooth/hidp/core.c
 +++ b/net/bluetooth/hidp/core.c
 @@ -70,10 +70,11 @@ static void hidp_session_terminate(struct hidp_session *s);
@@ -20069,7 +20069,7 @@ index a34ea517697..dd228e6f1c8 100644
  static int hidp_output_report(struct hid_device *hid, __u8 *data, size_t count)
  {
  	struct hidp_session *session = hid->driver_data;
-@@ -428,7 +507,7 @@ static void hidp_process_report(struct hidp_session *session,
+@@ -428,7 +507,7 @@ static void hidp_process_report(struct hidp_session *session, int type,
  static void hidp_process_handshake(struct hidp_session *session,
  					unsigned char param)
  {
@@ -20231,7 +20231,7 @@ index a34ea517697..dd228e6f1c8 100644
  				       HIDP_TRANS_HID_CONTROL |
  				         HIDP_CTRL_VIRTUAL_CABLE_UNPLUG,
 diff --git a/net/bluetooth/hidp/hidp.h b/net/bluetooth/hidp/hidp.h
-index 8798492a6e9..20d5ea4b79d 100644
+index 8798492a6e99..20d5ea4b79d1 100644
 --- a/net/bluetooth/hidp/hidp.h
 +++ b/net/bluetooth/hidp/hidp.h
 @@ -186,7 +186,7 @@ struct hidp_session {
@@ -20245,7 +20245,7 @@ index 8798492a6e9..20d5ea4b79d 100644
  
  #endif /* __HIDP_H */
 diff --git a/net/bluetooth/hidp/sock.c b/net/bluetooth/hidp/sock.c
-index 5b7abfad038..cb3fdde1968 100644
+index 5b7abfad038b..cb3fdde1968a 100644
 --- a/net/bluetooth/hidp/sock.c
 +++ b/net/bluetooth/hidp/sock.c
 @@ -33,7 +33,7 @@ static int hidp_sock_release(struct socket *sock)
@@ -20267,7 +20267,7 @@ index 5b7abfad038..cb3fdde1968 100644
  	if (sock->type != SOCK_RAW)
  		return -ESOCKTNOSUPPORT;
 diff --git a/net/bluetooth/l2cap_core.c b/net/bluetooth/l2cap_core.c
-index 281fcd2419e..eda4304b5dd 100644
+index 281fcd2419e9..eda4304b5dde 100644
 --- a/net/bluetooth/l2cap_core.c
 +++ b/net/bluetooth/l2cap_core.c
 @@ -46,7 +46,6 @@
@@ -21876,7 +21876,7 @@ index 281fcd2419e..eda4304b5dd 100644
  }
  
 diff --git a/net/bluetooth/l2cap_sock.c b/net/bluetooth/l2cap_sock.c
-index 1389bdec055..b6acd9bbcd9 100644
+index 1389bdec055a..b6acd9bbcd97 100644
 --- a/net/bluetooth/l2cap_sock.c
 +++ b/net/bluetooth/l2cap_sock.c
 @@ -84,7 +84,7 @@ static int l2cap_sock_bind(struct socket *sock, struct sockaddr *addr, int alen)
@@ -22262,7 +22262,7 @@ index 1389bdec055..b6acd9bbcd9 100644
  	if (err < 0)
  		return err;
 diff --git a/net/bluetooth/lib.c b/net/bluetooth/lib.c
-index dc5b753d47b..b36bc041585 100644
+index dc5b753d47b9..b36bc0415854 100644
 --- a/net/bluetooth/lib.c
 +++ b/net/bluetooth/lib.c
 @@ -145,7 +145,7 @@ void bt_info(const char *format, ...)
@@ -22284,7 +22284,7 @@ index dc5b753d47b..b36bc041585 100644
  	va_end(args);
  }
 diff --git a/net/bluetooth/mgmt.c b/net/bluetooth/mgmt.c
-index bb41fd1f0d2..c70b0f1635f 100644
+index bb41fd1f0d21..c70b0f1635f2 100644
 --- a/net/bluetooth/mgmt.c
 +++ b/net/bluetooth/mgmt.c
 @@ -32,10 +32,14 @@
@@ -30045,7 +30045,7 @@ index bb41fd1f0d2..c70b0f1635f 100644
 +}
 diff --git a/net/bluetooth/mgmt_util.c b/net/bluetooth/mgmt_util.c
 new file mode 100644
-index 00000000000..8c30c7eb8be
+index 000000000000..8c30c7eb8bef
 --- /dev/null
 +++ b/net/bluetooth/mgmt_util.c
 @@ -0,0 +1,210 @@
@@ -30261,7 +30261,7 @@ index 00000000000..8c30c7eb8be
 +}
 diff --git a/net/bluetooth/mgmt_util.h b/net/bluetooth/mgmt_util.h
 new file mode 100644
-index 00000000000..6559f189213
+index 000000000000..6559f189213c
 --- /dev/null
 +++ b/net/bluetooth/mgmt_util.h
 @@ -0,0 +1,53 @@
@@ -30319,7 +30319,7 @@ index 00000000000..6559f189213
 +void mgmt_pending_free(struct mgmt_pending_cmd *cmd);
 +void mgmt_pending_remove(struct mgmt_pending_cmd *cmd);
 diff --git a/net/bluetooth/rfcomm/Kconfig b/net/bluetooth/rfcomm/Kconfig
-index 18d352ea2bc..335df751522 100644
+index 18d352ea2bc7..335df7515220 100644
 --- a/net/bluetooth/rfcomm/Kconfig
 +++ b/net/bluetooth/rfcomm/Kconfig
 @@ -1,6 +1,6 @@
@@ -30331,7 +30331,7 @@ index 18d352ea2bc..335df751522 100644
  	  RFCOMM provides connection oriented stream transport.  RFCOMM
  	  support is required for Dialup Networking, OBEX and other Bluetooth
 diff --git a/net/bluetooth/rfcomm/core.c b/net/bluetooth/rfcomm/core.c
-index 955ec192a03..f12c940d642 100644
+index 955ec192a033..f12c940d6427 100644
 --- a/net/bluetooth/rfcomm/core.c
 +++ b/net/bluetooth/rfcomm/core.c
 @@ -78,8 +78,10 @@ static struct rfcomm_session *rfcomm_session_del(struct rfcomm_session *s);
@@ -30964,7 +30964,7 @@ index 955ec192a03..f12c940d642 100644
  	s = rfcomm_session_get(&conn->hdev->bdaddr, &conn->dst);
  	if (!s)
 diff --git a/net/bluetooth/rfcomm/sock.c b/net/bluetooth/rfcomm/sock.c
-index a9e1e67bbbd..3c6d2c8ac1a 100644
+index a9e1e67bbbd7..3c6d2c8ac1a4 100644
 --- a/net/bluetooth/rfcomm/sock.c
 +++ b/net/bluetooth/rfcomm/sock.c
 @@ -68,7 +68,7 @@ static void rfcomm_sk_state_change(struct rfcomm_dlc *d, int err)
@@ -31255,7 +31255,7 @@ index a9e1e67bbbd..3c6d2c8ac1a 100644
  	if (err < 0)
  		return err;
 diff --git a/net/bluetooth/rfcomm/tty.c b/net/bluetooth/rfcomm/tty.c
-index 71f8126be12..8e385a0ae60 100644
+index 71f8126be12b..8e385a0ae60e 100644
 --- a/net/bluetooth/rfcomm/tty.c
 +++ b/net/bluetooth/rfcomm/tty.c
 @@ -83,7 +83,7 @@ static void rfcomm_dev_destruct(struct tty_port *port)
@@ -31457,7 +31457,7 @@ index 71f8126be12..8e385a0ae60 100644
  	rfcomm_dlc_get_modem_status(dlc, &v24_sig);
  
 diff --git a/net/bluetooth/sco.c b/net/bluetooth/sco.c
-index fcf31a4d10c..9c9e64dc0a7 100644
+index fcf31a4d10c3..9c9e64dc0a78 100644
 --- a/net/bluetooth/sco.c
 +++ b/net/bluetooth/sco.c
 @@ -76,7 +76,7 @@ static void sco_sock_timeout(unsigned long arg)
@@ -31843,7 +31843,7 @@ index fcf31a4d10c..9c9e64dc0a7 100644
  	proto_unregister(&sco_proto);
 diff --git a/net/bluetooth/selftest.c b/net/bluetooth/selftest.c
 new file mode 100644
-index 00000000000..dc688f13e49
+index 000000000000..dc688f13e496
 --- /dev/null
 +++ b/net/bluetooth/selftest.c
 @@ -0,0 +1,271 @@
@@ -32120,7 +32120,7 @@ index 00000000000..dc688f13e49
 +#endif
 diff --git a/net/bluetooth/selftest.h b/net/bluetooth/selftest.h
 new file mode 100644
-index 00000000000..2aa0a346a91
+index 000000000000..2aa0a346a913
 --- /dev/null
 +++ b/net/bluetooth/selftest.h
 @@ -0,0 +1,45 @@
@@ -32170,7 +32170,7 @@ index 00000000000..2aa0a346a91
 +
 +#endif
 diff --git a/net/bluetooth/smp.c b/net/bluetooth/smp.c
-index b2829319ffd..43b00e542e8 100644
+index b2829319ffd0..43b00e542e8d 100644
 --- a/net/bluetooth/smp.c
 +++ b/net/bluetooth/smp.c
 @@ -20,6 +20,7 @@
@@ -35317,7 +35317,7 @@ index b2829319ffd..43b00e542e8 100644
 +
 +#endif
 diff --git a/net/bluetooth/smp.h b/net/bluetooth/smp.h
-index 86a683a8b49..6cf872563ea 100644
+index 86a683a8b491..6cf872563ea7 100644
 --- a/net/bluetooth/smp.h
 +++ b/net/bluetooth/smp.h
 @@ -50,10 +50,13 @@ struct smp_cmd_pairing {
@@ -35440,6 +35440,3 @@ index 86a683a8b49..6cf872563ea 100644
 +#endif
 +
  #endif /* __SMP_H */
--- 
-2.30.1
-

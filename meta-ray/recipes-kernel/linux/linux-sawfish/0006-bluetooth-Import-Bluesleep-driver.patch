@@ -1,8 +1,8 @@
-From eaf034279ac36ea7ccad2b3185e3bb4b62ef53fd Mon Sep 17 00:00:00 2001
+From 0a3682bb27c97d6eb2326d087d2c1d4742c31ad3 Mon Sep 17 00:00:00 2001
 From: MagneFire <IDaNLContact@gmail.com>
 Date: Tue, 16 Feb 2021 23:13:45 +0100
-Subject: [PATCH 3/4] bluetooth: Import Bluesleep driver. Import stock
- Bluesleep driver from sturgeon.
+Subject: [PATCH] bluetooth: Import Bluesleep driver. Import stock Bluesleep
+ driver from sturgeon.
 
 ---
  arch/arm/mach-msm/Makefile    |   2 +-
@@ -11,7 +11,7 @@ Subject: [PATCH 3/4] bluetooth: Import Bluesleep driver. Import stock
  create mode 100644 drivers/bluetooth/bluesleep.c
 
 diff --git a/arch/arm/mach-msm/Makefile b/arch/arm/mach-msm/Makefile
-index 12a05eed74a..71808e88db6 100644
+index 12a05eed74a9..71808e88db69 100644
 --- a/arch/arm/mach-msm/Makefile
 +++ b/arch/arm/mach-msm/Makefile
 @@ -6,7 +6,7 @@ obj-$(CONFIG_ARCH_MSM8916) += board-8952.o
@@ -25,7 +25,7 @@ index 12a05eed74a..71808e88db6 100644
  obj-$(CONFIG_SMP) += headsmp.o platsmp.o
 diff --git a/drivers/bluetooth/bluesleep.c b/drivers/bluetooth/bluesleep.c
 new file mode 100644
-index 00000000000..9879fd20fcf
+index 000000000000..9879fd20fcf8
 --- /dev/null
 +++ b/drivers/bluetooth/bluesleep.c
 @@ -0,0 +1,859 @@
@@ -888,6 +888,3 @@ index 00000000000..9879fd20fcf
 +#ifdef MODULE_LICENSE
 +MODULE_LICENSE("GPL");
 +#endif
--- 
-2.30.1
-

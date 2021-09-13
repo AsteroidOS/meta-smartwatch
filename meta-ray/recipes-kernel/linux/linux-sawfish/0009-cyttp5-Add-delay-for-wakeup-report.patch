@@ -1,4 +1,4 @@
-From 1406f47c0ac4cb40e61d6b65fb63cc75d2b7cc57 Mon Sep 17 00:00:00 2001
+From d39bb7d4a218f79de9791ae477ae750eae9aa0a2 Mon Sep 17 00:00:00 2001
 From: MagneFire <IDaNLContact@gmail.com>
 Date: Sun, 21 Feb 2021 22:21:06 +0100
 Subject: [PATCH] cyttp5: Add delay for wakeup report. AsteroidOS requires the
@@ -12,7 +12,7 @@ Subject: [PATCH] cyttp5: Add delay for wakeup report. AsteroidOS requires the
  1 file changed, 9 insertions(+), 1 deletion(-)
 
 diff --git a/drivers/input/touchscreen/cyttsp5_cs445a/cyttsp5_mt_common.c b/drivers/input/touchscreen/cyttsp5_cs445a/cyttsp5_mt_common.c
-index 96bba785c6e..c8713f6bff1 100644
+index 96bba785c6e3..c8713f6bff13 100644
 --- a/drivers/input/touchscreen/cyttsp5_cs445a/cyttsp5_mt_common.c
 +++ b/drivers/input/touchscreen/cyttsp5_cs445a/cyttsp5_mt_common.c
 @@ -23,7 +23,7 @@
@@ -66,6 +66,3 @@ index 96bba785c6e..c8713f6bff1 100644
  	if (md->input_device_registered) {
  		input_unregister_device(md->input);
  	} else {
--- 
-2.32.0
-

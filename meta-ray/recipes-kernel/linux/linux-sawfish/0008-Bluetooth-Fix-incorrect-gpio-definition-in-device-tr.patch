@@ -1,4 +1,4 @@
-From d64065d9bb5dbc006079ea1c14a9e52e09ddfcd6 Mon Sep 17 00:00:00 2001
+From 292fc50e44fb02380514177fc427360930805d87 Mon Sep 17 00:00:00 2001
 From: MagneFire <IDaNLContact@gmail.com>
 Date: Sat, 20 Feb 2021 21:38:33 +0100
 Subject: [PATCH] Bluetooth: Fix incorrect gpio definition in device tree and
@@ -14,7 +14,7 @@ Subject: [PATCH] Bluetooth: Fix incorrect gpio definition in device tree and
  2 files changed, 8 insertions(+), 4 deletions(-)
 
 diff --git a/arch/arm/boot/dts/apq8009w-sawshark/apq8009w-bt.dtsi b/arch/arm/boot/dts/apq8009w-sawshark/apq8009w-bt.dtsi
-index 86c657e09ca..01a8b4bdbfe 100644
+index 86c657e09ca0..01a8b4bdbfe8 100644
 --- a/arch/arm/boot/dts/apq8009w-sawshark/apq8009w-bt.dtsi
 +++ b/arch/arm/boot/dts/apq8009w-sawshark/apq8009w-bt.dtsi
 @@ -13,10 +13,12 @@
@@ -33,7 +33,7 @@ index 86c657e09ca..01a8b4bdbfe 100644
  		pinctrl-0 = <&bt_wakeup_ap_active>;
  		pinctrl-1 = <&bt_wakeup_ap_suspend>;
 diff --git a/drivers/bluetooth/bluesleep.c b/drivers/bluetooth/bluesleep.c
-index 47d596edbd6..b4ce58ce8b3 100644
+index 47d596edbd67..b4ce58ce8b3d 100644
 --- a/drivers/bluetooth/bluesleep.c
 +++ b/drivers/bluetooth/bluesleep.c
 @@ -640,7 +640,7 @@ static int bluesleep_probe(struct platform_device *pdev)
@@ -56,6 +56,3 @@ index 47d596edbd6..b4ce58ce8b3 100644
  
  	bsi->irq_polarity = POLARITY_LOW;	/*low edge (falling edge) */
  
--- 
-2.30.1
-
