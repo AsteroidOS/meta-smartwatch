@@ -1,7 +1,7 @@
-From 6443035d1c4f6acf1ff6e9d3d264fd1f5ed5090c Mon Sep 17 00:00:00 2001
+From 3de4e564d10d4fc2ade9467c067616a54741f4e9 Mon Sep 17 00:00:00 2001
 From: MagneFire <IDaNLContact@gmail.com>
 Date: Fri, 19 Feb 2021 22:59:58 +0100
-Subject: [PATCH 4/4] bluesleep: Use kernel's HCI events instead of
+Subject: [PATCH] bluesleep: Use kernel's HCI events instead of
  /proc/bluetooth/sleep/ write to interface with BlueZ instead of Bluedroid.
 
 ---
@@ -12,7 +12,7 @@ Subject: [PATCH 4/4] bluesleep: Use kernel's HCI events instead of
  4 files changed, 52 insertions(+), 8 deletions(-)
 
 diff --git a/drivers/bluetooth/bluesleep.c b/drivers/bluetooth/bluesleep.c
-index 9879fd20fcf..47d596edbd6 100644
+index 9879fd20fcf8..47d596edbd67 100644
 --- a/drivers/bluetooth/bluesleep.c
 +++ b/drivers/bluetooth/bluesleep.c
 @@ -54,6 +54,7 @@
@@ -95,7 +95,7 @@ index 9879fd20fcf..47d596edbd6 100644
  					const char __user * buffer,
  					size_t count, loff_t * ppos)
 diff --git a/drivers/bluetooth/hci_ldisc.c b/drivers/bluetooth/hci_ldisc.c
-index 5c9a73f0266..f21432799e0 100644
+index 5c9a73f02664..f21432799e0f 100644
 --- a/drivers/bluetooth/hci_ldisc.c
 +++ b/drivers/bluetooth/hci_ldisc.c
 @@ -248,6 +248,8 @@ static int hci_uart_close(struct hci_dev *hdev)
@@ -117,7 +117,7 @@ index 5c9a73f0266..f21432799e0 100644
  
  	hci_uart_tx_wakeup(hu);
 diff --git a/include/net/bluetooth/hci.h b/include/net/bluetooth/hci.h
-index d95da83cb1b..54be456bcc9 100644
+index d95da83cb1b0..54be456bcc9c 100644
 --- a/include/net/bluetooth/hci.h
 +++ b/include/net/bluetooth/hci.h
 @@ -44,6 +44,7 @@
@@ -129,7 +129,7 @@ index d95da83cb1b..54be456bcc9 100644
  /* HCI notify events */
  #define HCI_NOTIFY_CONN_ADD		1
 diff --git a/net/bluetooth/hci_sock.c b/net/bluetooth/hci_sock.c
-index a5cf13bf289..c5b77df9eb5 100644
+index a5cf13bf289d..c5b77df9eb52 100644
 --- a/net/bluetooth/hci_sock.c
 +++ b/net/bluetooth/hci_sock.c
 @@ -152,6 +152,8 @@ static bool is_filtered_packet(struct sock *sk, struct sk_buff *skb)
@@ -150,6 +150,3 @@ index a5cf13bf289..c5b77df9eb5 100644
  	BT_DBG("hdev %s event %d", hdev->name, event);
  
  	/* Send event to monitor */
--- 
-2.30.1
-
