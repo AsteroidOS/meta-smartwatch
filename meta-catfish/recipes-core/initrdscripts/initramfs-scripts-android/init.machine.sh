@@ -1,5 +1,9 @@
 #!/bin/sh
 
+echo QUIT > /run/psplash_fifo
+
+/usr/bin/psplash --angle $rotation --no-console-switch &
+
 BOOT_DIR=$1
 
 mkdir $BOOT_DIR/nvdata
@@ -25,3 +29,5 @@ dd if=/nvdata/MACWLAN of=/proc/wifi/mac
 ip link set up dev wlan0
 sleep 1
 ip link set down dev wlan0
+
+/usr/bin/msm-fb-refresher
