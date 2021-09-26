@@ -1,1 +1,1 @@
-KERNEL=="i2c-2", MODE="0666"
+KERNEL=="i2c-5", MODE="0666"
