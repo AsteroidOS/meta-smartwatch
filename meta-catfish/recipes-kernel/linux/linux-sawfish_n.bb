@@ -23,7 +23,7 @@ SRC_URI = " git://android.googlesource.com/kernel/msm;branch=android-msm-sawshar
 
 SRCREV = "51d550c70b9e35dbeeaf93a505e94ecbef818291"
 LINUX_VERSION ?= "3.18"
-PV = "${LINUX_VERSION}+nougat"
+PV = "${LINUX_VERSION}+oreo"
 S = "${WORKDIR}/git"
 B = "${S}"
 
