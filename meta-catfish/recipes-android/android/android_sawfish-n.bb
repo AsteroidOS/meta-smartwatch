@@ -1,13 +1,14 @@
 inherit gettext
 
-SUMMARY = "Downloads the Huawei Watch 2 Bluetooth /system and /usr/include/android folders and installs them for libhybris"
+SUMMARY = "Downloads the Snapdragon Wear 2100/3100 /usr/libexec/hal-droid and /usr/include/android folders and installs them for libhybris"
 LICENSE = "CLOSED"
-SRC_URI = "https://dl.dropboxusercontent.com/s/u1o3mtnlojg49jt/system-NXH20B.tar.gz \
+
+SRC_URI = "https://dl.dropboxusercontent.com/s/yl8tezw6e2d661o/hybris-o-msm8909.tar.gz \
     file://60-i2c.rules \
 "
-SRC_URI[md5sum] = "f9c576ef60fc4046155cb1e3432962bc"
-SRC_URI[sha256sum] = "2fc8a0d7d67962244ffd5479cbd2cbd65d318ac92da92359260153ab27756271"
-PV = "nougat"
+SRC_URI[md5sum] = "7891147518b1c1a3071af6173c9fd38f"
+SRC_URI[sha256sum] = "61c59dbcb894e693c0fd092d690efdb5fa63fd5784be63e0e3749f25af800ce8"
+PV = "oreo"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 INHIBIT_PACKAGE_STRIP = "1"
@@ -24,9 +25,6 @@ do_install() {
     install -d ${D}${sysconfdir}/udev/rules.d
     install -m 0644 ${WORKDIR}/60-i2c.rules ${D}${sysconfdir}/udev/rules.d/
 
-    install -d ${D}/system/
-    cp -r system/* ${D}/system/
-
     install -d ${D}/usr/
     cp -r usr/* ${D}/usr/
 
@@ -40,9 +38,6 @@ do_install() {
     ln -s system/vendor vendor
     # Make symlink for speaker functionality.
     ln -s /system/etc/Tfa98xx.cnt etc/Tfa98xx.cnt
-
-    install -d ${D}/
-    install -m 644 system/property_contexts ${D}/
 }
 
 # FIXME: QA Issue: Architecture did not match (40 to 164) on /work/dory-oe-linux-gnueabi/android/lollipop-r0/packages-split/android-system/system/vendor/firmware/adsp.b00 [arch]
@@ -50,6 +45,6 @@ do_package_qa() {
 }
 
 PACKAGES =+ "android-system android-headers"
-FILES_android-system = "/system /vendor /usr ${sysconfdir}/udev ${sysconfdir}/Tfa98xx.cnt /property_contexts"
+FILES_android-system = "/vendor /usr ${sysconfdir}/udev ${sysconfdir}/Tfa98xx.cnt"
 FILES_android-headers = "${libdir}/pkgconfig ${includedir}/android"
 EXCLUDE_FROM_SHLIBS = "1"
