@@ -1,0 +1,58 @@
+From caa555589bca91eb6c0d85dec450bc3b54724066 Mon Sep 17 00:00:00 2001
+From: MagneFire <IDaNLContact@gmail.com>
+Date: Mon, 25 Oct 2021 19:13:55 +0200
+Subject: [PATCH] skipjack: ddr: add dts support for 1GB DDR
+
+* add new boad-id for 1GB DDR support
+* set config HIGHMEM as y
+
+Bug: 147842730
+Change-Id: I99266e76dff481eb7eb7e130173779ff9bde554a
+Signed-off-by: abel_fang <Abel_Fang@compal.com>
+---
+ arch/arm/boot/dts/msm8909w-skipjack/apq8009w-skipjack-wtp.dts | 3 ++-
+ arch/arm/configs/skipjack-perf_defconfig                      | 1 +
+ arch/arm/configs/skipjack_defconfig                           | 1 +
+ 3 files changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/arch/arm/boot/dts/msm8909w-skipjack/apq8009w-skipjack-wtp.dts b/arch/arm/boot/dts/msm8909w-skipjack/apq8009w-skipjack-wtp.dts
+index d54c8fd7d15..c58c0abff15 100644
+--- a/arch/arm/boot/dts/msm8909w-skipjack/apq8009w-skipjack-wtp.dts
++++ b/arch/arm/boot/dts/msm8909w-skipjack/apq8009w-skipjack-wtp.dts
+@@ -25,7 +25,8 @@
+ 	compatible = "qcom,apq8009-mtp", "qcom,apq8009", "qcom,mtp";
+ 	qcom,msm-id = <265 0>,
+ 		      <301 0>;
+-	qcom,board-id= <8 0x105>;
++	qcom,board-id= <8 0x105>,
++	               <8 0x005>;
+ };
+ 
+ &soc {
+diff --git a/arch/arm/configs/skipjack-perf_defconfig b/arch/arm/configs/skipjack-perf_defconfig
+index bccd7cc0424..0049c937754 100644
+--- a/arch/arm/configs/skipjack-perf_defconfig
++++ b/arch/arm/configs/skipjack-perf_defconfig
+@@ -478,6 +478,7 @@ CONFIG_PSTORE_CONSOLE=y
+ CONFIG_PSTORE_FTRACE=y
+ CONFIG_PSTORE_RAM=y
+ CONFIG_PROC_FS=y
++CONFIG_HIGHMEM=y
+ CONFIG_SDCARD_FS=y
+ CONFIG_NLS_CODEPAGE_437=y
+ CONFIG_NLS_ASCII=y
+diff --git a/arch/arm/configs/skipjack_defconfig b/arch/arm/configs/skipjack_defconfig
+index 8dfa62e374d..f04a889006a 100644
+--- a/arch/arm/configs/skipjack_defconfig
++++ b/arch/arm/configs/skipjack_defconfig
+@@ -488,6 +488,7 @@ CONFIG_PSTORE=y
+ CONFIG_PSTORE_CONSOLE=y
+ CONFIG_PSTORE_FTRACE=y
+ CONFIG_PSTORE_RAM=y
++CONFIG_HIGHMEM=y
+ CONFIG_SDCARD_FS=y
+ CONFIG_NLS_CODEPAGE_437=y
+ CONFIG_NLS_ASCII=y
+-- 
+2.33.1
+

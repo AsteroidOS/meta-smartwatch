@@ -12,13 +12,15 @@ COMPATIBLE_MACHINE = "skipjack"
 DEPENDS_remove += "virtual/${TARGET_PREFIX}gcc"
 DEPENDS += "virtual/${TARGET_PREFIX}gcc8"
 
-SRC_URI = "git://android.googlesource.com/kernel/msm;branch=android-msm-skipjack-3.18-pie-wear-dr;protocol=https \
+SRC_URI = "git://android.googlesource.com/kernel/msm;branch=android-msm-skipjack-3.18-oreo-wear-dr;protocol=https \
     file://0001-scripts-dtc-Remove-redundant-YYLOC-global-declaratio.patch \
     file://0002-ARM-fix-put_user-for-gcc-8.patch \
     file://0003-touchscreen-Disable-extlibs.patch \
+    file://0004-skipjack-ddr-add-dts-support-for-1GB-DDR.patch \
+    file://0005-cgroups-Fix-compile-time-error.patch \
     file://defconfig \
     file://img_info"
-SRCREV = "a3099f57d3d213992f2b123503b18d91975c7875"
+SRCREV = "f46a8c36f416d4245b13b451c36f36a0c690283d"
 LINUX_VERSION ?= "3.18"
 PV = "${LINUX_VERSION}+pie"
 S = "${WORKDIR}/git"

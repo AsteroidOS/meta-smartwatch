@@ -1,0 +1,46 @@
+From 9d7c1ba05bbbb16bb4d7b837df647fd05d0e816f Mon Sep 17 00:00:00 2001
+From: Kishore Srivenkata Ganesh Bolisetty <bsrivenk@codeaurora.org>
+Date: Fri, 19 Feb 2016 13:54:03 +0530
+Subject: [PATCH] cgroups: Fix compile time error
+
+Fix this prototype mismatch error.
+
+==
+mm/memcontrol.c:2264:6: error: conflicting types for
+'mem_cgroup_end_page_stat'
+void mem_cgroup_end_page_stat(struct mem_cgroup *memcg, bool *locked,
+
+In file included from mm/memcontrol.c:29:0:
+include/linux/memcontrol.h:144:6: note: previous declaration of
+'mem_cgroup_end_page_stat' was here
+void mem_cgroup_end_page_stat(struct mem_cgroup *memcg, bool *locked,
+==
+
+CRs-Fixed: 988758
+Change-Id: Ic996cff7ccd5c2487bc76184922da012e70265ba
+Signed-off-by: Kishore Srivenkata Ganesh Bolisetty <bsrivenk@codeaurora.org>
+Signed-off-by: Vinayak Menon <vinmenon@codeaurora.org>
+---
+ mm/memcontrol.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/mm/memcontrol.c b/mm/memcontrol.c
+index 2e0300b27f7e..79d4a4dfb5cb 100644
+--- a/mm/memcontrol.c
++++ b/mm/memcontrol.c
+@@ -2262,10 +2262,10 @@ again:
+  * @flags: value received from mem_cgroup_begin_page_stat()
+  */
+ void mem_cgroup_end_page_stat(struct mem_cgroup *memcg, bool *locked,
+-			      unsigned long flags)
++			      unsigned long *flags)
+ {
+ 	if (memcg && *locked)
+-		move_unlock_mem_cgroup(memcg, &flags);
++		move_unlock_mem_cgroup(memcg, flags);
+ 
+ 	rcu_read_unlock();
+ }
+-- 
+2.33.1
+
