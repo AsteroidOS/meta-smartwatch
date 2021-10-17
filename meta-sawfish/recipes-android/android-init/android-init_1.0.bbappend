@@ -1,1 +1,1 @@
-FILESEXTRAPATHS_prepend_sawfish := "${THISDIR}/${PN}:"
+FILESEXTRAPATHS:prepend:sawfish := "${THISDIR}/${PN}:"
