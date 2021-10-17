@@ -1,1 +1,1 @@
-RDEPENDS_pulseaudio-server_append_dory = "pulseaudio-modules-droid"
+RDEPENDS:pulseaudio-server:append:dory = "pulseaudio-modules-droid"

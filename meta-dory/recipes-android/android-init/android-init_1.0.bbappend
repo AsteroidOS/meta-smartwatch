@@ -1,1 +1,1 @@
-FILESEXTRAPATHS_prepend_dory := "${THISDIR}/${PN}:"
+FILESEXTRAPATHS:prepend:dory := "${THISDIR}/${PN}:"

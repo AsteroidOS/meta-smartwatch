@@ -1,2 +1,2 @@
-FILESEXTRAPATHS_prepend_dory := "${THISDIR}/asteroid-launcher:"
-SRC_URI_append_dory = " file://default.conf"
+FILESEXTRAPATHS:prepend:dory := "${THISDIR}/asteroid-launcher:"
+SRC_URI:append:dory = " file://default.conf"
