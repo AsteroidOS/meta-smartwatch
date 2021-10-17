@@ -1,11 +1,11 @@
-FILESEXTRAPATHS_prepend_mooneye := "${THISDIR}/${PN}:"
+FILESEXTRAPATHS:prepend:mooneye := "${THISDIR}/${PN}:"
 
-SRC_URI_append_mooneye = " file://nonplat_property_contexts \
+SRC_URI:append:mooneye = " file://nonplat_property_contexts \
     file://plat_property_contexts"
 
-do_install_append_mooneye() {
+do_install:append:mooneye() {
     install -m 0644 ${WORKDIR}/nonplat* ${D}/
     install -m 0644 ${WORKDIR}/plat* ${D}/
 }
 
-FILES_${PN} += "/nonplat* /plat*"
+FILES:${PN} += "/nonplat* /plat*"

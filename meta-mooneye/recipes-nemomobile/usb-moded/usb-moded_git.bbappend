@@ -1,1 +1,1 @@
-FILESEXTRAPATHS_prepend_mooneye := "${THISDIR}/usb-moded:"
+FILESEXTRAPATHS:prepend:mooneye := "${THISDIR}/usb-moded:"

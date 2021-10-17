@@ -1,2 +1,2 @@
-FILESEXTRAPATHS_prepend_mooneye := "${THISDIR}/${PN}:"
-COMPATIBLE_MACHINE_mooneye = "mooneye"
+FILESEXTRAPATHS:prepend:mooneye := "${THISDIR}/${PN}:"
+COMPATIBLE_MACHINE:mooneye = "mooneye"

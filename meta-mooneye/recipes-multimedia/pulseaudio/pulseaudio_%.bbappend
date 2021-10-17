@@ -1,1 +1,1 @@
-RDEPENDS_pulseaudio-server_append_mooneye = "pulseaudio-modules-droid"
+RDEPENDS:pulseaudio-server:append:mooneye = "pulseaudio-modules-droid"

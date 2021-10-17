@@ -1,1 +1,1 @@
-DEPENDS_append_mooneye = " libhybris "
+DEPENDS:append:mooneye = " libhybris "
