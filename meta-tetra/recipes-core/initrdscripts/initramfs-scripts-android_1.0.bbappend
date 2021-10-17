@@ -1,2 +1,2 @@
-FILESEXTRAPATHS_prepend_tetra := "${THISDIR}/${PN}:"
-COMPATIBLE_MACHINE_tetra = "tetra"
+FILESEXTRAPATHS:prepend:tetra := "${THISDIR}/${PN}:"
+COMPATIBLE_MACHINE:tetra = "tetra"

@@ -1,1 +1,1 @@
-FILESEXTRAPATHS_prepend_tetra := "${THISDIR}/${PN}:"
+FILESEXTRAPATHS:prepend:tetra := "${THISDIR}/${PN}:"

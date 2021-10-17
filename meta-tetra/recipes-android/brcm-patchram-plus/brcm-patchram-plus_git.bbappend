@@ -1,3 +1,3 @@
-FILESEXTRAPATHS_prepend_tetra := "${THISDIR}/brcm-patchram-plus:"
-SRC_URI_append_tetra = " file://patchram.service "
-CFLAGS_append_tetra = " -DLPM_TETRA"
+FILESEXTRAPATHS:prepend:tetra := "${THISDIR}/brcm-patchram-plus:"
+SRC_URI:append:tetra = " file://patchram.service "
+CFLAGS:append:tetra = " -DLPM_TETRA"

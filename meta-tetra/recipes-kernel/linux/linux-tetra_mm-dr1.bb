@@ -9,7 +9,7 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=d7810fab7487fb0aad327b76f1be7cd7"
 COMPATIBLE_MACHINE = "tetra"
 
 # Use an older version of gcc (gcc >= 9 doesn't boot.)
-DEPENDS_remove += "virtual/${TARGET_PREFIX}gcc"
+DEPENDS:remove += "virtual/${TARGET_PREFIX}gcc"
 DEPENDS += "virtual/${TARGET_PREFIX}gcc8"
 
 SRC_URI = "git://android.googlesource.com/kernel/bcm;branch=android-bcm-tetra-3.10-marshmallow-dr1-wear-release;protocol=https \
@@ -32,13 +32,13 @@ PV = "${LINUX_VERSION}+marshmallow"
 S = "${WORKDIR}/git"
 B = "${S}"
 
-do_configure_prepend() {
+do_configure:prepend() {
     # This Kbuild is wanted by do_install
     mkdir -p ${S}/include/uapi/linux/broadcom
     touch ${S}/include/uapi/linux/broadcom/Kbuild
 }
 
-do_install_append() {
+do_install:append() {
     rm -rf ${D}/usr/src/usr/
 }
 

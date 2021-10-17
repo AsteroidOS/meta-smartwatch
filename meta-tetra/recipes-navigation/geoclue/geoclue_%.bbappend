@@ -1,1 +1,1 @@
-RDEPENDS_${PN}_append_tetra = " geoclue-provider-hybris "
+RDEPENDS:${PN}:append:tetra = " geoclue-provider-hybris "
