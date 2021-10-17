@@ -1,1 +1,1 @@
-RDEPENDS_pulseaudio-server_append_sprat = "pulseaudio-modules-droid"
+RDEPENDS:pulseaudio-server:append:sprat = "pulseaudio-modules-droid"

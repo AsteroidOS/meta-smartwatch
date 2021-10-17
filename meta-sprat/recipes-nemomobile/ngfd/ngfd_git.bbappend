@@ -1,1 +1,1 @@
-RDEPENDS_${PN}_append_sprat = " ngfd-plugin-droid-vibrator "
+RDEPENDS:${PN}:append:sprat = " ngfd-plugin-droid-vibrator "

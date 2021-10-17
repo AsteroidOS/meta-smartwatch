@@ -1,1 +1,1 @@
-RDEPENDS_${PN}_append_sprat = " qt5-qpa-hwcomposer-plugin "
+RDEPENDS:${PN}:append:sprat = " qt5-qpa-hwcomposer-plugin "
