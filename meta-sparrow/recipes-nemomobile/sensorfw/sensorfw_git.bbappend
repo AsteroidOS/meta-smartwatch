@@ -1,1 +1,1 @@
-DEPENDS_append_sparrow = " libhybris "
+DEPENDS:append:sparrow = " libhybris "
