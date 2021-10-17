@@ -1,10 +1,10 @@
-FILESEXTRAPATHS_prepend_lenok := "${THISDIR}/${PN}:"
-COMPATIBLE_MACHINE_lenok = "lenok"
+FILESEXTRAPATHS:prepend:lenok := "${THISDIR}/${PN}:"
+COMPATIBLE_MACHINE:lenok = "lenok"
 
-SRC_URI_append_lenok += " file://init.machine.sh"
+SRC_URI:append:lenok = " file://init.machine.sh"
 
-do_install_append_lenok() {
+do_install:append:lenok() {
     install -m 0755 ${WORKDIR}/init.machine.sh ${D}/init.machine
 }
 
-FILES_${PN} += "/init.machine"
+FILES:${PN} += "/init.machine"

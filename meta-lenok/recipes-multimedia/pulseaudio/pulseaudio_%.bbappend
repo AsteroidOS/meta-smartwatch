@@ -1,1 +1,1 @@
-RDEPENDS_pulseaudio-server_append_lenok = "pulseaudio-modules-droid"
+RDEPENDS:pulseaudio-server:append:lenok = "pulseaudio-modules-droid"

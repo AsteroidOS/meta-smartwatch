@@ -1,3 +1,3 @@
-FILESEXTRAPATHS_prepend_lenok := "${THISDIR}/brcm-patchram-plus:"
-SRC_URI_append_lenok = " file://patchram.service "
-CFLAGS_append_lenok = " -DLPM_LENOK"
+FILESEXTRAPATHS:prepend:lenok := "${THISDIR}/brcm-patchram-plus:"
+SRC_URI:append:lenok = " file://patchram.service "
+CFLAGS:append:lenok = " -DLPM_LENOK"

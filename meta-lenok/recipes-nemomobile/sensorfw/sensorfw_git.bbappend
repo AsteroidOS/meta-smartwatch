@@ -1,1 +1,1 @@
-DEPENDS_append_lenok = " libhybris "
+DEPENDS:append:lenok = " libhybris "

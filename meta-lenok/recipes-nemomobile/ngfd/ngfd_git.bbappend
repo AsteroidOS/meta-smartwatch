@@ -1,1 +1,1 @@
-RDEPENDS_${PN}_append_lenok = " ngfd-plugin-droid-vibrator "
+RDEPENDS:${PN}:append:lenok = " ngfd-plugin-droid-vibrator "
