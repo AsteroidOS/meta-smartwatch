@@ -1,1 +1,1 @@
-RDEPENDS_pulseaudio-server_append_anthias = "pulseaudio-modules-droid"
+RDEPENDS:pulseaudio-server:append:anthias = "pulseaudio-modules-droid"

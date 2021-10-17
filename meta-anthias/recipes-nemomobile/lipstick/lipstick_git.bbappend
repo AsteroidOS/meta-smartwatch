@@ -1,1 +1,1 @@
-RDEPENDS_${PN}_append_anthias = " qt5-qpa-hwcomposer-plugin "
+RDEPENDS:${PN}:append:anthias = " qt5-qpa-hwcomposer-plugin "

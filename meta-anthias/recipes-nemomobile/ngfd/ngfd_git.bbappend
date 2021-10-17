@@ -1,1 +1,1 @@
-RDEPENDS_${PN}_append_anthias = " ngfd-plugin-droid-vibrator "
+RDEPENDS:${PN}:append:anthias = " ngfd-plugin-droid-vibrator "

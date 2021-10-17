@@ -1,1 +1,1 @@
-DEPENDS_append_anthias = " libhybris "
+DEPENDS:append:anthias = " libhybris "

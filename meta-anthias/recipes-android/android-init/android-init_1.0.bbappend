@@ -1,1 +1,1 @@
-FILESEXTRAPATHS_prepend_anthias := "${THISDIR}/${PN}:"
+FILESEXTRAPATHS:prepend:anthias := "${THISDIR}/${PN}:"
