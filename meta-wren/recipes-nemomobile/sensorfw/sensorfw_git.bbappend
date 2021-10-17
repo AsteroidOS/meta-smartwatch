@@ -1,1 +1,1 @@
-DEPENDS_append_wren = " libhybris "
+DEPENDS:append:wren = " libhybris "

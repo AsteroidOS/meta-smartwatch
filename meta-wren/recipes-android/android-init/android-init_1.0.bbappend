@@ -1,1 +1,1 @@
-FILESEXTRAPATHS_prepend_wren := "${THISDIR}/${PN}:"
+FILESEXTRAPATHS:prepend:wren := "${THISDIR}/${PN}:"

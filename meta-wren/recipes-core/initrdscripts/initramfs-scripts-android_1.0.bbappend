@@ -1,2 +1,2 @@
-FILESEXTRAPATHS_prepend_wren := "${THISDIR}/${PN}:"
-COMPATIBLE_MACHINE_wren = "wren"
+FILESEXTRAPATHS:prepend:wren := "${THISDIR}/${PN}:"
+COMPATIBLE_MACHINE:wren = "wren"
