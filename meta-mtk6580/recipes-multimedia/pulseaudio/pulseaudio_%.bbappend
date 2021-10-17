@@ -1,2 +1,2 @@
-RDEPENDS_pulseaudio-server_append_harmony = "pulseaudio-modules-droid"
-RDEPENDS_pulseaudio-server_append_inharmony = "pulseaudio-modules-droid"
+RDEPENDS:pulseaudio-server:append:harmony = "pulseaudio-modules-droid"
+RDEPENDS:pulseaudio-server:append:inharmony = "pulseaudio-modules-droid"

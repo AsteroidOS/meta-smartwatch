@@ -1,1 +1,1 @@
-RDEPENDS_${PN} += "nemo-qtmultimedia-plugins"
+RDEPENDS:${PN} += "nemo-qtmultimedia-plugins"

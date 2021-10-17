@@ -1,2 +1,2 @@
-PACKAGECONFIG_remove = "mtdev"
-PACKAGECONFIG_append = " libinput"
+PACKAGECONFIG:remove = "mtdev"
+PACKAGECONFIG:append = " libinput"

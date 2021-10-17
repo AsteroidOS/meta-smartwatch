@@ -1,8 +1,8 @@
-FILESEXTRAPATHS_prepend_harmony := "${THISDIR}/sensorfw:"
-FILESEXTRAPATHS_prepend_inharmony := "${THISDIR}/sensorfw:"
+FILESEXTRAPATHS:prepend:harmony := "${THISDIR}/sensorfw:"
+FILESEXTRAPATHS:prepend:inharmony := "${THISDIR}/sensorfw:"
 
-SRC_URI_append_harmony = " file://0001-HybrisWristGestureAdaptor-Use-tilt-sensor-as-tilt-to.patch"
-SRC_URI_append_inharmony = " file://0001-HybrisWristGestureAdaptor-Use-tilt-sensor-as-tilt-to.patch"
+SRC_URI:append:harmony = " file://0001-HybrisWristGestureAdaptor-Use-tilt-sensor-as-tilt-to.patch"
+SRC_URI:append:inharmony = " file://0001-HybrisWristGestureAdaptor-Use-tilt-sensor-as-tilt-to.patch"
 
-DEPENDS_append_harmony = " libhybris "
-DEPENDS_append_inharmony = " libhybris "
+DEPENDS:append:harmony = " libhybris "
+DEPENDS:append:inharmony = " libhybris "

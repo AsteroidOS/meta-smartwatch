@@ -1,13 +1,13 @@
-FILESEXTRAPATHS_prepend_harmony := "${THISDIR}/mce:"
-SRC_URI_append_harmony = " file://10mce.ini"
+FILESEXTRAPATHS:prepend:harmony := "${THISDIR}/mce:"
+SRC_URI:append:harmony = " file://10mce.ini"
 
-do_install_append_harmony() {
+do_install:append:harmony() {
     cp ${WORKDIR}/10mce.ini ${D}/etc/mce/
 }
 
-FILESEXTRAPATHS_prepend_inharmony := "${THISDIR}/mce:"
-SRC_URI_append_inharmony = " file://10mce.ini"
+FILESEXTRAPATHS:prepend:inharmony := "${THISDIR}/mce:"
+SRC_URI:append:inharmony = " file://10mce.ini"
 
-do_install_append_inharmony() {
+do_install:append:inharmony() {
     cp ${WORKDIR}/10mce.ini ${D}/etc/mce/
 }

@@ -1,1 +1,1 @@
-RDEPENDS_${PN}_append_harmony = " gst-droid "
+RDEPENDS:${PN}:append:harmony = " gst-droid "

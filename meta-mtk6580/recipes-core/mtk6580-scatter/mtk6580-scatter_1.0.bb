@@ -2,7 +2,7 @@ DESCRIPTION = "Scatter file for MTK6580 watches"
 LICENSE = "PD"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/PD;md5=b3597d12946881e13cb3b548d1173851"
 
-FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
+FILESEXTRAPATHS:prepend := "${THISDIR}/${PN}:"
 SRC_URI = "file://MT6580_AsteroidOS_scatter.txt"
 
 S = "${WORKDIR}"
@@ -31,4 +31,4 @@ addtask deploy before do_build after do_install
 
 do_deploy[depends] += "mtk6580-asteroid-logo:do_deploy"
 
-FILES_${PN} += "/boot/MT6580_AsteroidOS_scatter.txt"
+FILES:${PN} += "/boot/MT6580_AsteroidOS_scatter.txt"

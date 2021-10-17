@@ -24,7 +24,7 @@ SRC_URI = "git://github.com/OpenWatchProject/android_kernel_mediatek_mt6580;prot
     file://0012-Disable-new-gcc-7.1.1-warnings.patch \
     file://0013-ARM-uaccess-remove-put_user-code-duplication.patch \
     "
-SRC_URI_append_inharmony = "file://inharmonyconfig"
+SRC_URI:append:inharmony = "file://inharmonyconfig"
 
 SRCREV = "b1ebbe66774b96f03fb440860d328a119b7f9a6b"
 LINUX_VERSION ?= "3.10"
@@ -34,7 +34,7 @@ B = "${S}"
 
 # Removes some headers that are installed incorrectly
 
-do_install_append() {
+do_install:append() {
     rm -rf ${D}/usr/src/usr/
 }
 

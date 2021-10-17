@@ -1,5 +1,5 @@
-FILESEXTRAPATHS_prepend_harmony := "${THISDIR}/${PN}:"
-COMPATIBLE_MACHINE_harmony = "harmony"
+FILESEXTRAPATHS:prepend:harmony := "${THISDIR}/${PN}:"
+COMPATIBLE_MACHINE:harmony = "harmony"
 
-FILESEXTRAPATHS_prepend_inharmony := "${THISDIR}/${PN}:"
-COMPATIBLE_MACHINE_inharmony = "inharmony"
+FILESEXTRAPATHS:prepend:inharmony := "${THISDIR}/${PN}:"
+COMPATIBLE_MACHINE:inharmony = "inharmony"

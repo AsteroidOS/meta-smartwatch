@@ -1,8 +1,8 @@
 SPLASH_IMAGES = "file://psplash-img-400.png;outsuffix=default"
 
-FILESEXTRAPATHS_prepend_harmony := "${THISDIR}/psplash:"
-SRC_URI_append_harmony = " file://rotation"
+FILESEXTRAPATHS:prepend:harmony := "${THISDIR}/psplash:"
+SRC_URI:append:harmony = " file://rotation"
 
-do_install_append_harmony() {
+do_install:append:harmony() {
     cp ${WORKDIR}/rotation ${D}/etc/rotation
 }
