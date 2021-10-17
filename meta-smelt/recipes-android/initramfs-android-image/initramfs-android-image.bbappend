@@ -1,1 +1,1 @@
-IMAGE_INSTALL_remove_smelt = "android-tools bash"
+IMAGE_INSTALL:remove:smelt = "android-tools bash"

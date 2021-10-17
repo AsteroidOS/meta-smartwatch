@@ -1,2 +1,2 @@
-FILESEXTRAPATHS_prepend_smelt := "${THISDIR}/asteroid-launcher:"
-SRC_URI_append_smelt = " file://default.conf"
+FILESEXTRAPATHS:prepend:smelt := "${THISDIR}/asteroid-launcher:"
+SRC_URI:append:smelt = " file://default.conf"

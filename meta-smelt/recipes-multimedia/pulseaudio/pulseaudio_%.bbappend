@@ -1,1 +1,1 @@
-RDEPENDS_pulseaudio-server_append_smelt = " pulseaudio-modules-droid "
+RDEPENDS:pulseaudio-server:append:smelt = " pulseaudio-modules-droid "

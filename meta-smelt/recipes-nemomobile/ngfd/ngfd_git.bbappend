@@ -1,1 +1,1 @@
-RDEPENDS_${PN}_append_smelt = " ngfd-plugin-droid-vibrator "
+RDEPENDS:${PN}:append:smelt = " ngfd-plugin-droid-vibrator "

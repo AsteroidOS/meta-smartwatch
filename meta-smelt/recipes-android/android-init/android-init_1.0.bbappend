@@ -1,1 +1,1 @@
-FILESEXTRAPATHS_prepend_smelt := "${THISDIR}/${PN}:"
+FILESEXTRAPATHS:prepend:smelt := "${THISDIR}/${PN}:"

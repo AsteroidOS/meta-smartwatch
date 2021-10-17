@@ -1,8 +1,8 @@
-FILESEXTRAPATHS_prepend_smelt := "${THISDIR}/sensorfw:"
-SRC_URI_append_smelt = " file://sensord-hybris.conf"
+FILESEXTRAPATHS:prepend:smelt := "${THISDIR}/sensorfw:"
+SRC_URI:append:smelt = " file://sensord-hybris.conf"
 
-do_install_append_smelt() {
+do_install:append:smelt() {
     cp ../sensord-hybris.conf ${D}/etc/sensorfw/primaryuse.conf
 }
 
-DEPENDS_append_smelt = " libhybris "
+DEPENDS:append:smelt = " libhybris "
