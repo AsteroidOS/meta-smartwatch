@@ -1,1 +1,1 @@
-FILESEXTRAPATHS_prepend_bass := "${THISDIR}/${PN}:"
+FILESEXTRAPATHS:prepend:bass := "${THISDIR}/${PN}:"

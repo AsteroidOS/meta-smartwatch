@@ -1,2 +1,2 @@
-FILESEXTRAPATHS_prepend_bass := "${THISDIR}/${PN}:"
-COMPATIBLE_MACHINE_bass = "bass"
+FILESEXTRAPATHS:prepend:bass := "${THISDIR}/${PN}:"
+COMPATIBLE_MACHINEL:bass = "bass"

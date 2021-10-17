@@ -1,1 +1,1 @@
-RDEPENDS_pulseaudio-server_append_bass = "pulseaudio-modules-droid"
+RDEPENDS:pulseaudio-server:append:bass = "pulseaudio-modules-droid"

@@ -1,3 +1,3 @@
-FILESEXTRAPATHS_prepend_bass := "${THISDIR}/brcm-patchram-plus:"
-SRC_URI_append_bass = " file://patchram.service "
-CFLAGS_append_bass = " -DLPM_BASS"
+FILESEXTRAPATHS:prepend:bass := "${THISDIR}/brcm-patchram-plus:"
+SRC_URI:append:bass = " file://patchram.service "
+CFLAGS:append:bass = " -DLPM_BASS"

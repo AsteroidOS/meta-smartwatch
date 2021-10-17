@@ -23,7 +23,7 @@ PV = "${LINUX_VERSION}+lollipop"
 S = "${WORKDIR}/git"
 B = "${S}"
 
-do_install_append() {
+do_install:append() {
     rm -rf ${D}/usr/src/usr/
 }
 
