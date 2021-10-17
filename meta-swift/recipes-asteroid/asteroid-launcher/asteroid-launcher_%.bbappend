@@ -1,2 +1,2 @@
-FILESEXTRAPATHS_prepend_swift := "${THISDIR}/asteroid-launcher:"
-SRC_URI_append_swift = " file://default.conf"
+FILESEXTRAPATHS:prepend:swift := "${THISDIR}/asteroid-launcher:"
+SRC_URI:append:swift = " file://default.conf"

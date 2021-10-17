@@ -1,1 +1,1 @@
-RDEPENDS_pulseaudio-server_append_swift = " pulseaudio-modules-droid "
+RDEPENDS:pulseaudio-server:append:swift = " pulseaudio-modules-droid "

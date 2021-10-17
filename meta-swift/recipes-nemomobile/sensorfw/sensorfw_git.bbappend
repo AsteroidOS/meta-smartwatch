@@ -1,1 +1,1 @@
-DEPENDS_append_swift = " libhybris "
+DEPENDS:append:swift = " libhybris "

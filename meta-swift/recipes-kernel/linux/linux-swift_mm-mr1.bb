@@ -19,11 +19,11 @@ PV = "${LINUX_VERSION}+marshmallow"
 S = "${WORKDIR}/git"
 B = "${S}"
 
-do_configure_prepend() {
+do_configure:prepend() {
     sed -i "s/ASUS_SW_VER/\"aos1\"/" ${S}/kernel/asusevtlog.c
 }
 
-do_install_append() {
+do_install:append() {
     rm -rf ${D}/usr/src/usr/
 }
 

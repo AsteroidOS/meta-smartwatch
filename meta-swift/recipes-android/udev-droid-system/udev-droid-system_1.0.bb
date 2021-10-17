@@ -7,7 +7,7 @@ SRC_URI = "file://998-droid-system.rules"
 S = "${WORKDIR}"
 B = "${S}"
 
-do_install_append() {
+do_install:append() {
     install -d ${D}/lib/udev/rules.d
     install -m 644 ${WORKDIR}/998-droid-system.rules ${D}/lib/udev/rules.d/
 }
