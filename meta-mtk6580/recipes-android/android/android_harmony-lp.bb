@@ -20,6 +20,7 @@ do_install() {
     cp -r system/* ${D}/system/
 
     install -d ${D}/usr/
+    rm -r usr/include/droidmedia/
     cp -r usr/* ${D}/usr/
 
     install -d ${D}${includedir}/android
