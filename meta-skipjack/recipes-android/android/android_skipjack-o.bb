@@ -2,9 +2,9 @@ inherit gettext
 
 SUMMARY = "Downloads the Ticwatch E & S /system and /usr/include/android folders and installs them for libhybris"
 LICENSE = "CLOSED"
-SRC_URI = "https://dl.dropboxusercontent.com/s/ubcsdhlbv09jxxo/system-skipjack.tar.gz"
-SRC_URI[md5sum] = "c1d225bca2257d13724600b3edac0e44"
-SRC_URI[sha256sum] = "9c89cbbd9ececff94467912498b19b239a6b8f6a3a72927cf75d0400e391ac99"
+SRC_URI = "https://dl.dropboxusercontent.com/s/yl8tezw6e2d661o/hybris-o-msm8909.tar.gz"
+SRC_URI[md5sum] = "7891147518b1c1a3071af6173c9fd38f"
+SRC_URI[sha256sum] = "61c59dbcb894e693c0fd092d690efdb5fa63fd5784be63e0e3749f25af800ce8"
 PV = "oreo"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
@@ -17,10 +17,9 @@ B = "${S}"
 PROVIDES += "virtual/android-system-image"
 PROVIDES += "virtual/android-headers"
 
-do_install() {
-    install -d ${D}/system/
-    cp -r system/* ${D}/system/
+RDEPENDS_${PN}_append_${PN} = "android-system-partition"
 
+do_install() {
     install -d ${D}/usr/
     cp -r usr/* ${D}/usr/
 
@@ -30,15 +29,12 @@ do_install() {
     install -d ${D}${libdir}/pkgconfig
     install -m 0644 ${D}${includedir}/android/android-headers.pc ${D}${libdir}/pkgconfig
     rm ${D}${includedir}/android/android-headers.pc
-
-    cd ${D}
-    ln -s system/vendor vendor
 }
 
 do_package_qa() {
 }
 
 PACKAGES =+ "android-system android-headers"
-FILES_android-system = "/system /vendor /usr"
+FILES_android-system = "/usr ${sysconfdir}/udev"
 FILES_android-headers = "${libdir}/pkgconfig ${includedir}/android"
 EXCLUDE_FROM_SHLIBS = "1"
