@@ -25,20 +25,3 @@ service logcat /system/bin/logcat -f /dev/kmsg
 service servicemanager /usr/libexec/hal-droid/system/bin/servicemanager
     setenv LD_PRELOAD /usr/libexec/hal-droid/system/lib/libselinux_stubs.so
     class core
-
-service sensorhd /system/bin/shd
-    class core
-
-service bt_vendor /system/bin/bt_vendor.sh
-    class core
-    oneshot
-
-service hwservicemanager /system/bin/hwservicemanager
-    setenv LD_PRELOAD /usr/libexec/hal-droid/system/lib/libselinux_stubs.so
-    class core
-service configstore-hal-1-0 /vendor/bin/hw/android.hardware.configstore@1.0-service
-    class core
-
-service gralloc-2-0 /vendor/bin/hw/android.hardware.graphics.allocator@2.0-service
-    capabilities SYS_NICE
-    class core
