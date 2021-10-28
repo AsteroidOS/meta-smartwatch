@@ -1,1 +1,1 @@
-RDEPENDS_pulseaudio-server_append_sawfish = " pulseaudio-modules-droid "
+RDEPENDS_pulseaudio-server_append_ray = " pulseaudio-modules-droid "

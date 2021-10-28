@@ -7,7 +7,7 @@ LICENSE = "GPLv3"
 LIC_FILES_CHKSUM = "file://COPYING;md5=84dcc94da3adb52b53ae4fa38fe49e5d"
 S = "${WORKDIR}"
 PACKAGE_ARCH = "${MACHINE_ARCH}"
-COMPATIBLE_MACHINE = "sawfish"
+COMPATIBLE_MACHINE = "ray"
 
 do_install() {
     install -m 0755 -d ${D}${bindir}
