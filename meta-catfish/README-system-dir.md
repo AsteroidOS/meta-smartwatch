@@ -1,6 +1,6 @@
 # /system/ directory build instructions
 
-This document describes how to build the system-dir tarball, needed for the sawfish platform to function properly. The archive contains original Android Wear parts (mostly /system/) and recompiled parts for libhybris compatibility (/include/ and /usr/libexec/hal-droid/system/lib/).
+This document describes how to build the system-dir tarball, needed for the ray platform to function properly. The archive contains original Android Wear parts (mostly /system/) and recompiled parts for libhybris compatibility (/include/ and /usr/libexec/hal-droid/system/lib/).
 
 
 ## 1. Know how to boot to fastboot and recovery
@@ -21,7 +21,7 @@ It is very likely that you are currently running an up-to-date version of WearOS
 When you follow this document correctly the flow of system build numbers will be: up-to-date version -> M6E69F -> M9E41V.
 
 Below you can find some links where you can find the system files for ME69F and update file for M9E41V:
-* M6E69F full system: https://androidfilehost.com/?fid=745425885120748838 or http://www.rootjunkysdl.com/files/Huawei%20Watch/Firmware/sawfish-m6e69f-wear-stock.zip
+* M6E69F full system: https://androidfilehost.com/?fid=745425885120748838 or http://www.rootjunkysdl.com/files/Huawei%20Watch/Firmware/ray-m6e69f-wear-stock.zip
 * M9E41V OTA file: https://my.hidrive.com/lnk/GrljFu3i
 
 ### 2.1 Install M6E69F
@@ -29,7 +29,7 @@ Below you can find some links where you can find the system files for ME69F and 
 Use the following commands to downgrade the system, make sure that your watch is currently in fastboot mode:
 
 ```sh
-fastboot flash bootloader bootloader-sawfish-m6e69f.img
+fastboot flash bootloader bootloader-ray-m6e69f.img
 fastboot reboot-bootloader
 ```
 Wait for fastboot menu to be available again. Then downgrade the system. You may need to extract a zip archive to find the boot.img, recovery.img, system.img, userdata.img and cache.img files.
@@ -69,9 +69,9 @@ sed -i -e '$asys.hwc.gpu_perf_mode=1' build.prop
 cd vendor/lib/egl/
 ln -s libGLESv2_adreno.so libGLESv2S3D_adreno.so
 cd ../../../lib/hw/
-ln -s /usr/libexec/hal-droid/system/lib/hw/hwcomposer.msm8909.so hwcomposer.sawfish.so
-ln -s /usr/libexec/hal-droid/system/lib/hw/gralloc.msm8909.so gralloc.sawfish.so
-ln -s /usr/libexec/hal-droid/system/lib/hw/memtrack.msm8909.so memtrack.sawfish.so
+ln -s /usr/libexec/hal-droid/system/lib/hw/hwcomposer.msm8909.so hwcomposer.ray.so
+ln -s /usr/libexec/hal-droid/system/lib/hw/gralloc.msm8909.so gralloc.ray.so
+ln -s /usr/libexec/hal-droid/system/lib/hw/memtrack.msm8909.so memtrack.ray.so
 cd ../../../
 ```
 
@@ -85,8 +85,8 @@ Download all the files needed for compilation:
 ``` sh
 curl https://storage.googleapis.com/git-repo-downloads/repo > repo
 chmod a+x repo
-mkdir -p android-sawfish/
-cd android-sawfish
+mkdir -p android-ray/
+cd android-ray
 
 ../repo init -u https://github.com/MagneFire/android_manifest -b nougat-mr1.8-release -g all,-notdefault,-darwin,-mips --depth=1
 ../repo sync
@@ -131,7 +131,7 @@ The second part of this tarball contains header files to compile against
 libhybris. There is a script in the libhybris distribution that can pull
 the header files from the downloaded android distribution (above).
 ```sh
-android-sawfish/libhybris/utils/extract-headers.sh -v 7.1.1 -p /usr/include/android android-sawfish include
+android-ray/libhybris/utils/extract-headers.sh -v 7.1.1 -p /usr/include/android android-ray include
 
 ```
 
