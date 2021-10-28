@@ -1,4 +1,4 @@
-FILESEXTRAPATHS_prepend_sawfish := "${THISDIR}/sensorfw:"
-SRC_URI_append_sawfish = " file://sensorfwd.service"
+FILESEXTRAPATHS_prepend_ray := "${THISDIR}/sensorfw:"
+SRC_URI_append_ray = " file://sensorfwd.service"
 
-DEPENDS_append_sawfish = " libhybris "
+DEPENDS_append_ray = " libhybris "
