@@ -9,7 +9,7 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=d7810fab7487fb0aad327b76f1be7cd7"
 COMPATIBLE_MACHINE = "skipjack"
 
 # Use an older version of gcc (gcc >= 9 doesn't boot.)
-DEPENDS_remove += "virtual/${TARGET_PREFIX}gcc"
+DEPENDS:remove += "virtual/${TARGET_PREFIX}gcc"
 DEPENDS += "virtual/${TARGET_PREFIX}gcc8"
 
 SRC_URI = "git://android.googlesource.com/kernel/msm;branch=android-msm-skipjack-3.18-oreo-wear-dr;protocol=https \
@@ -26,7 +26,7 @@ PV = "${LINUX_VERSION}+pie"
 S = "${WORKDIR}/git"
 B = "${S}"
 
-do_install_append() {
+do_install:append() {
     rm -rf ${D}/usr/src/usr/
 }
 

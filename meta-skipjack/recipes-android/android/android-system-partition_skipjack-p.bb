@@ -12,7 +12,7 @@ PV = "pie"
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 INHIBIT_PACKAGE_STRIP = "1"
 COMPATIBLE_MACHINE = "skipjack"
-INSANE_SKIP_${PN} = "ldflags dev-so already-stripped"
+INSANE_SKIP:${PN} = "ldflags dev-so already-stripped"
 S = "${WORKDIR}"
 B = "${S}"
 
@@ -26,5 +26,5 @@ do_install() {
     ln -s system/vendor vendor
 }
 
-FILES_${PN} = "/system /vendor"
+FILES:${PN} = "/system /vendor"
 EXCLUDE_FROM_SHLIBS = "1"

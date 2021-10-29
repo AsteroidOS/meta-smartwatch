@@ -10,14 +10,14 @@ PV = "oreo"
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 INHIBIT_PACKAGE_STRIP = "1"
 COMPATIBLE_MACHINE = "skipjack"
-INSANE_SKIP_${PN} = "already-stripped"
+INSANE_SKIP:${PN} = "already-stripped"
 S = "${WORKDIR}"
 B = "${S}"
 
 PROVIDES += "virtual/android-system-image"
 PROVIDES += "virtual/android-headers"
 
-RDEPENDS_${PN}_append_${PN} = "android-system-partition"
+RDEPENDS:${PN}:append_${PN} = "android-system-partition"
 
 do_install() {
     install -d ${D}/usr/
@@ -35,6 +35,6 @@ do_package_qa() {
 }
 
 PACKAGES =+ "android-system android-headers"
-FILES_android-system = "/usr ${sysconfdir}/udev"
-FILES_android-headers = "${libdir}/pkgconfig ${includedir}/android"
+FILES:android-system = "/usr ${sysconfdir}/udev"
+FILES:android-headers = "${libdir}/pkgconfig ${includedir}/android"
 EXCLUDE_FROM_SHLIBS = "1"

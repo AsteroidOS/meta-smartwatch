@@ -1,1 +1,1 @@
-DEPENDS_append_skipjack = " libhybris "
+DEPENDS:append:skipjack = " libhybris "

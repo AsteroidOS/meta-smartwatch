@@ -1,11 +1,11 @@
-FILESEXTRAPATHS_prepend_skipjack := "${THISDIR}/${PN}:"
+FILESEXTRAPATHS:prepend:skipjack := "${THISDIR}/${PN}:"
 
-SRC_URI_append_skipjack = " file://nonplat_property_contexts \
+SRC_URI:append:skipjack = " file://nonplat_property_contexts \
     file://plat_property_contexts"
 
-do_install_append_skipjack() {
+do_install:append:skipjack() {
     install -m 0644 ${WORKDIR}/nonplat* ${D}/
     install -m 0644 ${WORKDIR}/plat* ${D}/
 }
 
-FILES_${PN} += "/nonplat* /plat*"
+FILES:${PN} += "/nonplat* /plat*"

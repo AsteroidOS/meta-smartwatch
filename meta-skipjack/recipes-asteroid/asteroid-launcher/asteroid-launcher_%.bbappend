@@ -1,2 +1,2 @@
-FILESEXTRAPATHS_prepend_skipjack := "${THISDIR}/asteroid-launcher:"
-SRC_URI_append_skipjack = " file://default.conf"
+FILESEXTRAPATHS:prepend:skipjack := "${THISDIR}/asteroid-launcher:"
+SRC_URI:append:skipjack = " file://default.conf"

@@ -2,7 +2,7 @@
 =====================================
 
 The /system/ directory available on the skipjack platform and provided in
-prebuilt form by android_skipjack-o.bb is a tricky mix of an original WearOS
+prebuilt form by android:skipjack-o.bb is a tricky mix of an original WearOS
 /system and some recompiled parts. This is due to the half-closed nature of
 WearOS. This file explains you how to rebuild manually your own /system dir.
 

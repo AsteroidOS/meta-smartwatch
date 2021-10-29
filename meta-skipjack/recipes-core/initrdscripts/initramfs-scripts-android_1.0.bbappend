@@ -1,12 +1,12 @@
-FILESEXTRAPATHS_prepend_skipjack := "${THISDIR}/${PN}:"
-COMPATIBLE_MACHINE_skipjack = "skipjack"
+FILESEXTRAPATHS:prepend:skipjack := "${THISDIR}/${PN}:"
+COMPATIBLE_MACHINE:skipjack = "skipjack"
 
-RDEPENDS_${PN}_append_skipjack += "msm-fb-refresher"
+RDEPENDS:${PN}:append:skipjack += "msm-fb-refresher"
 
-SRC_URI_append_skipjack += " file://init.machine.sh"
+SRC_URI:append:skipjack += " file://init.machine.sh"
 
-do_install_append_skipjack() {
+do_install:append:skipjack() {
     install -m 0755 ${WORKDIR}/init.machine.sh ${D}/init.machine
 }
 
-FILES_${PN} += "/init.machine"
+FILES:${PN} += "/init.machine"
