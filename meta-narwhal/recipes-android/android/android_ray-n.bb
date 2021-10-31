@@ -16,7 +16,7 @@ PV = "oreo"
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 INHIBIT_PACKAGE_STRIP = "1"
 COMPATIBLE_MACHINE = "ray"
-INSANE_SKIP_${PN} = "already-stripped"
+INSANE_SKIP:${PN} = "already-stripped"
 S = "${WORKDIR}"
 B = "${S}"
 
@@ -50,6 +50,6 @@ do_package_qa() {
 }
 
 PACKAGES =+ "android-system android-headers"
-FILES_android-system = "/usr ${sysconfdir}/udev /system /vendor"
-FILES_android-headers = "${libdir}/pkgconfig ${includedir}/android"
+FILES:android-system = "/usr ${sysconfdir}/udev /system /vendor"
+FILES:android-headers = "${libdir}/pkgconfig ${includedir}/android"
 EXCLUDE_FROM_SHLIBS = "1"

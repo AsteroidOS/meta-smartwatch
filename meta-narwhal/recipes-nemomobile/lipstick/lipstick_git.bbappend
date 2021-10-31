@@ -1,1 +1,1 @@
-RDEPENDS_${PN}_append_ray = " qt5-qpa-hwcomposer-plugin "
+RDEPENDS:${PN}:append:ray = " qt5-qpa-hwcomposer-plugin "

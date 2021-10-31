@@ -1,1 +1,1 @@
-RDEPENDS_${PN}_append_ray = " geoclue-provider-hybris "
+RDEPENDS:${PN}:append:ray = " geoclue-provider-hybris "
