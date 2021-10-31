@@ -1,4 +1,7 @@
 on init
+    write /sys/devices/platform/soc/4080000.qcom,mss/subsys2/restart_level "RELATED"
+    write /sys/kernel/boot_adsp/boot 1
+
     mkdir /dev/graphics/
     symlink /dev/fb0 /dev/graphics/fb0
     chown system root /sys/class/timed_output/vibrator/enable
@@ -25,3 +28,8 @@ service logcat /system/bin/logcat -f /dev/kmsg
 service servicemanager /usr/libexec/hal-droid/system/bin/servicemanager
     setenv LD_PRELOAD /usr/libexec/hal-droid/system/lib/libselinux_stubs.so
     class core
+
+service wcnss_service /vendor/bin/wcnss_service
+    class core
+    user root
+    oneshot
