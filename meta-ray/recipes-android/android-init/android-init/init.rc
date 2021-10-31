@@ -7,6 +7,7 @@ on init
     chown system root /sys/class/timed_output/vibrator/enable
 
     load_system_props
+    restorecon_recursive /persist
 
     mkdir /data/
 
@@ -22,8 +23,12 @@ service logd /usr/libexec/hal-droid/system/bin/logd
     user logd
     group logd system readproc
 
-service logcat /system/bin/logcat -f /dev/kmsg
+service rmt_storage /vendor/bin/rmt_storage
     class core
+
+service sensors /vendor/bin/sensors.qcom
+    class core 
+    oneshot
 
 service servicemanager /usr/libexec/hal-droid/system/bin/servicemanager
     setenv LD_PRELOAD /usr/libexec/hal-droid/system/lib/libselinux_stubs.so
