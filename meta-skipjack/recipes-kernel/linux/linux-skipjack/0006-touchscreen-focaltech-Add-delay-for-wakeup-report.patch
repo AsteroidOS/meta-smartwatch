@@ -1,0 +1,77 @@
+From 4e6bf193f042f1db7ae8803876ef130362a48e48 Mon Sep 17 00:00:00 2001
+From: MagneFire <IDaNLContact@gmail.com>
+Date: Sun, 31 Oct 2021 23:51:10 +0100
+Subject: [PATCH] touchscreen: focaltech: Add delay for wakeup report.
+ AsteroidOS requires the user to keep pressing the screen for ~200ms to wake
+ the screen. However, the method used here simply sends a quick event, which
+ doesn't work in our implementation. To solve this we simply need to make sure
+ the the finger is held down for atleast 200ms, this is done by emulating a
+ 300ms touch.
+
+---
+ drivers/input/touchscreen/focaltech_core.c | 12 +++++++++++-
+ 1 file changed, 11 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/input/touchscreen/focaltech_core.c b/drivers/input/touchscreen/focaltech_core.c
+index 139f6a345c5..52855c2b469 100644
+--- a/drivers/input/touchscreen/focaltech_core.c
++++ b/drivers/input/touchscreen/focaltech_core.c
+@@ -30,6 +30,10 @@
+ #define FTS_SUSPEND_LEVEL 1
+ #endif
+ 
++#ifdef FTS_GESTRUE_EN
++#include <linux/wakelock.h>
++#endif
++
+ /*******************************************************************************
+ * Private constant and macro definitions using #define
+ *******************************************************************************/
+@@ -127,6 +131,7 @@ bool print_gesture = false;
+ 
+ bool big_area_enabled_flag = false;
+ bool en_big_area_func = true;
++static struct wake_lock touch_lock;
+ #endif
+ 
+ bool fts_wq_queue_result = false;
+@@ -731,16 +736,18 @@ static void fts_gesture_check(struct fts_ts_data *data)
+ 			       __func__, data->tp_gesture_id);
+ 		}
+ 
++		wake_lock(&touch_lock);
+ 		input_mt_slot(data->input_dev, 0);
+ 		input_mt_report_slot_state(data->input_dev, MT_TOOL_FINGER, 1);
+ 		input_report_abs(data->input_dev, ABS_MT_POSITION_X, 100);
+ 		input_report_abs(data->input_dev, ABS_MT_POSITION_Y, 100);
+ 		input_sync(data->input_dev);
+-		mdelay(10);
++		msleep(300);
+ 		input_mt_slot(data->input_dev, 0);
+ 		input_mt_report_slot_state(data->input_dev, MT_TOOL_FINGER, 0);
+ 		input_mt_report_pointer_emulation(data->input_dev, false);
+ 		input_sync(data->input_dev);
++		wake_unlock(&touch_lock);
+ 	}
+ }
+ #endif
+@@ -2144,6 +2151,8 @@ static int fts_ts_probe(struct i2c_client *client,
+ 		goto free_inputdev;
+ 	}
+ 
++	wake_lock_init(&touch_lock, WAKE_LOCK_SUSPEND, "touch-lock");
++
+ 	if (pdata->power_init) {
+ 		err = pdata->power_init(true);
+ 		if (err) {
+@@ -2503,6 +2512,7 @@ pwr_deinit:
+ 	else
+ 		fts_power_init(data, false);
+ unreg_inputdev:
++	wake_lock_destroy(&touch_lock);
+ 	input_unregister_device(input_dev);
+ 	input_dev = NULL;
+ free_inputdev:
+-- 
+2.33.1
+
