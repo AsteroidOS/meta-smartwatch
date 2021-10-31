@@ -1,12 +1,12 @@
-FILESEXTRAPATHS_prepend_ray := "${THISDIR}/${PN}:"
-COMPATIBLE_MACHINE_ray = "ray"
+FILESEXTRAPATHS:prepend:ray := "${THISDIR}/${PN}:"
+COMPATIBLE_MACHINE:ray = "ray"
 
-RDEPENDS_${PN}_append_ray += "msm-fb-refresher"
+RDEPENDS:${PN}:append:ray += "msm-fb-refresher"
 
-SRC_URI_append_ray += " file://init.machine.sh"
+SRC_URI:append:ray += " file://init.machine.sh"
 
-do_install_append_ray() {
+do_install:append:ray() {
     install -m 0755 ${WORKDIR}/init.machine.sh ${D}/init.machine
 }
 
-FILES_${PN} += "/init.machine"
+FILES:${PN} += "/init.machine"

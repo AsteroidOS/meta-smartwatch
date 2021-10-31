@@ -13,4 +13,4 @@ do_install() {
     ln -s ../wifi-enabler.service ${D}/lib/systemd/system/multi-user.target.wants/wifi-enabler.service
 }
 
-FILES_${PN} += "/lib/systemd/system/"
+FILES:${PN} += "/lib/systemd/system/"
