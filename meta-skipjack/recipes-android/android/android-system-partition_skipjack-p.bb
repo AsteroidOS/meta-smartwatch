@@ -1,12 +1,11 @@
 inherit gettext
 
-SUMMARY = "Downloads the Snapdragon Wear 2100/3100 /usr/libexec/hal-droid and /usr/include/android folders and installs them for libhybris"
+SUMMARY = "Downloads the TicWatch C2+ system folders and installs them for libhybris"
 LICENSE = "CLOSED"
 
-SRC_URI = "https://dl.dropboxusercontent.com/s/j05olh49xqcsdwl/system-sawfish-pie-preview.tar.gz"
-
-SRC_URI[md5sum] = "9c99e1494ee6c90e2584724295f102d2"
-SRC_URI[sha256sum] = "6f6678adf70325d23cc3cb89edb1a2fd80eb22455d3d2148eecd9eb7d7fa1028"
+SRC_URI = "https://dl.dropboxusercontent.com/s/xihp73hhfm5m4ky/Amalgamated-Skipjack-System.tar.gz"
+SRC_URI[md5sum] = "61756e5e971eb0d3a8d925f4eb9230da"
+SRC_URI[sha256sum] = "d458178a2909077a107b93d7e589d6ba336958e2953f779ea7b7e7f722055177"
 PV = "pie"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
@@ -24,6 +23,9 @@ do_install() {
 
     cd ${D}
     ln -s system/vendor vendor
+}
+
+do_package_qa() {
 }
 
 FILES:${PN} = "/system /vendor"

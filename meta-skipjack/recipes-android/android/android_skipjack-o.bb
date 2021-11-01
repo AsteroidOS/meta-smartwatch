@@ -1,6 +1,6 @@
 inherit gettext
 
-SUMMARY = "Downloads the Ticwatch E & S /system and /usr/include/android folders and installs them for libhybris"
+SUMMARY = "Downloads the generic /usr/include/android folders and installs them for libhybris"
 LICENSE = "CLOSED"
 SRC_URI = "https://dl.dropboxusercontent.com/s/yl8tezw6e2d661o/hybris-o-msm8909.tar.gz"
 SRC_URI[md5sum] = "7891147518b1c1a3071af6173c9fd38f"
@@ -38,3 +38,4 @@ PACKAGES =+ "android-system android-headers"
 FILES:android-system = "/usr ${sysconfdir}/udev"
 FILES:android-headers = "${libdir}/pkgconfig ${includedir}/android"
 EXCLUDE_FROM_SHLIBS = "1"
+
