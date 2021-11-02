@@ -1,38 +1,40 @@
 on init
+    write /sys/devices/platform/soc/4080000.qcom,mss/subsys2/restart_level "RELATED"
     write /sys/kernel/boot_adsp/boot 1
 
     mkdir /dev/graphics/
     symlink /dev/fb0 /dev/graphics/fb0
     chown system root /sys/class/timed_output/vibrator/enable
 
+    load_system_props
+    restorecon_recursive /persist
+
     mkdir /data/
 
     class_start core
 
-service logd /system/bin/logd
+service logd /usr/libexec/hal-droid/system/bin/logd
     class core
-    socket logd stream 0666 root root
-    socket logdr seqpacket 0666 root root
-    socket logdw dgram 0222 root root
+    socket logd stream 0666 logd logd
+    socket logdr seqpacket 0666 logd logd
+    socket logdw dgram 0222 logd logd
+    file /proc/kmsg r
+    file /dev/kmsg w
+    user logd
+    group logd system readproc
 
-service logcat /system/bin/logcat -f /dev/kmsg
-    class core
-
-service servicemanager /system/bin/servicemanager
-    class core
-
-service sensorhd /system/bin/shd
+service rmt_storage /vendor/bin/rmt_storage
     class core
 
-service bt_vendor /system/bin/bt_vendor.sh
-    class core
+service sensors /vendor/bin/sensors.qcom
+    class core 
     oneshot
 
-on property:sys.powerctl=*
-    powerctl ${sys.powerctl}
+service servicemanager /usr/libexec/hal-droid/system/bin/servicemanager
+    setenv LD_PRELOAD /usr/libexec/hal-droid/system/lib/libselinux_stubs.so
+    class core
 
-on property:sys.bt_modem.type=MODEM-BOARD
-    write /dev/kmsg "Start Modem service"
-
-on property:sys.bt_modem.type=BT-BOARD
-    write /dev/kmsg "Start BT service"
+service wcnss_service /vendor/bin/wcnss_service
+    class core
+    user root
+    oneshot

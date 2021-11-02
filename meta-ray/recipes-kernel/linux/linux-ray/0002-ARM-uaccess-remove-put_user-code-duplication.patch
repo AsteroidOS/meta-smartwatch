@@ -1,4 +1,4 @@
-From d6b990a38c0eb333de6a912fd1001878357ab69c Mon Sep 17 00:00:00 2001
+From ec62ef3962882340f09659d8057084838b945652 Mon Sep 17 00:00:00 2001
 From: Aussell King <rmk+kernel@arm.linux.org.uk>
 Date: Sun, 2 Dec 2018 19:34:23 +0100
 Subject: [PATCH] ARM: uaccess: remove put_user() code duplication
@@ -7,12 +7,13 @@ Remove the code duplication between put_user() and __put_user().  The
 code which selected the implementation based upon the pointer size, and
 declared the local variable to hold the value to be put are common to
 both implementations.
+
 ---
- arch/arm/include/asm/uaccess.h | 130 ++++++++++++++++++++-------------
- 1 file changed, 78 insertions(+), 52 deletions(-)
+ arch/arm/include/asm/uaccess.h | 129 ++++++++++++++++++++-------------
+ 1 file changed, 77 insertions(+), 52 deletions(-)
 
 diff --git a/arch/arm/include/asm/uaccess.h b/arch/arm/include/asm/uaccess.h
-index 4767eb9caa7..4952cec15b8 100644
+index 4767eb9caa78..4952cec15b88 100644
 --- a/arch/arm/include/asm/uaccess.h
 +++ b/arch/arm/include/asm/uaccess.h
 @@ -29,6 +29,35 @@
