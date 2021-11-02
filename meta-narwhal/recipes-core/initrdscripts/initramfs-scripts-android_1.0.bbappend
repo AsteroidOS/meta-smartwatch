@@ -1,10 +1,12 @@
-FILESEXTRAPATHS_prepend_sawfish := "${THISDIR}/${PN}:"
-COMPATIBLE_MACHINE_sawfish = "sawfish"
+FILESEXTRAPATHS:prepend:ray := "${THISDIR}/${PN}:"
+COMPATIBLE_MACHINE:ray = "ray"
 
-SRC_URI_append_sawfish += " file://init.machine.sh"
+RDEPENDS:${PN}:append:ray += "msm-fb-refresher"
 
-do_install_append_sawfish() {
+SRC_URI:append:ray += " file://init.machine.sh"
+
+do_install:append:ray() {
     install -m 0755 ${WORKDIR}/init.machine.sh ${D}/init.machine
 }
 
-FILES_${PN} += "/init.machine"
+FILES:${PN} += "/init.machine"
