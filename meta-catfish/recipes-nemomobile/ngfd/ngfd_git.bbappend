@@ -1,1 +1,1 @@
-RDEPENDS:${PN}:append:ray = " ngfd-plugin-droid-vibrator "
+RDEPENDS:${PN}:append:catfish = " ngfd-plugin-droid-vibrator "

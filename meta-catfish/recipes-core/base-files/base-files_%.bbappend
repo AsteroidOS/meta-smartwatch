@@ -1,2 +1,2 @@
-FILESEXTRAPATHS:prepend:ray := "${THISDIR}/${PN}:"
-COMPATIBLE_MACHINE:ray = "ray"
+FILESEXTRAPATHS:prepend:catfish := "${THISDIR}/${PN}:"
+COMPATIBLE_MACHINE:catfish = "catfish"
