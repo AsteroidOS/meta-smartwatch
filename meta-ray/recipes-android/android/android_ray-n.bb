@@ -15,7 +15,7 @@ PV = "oreo"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 INHIBIT_PACKAGE_STRIP = "1"
-COMPATIBLE_MACHINE = "ray"
+COMPATIBLE_MACHINE = "ray|firefish"
 INSANE_SKIP:${PN} = "already-stripped"
 S = "${WORKDIR}"
 B = "${S}"
