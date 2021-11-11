@@ -11,6 +11,8 @@ on init
 
     mkdir /data/
 
+    setprop init.svc.bluetooth running
+
     class_start core
 
 service logd /usr/libexec/hal-droid/system/bin/logd
