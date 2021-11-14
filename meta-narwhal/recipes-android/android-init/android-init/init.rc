@@ -11,6 +11,8 @@ on init
 
     mkdir /data/
 
+    setprop init.svc.bluetooth running
+
     class_start core
 
 service logd /usr/libexec/hal-droid/system/bin/logd
@@ -33,6 +35,18 @@ service sensors /vendor/bin/sensors.qcom
 service servicemanager /usr/libexec/hal-droid/system/bin/servicemanager
     setenv LD_PRELOAD /usr/libexec/hal-droid/system/lib/libselinux_stubs.so
     class core
+
+service hwservicemanager /system/bin/hwservicemanager
+    setenv LD_PRELOAD /usr/libexec/hal-droid/system/lib/libselinux_stubs.so
+    class core
+
+service config_bt_addr /vendor/bin/btnvtool -O
+    class core
+    oneshot
+
+service bt /vendor/bin/android.hardware.bluetooth@1.0-service-qti
+    class core
+    oneshot
 
 service wcnss_service /vendor/bin/wcnss_service
     class core
