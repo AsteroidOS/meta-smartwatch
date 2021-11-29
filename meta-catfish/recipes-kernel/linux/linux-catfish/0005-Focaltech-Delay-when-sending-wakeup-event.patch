@@ -1,0 +1,74 @@
+From e772935a36cda28fcc2811530ced689f96edc0eb Mon Sep 17 00:00:00 2001
+From: MagneFire <IDaNLContact@gmail.com>
+Date: Sun, 28 Nov 2021 21:29:31 +0100
+Subject: [PATCH] Focaltech: Delay when sending wakeup event.
+
+---
+ .../focaltech_touch/focaltech_core.c          | 21 +++++++++++++++++--
+ 1 file changed, 19 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/input/touchscreen/focaltech_touch/focaltech_core.c b/drivers/input/touchscreen/focaltech_touch/focaltech_core.c
+index d4d19e92752..d6a023f5649 100644
+--- a/drivers/input/touchscreen/focaltech_touch/focaltech_core.c
++++ b/drivers/input/touchscreen/focaltech_touch/focaltech_core.c
+@@ -42,6 +42,8 @@
+ #define FTS_SUSPEND_LEVEL 1     /* Early-suspend level */
+ #endif
+ 
++#include <linux/wakelock.h>
++
+ /*****************************************************************************
+ * Private constant and macro definitions using #define
+ *****************************************************************************/
+@@ -62,6 +64,7 @@
+ struct i2c_client *fts_i2c_client;
+ struct fts_ts_data *fts_wq_data;
+ struct input_dev *fts_input_dev;
++static struct wake_lock touch_lock;
+ 
+ #if FTS_DEBUG_EN
+ int g_show_log = 1;
+@@ -753,10 +756,22 @@ static irqreturn_t fts_ts_interrupt(int irq, void *dev_id)
+ 			< 1000000000)
+ 			return IRQ_HANDLED;
+ #endif
+-		input_report_key(fts_input_dev, KEY_WAKEUP, 1);
++		wake_lock(&touch_lock);
++		input_mt_slot(fts_input_dev, 0);
++		input_mt_report_slot_state(fts_input_dev, MT_TOOL_FINGER, 1);
++		input_report_abs(fts_input_dev, ABS_MT_POSITION_X, 100);
++		input_report_abs(fts_input_dev, ABS_MT_POSITION_Y, 100);
+ 		input_sync(fts_input_dev);
+-		input_report_key(fts_input_dev, KEY_WAKEUP, 0);
++        msleep(300);
++		input_mt_slot(fts_input_dev, 0);
++		input_mt_report_slot_state(fts_input_dev, MT_TOOL_FINGER, 0);
++		input_mt_report_pointer_emulation(fts_input_dev, false);
+ 		input_sync(fts_input_dev);
++        wake_unlock(&touch_lock);
++		/*input_report_key(fts_input_dev, KEY_WAKEUP, 1);
++		input_sync(fts_input_dev);
++		input_report_key(fts_input_dev, KEY_WAKEUP, 0);
++		input_sync(fts_input_dev);*/
+ 		wakeup_flag = 1;
+ 		printk(KERN_DEBUG "FTS: wakeup system from ambient mode\n");
+ 		return IRQ_HANDLED;
+@@ -1127,6 +1142,7 @@ static int fts_ts_probe(struct i2c_client *client,
+ 	spin_lock_init(&fts_wq_data->irq_lock);
+ 	mutex_init(&fts_wq_data->report_mutex);
+ 
++	wake_lock_init(&touch_lock, WAKE_LOCK_SUSPEND, "touch-lock");
+ 	fts_input_dev_init(client, data, input_dev, pdata);
+ 
+ 	fts_ctpm_get_upgrade_array();
+@@ -1241,6 +1257,7 @@ free_gpio:
+ 	regulator_put(data->vdd);
+ #endif
+ 	input_free_device(input_dev);
++	wake_lock_destroy(&touch_lock);
+ 
+ 	FTS_ERROR("[FTS]fts_ts_probe failed!");
+ err_switch_gpio_req:
+-- 
+2.33.1
+
