@@ -2,6 +2,8 @@ on init
     write /sys/devices/platform/soc/4080000.qcom,mss/subsys2/restart_level "RELATED"
     write /sys/kernel/boot_adsp/boot 1
 
+    write /sys/class/nanohub/nanohub/lcd_mutex 1
+
     mkdir /dev/graphics/
     symlink /dev/fb0 /dev/graphics/fb0
     chown system root /sys/class/timed_output/vibrator/enable
