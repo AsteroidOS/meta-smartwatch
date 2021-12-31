@@ -15,7 +15,7 @@ SRC_URI = "git://android.googlesource.com/kernel/msm;branch=android-msm-sparrow-
     file://0004-Add-files-needed-for-device_trace.h.patch \
     file://0005-Create-copy-of-devfreq_trace.h.patch \
     file://0006-Patch-battery-values.patch \
-    file://0007-Touch-screen-sleep-resume-patch.patch \
+    file://0007-it7260-Add-delay-for-wakeup-report.patch \
     file://0008-Remove-unecessary-include-to-axc_PM8226Charger.h.patch \
     file://0009-msm-mdss-mdp-Don-t-use-tracing-features.patch \
     file://0010-Makefile-patch-fixes-ASUS_SW_VER-error.patch \
