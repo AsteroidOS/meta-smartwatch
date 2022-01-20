@@ -1,0 +1,60 @@
+From 82ed3e3d8824c06d8382746911f0c4a149d4a26b Mon Sep 17 00:00:00 2001
+From: Victor Xu <chaoxu@mobvoi.com>
+Date: Mon, 15 Jul 2019 10:38:02 +0800
+Subject: [PATCH] arm: dts: memory: add support for 1G DDR on catfish
+
+---
+ arch/arm/boot/dts/qcom/Makefile           |  3 ++-
+ arch/arm/boot/dts/qcom/catfish_1g_ddr.dts | 26 +++++++++++++++++++++++
+ 2 files changed, 28 insertions(+), 1 deletion(-)
+ create mode 100644 arch/arm/boot/dts/qcom/catfish_1g_ddr.dts
+
+diff --git a/arch/arm/boot/dts/qcom/Makefile b/arch/arm/boot/dts/qcom/Makefile
+index 4bdae9a7b37a..39439469e24b 100644
+--- a/arch/arm/boot/dts/qcom/Makefile
++++ b/arch/arm/boot/dts/qcom/Makefile
+@@ -293,7 +293,8 @@ dtb-$(CONFIG_ARCH_MSM8916) += msm8952-qrd-skum.dtb \
+        msm8952-mtp.dtb
+ 
+ dtb-$(CONFIG_ARCH_MSM8909) += catfish.dtb \
+-	catshark.dtb
++	catshark.dtb \
++	catfish_1g_ddr.dtb
+ 
+ ifeq ($(CONFIG_ARM64),y)
+ always          := $(dtb-y)
+diff --git a/arch/arm/boot/dts/qcom/catfish_1g_ddr.dts b/arch/arm/boot/dts/qcom/catfish_1g_ddr.dts
+new file mode 100644
+index 000000000000..04268ca78b3f
+--- /dev/null
++++ b/arch/arm/boot/dts/qcom/catfish_1g_ddr.dts
+@@ -0,0 +1,26 @@
++/*
++ * Copyright (c) 2015-2016, The Linux Foundation. All rights reserved.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 and
++ * only version 2 as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ */
++
++/dts-v1/;
++
++#include "common-8909.dtsi"
++#include "msm8909w-memory.dtsi"
++
++/ {
++	model = "Qualcomm Technologies, Inc. APQ8009W-PM8916 1GB CDP";
++	compatible = "qcom,apq8009-cdp", "qcom,apq8009", "qcom,cdp";
++	qcom,msm-id = <265 0>,
++			<301 0>;
++	qcom,board-id= <8 0x5>;
++};
++
+-- 
+2.33.1
+
