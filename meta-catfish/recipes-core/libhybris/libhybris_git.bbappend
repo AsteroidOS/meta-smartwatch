@@ -1,3 +1,1 @@
-SRCREV:catfish = "9cadeefe224aa2387cc88c9d17a374df2f265ba8"
-
-SRC_URI:remove:catfish = "file://0001-Add-EGL_OPENGL_ES3_BIT_KHR-define.patch;patchdir=.."
+SRCREV:catfish = "8883e9aca7de870a4a93b31e82cfc600c51cef5d"
