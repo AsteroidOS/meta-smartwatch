@@ -12,6 +12,18 @@ on init
     restorecon_recursive /persist
 
     mkdir /data/
+    mkdir /data/vendor
+    mkdir /data/vendor/sensor
+    mkdir /data/vendor/sensor/nanohub_lock
+    # TODO: Fix when proper policies and access control are implemented
+    chown 1000 root /sys/class/nanohub/nanohub/mode
+    chown 1000 root /sys/class/nanohub/nanohub/lcd_mutex
+    chown 1000 root /sys/class/graphics/fb0/msm_fb_lcd_loadswitch
+    chown 1000 root /sys/class/nanohub/nanohub/app_info
+    chown 1000 root /data/vendor/sensor/nanohub_lock
+    chown 1000 root /dev/nanohub
+    chown 1000 root /dev/nanohub_comms
+    chown 1000 root /dev/nanohub_custom_flash
 
     setprop init.svc.bluetooth running
 
