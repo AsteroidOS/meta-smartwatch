@@ -1,7 +1,3 @@
-SRCREV:ray = "9cadeefe224aa2387cc88c9d17a374df2f265ba8"
+SRCREV:narwhal = "8883e9aca7de870a4a93b31e82cfc600c51cef5d"
 
-SRC_URI:remove:ray = "file://0001-Add-EGL_OPENGL_ES3_BIT_KHR-define.patch;patchdir=.."
-
-SRCREV:firefish = "9cadeefe224aa2387cc88c9d17a374df2f265ba8"
-
-SRC_URI:remove:firefish = "file://0001-Add-EGL_OPENGL_ES3_BIT_KHR-define.patch;patchdir=.."
+SRC_URI:remove:narwhal = "file://0001-Add-EGL_OPENGL_ES3_BIT_KHR-define.patch;patchdir=.."

@@ -4,7 +4,7 @@ SUMMARY = "Downloads the Snapdragon Wear 2100/3100 /usr/libexec/hal-droid and /u
 LICENSE = "CLOSED"
 
 SRC_URI = "https://dl.dropboxusercontent.com/s/yl8tezw6e2d661o/hybris-o-msm8909.tar.gz;name=hybris \
-    https://dl.dropboxusercontent.com/s/al40eklhv50l6z5/system-ray-pie-preview.tar.gz;name=system \
+    https://dl.dropboxusercontent.com/s/al40eklhv50l6z5/system-narwhal-pie-preview.tar.gz;name=system \
     file://60-i2c.rules \
 "
 SRC_URI[hybris.md5sum] = "7891147518b1c1a3071af6173c9fd38f"
@@ -15,7 +15,7 @@ PV = "oreo"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 INHIBIT_PACKAGE_STRIP = "1"
-COMPATIBLE_MACHINE = "ray|firefish"
+COMPATIBLE_MACHINE = "narwhal"
 INSANE_SKIP:${PN} = "already-stripped"
 S = "${WORKDIR}"
 B = "${S}"

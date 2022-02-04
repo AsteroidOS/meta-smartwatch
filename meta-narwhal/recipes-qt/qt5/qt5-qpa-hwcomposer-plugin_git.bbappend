@@ -1,8 +1,4 @@
-SRC_URI:append:ray = " \
-    file://0002-Add-QCOM_BSP-define-switch.patch;striplevel=2 \
-    file://004-Includes-sync.h-which-provides-sync_wait.patch;striplevel=2 \
-"
-SRC_URI:append:firefish = " \
+SRC_URI:append:narwhal = " \
     file://0002-Add-QCOM_BSP-define-switch.patch;striplevel=2 \
     file://004-Includes-sync.h-which-provides-sync_wait.patch;striplevel=2 \
 "

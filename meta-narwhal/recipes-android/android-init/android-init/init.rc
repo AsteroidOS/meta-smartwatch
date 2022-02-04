@@ -1,6 +1,6 @@
 on init
     write /sys/devices/platform/soc/4080000.qcom,mss/subsys2/restart_level "RELATED"
-    write /sys/kernel/boot_adsp/boot 1
+    write sys/devices/virtual/input/mxt_touch/check_fw 1
 
     mkdir /dev/graphics/
     symlink /dev/fb0 /dev/graphics/fb0
