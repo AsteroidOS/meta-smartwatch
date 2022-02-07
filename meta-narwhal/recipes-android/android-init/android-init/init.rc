@@ -1,6 +1,9 @@
 on init
     write /sys/devices/platform/soc/4080000.qcom,mss/subsys2/restart_level "RELATED"
-    write sys/devices/virtual/input/mxt_touch/check_fw 1
+
+    write /sys/devices/virtual/input/mxt_touch/check_fw "1"
+    write /sys/devices/sop716/motor_move_all "45:135"
+    write /sys/devices/sop716/watch_mode "1"
 
     mkdir /dev/graphics/
     symlink /dev/fb0 /dev/graphics/fb0
@@ -29,7 +32,7 @@ service rmt_storage /vendor/bin/rmt_storage
     class core
 
 service sensors /vendor/bin/sensors.qcom
-    class core 
+    class core
     oneshot
 
 service servicemanager /usr/libexec/hal-droid/system/bin/servicemanager
@@ -44,7 +47,7 @@ service config_bt_addr /vendor/bin/btnvtool -O
     class core
     oneshot
 
-service bt /vendor/bin/android.hardware.bluetooth@1.0-service-qti
+service bt /vendor/bin/hw/android.hardware.bluetooth@1.0-service
     class core
     oneshot
 
