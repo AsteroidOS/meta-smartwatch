@@ -43,14 +43,6 @@ service hwservicemanager /system/bin/hwservicemanager
     setenv LD_PRELOAD /usr/libexec/hal-droid/system/lib/libselinux_stubs.so
     class core
 
-service config_bt_addr /vendor/bin/btnvtool -O
-    class core
-    oneshot
-
-service bt /vendor/bin/hw/android.hardware.bluetooth@1.0-service
-    class core
-    oneshot
-
 service wcnss_service /vendor/bin/wcnss_service
     class core
     user root
