@@ -8,6 +8,7 @@ on init
     mkdir /dev/graphics/
     symlink /dev/fb0 /dev/graphics/fb0
     chown system root /sys/class/timed_output/vibrator/enable
+    chmod 666 /sys/devices/sop716/*
 
     load_system_props
     restorecon_recursive /persist
