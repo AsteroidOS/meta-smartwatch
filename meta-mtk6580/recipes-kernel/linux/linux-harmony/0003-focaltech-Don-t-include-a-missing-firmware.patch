@@ -1,0 +1,25 @@
+From 9d68dc4e9bb32fe538613352b8c5702133cc7fff Mon Sep 17 00:00:00 2001
+From: Florent Revest <revestflo@gmail.com>
+Date: Tue, 27 Jun 2017 13:41:41 +0200
+Subject: [PATCH 02/11] focaltech: Don't include a missing firmware
+
+---
+ .../input/touchscreen/mediatek/focaltech_all/focaltech_flash.c  | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/input/touchscreen/mediatek/focaltech_all/focaltech_flash.c b/drivers/input/touchscreen/mediatek/focaltech_all/focaltech_flash.c
+index 83f430e1c..44a4e3471 100755
+--- a/drivers/input/touchscreen/mediatek/focaltech_all/focaltech_flash.c
++++ b/drivers/input/touchscreen/mediatek/focaltech_all/focaltech_flash.c
+@@ -113,7 +113,7 @@
+ * Static variables
+ *******************************************************************************/
+ static unsigned char CTPM_FW[] = {
+-	#include "FT_Upgrade_App.i"
++//	#include "FT_Upgrade_App.i"
+ };
+ 
+  struct fts_Upgrade_Info fts_updateinfo[] =
+-- 
+2.19.0
+

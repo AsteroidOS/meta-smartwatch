@@ -1,0 +1,29 @@
+From c2a8cb52a753449aa14223bce2646b9b1c5566f5 Mon Sep 17 00:00:00 2001
+From: Florent Revest <revestflo@gmail.com>
+Date: Mon, 24 Sep 2018 22:29:09 +0200
+Subject: [PATCH 11/11] Disable new gcc 7.1.1 warnings
+
+We can't call this a hack if Linus does the same... Right?
+https://lore.kernel.org/patchwork/patch/814178/
+---
+ Makefile | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/Makefile b/Makefile
+index 5a91fe071..97a78af66 100644
+--- a/Makefile
++++ b/Makefile
+@@ -658,6 +658,10 @@ KBUILD_CFLAGS += $(call cc-option,-Wdeclaration-after-statement,)
+ # disable pointer signed / unsigned warnings in gcc 4.0
+ KBUILD_CFLAGS += $(call cc-disable-warning, pointer-sign)
+ 
++KBUILD_CFLAGS += $(call cc-disable-warning, format-truncation)
++KBUILD_CFLAGS += $(call cc-disable-warning, format-overflow)
++KBUILD_CFLAGS += $(call cc-disable-warning, int-in-bool-context)
++
+ # disable invalid "can't wrap" optimizations for signed / pointers
+ KBUILD_CFLAGS	+= $(call cc-option,-fno-strict-overflow)
+ 
+-- 
+2.19.0
+

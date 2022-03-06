@@ -1,0 +1,12 @@
+kernel=%%KERNEL%%
+ramdisk=%%RAMDISK%%
+page_size=2048
+kernel_size=5824304
+ramdisk_size=667438
+base_addr=0x80000000
+kernel_offset=0x00008000
+ramdisk_offset=0x04000000
+tags_offset=0x0e000000
+cmd_line='bootopt=64S3,32S1,32S1'
+board="KW88_CS1_B_GSM_"
+format=gzip

@@ -1,0 +1,33 @@
+From 2533a3db5430e9ec08c738843cc7fd10040eabfa Mon Sep 17 00:00:00 2001
+From: MagneFire <IDaNLContact@gmail.com>
+Date: Fri, 5 Mar 2021 16:37:13 +0100
+Subject: [PATCH] HybrisWristGestureAdaptor: Use tilt sensor for tilt-to-wake
+ sensor.
+
+---
+ .../hybriswristgestureadaptor/hybriswristgestureadaptor.cpp | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/adaptors/hybriswristgestureadaptor/hybriswristgestureadaptor.cpp b/adaptors/hybriswristgestureadaptor/hybriswristgestureadaptor.cpp
+index fec268b..82bf86f 100644
+--- a/adaptors/hybriswristgestureadaptor/hybriswristgestureadaptor.cpp
++++ b/adaptors/hybriswristgestureadaptor/hybriswristgestureadaptor.cpp
+@@ -28,12 +28,12 @@
+ #include "config.h"
+ 
+ 
+-#ifndef SENSOR_TYPE_WRIST_TILT_GESTURE
+-#define SENSOR_TYPE_WRIST_TILT_GESTURE (26)
++#ifndef SENSOR_TYPE_TILT_DETECTOR
++#define SENSOR_TYPE_TILT_DETECTOR (22)
+ #endif
+ 
+ HybrisWristGestureAdaptor::HybrisWristGestureAdaptor(const QString& id) :
+-    HybrisAdaptor(id,SENSOR_TYPE_WRIST_TILT_GESTURE)
++    HybrisAdaptor(id,SENSOR_TYPE_TILT_DETECTOR)
+ {
+     buffer = new DeviceAdaptorRingBuffer<TimedUnsigned>(1);
+     setAdaptedSensor("hybriswristgesture", "Internal wristgesture coordinates", buffer);
+-- 
+2.30.1
+

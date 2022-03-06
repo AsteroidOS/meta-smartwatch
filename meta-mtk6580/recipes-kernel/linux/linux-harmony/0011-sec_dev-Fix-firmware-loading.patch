@@ -1,0 +1,27 @@
+From 184f7ee75c26ae3c18548f646389c8fcc16d444d Mon Sep 17 00:00:00 2001
+From: Florent Revest <revestflo@gmail.com>
+Date: Tue, 19 Sep 2017 22:41:15 +0200
+Subject: [PATCH 10/11] sec_dev: Fix firmware loading
+
+---
+ drivers/misc/mediatek/masp/asf/core/sec_dev.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/misc/mediatek/masp/asf/core/sec_dev.c b/drivers/misc/mediatek/masp/asf/core/sec_dev.c
+index c35ca8e8f..1392a5855 100644
+--- a/drivers/misc/mediatek/masp/asf/core/sec_dev.c
++++ b/drivers/misc/mediatek/masp/asf/core/sec_dev.c
+@@ -27,8 +27,8 @@
+ #define MOD                         "ASF.DEV"
+ #if defined(CONFIG_MTK_GPT_SCHEME_SUPPORT)
+ #define PARTINFO_TITLE                      "Name"
+-#define USER_REGION_PATH                    "/dev/block/mmcblk0"
+-#define BOOT_REGION0_PATH                   "/dev/block/mmcblk0boot0"
++#define USER_REGION_PATH                    "/dev/mmcblk0"
++#define BOOT_REGION0_PATH                   "/dev/mmcblk0boot0"
+ #define USER_REGION_PART_PATH_PREFIX        "/dev/block/platform/mtk-msdc.0/by-name/"
+ 
+ #endif
+-- 
+2.19.0
+

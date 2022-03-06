@@ -1,0 +1,35 @@
+From 1177981d00e5cdac4033cfbc2ba6bfdeb6fedc21 Mon Sep 17 00:00:00 2001
+From: Florent Revest <revestflo@gmail.com>
+Date: Tue, 27 Jun 2017 13:41:24 +0200
+Subject: [PATCH 01/11] printk: Expose mt_enable_uart and mt_disable_uart for
+ mt_printk_ctrl
+
+---
+ kernel/printk.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/kernel/printk.c b/kernel/printk.c
+index 685c06ceb..919c714c6 100644
+--- a/kernel/printk.c
++++ b/kernel/printk.c
+@@ -276,7 +276,7 @@ static u32 log_buf_len = __LOG_BUF_LEN;
+ #ifdef CONFIG_MT_PRINTK_UART_CONSOLE
+ 
+ extern int mt_need_uart_console;
+-inline void mt_disable_uart(void)
++void mt_disable_uart(void)
+ {
+     if (mt_need_uart_console == 0) {
+         printk("<< printk console disable >>\n");
+@@ -285,7 +285,7 @@ inline void mt_disable_uart(void)
+         printk("<< printk console can't be disabled >>\n");
+     }
+ }
+-inline void mt_enable_uart(void)
++void mt_enable_uart(void)
+ {
+     if (mt_need_uart_console == 1) {
+         if (printk_disable_uart == 0)
+-- 
+2.19.0
+

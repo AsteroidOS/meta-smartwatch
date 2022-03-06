@@ -1,0 +1,35 @@
+From 8d75834f87981732eedf9f7666af65bd1c048d15 Mon Sep 17 00:00:00 2001
+From: Florent Revest <revestflo@gmail.com>
+Date: Fri, 8 Sep 2017 16:57:06 +0200
+Subject: [PATCH] Adds a gnssStatusCallback from Mediatek gps.h compatibility
+
+---
+ hybrisprovider.cpp | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/hybrisprovider.cpp b/hybrisprovider.cpp
+index 6188c38..edd5354 100644
+--- a/hybrisprovider.cpp
++++ b/hybrisprovider.cpp
+@@ -176,6 +176,10 @@ void parseRmc(const QByteArray &nmea)
+     }
+ }
+ 
++void gnssStatusCallback(GnssSvStatus* sv_info)
++{
++}
++
+ void nmeaCallback(GpsUtcTime timestamp, const char *nmeaData, int length)
+ {
+     // Trim trailing whitepsace
+@@ -316,6 +320,7 @@ GpsCallbacks gpsCallbacks = {
+     locationCallback,
+     statusCallback,
+     svStatusCallback,
++    gnssStatusCallback,
+     nmeaCallback,
+     setCapabilitiesCallback,
+     acquireWakelockCallback,
+-- 
+2.7.4
+

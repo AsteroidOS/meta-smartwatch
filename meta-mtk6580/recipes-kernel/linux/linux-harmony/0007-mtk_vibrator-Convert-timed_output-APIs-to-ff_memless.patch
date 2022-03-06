@@ -1,0 +1,791 @@
+From 3efeadb04226a16ea24b93fa9e751b9cb129af25 Mon Sep 17 00:00:00 2001
+From: Florent Revest <revestflo@gmail.com>
+Date: Sat, 22 Jul 2017 00:37:37 +0100
+Subject: [PATCH 06/11] mtk_vibrator: Convert timed_output APIs to ff_memless
+ input APIs
+
+---
+ drivers/input/ff-memless.c                    |   2 +-
+ drivers/input/touchscreen/mediatek/tpd.h      |   1 -
+ drivers/misc/mediatek/Kconfig.drivers         |   1 +
+ drivers/misc/mediatek/Makefile                |   2 +-
+ .../mach/mt6580/sf6580_weg_l/Makefile         |   1 -
+ .../mt6580/sf6580_weg_l/vibrator/Makefile     |   3 -
+ .../sf6580_weg_l/vibrator/cust_vibrator.c     |  18 -
+ .../sf6580_weg_l/vibrator/cust_vibrator.h     |  24 -
+ drivers/misc/mediatek/vibrator/Makefile       |   6 +-
+ .../misc/mediatek/vibrator/mt6580/Makefile    |   4 -
+ .../misc/mediatek/vibrator/mt6580/vibrator.c  |  61 ---
+ .../mediatek/vibrator/mt6580/vibrator_hal.h   |   8 -
+ drivers/misc/mediatek/vibrator/timed_output.h |  37 --
+ drivers/misc/mediatek/vibrator/vibrator_drv.c | 432 ++++++------------
+ 14 files changed, 134 insertions(+), 466 deletions(-)
+ delete mode 100755 drivers/misc/mediatek/mach/mt6580/sf6580_weg_l/vibrator/Makefile
+ delete mode 100644 drivers/misc/mediatek/mach/mt6580/sf6580_weg_l/vibrator/cust_vibrator.c
+ delete mode 100644 drivers/misc/mediatek/mach/mt6580/sf6580_weg_l/vibrator/cust_vibrator.h
+ delete mode 100755 drivers/misc/mediatek/vibrator/mt6580/Makefile
+ delete mode 100644 drivers/misc/mediatek/vibrator/mt6580/vibrator.c
+ delete mode 100644 drivers/misc/mediatek/vibrator/mt6580/vibrator_hal.h
+ delete mode 100644 drivers/misc/mediatek/vibrator/timed_output.h
+
+diff --git a/drivers/input/ff-memless.c b/drivers/input/ff-memless.c
+index 74c0d8c60..0723e0d0b 100644
+--- a/drivers/input/ff-memless.c
++++ b/drivers/input/ff-memless.c
+@@ -38,7 +38,7 @@ MODULE_AUTHOR("Anssi Hannula <anssi.hannula@gmail.com>");
+ MODULE_DESCRIPTION("Force feedback support for memoryless devices");
+ 
+ /* Number of effects handled with memoryless devices */
+-#define FF_MEMLESS_EFFECTS	16
++#define FF_MEMLESS_EFFECTS	64
+ 
+ /* Envelope update interval in ms */
+ #define FF_ENVELOPE_INTERVAL	50
+diff --git a/drivers/input/touchscreen/mediatek/tpd.h b/drivers/input/touchscreen/mediatek/tpd.h
+index 2b5bc1274..81c79f120 100644
+--- a/drivers/input/touchscreen/mediatek/tpd.h
++++ b/drivers/input/touchscreen/mediatek/tpd.h
+@@ -29,7 +29,6 @@
+ #include <linux/earlysuspend.h>
+ #include <linux/regulator/consumer.h>
+ /* #include "tpd_custom.h" */
+-#include <vibrator_hal.h>
+ 
+ /* debug macros */
+ /* //#define TPD_DEBUG */
+diff --git a/drivers/misc/mediatek/Kconfig.drivers b/drivers/misc/mediatek/Kconfig.drivers
+index eb70b37b4..191f8ddbe 100755
+--- a/drivers/misc/mediatek/Kconfig.drivers
++++ b/drivers/misc/mediatek/Kconfig.drivers
+@@ -791,6 +791,7 @@ config LEDS_RT8542
+ 
+ # Vibrator
+ config MTK_VIBRATOR
++    depends on INPUT_FF_MEMLESS
+ 	bool "MediaTek Vibrator Driver"
+ 	default y
+ 
+diff --git a/drivers/misc/mediatek/Makefile b/drivers/misc/mediatek/Makefile
+index d552dd821..37cb3f87a 100755
+--- a/drivers/misc/mediatek/Makefile
++++ b/drivers/misc/mediatek/Makefile
+@@ -256,7 +256,7 @@ obj-$(CONFIG_USB_MU3D_DRV)	+= mu3phy/
+ 
+ obj-$(CONFIG_MTK_TEST_XHCI)   +=  xhci_test/
+ 
+-obj-y	+= vibrator/
++obj-$(CONFIG_MTK_VIBRATOR)	+= vibrator/
+ obj-$(CONFIG_MTK_WD_KICKER)		+= wdt/
+ obj-$(CONFIG_MTK_FREQ_HOPPING)	+= freqhopping/
+ obj-$(CONFIG_SECURITY_SELINUX)	+= selinux_warning/
+diff --git a/drivers/misc/mediatek/mach/mt6580/sf6580_weg_l/Makefile b/drivers/misc/mediatek/mach/mt6580/sf6580_weg_l/Makefile
+index f303e1cd0..bb6d26f6c 100755
+--- a/drivers/misc/mediatek/mach/mt6580/sf6580_weg_l/Makefile
++++ b/drivers/misc/mediatek/mach/mt6580/sf6580_weg_l/Makefile
+@@ -11,7 +11,6 @@ ifneq ($(CONFIG_ARM64), y)
+ obj-y   +=  camera/camera/
+ endif
+ #obj-y   +=  flashlight/constant_flashlight/
+-obj-$(CONFIG_MTK_VIBRATOR)   +=  vibrator/
+ obj-$(CONFIG_MTK_LEDS)   +=  leds/
+ #obj-y   +=  keypad/
+ #obj-y   +=  sound/
+diff --git a/drivers/misc/mediatek/mach/mt6580/sf6580_weg_l/vibrator/Makefile b/drivers/misc/mediatek/mach/mt6580/sf6580_weg_l/vibrator/Makefile
+deleted file mode 100755
+index b8897cec7..000000000
+--- a/drivers/misc/mediatek/mach/mt6580/sf6580_weg_l/vibrator/Makefile
++++ /dev/null
+@@ -1,3 +0,0 @@
+-include $(srctree)/drivers/misc/mediatek/Makefile.custom
+-obj-y := cust_vibrator.o
+-
+diff --git a/drivers/misc/mediatek/mach/mt6580/sf6580_weg_l/vibrator/cust_vibrator.c b/drivers/misc/mediatek/mach/mt6580/sf6580_weg_l/vibrator/cust_vibrator.c
+deleted file mode 100644
+index 5478e8931..000000000
+--- a/drivers/misc/mediatek/mach/mt6580/sf6580_weg_l/vibrator/cust_vibrator.c
++++ /dev/null
+@@ -1,18 +0,0 @@
+-#include <cust_vibrator.h>
+-#include <linux/types.h>
+-
+-static struct vibrator_hw cust_vibrator_hw = {
+-	.vib_timer = 25,
+-  #ifdef CUST_VIBR_LIMIT
+-	.vib_limit = 9,
+-  #endif
+-  #ifdef CUST_VIBR_VOL
+-	.vib_vol = 0x6,//3V for vibr
+-  #endif
+-};
+-
+-struct vibrator_hw *get_cust_vibrator_hw(void)
+-{
+-    return &cust_vibrator_hw;
+-}
+-
+diff --git a/drivers/misc/mediatek/mach/mt6580/sf6580_weg_l/vibrator/cust_vibrator.h b/drivers/misc/mediatek/mach/mt6580/sf6580_weg_l/vibrator/cust_vibrator.h
+deleted file mode 100644
+index f6965a2bf..000000000
+--- a/drivers/misc/mediatek/mach/mt6580/sf6580_weg_l/vibrator/cust_vibrator.h
++++ /dev/null
+@@ -1,24 +0,0 @@
+-#ifndef __CUST_VIBRATOR_H__
+-#define __CUST_VIBRATOR_H__
+-
+-#include <mach/mt_reg_base.h>
+-#include <mach/mt_typedefs.h>
+-#include <mach/mt_gpio.h>
+-#include <mach/mt_pm_ldo.h>
+-
+-#define CUST_VIBR_LIMIT
+-#define CUST_VIBR_VOL
+-/*----------------------------------------------------------------------------*/
+-struct vibrator_hw {
+-	int	vib_timer;
+-#ifdef CUST_VIBR_LIMIT
+-	int	vib_limit;
+-#endif
+-#ifdef CUST_VIBR_VOL
+-	int	vib_vol;
+-#endif
+-};
+-/*----------------------------------------------------------------------------*/
+-extern struct vibrator_hw *get_cust_vibrator_hw(void);
+-/*----------------------------------------------------------------------------*/
+-#endif
+diff --git a/drivers/misc/mediatek/vibrator/Makefile b/drivers/misc/mediatek/vibrator/Makefile
+index 7443743ad..764e0aaae 100644
+--- a/drivers/misc/mediatek/vibrator/Makefile
++++ b/drivers/misc/mediatek/vibrator/Makefile
+@@ -1,7 +1,3 @@
+ include $(srctree)/drivers/misc/mediatek/Makefile.custom
+ 
+-obj-$(CONFIG_MTK_VIBRATOR) := vibrator_drv.o
+-
+-obj-y += $(subst ",,$(CONFIG_MTK_PLATFORM))/
+-
+-#ccflags-y := -Idrivers/staging/android/
++obj-y := vibrator_drv.o
+diff --git a/drivers/misc/mediatek/vibrator/mt6580/Makefile b/drivers/misc/mediatek/vibrator/mt6580/Makefile
+deleted file mode 100755
+index 8081486e5..000000000
+--- a/drivers/misc/mediatek/vibrator/mt6580/Makefile
++++ /dev/null
+@@ -1,4 +0,0 @@
+-include $(srctree)/drivers/misc/mediatek/Makefile.custom
+-
+-obj-$(CONFIG_MTK_VIBRATOR) := vibrator.o
+-#ccflags-y := -Idrivers/staging/android/
+diff --git a/drivers/misc/mediatek/vibrator/mt6580/vibrator.c b/drivers/misc/mediatek/vibrator/mt6580/vibrator.c
+deleted file mode 100644
+index 445dbf7cf..000000000
+--- a/drivers/misc/mediatek/vibrator/mt6580/vibrator.c
++++ /dev/null
+@@ -1,61 +0,0 @@
+-/******************************************************************************
+- * mt6575_vibrator.c - MT6575 Android Linux Vibrator Device Driver
+- * 
+- * Copyright 2009-2010 MediaTek Co.,Ltd.
+- * 
+- * DESCRIPTION:
+- *     This file provid the other drivers vibrator relative functions
+- *
+- ******************************************************************************/
+-
+-#include <linux/init.h>
+-#include <linux/module.h>
+-#include <linux/kernel.h>
+-#include <linux/types.h>
+-#include <linux/device.h>
+-#include <mach/mt_typedefs.h>
+-#include <cust_vibrator.h>
+-#include <mach/upmu_common.h>
+-#include <mach/upmu_common_sw.h>
+-#include <mach/upmu_sw.h>
+-#include <mach/upmu_hw.h>
+-
+-extern S32 pwrap_read( U32  adr, U32 *rdata );
+-extern S32 pwrap_write( U32  adr, U32  wdata );
+-
+-void vibr_Enable_HW(void)
+-{
+-	pmic_set_register_value(PMIC_RG_VIBR_EN,1);     //[bit 1]: VIBR_EN,  1=enable
+-}
+-
+-void vibr_Disable_HW(void)
+-{
+-	pmic_set_register_value(PMIC_RG_VIBR_EN,0);     //[bit 1]: VIBR_EN,  1=enable
+-}
+-
+-
+-/******************************************
+-* Set RG_VIBR_VOSEL	Output voltage select
+-*  hw->vib_vol:  Voltage selection
+-* 3'b000: 1.3V
+-* 3'b001: 1.5V
+-* 3'b010: 1.8V
+-* 3'b011: 2.0V
+-* 3'b100: 2.5V
+-* 3'b101: 2.8V
+-* 3'b110: 3.0V
+-* 3'b111: 3.3V
+-*******************************************/
+-
+-void vibr_power_set(void)
+-{
+-#ifdef CUST_VIBR_VOL
+-	struct vibrator_hw* hw = get_cust_vibrator_hw();	
+-	pmic_set_register_value(PMIC_RG_VIBR_VOSEL,hw->vib_vol);
+-#endif
+-}
+-
+-struct vibrator_hw* mt_get_cust_vibrator_hw(void)
+-{
+-	return get_cust_vibrator_hw();
+-}
+diff --git a/drivers/misc/mediatek/vibrator/mt6580/vibrator_hal.h b/drivers/misc/mediatek/vibrator/mt6580/vibrator_hal.h
+deleted file mode 100644
+index c0b416eea..000000000
+--- a/drivers/misc/mediatek/vibrator/mt6580/vibrator_hal.h
++++ /dev/null
+@@ -1,8 +0,0 @@
+-/*********************************************
+-HAL API
+-**********************************************/
+-
+-void vibr_Enable_HW(void);
+-void vibr_Disable_HW(void);
+-void vibr_power_set(void);
+-struct vibrator_hw *mt_get_cust_vibrator_hw(void);
+diff --git a/drivers/misc/mediatek/vibrator/timed_output.h b/drivers/misc/mediatek/vibrator/timed_output.h
+deleted file mode 100644
+index 5a838f10f..000000000
+--- a/drivers/misc/mediatek/vibrator/timed_output.h
++++ /dev/null
+@@ -1,37 +0,0 @@
+-/* include/linux/timed_output.h
+- *
+- * Copyright (C) 2008 Google, Inc.
+- *
+- * This software is licensed under the terms of the GNU General Public
+- * License version 2, as published by the Free Software Foundation, and
+- * may be copied, distributed, and modified under those terms.
+- *
+- * This program is distributed in the hope that it will be useful,
+- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+- * GNU General Public License for more details.
+- *
+-*/
+-
+-#ifndef _LINUX_TIMED_OUTPUT_H
+-#define _LINUX_TIMED_OUTPUT_H
+-
+-struct timed_output_dev {
+-	const char *name;
+-
+-	/* enable the output and set the timer */
+-	void (*enable) (struct timed_output_dev *sdev, int timeout);
+-
+-	/* returns the current number of milliseconds remaining on the timer */
+-	int (*get_time) (struct timed_output_dev *sdev);
+-
+-	/* private data */
+-	struct device *dev;
+-	int index;
+-	int state;
+-};
+-
+-extern int timed_output_dev_register(struct timed_output_dev *dev);
+-extern void timed_output_dev_unregister(struct timed_output_dev *dev);
+-
+-#endif
+diff --git a/drivers/misc/mediatek/vibrator/vibrator_drv.c b/drivers/misc/mediatek/vibrator/vibrator_drv.c
+index 689df73ab..afdbc7761 100755
+--- a/drivers/misc/mediatek/vibrator/vibrator_drv.c
++++ b/drivers/misc/mediatek/vibrator/vibrator_drv.c
+@@ -1,351 +1,179 @@
+-/******************************************************************************
+- * mt6575_vibrator.c - MT6575 Android Linux Vibrator Device Driver
++/* 
++ * Copyright (C) 2009-2010 MediaTek Co.,Ltd.
+  *
+- * Copyright 2009-2010 MediaTek Co.,Ltd.
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
+  *
+- * DESCRIPTION:
+- *     This file provid the other drivers vibrator relative functions
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
++ * GNU General Public License for more details.
+  *
+- ******************************************************************************/
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, write to the Free Software
++ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
++ */
+ 
+ #include <linux/init.h>
+ #include <linux/module.h>
+-#include <linux/kernel.h>
+-#include <linux/types.h>
+-#include <linux/device.h>
+-#include <linux/workqueue.h>
+-
+-#include "timed_output.h"
+-
+-
+-#include <linux/err.h>
+ #include <linux/platform_device.h>
+-#include <linux/spinlock.h>
+-
+-#include <linux/jiffies.h>
+-#include <linux/timer.h>
+-
+-#include <mach/mt_typedefs.h>
+-#include <cust_vibrator.h>
+-#include <vibrator_hal.h>
+-
+-
+-#include <linux/kthread.h>
+-#include <linux/delay.h>
+-
+-
+-
+-#define VERSION					"v 0.2"
+-#define VIB_DEVICE				"mtk_vibrator"
+-
+-
+-static struct task_struct *thread = NULL;
+-static DECLARE_WAIT_QUEUE_HEAD(vib_waiter);
+-static int vib_flag = 0;
+-
+-
+-/******************************************************************************
+-Error Code No.
+-******************************************************************************/
+-#define RSUCCESS        0
+-
+-/******************************************************************************
+-Debug Message Settings
+-******************************************************************************/
+-
+-/* Debug message event */
+-#define DBG_EVT_NONE		0x00000000	/* No event */
+-#define DBG_EVT_INT			0x00000001	/* Interrupt related event */
+-#define DBG_EVT_TASKLET		0x00000002	/* Tasklet related event */
+-
+-#define DBG_EVT_ALL			0xffffffff
+-
+-#define DBG_EVT_MASK		(DBG_EVT_TASKLET)
+-
+-#if 1
+-#define MSG(evt, fmt, args...) \
+-do {	\
+-	if ((DBG_EVT_##evt) & DBG_EVT_MASK) { \
+-		printk(fmt, ##args); \
+-	} \
+-} while (0)
+-
+-#define MSG_FUNC_ENTRY(f)	MSG(FUC, "<FUN_ENT>: %s\n", __func__)
+-#else
+-#define MSG(evt, fmt, args...) do {} while (0)
+-#define MSG_FUNC_ENTRY(f)	   do {} while (0)
+-#endif
+-
+-
+-/******************************************************************************
+-Global Definations
+-******************************************************************************/
+-static spinlock_t vibe_lock;
+-static int vibe_state;
+-static int ldo_state;
+-static int shutdown_flag;
+-static int vibe_time;
++#include <linux/input.h>
++#include <mach/upmu_common.h>
++#include <mach/upmu_common_sw.h>
++#include <mach/upmu_sw.h>
++#include <mach/upmu_hw.h>
++
++#define mtk_vib_haptic_enable()  pmic_set_register_value(PMIC_RG_VIBR_EN, 1)
++#define mtk_vib_haptic_disable() pmic_set_register_value(PMIC_RG_VIBR_EN, 0)
++
++struct mtk_vib_data {
++    struct input_dev *input_dev;
++    struct device *dev;
++    struct work_struct work;
++    int speed;
++};
+ 
+-/**********************************************************************************************/
+-/*Vibrate operate function*/
+-static int vibr_Enable(void)
++static void mtk_vib_close(struct input_dev *dev)
+ {
+-	if (!ldo_state) {
+-		vibr_Enable_HW();
+-		ldo_state = 1;
+-	}
+-	return 0;
++    struct mtk_vib_data *vib = input_get_drvdata(dev);
++    cancel_work_sync(&vib->work);
++    mtk_vib_haptic_disable();
+ }
+ 
+-static int vibr_Disable(void)
++static void mtk_vib_play_effect_work(struct work_struct *work)
+ {
+-	if (ldo_state) {
+-		vibr_Disable_HW();
+-		ldo_state = 0;
+-	}
+-	return 0;
+-}
++    struct mtk_vib_data *vib = container_of(work, struct mtk_vib_data, work);
+ 
++    if(vib->speed)
++        mtk_vib_haptic_enable();
++    else
++        mtk_vib_haptic_disable();
++}
+ 
+-static int vibr_time_remine  = 0;
+-static int vibr_kernel_thread_handler(void *unused)
++static int mtk_vib_play_effect(struct input_dev *dev, void *data,
++        struct ff_effect *effect)
+ {
+-    struct sched_param param = { .sched_priority = RTPM_PRIO_TPD };
++    struct mtk_vib_data *vib = input_get_drvdata(dev);
+ 
+-    sched_setscheduler(current, SCHED_RR, &param);
+-	
+-	do
+-	{
+-		set_current_state(TASK_INTERRUPTIBLE);
+-		while (vib_flag)
+-		{
+-			vib_flag = 0;
+-			msleep(10);
+-		} 
+-		
+-		wait_event_interruptible(vib_waiter, vib_flag != 0);
+-		vib_flag = 0;
++    vib->speed = effect->u.rumble.strong_magnitude;
++    if (!vib->speed)
++        vib->speed = effect->u.rumble.weak_magnitude;
+ 
+-		
+-		set_current_state(TASK_RUNNING);
+-		vibr_Enable();
+-		vibe_state = 1;
+-		while(vibr_time_remine)
+-		{
+-			if(vibr_time_remine >= 20)
+-			{
+-				vibr_time_remine -= 20;
+-				msleep(12);
+-			}
+-			else
+-			{
+-				msleep(vibr_time_remine);
+-				vibr_time_remine = 0;
+-			}
+-		}
+-		vibr_Disable();
+-		vibe_state = 0;
+-    }
+-	while (!kthread_should_stop());
+-
+-    return RSUCCESS;
+-}
+-
+-
+-static int vibrator_get_time(struct timed_output_dev *dev)
+-{
+-	return vibr_time_remine;
++    schedule_work(&vib->work);
++    return 0;
+ }
+ 
+-static void vibrator_enable(struct timed_output_dev *dev, int value)
++static struct mtk_vib_data mtk_vibrator_data;
++static int mtk_vib_probe(struct platform_device *pdev)
+ {
+-	unsigned long flags;
+-int ret;
+-	
+-	 /**********************modify begin*************************************************/
+-	
+-	if (value == 0 && vibe_state == 1)   //vibrator is on and need to shutdown
+-	
+-	{
+-		vibr_time_remine = 0;
+-		msleep(10);
+-		return;
+-	
+-	}
+-	
+-	/***************************modify end**************************************************/
+-
+-
+-#if 1
+-	struct vibrator_hw *hw = mt_get_cust_vibrator_hw();
+-#endif
+-	spin_lock_irqsave(&vibe_lock, flags);
++    int ret;
++    struct mtk_vib_data *vib;
+ 
++    platform_set_drvdata(pdev, &mtk_vibrator_data);
++    vib = (struct mtk_vib_data *)platform_get_drvdata(pdev);
++    pdev->dev.init_name = "mtk_vibrator";
+ 
+-	if (value == 0 || shutdown_flag == 1) {
+-		vibr_time_remine = 0;
+-	} else {
+-#ifdef CUST_VIBR_LIMIT
+-		if (value > hw->vib_limit && value < hw->vib_timer)
+-#else
+-		if (value >= 10 && value < hw->vib_timer)
+-#endif
+-			value = hw->vib_timer;
+-		value =  ((value < hw->vib_timer) ? hw->vib_timer : value ); 
+-		value = (value > 15000 ? 15000 : value);
+-		vibr_time_remine = vibe_time = value;
+-		wake_up_interruptible(&vib_waiter);vib_flag = 1;
+-	}
++    INIT_WORK(&vib->work, mtk_vib_play_effect_work);
+ 
+-	spin_unlock_irqrestore(&vibe_lock, flags);
+-}
++    vib->input_dev = input_allocate_device();
++    if (!vib->input_dev) {
++        dev_err(&pdev->dev, "unable to allocate memory\n");
++        ret = -ENOMEM;
++        goto err_free_mem;
++    }
+ 
++    vib->input_dev->name = "mtk_vibrator";
++    vib->input_dev->id.version = 1;
++    vib->input_dev->close = mtk_vib_close;
++    input_set_drvdata(vib->input_dev, &mtk_vibrator_data);
++    input_set_capability(vib->input_dev, EV_FF, FF_RUMBLE);
+ 
++    ret = input_ff_create_memless(vib->input_dev, NULL, mtk_vib_play_effect);
++    if (ret) {
++        dev_err(&pdev->dev, "unable to create FF device, error: %d\n", ret);
++        goto err_free_mem;
++    }
+ 
+-static struct timed_output_dev mtk_vibrator = {
+-	.name = "vibrator",
+-	.get_time = vibrator_get_time,
+-	.enable = vibrator_enable,
+-};
++    ret = input_register_device(vib->input_dev);
++    if (ret) {
++        dev_err(&pdev->dev, "unable to register input device, error: %d\n", ret);
++        goto err_destroy_ff;
++    }
++    return 0;
+ 
+-static int vib_probe(struct platform_device *pdev)
+-{
+-	return 0;
++err_destroy_ff:
++    input_ff_destroy(vib->input_dev);
++err_free_mem:
++    input_free_device(vib->input_dev);
++    return ret;
+ }
+ 
+-static int vib_remove(struct platform_device *pdev)
++static int mtk_vib_remove(struct platform_device *pdev)
+ {
+-	return 0;
++    struct mtk_vib_data *vib = platform_get_drvdata(pdev);
++
++    input_unregister_device(vib->input_dev);
++    mtk_vib_haptic_disable();
++
++    return 0;
+ }
+ 
+-static void vib_shutdown(struct platform_device *pdev)
++static void mtk_vib_shutdown(struct platform_device *pdev)
+ {
+-	unsigned long flags;
+-	spin_lock_irqsave(&vibe_lock, flags);
+-	shutdown_flag = 1;
+-	if (vibe_state) {
+-		vibe_state = 0;
+-		spin_unlock_irqrestore(&vibe_lock, flags);
+-		vibr_Disable();
+-	} else {
+-		spin_unlock_irqrestore(&vibe_lock, flags);
+-	}
++    mtk_vib_haptic_disable();
+ }
+ 
+-/******************************************************************************
+-Device driver structure
+-*****************************************************************************/
+-static struct platform_driver vibrator_driver = {
+-	.probe = vib_probe,
+-	.remove = vib_remove,
+-	.shutdown = vib_shutdown,
+-	.driver = {
+-		   .name = VIB_DEVICE,
+-		   .owner = THIS_MODULE,
+-		   },
++static struct platform_driver mtk_vib_driver = {
++    .probe = mtk_vib_probe,
++    .remove = mtk_vib_remove,
++    .shutdown = mtk_vib_shutdown,
++    .driver = {
++        .name = "mtk_vibrator",
++        .owner = THIS_MODULE,
++    },
+ };
+ 
+-static struct platform_device vibrator_device = {
+-	.name = "mtk_vibrator",
+-	.id = -1,
++static struct platform_device mtk_vib_device = {
++    .name = "mtk_vibrator",
++    .id = -1,
+ };
+ 
+-static ssize_t store_vibr_on(struct device *dev, struct device_attribute *attr, const char *buf,
+-			     size_t size)
++static int mtk_vib_init(void)
+ {
+-	if (buf != NULL && size != 0) {
+-		if (buf[0] == '0') {
+-			vibr_Disable();
+-		} else {
+-			vibr_Enable();
+-		}
+-	}
+-	return size;
+-}
+-
+-static DEVICE_ATTR(vibr_on, 0333, NULL, store_vibr_on);
+-
+-/******************************************************************************
+- * vib_mod_init
+- *
+- * DESCRIPTION:
+- *   Register the vibrator device driver !
+- *
+- * PARAMETERS:
+- *   None
+- *
+- * RETURNS:
+- *   None
+- *
+- * NOTES:
+- *   RSUCCESS : Success
+- *
+- ******************************************************************************/
+-
+-static int vib_mod_init(void)
+-{
+-	s32 ret;
+-	s32 err;
+-
+-	vibr_power_set();	/* set vibr voltage if needs.  Before MT6320 vibr default voltage=2.8v but in MT6323 vibr default voltage=1.2v */
+-	ret = platform_device_register(&vibrator_device);
+-	if (ret != 0) {
+-		printk("[vibrator]Unable to register vibrator device (%d)\n", ret);
+-		return ret;
+-	}
+-
+-	spin_lock_init(&vibe_lock);
+-	shutdown_flag = 0;
+-	vibe_state = 0;
+-
+-	timed_output_dev_register(&mtk_vibrator);
+-
+-	ret = platform_driver_register(&vibrator_driver);
+-
+-	if (ret) {
+-		printk("[vibrator]Unable to register vibrator driver (%d)\n", ret);
+-		return ret;
+-	}
+-
+-	ret = device_create_file(mtk_vibrator.dev, &dev_attr_vibr_on);
+-	if (ret) {
+-		printk("[vibrator]device_create_file vibr_on fail!\n");
+-	}
++    int ret;
++
++    /*
++     * Allowed voltage for PMIC_RG_VIBR_VOSEL value:
++     * 0x0: 1.3V  0x1: 1.5V  0x2: 1.8V  0x3: 2.0V
++     * 0x4: 2.5V  0x5: 2.8V  0x6: 3.0V  0x7: 3.3V
++     */
++    pmic_set_register_value(PMIC_RG_VIBR_VOSEL, 0x6);
++
++    ret = platform_device_register(&mtk_vib_device);
++    if (ret != 0) {
++        printk("[vibrator] Unable to register vibrator device (%d)\n", ret);
++        return ret;
++    }
+ 
+-	//start kernel thread to 
+-	thread = kthread_run(vibr_kernel_thread_handler, 0, VIB_DEVICE);
+-    if (IS_ERR(thread))
+-	{
+-        err = PTR_ERR(thread);
+-        printk("[vibrator] failed to create kernel thread: %d\n", err);
++    ret = platform_driver_register(&mtk_vib_driver);
++    if (ret) {
++        printk("[vibrator] Unable to register vibrator driver (%d)\n", ret);
++        return ret;
+     }
+-	
+-	return RSUCCESS;
+-}
+ 
+-/******************************************************************************
+- * vib_mod_exit
+- *
+- * DESCRIPTION:
+- *   Free the device driver !
+- *
+- * PARAMETERS:
+- *   None
+- *
+- * RETURNS:
+- *   None
+- *
+- * NOTES:
+- *   None
+- *
+- ******************************************************************************/
++    return 0;
++}
+ 
+-static void vib_mod_exit(void)
++static void mtk_vib_exit(void)
+ {
+-	printk("MediaTek MTK vibrator driver unregister, version %s\n", VERSION);
++    platform_driver_unregister(&mtk_vib_driver);
++    platform_device_unregister(&mtk_vib_device);
+ }
+-module_init(vib_mod_init);
+-module_exit(vib_mod_exit);
++
++module_init(mtk_vib_init);
++module_exit(mtk_vib_exit);
+ MODULE_AUTHOR("MediaTek Inc.");
+ MODULE_DESCRIPTION("MTK Vibrator Driver (VIB)");
+ MODULE_LICENSE("GPL");
+-- 
+2.19.0
+
