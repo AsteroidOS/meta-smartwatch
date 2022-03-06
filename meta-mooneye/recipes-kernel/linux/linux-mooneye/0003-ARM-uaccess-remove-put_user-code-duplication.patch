@@ -1,0 +1,243 @@
+From patchwork Fri Jun 10 15:57:46 2016
+Content-Type: text/plain; charset="utf-8"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+X-Patchwork-Submitter: Russell King <rmk+kernel@arm.linux.org.uk>
+X-Patchwork-Id: 9170055
+Return-Path: 
+ <linux-arm-kernel-bounces+patchwork-linux-arm=patchwork.kernel.org@lists.infradead.org>
+Received: from mail.wl.linuxfoundation.org (pdx-wl-mail.web.codeaurora.org
+	[172.30.200.125])
+	by pdx-korg-patchwork.web.codeaurora.org (Postfix) with ESMTP id
+	415126048C for <patchwork-linux-arm@patchwork.kernel.org>;
+	Fri, 10 Jun 2016 15:59:55 +0000 (UTC)
+Received: from mail.wl.linuxfoundation.org (localhost [127.0.0.1])
+	by mail.wl.linuxfoundation.org (Postfix) with ESMTP id 2F8C32833F
+	for <patchwork-linux-arm@patchwork.kernel.org>;
+	Fri, 10 Jun 2016 15:59:55 +0000 (UTC)
+Received: by mail.wl.linuxfoundation.org (Postfix, from userid 486)
+	id 2472A28368; Fri, 10 Jun 2016 15:59:55 +0000 (UTC)
+X-Spam-Checker-Version: SpamAssassin 3.3.1 (2010-03-16) on
+	pdx-wl-mail.web.codeaurora.org
+X-Spam-Level: 
+X-Spam-Status: No, score=-4.1 required=2.0 tests=BAYES_00,DKIM_SIGNED,
+	RCVD_IN_DNSWL_MED,T_DKIM_INVALID autolearn=ham version=3.3.1
+Received: from bombadil.infradead.org (bombadil.infradead.org
+	[198.137.202.9])
+	(using TLSv1.2 with cipher AES128-GCM-SHA256 (128/128 bits))
+	(No client certificate requested)
+	by mail.wl.linuxfoundation.org (Postfix) with ESMTPS id 2E3B02833F
+	for <patchwork-linux-arm@patchwork.kernel.org>;
+	Fri, 10 Jun 2016 15:59:54 +0000 (UTC)
+Received: from localhost ([127.0.0.1] helo=bombadil.infradead.org)
+	by bombadil.infradead.org with esmtp (Exim 4.80.1 #2 (Red Hat Linux))
+	id 1bBOp6-0001U0-8H; Fri, 10 Jun 2016 15:58:16 +0000
+Received: from pandora.armlinux.org.uk
+	([2001:4d48:ad52:3201:214:fdff:fe10:1be6])
+	by bombadil.infradead.org with esmtps (Exim 4.80.1 #2 (Red Hat
+	Linux)) id 1bBOp2-0001GL-09
+	for linux-arm-kernel@lists.infradead.org;
+	Fri, 10 Jun 2016 15:58:13 +0000
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=armlinux.org.uk; s=pandora-2014;
+	h=Date:Sender:Message-Id:Content-Type:Content-Transfer-Encoding:MIME-Version:Subject:To:From;
+	bh=xpRbeltLrcJH9TH3xOe7IrPi7jn8l+Lb/wCEFlktmHk=;
+	b=L6N5WzN8o85P0omOcM9QL0sptCSJIhgZFnMBvxV3Qd1bgysKSKMOwYPw5fHV3Qkw2qKZxN+89AZi7R7WG4432OK9v4PQRN5iwdxfI4MTymQpUDBeS1POwjc3lCQhhVP2YZdMEFP9nPqnCGKx6gSFuY29LJ4X5QDRK8NvqSe21rg=;
+Received: from e0022681537dd.dyn.armlinux.org.uk
+	([2002:4e20:1eda:1:222:68ff:fe15:37dd]:33069
+	helo=rmk-PC.armlinux.org.uk)
+	by pandora.armlinux.org.uk with esmtpsa (TLSv1:AES128-SHA:128)
+	(Exim 4.82_1-5b7a7c0-XX) (envelope-from <rmk@armlinux.org.uk>)
+	id 1bBOod-0004Vd-QA for linux-arm-kernel@lists.infradead.org;
+	Fri, 10 Jun 2016 16:57:47 +0100
+Received: from rmk by rmk-PC.armlinux.org.uk with local (Exim
+	4.82_1-5b7a7c0-XX) (envelope-from <rmk@armlinux.org.uk>)
+	id 1bBOoc-00038i-Sf for linux-arm-kernel@lists.infradead.org;
+	Fri, 10 Jun 2016 16:57:46 +0100
+From: Russell King <rmk+kernel@arm.linux.org.uk>
+To: linux-arm-kernel@lists.infradead.org
+Subject: [PATCH] ARM: uaccess: remove put_user() code duplication
+MIME-Version: 1.0
+Content-Disposition: inline
+Message-Id: <E1bBOoc-00038i-Sf@rmk-PC.armlinux.org.uk>
+Date: Fri, 10 Jun 2016 16:57:46 +0100
+X-CRM114-Version: 20100106-BlameMichelson ( TRE 0.8.0 (BSD) ) MR-646709E3 
+X-CRM114-CacheID: sfid-20160610_085812_606530_BDA36362 
+X-CRM114-Status: GOOD (  12.70  )
+X-BeenThere: linux-arm-kernel@lists.infradead.org
+X-Mailman-Version: 2.1.20
+Precedence: list
+List-Id: <linux-arm-kernel.lists.infradead.org>
+List-Unsubscribe: 
+ <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: 
+ <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+	<mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Content-Type: text/plain; charset="us-ascii"
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: 
+ linux-arm-kernel-bounces+patchwork-linux-arm=patchwork.kernel.org@lists.infradead.org
+X-Virus-Scanned: ClamAV using ClamSMTP
+
+Remove the code duplication between put_user() and __put_user().  The
+code which selected the implementation based upon the pointer size, and
+declared the local variable to hold the value to be put are common to
+both implementations.
+
+Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
+---
+ arch/arm/include/asm/uaccess.h | 106 +++++++++++++++++++----------------------
+ 1 file changed, 49 insertions(+), 57 deletions(-)
+
+diff --git a/arch/arm/include/asm/uaccess.h b/arch/arm/include/asm/uaccess.h
+index 7badc3e55109..faa47f979f04 100644
+--- a/arch/arm/include/asm/uaccess.h
++++ b/arch/arm/include/asm/uaccess.h
+@@ -230,49 +230,23 @@ extern int __put_user_2(void *, unsigned int);
+ extern int __put_user_4(void *, unsigned int);
+ extern int __put_user_8(void *, unsigned long long);
+ 
+-#define __put_user_x(__r2, __p, __e, __l, __s)				\
+-	   __asm__ __volatile__ (					\
+-		__asmeq("%0", "r0") __asmeq("%2", "r2")			\
+-		__asmeq("%3", "r1")					\
+-		"bl	__put_user_" #__s				\
+-		: "=&r" (__e)						\
+-		: "0" (__p), "r" (__r2), "r" (__l)			\
+-		: "ip", "lr", "cc")
+-
+-#define __put_user_check(x, p)						\
++#define __put_user_check(__pu_val, __ptr, __err, __s)			\
+ 	({								\
+ 		unsigned long __limit = current_thread_info()->addr_limit - 1; \
+-		const typeof(*(p)) __user *__tmp_p = (p);		\
+-		register const typeof(*(p)) __r2 asm("r2") = (x);	\
+-		register const typeof(*(p)) __user *__p asm("r0") = __tmp_p; \
++		register typeof(__pu_val) __r2 asm("r2") = __pu_val;	\
++		register const void __user *__p asm("r0") = __ptr;	\
+ 		register unsigned long __l asm("r1") = __limit;		\
+ 		register int __e asm("r0");				\
+-		unsigned int __ua_flags = uaccess_save_and_enable();	\
+-		switch (sizeof(*(__p))) {				\
+-		case 1:							\
+-			__put_user_x(__r2, __p, __e, __l, 1);		\
+-			break;						\
+-		case 2:							\
+-			__put_user_x(__r2, __p, __e, __l, 2);		\
+-			break;						\
+-		case 4:							\
+-			__put_user_x(__r2, __p, __e, __l, 4);		\
+-			break;						\
+-		case 8:							\
+-			__put_user_x(__r2, __p, __e, __l, 8);		\
+-			break;						\
+-		default: __e = __put_user_bad(); break;			\
+-		}							\
+-		uaccess_restore(__ua_flags);				\
+-		__e;							\
++		__asm__ __volatile__ (					\
++			__asmeq("%0", "r0") __asmeq("%2", "r2")		\
++			__asmeq("%3", "r1")				\
++			"bl	__put_user_" #__s			\
++			: "=&r" (__e)					\
++			: "0" (__p), "r" (__r2), "r" (__l)		\
++			: "ip", "lr", "cc");				\
++		__err = __e;						\
+ 	})
+ 
+-#define put_user(x, p)							\
+-	({								\
+-		might_fault();						\
+-		__put_user_check(x, p);					\
+-	 })
+-
+ #else /* CONFIG_MMU */
+ 
+ /*
+@@ -290,7 +264,7 @@ static inline void set_fs(mm_segment_t fs)
+ }
+ 
+ #define get_user(x, p)	__get_user(x, p)
+-#define put_user(x, p)	__put_user(x, p)
++#define __put_user_nocheck __put_user_check
+ 
+ #endif /* CONFIG_MMU */
+ 
+@@ -381,36 +355,54 @@ do {									\
+ #define __get_user_asm_word(x, addr, err)			\
+ 	__get_user_asm(x, addr, err, ldr)
+ 
++
++#define __put_user_switch(x, ptr, __err, __fn)				\
++	do {								\
++		const __typeof__(*(ptr)) __user *__pu_ptr = (ptr);	\
++		__typeof__(*(ptr)) __pu_val = (x);			\
++		unsigned int __ua_flags;				\
++		might_fault();						\
++		__ua_flags = uaccess_save_and_enable();			\
++		switch (sizeof(*(ptr))) {				\
++		case 1: __fn(__pu_val, __pu_ptr, __err, 1); break;	\
++		case 2:	__fn(__pu_val, __pu_ptr, __err, 2); break;	\
++		case 4:	__fn(__pu_val, __pu_ptr, __err, 4); break;	\
++		case 8:	__fn(__pu_val, __pu_ptr, __err, 8); break;	\
++		default: __err = __put_user_bad(); break;		\
++		}							\
++		uaccess_restore(__ua_flags);				\
++	} while (0)
++
++#define put_user(x, ptr)						\
++({									\
++	int __pu_err;							\
++	__put_user_switch((x), (ptr), __pu_err, __put_user_check);	\
++	__pu_err;							\
++})
++
+ #define __put_user(x, ptr)						\
+ ({									\
+ 	long __pu_err = 0;						\
+-	__put_user_err((x), (ptr), __pu_err);				\
++	__put_user_switch((x), (ptr), __pu_err, __put_user_nocheck);	\
+ 	__pu_err;							\
+ })
+ 
+ #define __put_user_error(x, ptr, err)					\
+ ({									\
+-	__put_user_err((x), (ptr), err);				\
++	__put_user_switch((x), (ptr), (err), __put_user_nocheck);	\
+ 	(void) 0;							\
+ })
+ 
+-#define __put_user_err(x, ptr, err)					\
+-do {									\
+-	unsigned long __pu_addr = (unsigned long)(ptr);			\
+-	unsigned int __ua_flags;					\
+-	__typeof__(*(ptr)) __pu_val = (x);				\
+-	__chk_user_ptr(ptr);						\
+-	might_fault();							\
+-	__ua_flags = uaccess_save_and_enable();				\
+-	switch (sizeof(*(ptr))) {					\
+-	case 1: __put_user_asm_byte(__pu_val, __pu_addr, err);	break;	\
+-	case 2: __put_user_asm_half(__pu_val, __pu_addr, err);	break;	\
+-	case 4: __put_user_asm_word(__pu_val, __pu_addr, err);	break;	\
+-	case 8:	__put_user_asm_dword(__pu_val, __pu_addr, err);	break;	\
+-	default: __put_user_bad();					\
+-	}								\
+-	uaccess_restore(__ua_flags);					\
+-} while (0)
++#define __put_user_nocheck(x, __pu_ptr, __err, __size)			\
++	do {								\
++		unsigned long __pu_addr = (unsigned long)__pu_ptr;	\
++		__put_user_nocheck_##__size(x, __pu_addr, __err);	\
++	} while (0)
++
++#define __put_user_nocheck_1 __put_user_asm_byte
++#define __put_user_nocheck_2 __put_user_asm_half
++#define __put_user_nocheck_4 __put_user_asm_word
++#define __put_user_nocheck_8 __put_user_asm_dword
+ 
+ #define __put_user_asm(x, __pu_addr, err, instr)		\
+ 	__asm__ __volatile__(					\
