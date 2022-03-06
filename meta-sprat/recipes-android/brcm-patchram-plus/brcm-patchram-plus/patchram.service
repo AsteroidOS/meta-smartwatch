@@ -1,0 +1,10 @@
+[Unit]
+Description=Load firmware into BCM20715A1 bluetooth chip
+
+[Service]
+Type=simple
+ExecStartPre=/usr/sbin/rfkill unblock bluetooth
+ExecStart=/usr/bin/brcm_patchram_plus --enable_lpm --enable_hci --no2bytes --patchram /vendor/firmware/bcm43342A.hcd /dev/ttyHS0
+
+[Install]
+WantedBy=basic.target
