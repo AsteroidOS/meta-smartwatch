@@ -1,0 +1,46 @@
+on init
+    write /sys/devices/platform/soc/4080000.qcom,mss/subsys2/restart_level "RELATED"
+
+    write /sys/devices/virtual/input/mxt_touch/check_fw "1"
+    write /sys/devices/sop716/motor_move_all "45:135"
+    write /sys/devices/sop716/watch_mode "1"
+
+    mkdir /dev/graphics/
+    symlink /dev/fb0 /dev/graphics/fb0
+    chown system root /sys/class/timed_output/vibrator/enable
+    chmod 666 /sys/devices/sop716/*
+
+    load_system_props
+    restorecon_recursive /persist
+
+    mkdir /data/
+
+    setprop init.svc.bluetooth running
+
+    class_start core
+
+service logd /usr/libexec/hal-droid/system/bin/logd
+    class core
+    socket logd stream 0666 logd logd
+    socket logdr seqpacket 0666 logd logd
+    socket logdw dgram 0222 logd logd
+    file /proc/kmsg r
+    file /dev/kmsg w
+    user logd
+    group logd system readproc
+
+service rmt_storage /vendor/bin/rmt_storage
+    class core
+
+service sensors /vendor/bin/sensors.qcom
+    class core
+    oneshot
+
+service servicemanager /usr/libexec/hal-droid/system/bin/servicemanager
+    setenv LD_PRELOAD /usr/libexec/hal-droid/system/lib/libselinux_stubs.so
+    class core
+
+service hwservicemanager /system/bin/hwservicemanager
+    setenv LD_PRELOAD /usr/libexec/hal-droid/system/lib/libselinux_stubs.so
+    class core
+
