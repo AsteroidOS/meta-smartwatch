@@ -1,0 +1,201 @@
+From bfdf66ae236678cf8535f48ea7c4b634b5974cc0 Mon Sep 17 00:00:00 2001
+From: Florent Revest <revestflo@gmail.com>
+Date: Mon, 18 Apr 2016 00:45:27 +0200
+Subject: [PATCH] Bluetooth: fixes a poorly done patch
+
+---
+ drivers/bluetooth/hci_ldisc.c |  2 +-
+ drivers/bluetooth/hci_uart.h  |  4 +++-
+ include/net/bluetooth/hci.h   |  3 ---
+ include/net/bluetooth/sco.h   |  3 ---
+ net/bluetooth/af_bluetooth.c  | 25 -------------------------
+ net/bluetooth/hci_event.c     |  9 ---------
+ net/bluetooth/sco.c           | 14 --------------
+ 7 files changed, 4 insertions(+), 56 deletions(-)
+
+diff --git a/drivers/bluetooth/hci_ldisc.c b/drivers/bluetooth/hci_ldisc.c
+index 5dd9464..8180c0f 100644
+--- a/drivers/bluetooth/hci_ldisc.c
++++ b/drivers/bluetooth/hci_ldisc.c
+@@ -525,7 +525,6 @@ static int hci_uart_tty_ioctl(struct tty_struct *tty, struct file * file,
+ 				clear_bit(HCI_UART_PROTO_SET, &hu->flags);
+ 				return err;
+ 			}
+-			tty->low_latency = 1;
+ 		} else
+ 			return -EBUSY;
+ 		break;
+@@ -620,6 +619,7 @@ static int __init hci_uart_init(void)
+ #endif
+ #ifdef CONFIG_BT_HCIUART_3WIRE
+ 	h5_init();
++#endif
+ #ifdef CONFIG_BT_HCIUART_BRCM
+ 	brcm_init();
+ #endif
+diff --git a/drivers/bluetooth/hci_uart.h b/drivers/bluetooth/hci_uart.h
+index d1e21c8..df4be0f 100644
+--- a/drivers/bluetooth/hci_uart.h
++++ b/drivers/bluetooth/hci_uart.h
+@@ -37,7 +37,7 @@
+ /* UART protocols */
+ #define HCI_UART_MAX_PROTO	6
+ 
+-/*#define HCI_UART_H4	0*/
++#define HCI_UART_H4	0
+ #define HCI_UART_BRCM  0
+ #define HCI_UART_BCSP	1
+ #define HCI_UART_3WIRE	2
+@@ -115,6 +115,8 @@ int ath_deinit(void);
+ #ifdef CONFIG_BT_HCIUART_3WIRE
+ int h5_init(void);
+ int h5_deinit(void);
++#endif
++
+ #ifdef CONFIG_BT_HCIUART_BRCM
+ int brcm_init(void);
+ int brcm_deinit(void);
+diff --git a/include/net/bluetooth/hci.h b/include/net/bluetooth/hci.h
+index 09f9586..b2f4294 100644
+--- a/include/net/bluetooth/hci.h
++++ b/include/net/bluetooth/hci.h
+@@ -199,11 +199,8 @@ enum {
+ #define ESCO_2EV5	0x0100
+ #define ESCO_3EV5	0x0200
+ 
+-<<<<<<< HEAD
+ #define ESCO_WBS    (ESCO_EV3 | (EDR_ESCO_MASK ^ ESCO_2EV3))
+ 
+-=======
+->>>>>>> linaro/experimental/android-3.10
+ #define SCO_ESCO_MASK	(ESCO_HV1 | ESCO_HV2 | ESCO_HV3)
+ #define EDR_ESCO_MASK	(ESCO_2EV3 | ESCO_3EV3 | ESCO_2EV5 | ESCO_3EV5)
+ #define ALL_ESCO_MASK	(SCO_ESCO_MASK | ESCO_EV3 | ESCO_EV4 | ESCO_EV5 | \
+diff --git a/include/net/bluetooth/sco.h b/include/net/bluetooth/sco.h
+index d608125..c6dea42 100644
+--- a/include/net/bluetooth/sco.h
++++ b/include/net/bluetooth/sco.h
+@@ -38,10 +38,7 @@ struct sockaddr_sco {
+ 	sa_family_t	sco_family;
+ 	bdaddr_t	sco_bdaddr;
+ 	__u16		sco_pkt_type;
+-<<<<<<< HEAD
+ 	__s8            is_wbs;
+-=======
+->>>>>>> linaro/experimental/android-3.10
+ };
+ 
+ /* SCO socket options */
+diff --git a/net/bluetooth/af_bluetooth.c b/net/bluetooth/af_bluetooth.c
+index b7fd3a5..e6968ea 100644
+--- a/net/bluetooth/af_bluetooth.c
++++ b/net/bluetooth/af_bluetooth.c
+@@ -35,7 +35,6 @@
+ #define BT_DBG(D...)
+ #endif
+ 
+-<<<<<<< HEAD
+ #ifdef CONFIG_ANDROID_PARANOID_NETWORK
+ #include <linux/android_aid.h>
+ #endif
+@@ -45,8 +44,6 @@
+ #define BT_DBG(D...)
+ #endif
+ 
+-=======
+->>>>>>> linaro/experimental/android-3.10
+ #define VERSION "2.16"
+ 
+ /* Bluetooth sockets */
+@@ -142,28 +139,6 @@ static inline int current_has_bt(void)
+ }
+ #endif
+ 
+-#ifdef CONFIG_PARANOID_NETWORK
+-static inline int current_has_bt_admin(void)
+-{
+-	return !current_euid();
+-}
+-
+-static inline int current_has_bt(void)
+-{
+-	return current_has_bt_admin();
+-}
+-# else
+-static inline int current_has_bt_admin(void)
+-{
+-	return 1;
+-}
+-
+-static inline int current_has_bt(void)
+-{
+-	return 1;
+-}
+-#endif
+-
+ static int bt_sock_create(struct net *net, struct socket *sock, int proto,
+ 			  int kern)
+ {
+diff --git a/net/bluetooth/hci_event.c b/net/bluetooth/hci_event.c
+index a5b7397..123844b 100755
+--- a/net/bluetooth/hci_event.c
++++ b/net/bluetooth/hci_event.c
+@@ -1757,15 +1757,6 @@ static inline bool is_sco_active(struct hci_dev *hdev)
+ 	return false;
+ }
+ 
+-static inline bool is_sco_active(struct hci_dev *hdev)
+-{
+-	if (hci_conn_hash_lookup_state(hdev, SCO_LINK, BT_CONNECTED) ||
+-			(hci_conn_hash_lookup_state(hdev, ESCO_LINK,
+-						    BT_CONNECTED)))
+-		return true;
+-	return false;
+-}
+-
+ static void hci_conn_request_evt(struct hci_dev *hdev, struct sk_buff *skb)
+ {
+ 	struct hci_ev_conn_request *ev = (void *) skb->data;
+diff --git a/net/bluetooth/sco.c b/net/bluetooth/sco.c
+index 22e5794..83316c9 100644
+--- a/net/bluetooth/sco.c
++++ b/net/bluetooth/sco.c
+@@ -176,7 +176,6 @@ static int sco_connect(struct sock *sk, __s8 is_wbs)
+ 
+ 	if (lmp_esco_capable(hdev) && !disable_esco) {
+ 		type = ESCO_LINK;
+-<<<<<<< HEAD
+ 	} else if (is_wbs) {
+ 		return -ENAVAIL;
+ 	} else {
+@@ -189,15 +188,6 @@ static int sco_connect(struct sock *sk, __s8 is_wbs)
+ 	BT_DBG("type: %d, pkt_type: 0x%x", type, pkt_type);
+ 	printk("type: %d, pkt_type: 0x%x, is_wbs: %x\n", type, pkt_type, is_wbs);
+ 
+-=======
+-	else {
+-		type = SCO_LINK;
+-		pkt_type &= SCO_ESCO_MASK;
+-	}
+-
+-	hcon = hci_connect(hdev, type, pkt_type, dst, BDADDR_BREDR,
+-			   BT_SECURITY_LOW, HCI_AT_NO_BONDING);
+->>>>>>> linaro/experimental/android-3.10
+ 	if (IS_ERR(hcon)) {
+ 		err = PTR_ERR(hcon);
+ 		goto done;
+@@ -513,11 +503,7 @@ static int sco_sock_connect(struct socket *sock, struct sockaddr *addr, int alen
+ {
+ 	struct sock *sk = sock->sk;
+ 	struct sockaddr_sco sa;
+-<<<<<<< HEAD
+ 	int len, err = 0;
+-=======
+-	int len, err;
+->>>>>>> linaro/experimental/android-3.10
+ 
+ 	BT_DBG("sk %p", sk);
+ 
+-- 
+2.8.0.rc3
+

@@ -1,0 +1,22 @@
+#!/bin/sh
+
+# Set to interactive to make PowerHAL function.
+echo interactive > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+echo 0        > /sys/devices/system/cpu/cpu1/online
+echo 0        > /sys/devices/system/cpu/cpu2/online
+echo 0        > /sys/devices/system/cpu/cpu3/online
+
+echo 1 > /sys/power/memc_dfs_init
+
+# Fixup permissions so that the PowerHAL can actually change them.
+# android-init runs very early in the boot process after which some of these change. This means that we have to change the permissions later in the boot process.
+chown ceres:root /sys/class/input/input1/mode
+chown ceres:root /sys/devices/platform/3c200000.kona-fb/backlight_brightness
+chown ceres:root /sys/devices/platform/3c200000.kona-fb/panel_mode
+chown ceres:root /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
+chown ceres:root /sys/devices/system/cpu/cpufreq/interactive/go_hispeed_load
+chown ceres:root /sys/devices/system/cpu/cpufreq/interactive/timer_rate
+chown ceres:root /sys/devices/system/cpu/cpufreq/interactive/above_hispeed_delay
+chown ceres:root /sys/devices/system/cpu/cpufreq/interactive/min_sample_time
+chown ceres:root /sys/devices/system/cpu/cpufreq/interactive/hispeed_freq
+chown ceres:root /sys/devices/system/cpu/cpufreq/interactive/timer_slack

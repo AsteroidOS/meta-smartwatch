@@ -1,0 +1,33 @@
+From 350a13750ca88fc0e3082a3006f866363fdf2d36 Mon Sep 17 00:00:00 2001
+From: Florent Revest <revestflo@gmail.com>
+Date: Sat, 4 Nov 2017 23:33:11 +0100
+Subject: [PATCH 1/2] bcm_bzhw: Use inverted IRQ lines polarity
+
+---
+ drivers/bluetooth/bcm_bzhw.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/bluetooth/bcm_bzhw.c b/drivers/bluetooth/bcm_bzhw.c
+index 2e0e7649901..8b748090be7 100644
+--- a/drivers/bluetooth/bcm_bzhw.c
++++ b/drivers/bluetooth/bcm_bzhw.c
+@@ -35,14 +35,14 @@
+ #define BZHW_CLOCK_DISABLE 0
+ 
+ #ifndef BZHW_BT_WAKE_ASSERT
+-#define BZHW_BT_WAKE_ASSERT 1
++#define BZHW_BT_WAKE_ASSERT 0
+ #endif
+ #ifndef BZHW_BT_WAKE_DEASSERT
+ #define BZHW_BT_WAKE_DEASSERT (!(BZHW_BT_WAKE_ASSERT))
+ #endif
+ 
+ #ifndef BZHW_HOST_WAKE_ASSERT
+-#define BZHW_HOST_WAKE_ASSERT 1
++#define BZHW_HOST_WAKE_ASSERT 0
+ #endif
+ #ifndef BZHW_HOST_WAKE_DEASSERT
+ #define BZHW_HOST_WAKE_DEASSERT (!(BZHW_HOST_WAKE_ASSERT))
+-- 
+2.14.3
+

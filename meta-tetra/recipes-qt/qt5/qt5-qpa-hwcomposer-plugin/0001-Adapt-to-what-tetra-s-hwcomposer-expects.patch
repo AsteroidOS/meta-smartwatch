@@ -1,0 +1,58 @@
+From 6c7a9d9b54bad4737b9efa56b87251cbee83fe55 Mon Sep 17 00:00:00 2001
+From: Florent Revest <revestflo@gmail.com>
+Date: Tue, 17 Oct 2017 19:21:51 +0200
+Subject: [PATCH] Adapt to what tetra's hwcomposer expects
+
+---
+ hwcomposer/hwcomposer_backend_v11.cpp | 14 +++++++-------
+ 1 file changed, 7 insertions(+), 7 deletions(-)
+
+diff --git a/hwcomposer/hwcomposer_backend_v11.cpp b/hwcomposer/hwcomposer_backend_v11.cpp
+index 136698e..a70805b 100644
+--- a/hwcomposer/hwcomposer_backend_v11.cpp
++++ b/hwcomposer/hwcomposer_backend_v11.cpp
+@@ -132,8 +132,8 @@ void HWComposer::present(HWComposerNativeWindowBuffer *buffer)
+ 
+     QPA_HWC_TIMING_SAMPLE(presentTime);
+ 
+-    fblayer->handle = buffer->handle;
+-    fblayer->releaseFenceFd = -1;
++    mlist[0]->hwLayers[0].handle = buffer->handle;
++    mlist[0]->hwLayers[0].releaseFenceFd = -1;
+ 
+     int retireFenceFd = -1;
+ 
+@@ -147,10 +147,10 @@ void HWComposer::present(HWComposerNativeWindowBuffer *buffer)
+         if (acqFd >= 0) {
+             sync_wait(acqFd, -1);
+             close(acqFd);
+-            fblayer->acquireFenceFd = -1;
++            mlist[0]->hwLayers[0].acquireFenceFd = -1;
+         }
+     } else {
+-        fblayer->acquireFenceFd = getFenceBufferFd(buffer);
++        mlist[0]->hwLayers[0].acquireFenceFd = getFenceBufferFd(buffer);
+     }
+ 
+     QPA_HWC_TIMING_SAMPLE(syncTime);
+@@ -167,7 +167,7 @@ void HWComposer::present(HWComposerNativeWindowBuffer *buffer)
+ 
+     QPA_HWC_TIMING_SAMPLE(setTime);
+ 
+-    setFenceBufferFd(buffer, fblayer->releaseFenceFd);
++    setFenceBufferFd(buffer, mlist[0]->hwLayers[0].releaseFenceFd);
+ 
+     if (m_waitOnRetireFence && retireFenceFd != -1) {
+         sync_wait(retireFenceFd, -1);
+@@ -318,7 +318,7 @@ HwComposerBackend_v11::createWindow(int width, int height)
+ 
+ 
+     HWComposer *hwc_win = new HWComposer(width, height, HAL_PIXEL_FORMAT_RGBA_8888,
+-                                         hwc_device, hwc_mList, &hwc_list->hwLayers[1], num_displays);
++                                         hwc_device, hwc_mList, &hwc_list->hwLayers[0], num_displays);
+     return (EGLNativeWindowType) static_cast<ANativeWindow *>(hwc_win);
+ }
+ 
+-- 
+2.29.0
+

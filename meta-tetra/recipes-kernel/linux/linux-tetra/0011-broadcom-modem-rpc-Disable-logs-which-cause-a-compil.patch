@@ -1,0 +1,89 @@
+From 0f2bc05f8ae03f2abc675efde93450f96dcbb643 Mon Sep 17 00:00:00 2001
+From: Florent Revest <revestflo@gmail.com>
+Date: Sun, 27 Jan 2019 14:15:33 +0100
+Subject: [PATCH] broadcom-modem-rpc: Disable logs which cause a compilation
+ error
+
+---
+ .../char/broadcom/modem/rpc/rpc_CIB/arpc/src/rpc_api.c    | 8 ++++++++
+ drivers/char/broadcom/modem/rpc/rpc_CIB/public/xdr.h      | 3 +--
+ 2 files changed, 9 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/char/broadcom/modem/rpc/rpc_CIB/arpc/src/rpc_api.c b/drivers/char/broadcom/modem/rpc/rpc_CIB/arpc/src/rpc_api.c
+index 5f0089fd986..46a0537f6ff 100644
+--- a/drivers/char/broadcom/modem/rpc/rpc_CIB/arpc/src/rpc_api.c
++++ b/drivers/char/broadcom/modem/rpc/rpc_CIB/arpc/src/rpc_api.c
+@@ -57,11 +57,13 @@ Result_t RPC_SerializeMsg(RPC_InternalMsg_t *rpcMsg, char *stream,
+ 
+ 	/*assert(isValid); */
+ 
++#ifdef DEVELOPMENT_RPC_XDR_DETAIL_LOG
+ 	if (DETAIL_LOG_ENABLED) {
+ 		detailLogBuffer = (char *)capi2_malloc(MAX_LOG_BUFFER_SIZE+1);
+ 		xdrmem_create(&xdrs, stream, streamLen, detailLogBuffer,
+ 			MAX_LOG_BUFFER_SIZE, XDR_ENCODE);
+ 	} else
++#endif
+ 		xdrmem_create(&xdrs, stream, streamLen, NULL, 0, XDR_ENCODE);
+ 
+ 	result =
+@@ -81,7 +83,9 @@ Result_t RPC_SerializeMsg(RPC_InternalMsg_t *rpcMsg, char *stream,
+ #endif
+ 
+ 	if (detailLogBuffer) {
++#ifdef DEVELOPMENT_RPC_XDR_DETAIL_LOG
+ 		xdrmem_log_reset(&xdrs);
++#endif
+ 		capi2_free(detailLogBuffer);
+ 	}
+ 
+@@ -191,6 +195,7 @@ Result_t RPC_DeserializeMsg(char *stream, UInt32 stream_len,
+ 
+ 		memset(rpcMsg, 0, sizeof(RPC_InternalMsg_t));
+ 
++#ifdef DEVELOPMENT_RPC_XDR_DETAIL_LOG
+ 		if (DETAIL_LOG_ENABLED) {
+ 			detailLogBuffer =
+ 				(char *)capi2_malloc(MAX_LOG_BUFFER_SIZE+1);
+@@ -198,6 +203,7 @@ Result_t RPC_DeserializeMsg(char *stream, UInt32 stream_len,
+ 					detailLogBuffer,
+ 					MAX_LOG_BUFFER_SIZE, XDR_DECODE);
+ 		} else
++#endif
+ 			xdrmem_create(xdrs, stream, stream_len, NULL, 0,
+ 				      XDR_DECODE);
+ 
+@@ -222,7 +228,9 @@ Result_t RPC_DeserializeMsg(char *stream, UInt32 stream_len,
+ 		result = RESULT_ERROR;
+ 
+ 	if (detailLogBuffer) {
++#ifdef DEVELOPMENT_RPC_XDR_DETAIL_LOG
+ 		xdrmem_log_reset(xdrs);
++#endif
+ 		capi2_free(detailLogBuffer);
+ 	}
+ 
+diff --git a/drivers/char/broadcom/modem/rpc/rpc_CIB/public/xdr.h b/drivers/char/broadcom/modem/rpc/rpc_CIB/public/xdr.h
+index 783159c3bca..e8d2dcb8cb8 100644
+--- a/drivers/char/broadcom/modem/rpc/rpc_CIB/public/xdr.h
++++ b/drivers/char/broadcom/modem/rpc/rpc_CIB/public/xdr.h
+@@ -302,8 +302,6 @@ struct xdr_discrim {
+ #define IXDR_PUT_SHORT(buf, v)		IXDR_PUT_LONG((buf), (v))
+ #define IXDR_PUT_U_SHORT(buf, v)	IXDR_PUT_LONG((buf), (v))
+ 
+-#define DEVELOPMENT_RPC_XDR_DETAIL_LOG
+-
+ #define MAX_XDR_BASIC_LOG	128
+ 
+ #ifdef DEVELOPMENT_RPC_XDR_DETAIL_LOG
+@@ -326,6 +324,7 @@ extern void xdrmem_log_reset(XDR *xdrs);
+ #else
+ #define _xdr_u_char(a, b, c)		xdr_u_char(a, b)
+ #define _xdr_u_int16_t(a, b, c)	xdr_u_int16_t(a, b)
++#define _xdr_u_long(a, b, c)		xdr_u_long(a, b)
+ #define XDR_LOG_RESET(x, y)
+ #define XDR_LOG(x, y)
+ #endif
+-- 
+2.17.1
+

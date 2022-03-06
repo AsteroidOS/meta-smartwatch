@@ -1,0 +1,26 @@
+From c6f3875f21b1071c4ba8ba48ef805fba0dbcd32b Mon Sep 17 00:00:00 2001
+From: MagneFire <dgriet@gmail.com>
+Date: Sun, 26 Dec 2021 19:45:26 +0100
+Subject: [PATCH] fbdev: Don't use ioctl for FBIOBLANK. The hwcomposer already
+ controls blanking, no need to do it here too.
+
+---
+ mce-fbdev.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/mce-fbdev.c b/mce-fbdev.c
+index 6212a91..61c5bf3 100644
+--- a/mce-fbdev.c
++++ b/mce-fbdev.c
+@@ -261,6 +261,8 @@ void mce_fbdev_set_suspend_mode(bool vsync_suspend)
+ void mce_fbdev_set_power(bool power_on)
+ {
+     mce_log(LL_DEBUG, "fbdev power %s", power_on ? "up" : (mce_fbdev_power_vsync_suspend ? "ambient" : "down"));
++    // The hwcomposer is responsible for controlling FBIOBLANK ioctls.
++    return;
+ 
+     if( mce_fbdev_handle != -1 ) {
+         int value;
+-- 
+2.34.1
+

@@ -1,0 +1,9 @@
+[Unit]
+Description=Underclock the CPU and GPU to save energy and tweak sysfs paths to allow for proper screen on/off transitions.
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/underclock
+
+[Install]
+WantedBy=basic.target
