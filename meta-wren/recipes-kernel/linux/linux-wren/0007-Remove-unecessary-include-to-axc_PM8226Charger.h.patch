@@ -1,0 +1,25 @@
+From 5a2f8f34fa983d587435d5f78291ae90f0bd0809 Mon Sep 17 00:00:00 2001
+From: Lrs121 <lrs@lrsservers.net>
+Date: Thu, 30 Jun 2016 12:06:46 -0700
+Subject: [PATCH] Remove unecessary include to axc_PM8226Charger.h
+
+Include to charger/axc_PM8226Charger.h breaks build
+removing file fixes build
+
+---
+ drivers/power/qpnp-charger.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/power/qpnp-charger.c b/drivers/power/qpnp-charger.c
+index 6f7990d11d79..3dac71841566 100644
+--- a/drivers/power/qpnp-charger.c
++++ b/drivers/power/qpnp-charger.c
+@@ -45,7 +45,7 @@
+ #include <asm/uaccess.h>
+ #include <linux/proc_fs.h>
+ #include <linux/asusdebug.h>
+-#include <charger/axc_PM8226Charger.h>
++//#include <charger/axc_PM8226Charger.h>
+ //ASUS_BSP Lenter ---
+ 
+ /* Interrupt offsets */

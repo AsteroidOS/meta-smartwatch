@@ -1,0 +1,29 @@
+From 10d5a2f322ba0c9d66004411232dc0bf3e06080e Mon Sep 17 00:00:00 2001
+From: Florent Revest <revestflo@gmail.com>
+Date: Fri, 1 Jul 2016 23:22:27 +0200
+Subject: [PATCH] psmouse-base: disable references to lifebook_detect which
+ needs x86
+
+---
+ drivers/input/mouse/psmouse-base.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/input/mouse/psmouse-base.c b/drivers/input/mouse/psmouse-base.c
+index cff065f6261c..37868a817fd0 100644
+--- a/drivers/input/mouse/psmouse-base.c
++++ b/drivers/input/mouse/psmouse-base.c
+@@ -710,12 +710,12 @@ static int psmouse_extensions(struct psmouse *psmouse,
+  * We always check for lifebook because it does not disturb mouse
+  * (it only checks DMI information).
+  */
+-	if (psmouse_do_detect(lifebook_detect, psmouse, set_properties) == 0) {
++/*	if (psmouse_do_detect(lifebook_detect, psmouse, set_properties) == 0) {
+ 		if (max_proto > PSMOUSE_IMEX) {
+ 			if (!set_properties || lifebook_init(psmouse) == 0)
+ 				return PSMOUSE_LIFEBOOK;
+ 		}
+-	}
++	}*/
+ 
+ /*
+  * Try Kensington ThinkingMouse (we try first, because synaptics probe

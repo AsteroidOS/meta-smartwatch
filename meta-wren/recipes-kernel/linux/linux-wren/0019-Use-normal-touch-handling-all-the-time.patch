@@ -1,0 +1,26 @@
+From 3c5e6b13684050d94de945e9daa00a4a90b6a4e4 Mon Sep 17 00:00:00 2001
+From: Daniel Landau <daniel@landau.fi>
+Date: Sat, 11 Mar 2017 10:37:08 +0200
+Subject: [PATCH] Use normal touch handling all the time
+
+---
+ drivers/input/touchscreen/it7260_ts_i2c.c | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/input/touchscreen/it7260_ts_i2c.c b/drivers/input/touchscreen/it7260_ts_i2c.c
+index b254e4d79220..e0c97e8a7f27 100644
+--- a/drivers/input/touchscreen/it7260_ts_i2c.c
++++ b/drivers/input/touchscreen/it7260_ts_i2c.c
+@@ -1625,8 +1625,10 @@ static irqreturn_t IT7260_ts_threaded_handler(int irq, void *devid)
+ {
+ 	smp_rmb();
+ 	if (driverInLowPower) {
+-		readTouchDataPoint_Ambient();
+-		smp_wmb();
++    // Just always do normal touch point. _Ambient version doesn't work in Asteroid
++		readTouchDataPoint();
++		/* readTouchDataPoint_Ambient(); */
++		/* smp_wmb(); */
+ 		/* XXX: call readTouchDataPoint() here maybe ? */
+ 	} else {
+ 		readTouchDataPoint();
