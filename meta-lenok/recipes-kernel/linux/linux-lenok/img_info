@@ -1,0 +1,12 @@
+kernel=%%KERNEL%%
+ramdisk=%%RAMDISK%%
+kernel_size=%%KERNEL_SIZE%%
+ramdisk_size=%%RAMDISK_SIZE%%
+kernel_offset=0x00008000
+base_addr=0x00000000
+ramdisk_offset=0x02000000
+tags_offset=0x01e00000
+page_size=2048
+cmd_line="androidboot.hardware=lenok user_debug=31 maxcpus=4 msm_rtb.filter=0x3F pm_levels.sleep_disabled=1 selinux=0"
+board="lenok"
+format=gzip

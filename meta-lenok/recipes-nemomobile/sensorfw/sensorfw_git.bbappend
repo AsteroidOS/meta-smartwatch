@@ -1,0 +1,1 @@
+DEPENDS:append:lenok = " libhybris "
