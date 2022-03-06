@@ -1,0 +1,66 @@
+From 5b5a4f11d1545c4c4c0cd5768dc65a28587c76c1 Mon Sep 17 00:00:00 2001
+From: MagneFire <IDaNLContact@gmail.com>
+Date: Fri, 19 Jun 2020 16:10:04 +0200
+Subject: [PATCH] Revert "Enable Nitrous BT power management driver."
+
+This reverts commit 8a347296e3c1b394d890fa28de06ea9c2b17d55f.
+
+---
+ arch/arm/boot/dts/apq8026-smelt-common.dtsi | 22 +++++++++++++--------
+ drivers/bluetooth/Makefile                  |  3 ++-
+ 2 files changed, 16 insertions(+), 9 deletions(-)
+
+diff --git a/arch/arm/boot/dts/apq8026-smelt-common.dtsi b/arch/arm/boot/dts/apq8026-smelt-common.dtsi
+index 433b58fd9d2b..680af2052aae 100644
+--- a/arch/arm/boot/dts/apq8026-smelt-common.dtsi
++++ b/arch/arm/boot/dts/apq8026-smelt-common.dtsi
+@@ -40,6 +40,11 @@
+ 		android,ramoops-annotate-size = <0x400>;
+ 	};
+ 
++	bt_qca6174 {
++		compatible = "qca,qca6174";
++		qca,bt-reset-gpio = <&msmgpio 26 0>; /* BT_ENABLE */
++	};
++
+ 	wifi_bcm4343 {
+ 		compatible = "bcm,bcm4343";
+ 		wl_reg_on = <&msmgpio 28 0>;
+@@ -314,14 +319,15 @@
+ 		status = "disabled";
+ 	};
+ 
+-	bt_nitrous {
+-		compatible = "goog,nitrous";
+-		uart-port = <6>;
+-		power-gpio = <&msmgpio 26 0>;
+-		host-wake-gpio = <&msmgpio 27 0>;
+-		host-wake-polarity = <0>;
+-		dev-wake-gpio = <&msmgpio 30 0>;
+-		dev-wake-polarity = <0>;
++	bluesleep {
++		compatible = "qcom,bluesleep";
++		bt_port_id = <6>;
++		bt_host_wake = <&msmgpio 27 0>;
++		bt_ext_wake = <&msmgpio 30 0>;
++		interrupt-parent = <&msmgpio>;
++		interrupts = <27 0>;
++		interrupt-names = "host_wake";
++		tx-timer-interval = <300>;
+ 	};
+ 
+ };
+diff --git a/drivers/bluetooth/Makefile b/drivers/bluetooth/Makefile
+index e8c0807766fa..8972a3add1aa 100644
+--- a/drivers/bluetooth/Makefile
++++ b/drivers/bluetooth/Makefile
+@@ -20,7 +20,8 @@ obj-$(CONFIG_BT_MRVL)		+= btmrvl.o
+ obj-$(CONFIG_BT_MRVL_SDIO)	+= btmrvl_sdio.o
+ obj-$(CONFIG_BT_WILINK)		+= btwilink.o
+ obj-$(CONFIG_MSM_BT_POWER)	+= bluetooth-power.o
+-obj-$(CONFIG_BT_MSM_SLEEP)	+= nitrous.o
++obj-$(CONFIG_BT_MSM_SLEEP)	+= msm_bt_sleep.o
++msm_bt_sleep-objs		:= bluesleep.o
+ 
+ btmrvl-y			:= btmrvl_main.o
+ btmrvl-$(CONFIG_DEBUG_FS)	+= btmrvl_debugfs.o

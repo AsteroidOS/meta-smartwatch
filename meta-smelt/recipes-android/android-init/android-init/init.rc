@@ -1,0 +1,32 @@
+on init
+    write /sys/kernel/boot_adsp/boot 1
+
+    mkdir /dev/graphics/
+    symlink /dev/fb0 /dev/graphics/fb0
+    chown system root /sys/class/timed_output/vibrator/enable
+
+    chown system system /sys/bus/i2c/devices/5-004a/interactivemode
+    chown system system /sys/class/leds/lcd-backlight/interactive
+
+    write /sys/kernel/debug/mdp/allow_cx_vddmin 1
+
+    class_start core
+
+service logd /system/bin/logd
+    class core
+    socket logd stream 0666 root root
+    socket logdr seqpacket 0666 root root
+    socket logdw dgram 0222 root root
+
+service servicemanager /system/bin/servicemanager
+    class core
+
+service healthd /system/bin/healthd
+    class core
+
+service m4setup /system/bin/m4setup
+    user root
+    oneshot
+
+on property:hw.m4.download_complete=true
+    start m4setup

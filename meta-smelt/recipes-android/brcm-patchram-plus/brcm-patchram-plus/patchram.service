@@ -1,0 +1,11 @@
+[Unit]
+Description=Load firmware into bluetooth chip
+
+[Service]
+Type=simple
+ExecStartPre=/bin/sleep 8
+ExecStartPre=/usr/sbin/rfkill unblock bluetooth
+ExecStart=/usr/bin/brcm_patchram_plus --baudrate 3000000 --enable_lpm --enable_hci --no2bytes --patchram /vendor/firmware/BCM43430A1_001.002.009.0031.0000_TEST.hcd /dev/ttyHS6
+
+[Install]
+WantedBy=basic.target
