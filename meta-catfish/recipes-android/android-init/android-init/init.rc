@@ -1,0 +1,59 @@
+on init
+    write /sys/devices/platform/soc/4080000.qcom,mss/subsys2/restart_level "RELATED"
+    write /sys/kernel/boot_adsp/boot 1
+
+    write /sys/class/nanohub/nanohub/lcd_mutex 1
+
+    mkdir /dev/graphics/
+    symlink /dev/fb0 /dev/graphics/fb0
+    chown system root /sys/class/timed_output/vibrator/enable
+
+    load_system_props
+    restorecon_recursive /persist
+
+    mkdir /data/
+    mkdir /data/vendor
+    mkdir /data/vendor/sensor
+    mkdir /data/vendor/sensor/nanohub_lock
+    # TODO: Fix when proper policies and access control are implemented
+    chown 1000 root /sys/class/nanohub/nanohub/mode
+    chown 1000 root /sys/class/nanohub/nanohub/lcd_mutex
+    chown 1000 root /sys/class/graphics/fb0/msm_fb_lcd_loadswitch
+    chown 1000 root /sys/class/nanohub/nanohub/app_info
+    chown 1000 root /data/vendor/sensor/nanohub_lock
+    chown 1000 root /dev/nanohub
+    chown 1000 root /dev/nanohub_comms
+    chown 1000 root /dev/nanohub_custom_flash
+
+    setprop init.svc.bluetooth running
+
+    class_start core
+
+service logd /usr/libexec/hal-droid/system/bin/logd
+    class core
+    socket logd stream 0666 logd logd
+    socket logdr seqpacket 0666 logd logd
+    socket logdw dgram 0222 logd logd
+    file /proc/kmsg r
+    file /dev/kmsg w
+    user logd
+    group logd system readproc
+
+service rmt_storage /vendor/bin/rmt_storage
+    class core
+
+service servicemanager /usr/libexec/hal-droid/system/bin/servicemanager
+    setenv LD_PRELOAD /usr/libexec/hal-droid/system/lib/libselinux_stubs.so
+    class core
+
+service hwservicemanager /system/bin/hwservicemanager
+    setenv LD_PRELOAD /usr/libexec/hal-droid/system/lib/libselinux_stubs.so
+    class core
+
+service bt /vendor/bin/hw/android.hardware.bluetooth@1.0-service
+    class core
+    oneshot
+
+service upgrade-nanohub /vendor/bin/nanoapp_cmd "download"
+    class core
+    oneshot
