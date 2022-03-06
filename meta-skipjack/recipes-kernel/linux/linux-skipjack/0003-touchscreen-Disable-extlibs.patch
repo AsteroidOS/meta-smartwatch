@@ -1,0 +1,22 @@
+From aee3bc1c9b37c55db341d68f1d6eb4e29e39d7a9 Mon Sep 17 00:00:00 2001
+From: MagneFire <IDaNLContact@gmail.com>
+Date: Fri, 8 Oct 2021 23:36:39 +0200
+Subject: [PATCH] touchscreen: Disable extlibs
+
+---
+ drivers/input/touchscreen/Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/input/touchscreen/Makefile b/drivers/input/touchscreen/Makefile
+index e6345311f42..e80a0b75cc8 100644
+--- a/drivers/input/touchscreen/Makefile
++++ b/drivers/input/touchscreen/Makefile
+@@ -93,4 +93,4 @@ obj-$(CONFIG_TOUCHSCREEN_FT3267) += fts_ts.o
+ fts_ts-$(CONFIG_TOUCHSCREEN_FT3267) += focaltech_core.o focaltech_ctl.o focaltech_ex_fun.o focaltech_flash.o \
+ 					test_lib.o ini.o Global.o Config_FT6X36.o Test_FT6X36.o DetailThreshold.o focaltech_gesture.o
+ ldflagobj-$(CONFIG_TOUCHSCREEN_FT3267) += fts_ts.o
+-obj-$(CONFIG_TOUCHSCREEN_FT3267) s-$(CONFIG_TOUCHSCREEN_FT3267) +=--whole-archive $(extlibs) --no-whole-archive
++#obj-$(CONFIG_TOUCHSCREEN_FT3267) s-$(CONFIG_TOUCHSCREEN_FT3267) +=--whole-archive $(extlibs) --no-whole-archive
+-- 
+2.33.0
+
