@@ -1,0 +1,16 @@
+[Unit]
+Description=The wayland compositors and desktop of AsteroidOS
+Requires=dbus.socket
+ConditionUser=!root
+
+[Service]
+Type=notify
+WorkingDirectory=/
+EnvironmentFile=-/var/lib/environment/compositor/*.conf
+ExecStartPre=/bin/sh -ec 'while [ ! -f /dev/.coldboot_done ]; do sleep 1; done'
+ExecStart=/usr/bin/asteroid-launcher $LIPSTICK_OPTIONS --systemd
+TimeoutStopSec=3
+Restart=always
+
+[Install]
+WantedBy=default.target
