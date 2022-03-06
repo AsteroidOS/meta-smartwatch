@@ -1,0 +1,1 @@
+SUBSYSTEM=="input", KERNEL=="event[0-9]*", ATTRS{name}=="HX852XES", SYMLINK+="input/touch0"
