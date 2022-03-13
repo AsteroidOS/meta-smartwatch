@@ -2,9 +2,15 @@ inherit gettext
 
 SUMMARY = "Downloads the Asus ZenWatch 2 /system and /usr/include/android folders and installs them for libhybris"
 LICENSE = "CLOSED"
-SRC_URI = "https://dl.dropboxusercontent.com/s/kdmv8amgcz4tucv/system-sparrow.tar.gz"
-SRC_URI[md5sum] = "8fcf9da496125dee0a2e87b1c12f524c"
-SRC_URI[sha256sum] = "9468f9b6e31afbdbf9b23bf0d7c173bd70d883e03282db27586239a08d3e99af"
+
+SRC_URI = "https://dl.dropboxusercontent.com/s/j3lbzk349k2qtn6/hybris-m-msm8226.tar.gz;name=hybris \
+    https://dl.dropboxusercontent.com/s/0vcryg0esbz7698/system-sparrow-m.tar.gz;name=system \
+"
+SRC_URI[hybris.md5sum] = "e211970b9d541844916dc2e8a70cca2e"
+SRC_URI[hybris.sha256sum] = "baf4b938ab554b0e9941c8f011b2c87a47a9fb0fda64de556ca336479f50fc9f"
+SRC_URI[system.md5sum] = "581ddf4a53dfa9a350d561cf7ddabdc0"
+SRC_URI[system.sha256sum] = "1c35baddfd28033f92faadda03bc4070397c8c22c4f95257e266a434ca0fb14a"
+
 PV = "lollipop"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
@@ -21,6 +27,9 @@ do_install() {
     install -d ${D}/system/
     cp -r system/* ${D}/system/
 
+    install -d ${D}/usr/
+    cp -r usr/* ${D}/usr/
+
     install -d ${D}${includedir}/android
     cp -r include/* ${D}${includedir}/android/
 
@@ -36,6 +45,6 @@ do_package_qa() {
 }
 
 PACKAGES =+ "android-system android-headers"
-FILES:android-system = "/system /vendor"
+FILES:android-system = "/system /vendor /usr"
 FILES:android-headers = "${libdir}/pkgconfig ${includedir}/android"
 EXCLUDE_FROM_SHLIBS = "1"
