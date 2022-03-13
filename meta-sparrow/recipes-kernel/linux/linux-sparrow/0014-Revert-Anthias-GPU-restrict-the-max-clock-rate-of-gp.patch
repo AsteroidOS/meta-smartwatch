@@ -1,0 +1,30 @@
+From 431d2d1c176e3dc442e63e33b3a232bd6cd6f826 Mon Sep 17 00:00:00 2001
+From: MagneFire <dgriet@gmail.com>
+Date: Sun, 6 Mar 2022 22:56:01 +0100
+Subject: [PATCH] Revert "Anthias: GPU: restrict the max clock rate of gpu to
+ 200Mhz"
+
+This reverts commit 3de2d9e2a55b4743cacaf74d0036cb8d0ed7502a.
+---
+ drivers/gpu/msm/kgsl_pwrctrl.c | 5 -----
+ 1 file changed, 5 deletions(-)
+
+diff --git a/drivers/gpu/msm/kgsl_pwrctrl.c b/drivers/gpu/msm/kgsl_pwrctrl.c
+index c540a7ae150..e5e69898231 100644
+--- a/drivers/gpu/msm/kgsl_pwrctrl.c
++++ b/drivers/gpu/msm/kgsl_pwrctrl.c
+@@ -930,11 +930,6 @@ void kgsl_pwrctrl_clk(struct kgsl_device *device, int state,
+ 	struct kgsl_pwrctrl *pwr = &device->pwrctrl;
+ 	int i = 0;
+ 
+-//restrict the max clock rate of gpu to 200Mhz
+-#ifndef ASUS_PERFORMANCE_RESTRICTION
+-        pwr->max_pwrlevel = 2;
+-#endif
+-
+ 	if (test_bit(KGSL_PWRFLAGS_CLK_ON, &pwr->ctrl_flags))
+ 		return;
+ 
+-- 
+2.35.1
+

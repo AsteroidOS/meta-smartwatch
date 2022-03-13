@@ -22,6 +22,7 @@ SRC_URI = "git://android.googlesource.com/kernel/msm;branch=android-msm-sparrow-
     file://0011-ARM-uaccess-remove-put_user-code-duplication.patch \
     file://0012-Backport-mainline-4.1-Bluetooth-subsystem.patch \
     file://0013-bluesleep-Use-kernel-s-HCI-events-instead-of-proc-bl.patch \
+    file://0014-Revert-Anthias-GPU-restrict-the-max-clock-rate-of-gp.patch \
     file://defconfig \
     file://img_info "
 SRCREV = "3d2fa521411917b5a1683fec42ad2a8e50aee79f"
