@@ -8,7 +8,7 @@ echo 0        > /sys/devices/system/cpu/cpu2/online
 echo 0        > /sys/devices/system/cpu/cpu3/online
 
 # Set the GPU's freq to 200MHz
-echo 200000000   > /sys/class/kgsl/kgsl-3d0/devfreq/max_freq
+echo 320000000   > /sys/class/kgsl/kgsl-3d0/devfreq/max_freq
 echo 200000000   > /sys/class/kgsl/kgsl-3d0/devfreq/min_freq
 echo performance > /sys/class/kgsl/kgsl-3d0/devfreq/governor
 
