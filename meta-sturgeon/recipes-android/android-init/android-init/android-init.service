@@ -8,7 +8,7 @@ Conflicts=shutdown.target
 [Service]
 Type=simple
 ExecStartPre=/bin/touch /dev/.coldboot_done
-ExecStart=/system/bin/init --second-stage
+ExecStart=/usr/libexec/hal-droid/system/bin/init --second-stage
 
 [Install]
 WantedBy=graphical.target
