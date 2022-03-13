@@ -1,62 +1,33 @@
-# /system/ directory build instructions
-
-This document describes how to build the system-dir tarball, needed for the sturgeon platform to function properly. The archive contains original Android Wear parts (mostly /system/) and recompiled parts for libhybris compatibility (/include/ and /usr/libexec/hal-droid/system/lib/).
+# libhybris and /system/ directory build instructions
 
 
-## 1. Know how to boot to fastboot and recovery
+AsteroidOS utilizes libhybris in combination with Android libraries to take full advantage of the hardware. libhybris is a tool that allows us to use Android libraries on a non-Android userspace system.
 
-You will need to know how to get into the fastboot menu and the Android recovery. These are depicted in the images below.
+This document describes how to prepare the Android libraries from the /system partition and how to compile patched Android libraries for use with libhybris.
+With this there is a distinction between the device specific /system partition and generic Android libraries patched for libhybris. This essentially creates two tarballs: a system tarball and a patched Android libraries tarball.
+The system tarball only contains a single folder (system). While the tarball for libhybris contains two folders (/include/ and /usr/libexec/hal-droid/system/).
 
-Fastboot menu             |  Android Recovery
-:------------------------:|:-------------------------:
-![](images/fastboot.jpg)  |  ![](images/recovery.jpg)
+## 1. Get the a dump of the system partition
 
-To get into the fastboot menu you can use the `adb reboot bootloader` command when booted to Android Wear. Make sure you have ADB debugging enabled on Android Wear.
-From the fastboot menu you can boot to the Android Recovery.
+Keep in mind that this document targets Android Marshmallow (6.0.1) systems. If possible downgrade/upgrade your system to Android Marshmallow before continuing.
 
-## 2. Getting the system files.
+The recommended way to get a system partition dump is to use TWRP and pull the entire partition using ADB: `adb pull /dev/block/platform/msm_sdcc.1/by-name/system system.img` also be sure to get a dump of the firmware partition: `adb pull /dev/block/platform/msm_sdcc.1/by-name/modem modem.img`. The firmware dump is needed for booting the aDSP (Audio processor).
 
-It is very likely that you are currently running an up-to-date version of WearOS on the Huawei Watch. This version may be incompatible/unsupported by AsteroidOS. We need to go back to an older version to get the system and firmware files known to work with AsteroidOS.
+### 1.1 Extract the dumps
 
-When you follow this document correctly the flow of system build numbers will be: up-to-date version -> M6E69F -> M9E41V.
-
-Below you can find some links where you can find the system files for ME69F and update file for M9E41V:
-* M6E69F full system: https://androidfilehost.com/?fid=745425885120748838 or http://www.rootjunkysdl.com/files/Huawei%20Watch/Firmware/sturgeon-m6e69f-wear-stock.zip
-* M9E41V OTA file: https://my.hidrive.com/lnk/GrljFu3i
-
-### 2.1 Install M6E69F
-
-Use the following commands to downgrade the system, make sure that your watch is currently in fastboot mode:
-
+Now extract these dumps and merge them as follows:
 ```sh
-fastboot flash bootloader bootloader-sturgeon-m6e69f.img
-fastboot reboot-bootloader
+mkdir tmp
+sudo mount system.img tmp
+sudo cp -r tmp system
+sudo umount tmp
+sudo mount modem.img tmp
+sudo cp -r tmp firmware
 ```
-Wait for fastboot menu to be available again. Then downgrade the system. You may need to extract a zip archive to find the boot.img, recovery.img, system.img, userdata.img and cache.img files.
+This results in two folders: system and firmware.
 
-```sh
-fastboot flash boot boot.img
-fastboot flash recovery recovery.img
-fastboot flash system system.img
-fastboot flash userdata userdata.img
-fastboot flash cache cache.img
-fastboot -w
-```
 
-### 2.2 Update M6E69F to M9E41V
-
-Now boot to the Android Recovery and select `Apply update from ADB`. Use the `adb sideload update.zip` command on your host PC to start the update. Make sure to clear cache afterwards.
-
-### 2.3 Get M9E41V system and firmware files
-
-We need the system files and firmware files.
-Use the following commands to get them:
-```sh
-adb pull /system/ system
-adb pull /firmware/ firmware
-```
-
-### 2.4 Prepare /system
+### 1.2 Prepare /system
 
 We can now copy the firmware files to the proper directory and adjust some symlinks:
 ```sh
@@ -67,31 +38,33 @@ rm -rf app/ fonts/ framework/ media/ priv-app/ xbin/
 sed -i "/persist.hwc.mdpcomp.enable=true/d" build.prop
 cd vendor/lib/egl/
 ln -s libGLESv2_adreno.so libGLESv2S3D_adreno.so
-cd ../../../lib/hw/
-ln -s /usr/libexec/hal-droid/system/lib/hw/hwcomposer.msm8226.so hwcomposer.sturgeon.so
-ln -s /usr/libexec/hal-droid/system/lib/hw/gralloc.msm8226.so gralloc.sturgeon.so
-ln -s /usr/libexec/hal-droid/system/lib/hw/memtrack.msm8226.so memtrack.sturgeon.so
 cd ../../../
 ```
 
-## 3. Patch bionic and GPU drivers
+### 1.3 Create the system tarball
+
+```sh
+tar zcvf system-sturgeon-m.tar.gz system
+```
+
+## 2. Patch bionic and GPU drivers
 
 libhybris requires a patched bionic and GPU drivers with the QCOM_BSP flag enabled. These parts are open-source so we can rebuild them.
 
-### 3.1 Download repo
+### 2.1 Download repo
 
 Download all the files needed for compilation:
 ``` sh
 curl https://storage.googleapis.com/git-repo-downloads/repo > repo
 chmod a+x repo
-mkdir -p android-sturgeon/
-cd android-sturgeon
+mkdir -p android-hybris/
+cd android-hybris
 
 ../repo init -u https://github.com/AsteroidOS/android_manifest -b marshmallow-dr1.5-release -g all,-notdefault,-darwin,-mips --depth=1
 ../repo sync
 ```
 
-### 3.2 Build
+### 2.2 Build
 
 Build everything:
 ```sh
@@ -108,34 +81,37 @@ mmma system/core/logd/
 mmma system/core/init/
 ```
 
-### 3.3 Installation
+### 2.3 Installation
 
 Make sure that most libraries are separated from the original libraries from Android Wear.
 ```sh
-cp out/target/product/generic/root/init ../system/bin/
-cp -r out/target/product/generic/system/bin/* ../system/bin/
-chmod +x ../system/bin/*
+mkdir -p ../usr/libexec/hal-droid/system/bin/
+cp out/target/product/generic/root/init ../usr/libexec/hal-droid/system/bin/
+cp -r out/target/product/generic/system/bin/* ../usr/libexec/hal-droid/system/bin/
+chmod +x ../usr/libexec/hal-droid/system/bin/*
 
-cp -r out/target/product/generic/system/usr/* ../system/usr/
+mkdir -p ../usr/libexec/hal-droid/system/
+cp -r out/target/product/generic/system/usr/ ../usr/libexec/hal-droid/system/
+
 mkdir -p ../usr/libexec/hal-droid/system/lib/
 cp -r out/target/product/generic/system/lib ../usr/libexec/hal-droid/system
 cd ../
 ```
 
-## 4. libhybris headers
+## 3. libhybris headers
 
 The second part of this tarball contains header files to compile against
 libhybris. There is a script in the libhybris distribution that can pull
 the header files from the downloaded android distribution (above).
 ```sh
 git clone https://github.com/libhybris/libhybris
-./libhybris/utils/extract-headers.sh -v 6.0.1 -p /usr/include/android android-sturgeon include
+./libhybris/utils/extract-headers.sh -v 6.0.1 -p /usr/include/android android-hybris include
 
 ```
 
-## 5. Putting it all together
+## 4. Putting it all together
 
 With the system and include directories, you can create the system-dir tarball:
 ```sh
-tar zcvf system-M9E41V.tar.gz system include usr
+tar zcvf hybris-m-msm8226.tar.gz include usr
 ```
