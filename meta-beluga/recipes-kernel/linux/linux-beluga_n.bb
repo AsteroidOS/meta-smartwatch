@@ -8,16 +8,27 @@ LICENSE = "GPLv2"
 LIC_FILES_CHKSUM = "file://COPYING;md5=d7810fab7487fb0aad327b76f1be7cd7"
 COMPATIBLE_MACHINE = "beluga"
 
-SRC_URI = " git://android.googlesource.com/kernel/msm;branch=android-msm-beluga-3.18-oreo-wear-dr;protocol=https \
+SRC_URI = " git://android.googlesource.com/kernel/msm;branch=android-msm-beluga-4.9-pie-wear-mr2;protocol=https \
     file://defconfig \
     file://img_info \
     file://0001-scripts-dtc-Remove-redundant-YYLOC-global-declaratio.patch \
-    file://0002-ARM-uaccess-remove-put_user-code-duplication.patch \
-    file://0003-touchscreen-belugadium-Add-delay-for-wakeup-report.patch \
-    file://0004-Backport-mainline-4.1-Bluetooth-subsystem.patch \
+    file://0001-dts-Add-oppo-device-trees.patch \
+    file://0001-cyttsp5-Fix-compilation.patch \
+    file://0001-oppo-Fix-compilation.patch \
+    file://0001-pinctrl-Fix-compilation.patch \
+    file://0001-btfm_slim-Fix-compilation.patch \
+    file://0001-cpuidle-Fix-compilation.patch \
+    file://0001-gpu-Compilation-fix.patch \
+    file://0001-vl53l0x-Fix-compilation.patch \
+    file://0001-camera_v2-Fix-compilation.patch \
+    file://0001-ipa_v2-Fix-compilation.patch \
+    file://0001-usb-gadget-Fix-compilation.patch \
+    file://0001-soc-qcom-Fix-compilation.patch \
+    file://0001-Import-GPU-drivers-from-ray-oreo.patch \
 "
 
-SRCREV = "ceb81fda35a733c904776eaaabd72dddf1e603c9"
+SRCREV = "1842042ff3513f2cbb813b82891530d43c62df73"
+#SRCREV = "c9e8c2ecb9a8b9453504c12469b73a3947060a4e"
 LINUX_VERSION ?= "3.18"
 PV = "${LINUX_VERSION}+oreo"
 S = "${WORKDIR}/git"

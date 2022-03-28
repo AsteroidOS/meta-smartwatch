@@ -1,0 +1,22 @@
+From f702d9a4cbb121e42bfbf6bf53ef90e08a813705 Mon Sep 17 00:00:00 2001
+From: MagneFire <dgriet@gmail.com>
+Date: Thu, 10 Feb 2022 22:04:02 +0100
+Subject: [PATCH] soc-qcom: Fix compilation.
+
+---
+ drivers/soc/qcom/Makefile | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/drivers/soc/qcom/Makefile b/drivers/soc/qcom/Makefile
+index 1da834679417..6121806c8511 100644
+--- a/drivers/soc/qcom/Makefile
++++ b/drivers/soc/qcom/Makefile
+@@ -1,3 +1,5 @@
++ccflags-y := -Idrivers/soc/qcom
++
+ KASAN_SANITIZE_scm.o := n
+ KCOV_INSTRUMENT_scm.o := n
+ 
+-- 
+2.35.1
+

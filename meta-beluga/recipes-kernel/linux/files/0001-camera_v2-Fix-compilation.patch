@@ -1,0 +1,43 @@
+From 6d7aa649cd93ff65a476961410a949a57f811b0d Mon Sep 17 00:00:00 2001
+From: MagneFire <dgriet@gmail.com>
+Date: Thu, 10 Feb 2022 21:29:05 +0100
+Subject: [PATCH] camera_v2: Fix compilation.
+
+---
+ drivers/media/platform/msm/camera_v2/common/cam_smmu_api.c | 2 +-
+ drivers/media/platform/msm/camera_v2/sensor/msm_sensor.h   | 6 +++---
+ 2 files changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/media/platform/msm/camera_v2/common/cam_smmu_api.c b/drivers/media/platform/msm/camera_v2/common/cam_smmu_api.c
+index 1d7430919656..fc5d23004cba 100644
+--- a/drivers/media/platform/msm/camera_v2/common/cam_smmu_api.c
++++ b/drivers/media/platform/msm/camera_v2/common/cam_smmu_api.c
+@@ -25,7 +25,7 @@
+ #include <linux/sizes.h>
+ #include <soc/qcom/scm.h>
+ #include <soc/qcom/secure_buffer.h>
+-#include <msm_camera_tz_util.h>
++#include "msm_camera_tz_util.h"
+ #include "cam_smmu_api.h"
+ 
+ #define SCRATCH_ALLOC_START SZ_128K
+diff --git a/drivers/media/platform/msm/camera_v2/sensor/msm_sensor.h b/drivers/media/platform/msm/camera_v2/sensor/msm_sensor.h
+index 753e85a32608..9c2ba98cb859 100644
+--- a/drivers/media/platform/msm/camera_v2/sensor/msm_sensor.h
++++ b/drivers/media/platform/msm/camera_v2/sensor/msm_sensor.h
+@@ -31,9 +31,9 @@
+ #include <media/msm_cam_sensor.h>
+ #include <media/v4l2-subdev.h>
+ #include <media/v4l2-ioctl.h>
+-#include "msm_camera_i2c.h"
+-#include "msm_camera_dt_util.h"
+-#include "msm_sd.h"
++#include "io/msm_camera_i2c.h"
++#include "io/msm_camera_dt_util.h"
++#include "../msm_sd.h"
+ 
+ #define DEFINE_MSM_MUTEX(mutexname) \
+ 	static struct mutex mutexname = __MUTEX_INITIALIZER(mutexname)
+-- 
+2.35.1
+

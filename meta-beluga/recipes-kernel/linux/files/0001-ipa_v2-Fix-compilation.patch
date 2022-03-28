@@ -1,0 +1,22 @@
+From 2853528806da0b9e056108bda87eff0700e5bac9 Mon Sep 17 00:00:00 2001
+From: MagneFire <dgriet@gmail.com>
+Date: Thu, 10 Feb 2022 21:38:25 +0100
+Subject: [PATCH] ipa_v2: Fix compilation.
+
+---
+ drivers/platform/msm/ipa/ipa_v2/Makefile | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/drivers/platform/msm/ipa/ipa_v2/Makefile b/drivers/platform/msm/ipa/ipa_v2/Makefile
+index fb039709261e..757a6285002b 100644
+--- a/drivers/platform/msm/ipa/ipa_v2/Makefile
++++ b/drivers/platform/msm/ipa/ipa_v2/Makefile
+@@ -1,3 +1,5 @@
++ccflags-y := -Idrivers/platform/msm/ipa/ipa_v2
++
+ obj-$(CONFIG_IPA) += ipat.o
+ ipat-y := ipa.o ipa_debugfs.o ipa_hdr.o ipa_flt.o ipa_rt.o ipa_dp.o ipa_client.o \
+ 	ipa_utils.o ipa_nat.o ipa_intf.o teth_bridge.o ipa_interrupts.o \
+-- 
+2.35.1
+

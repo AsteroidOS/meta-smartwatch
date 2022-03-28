@@ -1,0 +1,26 @@
+From 373da4a04a38a1ac748de10ec7a192acabb2f62b Mon Sep 17 00:00:00 2001
+From: MagneFire <dgriet@gmail.com>
+Date: Sat, 12 Feb 2022 22:13:11 +0100
+Subject: [PATCH] cyttsp5: Fix compilation.
+
+Signed-off-by: MagneFire <dgriet@gmail.com>
+---
+ drivers/input/touchscreen/cyttsp5/Makefile | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/drivers/input/touchscreen/cyttsp5/Makefile b/drivers/input/touchscreen/cyttsp5/Makefile
+index 9504b0e9ec93..4d0ab0219cbd 100755
+--- a/drivers/input/touchscreen/cyttsp5/Makefile
++++ b/drivers/input/touchscreen/cyttsp5/Makefile
+@@ -4,6 +4,8 @@
+ 
+ # Each configuration option enables a list of files.
+ 
++ccflags-y	+= -Idrivers/input/touchscreen/cyttsp5
++
+ cyttsp5-y := cyttsp5_core.o cyttsp5_mt_common.o cyttsp5_platform.o
+ cyttsp5-$(CONFIG_TOUCHSCREEN_CYPRESS_CYTTSP5_MT_A) += cyttsp5_mta.o
+ cyttsp5-$(CONFIG_TOUCHSCREEN_CYPRESS_CYTTSP5_MT_B) += cyttsp5_mtb.o
+-- 
+2.35.1
+
