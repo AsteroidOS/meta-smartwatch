@@ -37,28 +37,28 @@ Signed-off-by: Rob Herring <robh@kernel.org>
  2 files changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/scripts/dtc/dtc-lexer.l b/scripts/dtc/dtc-lexer.l
-index 3b41bfca636c..9b9c29e6f311 100644
+index 790fbf6cf2d7..e7eab4d7c5a9 100644
 --- a/scripts/dtc/dtc-lexer.l
 +++ b/scripts/dtc/dtc-lexer.l
-@@ -39,7 +39,7 @@ LINECOMMENT	"//".*\n
+@@ -38,7 +38,7 @@ LINECOMMENT	"//".*\n
  #include "srcpos.h"
  #include "dtc-parser.tab.h"
  
 -YYLTYPE yylloc;
 +extern YYLTYPE yylloc;
+ extern bool treesource_error;
  
  /* CAUTION: this will stop working if we ever use yyless() or yyunput() */
- #define	YY_USER_ACTION \
 diff --git a/scripts/dtc/dtc-parser.tab.c_shipped b/scripts/dtc/dtc-parser.tab.c_shipped
-index c8769d550cfb..b5b924c57096 100644
+index 31cec50a1265..da139e3f5ad9 100644
 --- a/scripts/dtc/dtc-parser.tab.c_shipped
 +++ b/scripts/dtc/dtc-parser.tab.c_shipped
-@@ -70,7 +70,7 @@
- #include "dtc.h"
- #include "srcpos.h"
- 
--YYLTYPE yylloc;
-+extern YYLTYPE yylloc;
- 
- extern int yylex(void);
- extern void print_error(char const *fmt, ...);
+@@ -1196,7 +1196,7 @@ int yychar;
+ /* The semantic value of the lookahead symbol.  */
+ YYSTYPE yylval;
+ /* Location data for the lookahead symbol.  */
+-YYLTYPE yylloc
++extern YYLTYPE yylloc
+ # if defined YYLTYPE_IS_TRIVIAL && YYLTYPE_IS_TRIVIAL
+   = { 1, 1, 1, 1 }
+ # endif

@@ -1,0 +1,25 @@
+From fa847dc3a84f0269f119da20e4865fcfa054853a Mon Sep 17 00:00:00 2001
+From: MagneFire <dgriet@gmail.com>
+Date: Thu, 10 Feb 2022 20:55:54 +0100
+Subject: [PATCH] cpuidle: Fix compilation.
+
+---
+ drivers/cpuidle/lpm-workarounds.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/cpuidle/lpm-workarounds.c b/drivers/cpuidle/lpm-workarounds.c
+index 657e2b9b38fa..85e7329acdb4 100644
+--- a/drivers/cpuidle/lpm-workarounds.c
++++ b/drivers/cpuidle/lpm-workarounds.c
+@@ -19,7 +19,7 @@
+ #include <linux/platform_device.h>
+ #include <linux/regulator/consumer.h>
+ #include <linux/regulator/rpm-smd-regulator.h>
+-#include <lpm-workarounds.h>
++#include "lpm-workarounds.h"
+ 
+ static struct regulator *lpm_cx_reg;
+ static struct work_struct dummy_vote_work;
+-- 
+2.35.1
+

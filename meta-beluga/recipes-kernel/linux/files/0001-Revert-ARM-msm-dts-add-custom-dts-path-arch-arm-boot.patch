@@ -1,0 +1,36 @@
+From 28c93ff49c956f025063d888c549c63f88528194 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Darrel=20Gri=C3=ABt?= <dgriet@gmail.com>
+Date: Thu, 10 Feb 2022 20:36:15 +0100
+Subject: [PATCH] Revert "ARM: msm: dts: add custom dts
+ path:arch/arm/boot/dts/oppo"
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+This reverts commit 57fe8f0c0b522cd9c3a0b733b34a0230f6dbedf3.
+
+Signed-off-by: Darrel Griët <dgriet@gmail.com>
+---
+ arch/arm/boot/dts/qcom/Makefile | 3 ---
+ 1 file changed, 3 deletions(-)
+ mode change 100755 => 100644 arch/arm/boot/dts/qcom/Makefile
+
+diff --git a/arch/arm/boot/dts/qcom/Makefile b/arch/arm/boot/dts/qcom/Makefile
+old mode 100755
+new mode 100644
+index 1c876a3bbd20..b5734c5ecf04
+--- a/arch/arm/boot/dts/qcom/Makefile
++++ b/arch/arm/boot/dts/qcom/Makefile
+@@ -28,9 +28,6 @@ targets += dtbs
+ include $(srctree)/arch/arm64/boot/dts/qcom/Makefile
+ $(obj)/%.dtb: $(src)/../../../../arm64/boot/dts/qcom/%.dts FORCE
+ 	$(call if_changed_dep,dtc)
+-include $(srctree)/arch/arm/boot/dts/oppo/Makefile
+-$(obj)/%.dtb: $(src)/../../../../arm/boot/dts/oppo/%.dts FORCE
+-	$(call if_changed_dep,dtc)
+ 
+ ifeq ($(CONFIG_BUILD_ARM64_DT_OVERLAY),y)
+ $(obj)/%.dtbo:$(src)/../../../../arm64/boot/dts/qcom/%.dts FORCE
+-- 
+2.35.1
+
