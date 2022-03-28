@@ -1,0 +1,54 @@
+on init
+    write /sys/devices/platform/soc/4080000.qcom,mss/subsys2/restart_level "RELATED"
+    write /sys/kernel/boot_adsp/boot 1
+
+    mkdir /dev/graphics/
+    symlink /dev/fb0 /dev/graphics/fb0
+    chown system root /sys/class/timed_output/vibrator/enable
+
+    load_system_props
+    restorecon_recursive /persist
+
+    mkdir /data/
+
+    setprop init.svc.bluetooth running
+
+    class_start core
+
+service logd /usr/libexec/hal-droid/system/bin/logd
+    class core
+    socket logd stream 0666 logd logd
+    socket logdr seqpacket 0666 logd logd
+    socket logdw dgram 0222 logd logd
+    file /proc/kmsg r
+    file /dev/kmsg w
+    user logd
+    group logd system readproc
+
+service rmt_storage /vendor/bin/rmt_storage
+    class core
+
+service sensors /vendor/bin/sensors.qcom
+    class core 
+    oneshot
+
+service servicemanager /usr/libexec/hal-droid/system/bin/servicemanager
+    setenv LD_PRELOAD /usr/libexec/hal-droid/system/lib/libselinux_stubs.so
+    class core
+
+service hwservicemanager /system/bin/hwservicemanager
+    setenv LD_PRELOAD /usr/libexec/hal-droid/system/lib/libselinux_stubs.so
+    class core
+
+service config_bt_addr /vendor/bin/btnvtool -O
+    class core
+    oneshot
+
+service bt /vendor/bin/android.hardware.bluetooth@1.0-service-qti
+    class core
+    oneshot
+
+service wcnss_service /vendor/bin/wcnss_service
+    class core
+    user root
+    oneshot
