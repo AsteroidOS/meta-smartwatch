@@ -8,6 +8,12 @@ on init
 
     mkdir /dev/graphics/
     symlink /dev/fb0 /dev/graphics/fb0
+    write /sys/class/leds/vibrator/trigger "transient"
+    chown system root /sys/class/leds/vibrator/trigger
+    chown system root /sys/class/leds/vibrator/activate
+    chown system root /sys/class/leds/vibrator/brightness
+    chown system root /sys/class/leds/vibrator/duration
+    chown system root /sys/class/leds/vibrator/state
     chown system root /sys/class/timed_output/vibrator/enable
     chmod 666 /sys/devices/sop716/*
 
