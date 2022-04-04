@@ -1,5 +1,6 @@
 on init
     write /sys/devices/platform/soc/4080000.qcom,mss/subsys2/restart_level "RELATED"
+    write /sys/kernel/boot_adsp/boot 1
 
     write /sys/devices/virtual/input/mxt_touch/check_fw "1"
     write /sys/devices/sop716/motor_move_all "45:135"
