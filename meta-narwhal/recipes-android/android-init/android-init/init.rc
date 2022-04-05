@@ -15,7 +15,13 @@ on init
     chown system root /sys/class/leds/vibrator/duration
     chown system root /sys/class/leds/vibrator/state
     chown system root /sys/class/timed_output/vibrator/enable
-    chmod 666 /sys/devices/sop716/*
+
+    chmod 222 /sys/devices/sop716/motor_move_all
+    chmod 222 /sys/devices/sop716/motor_move
+    chmod 222 /sys/devices/sop716/motor_init
+    chmod 666 /sys/devices/sop716/watch_mode
+    chmod 444 /sys/devices/sop716/position
+    chmod 666 /sys/devices/sop716/self_test
 
     load_system_props
     restorecon_recursive /persist
