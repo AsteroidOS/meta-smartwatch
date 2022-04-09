@@ -3,12 +3,12 @@ inherit gettext
 SUMMARY = "Downloads the Snapdragon Wear 2100/3100 /usr/libexec/hal-droid and /usr/include/android folders and installs them for libhybris"
 LICENSE = "CLOSED"
 
-SRC_URI = "https://dl.dropboxusercontent.com/s/yl8tezw6e2d661o/hybris-o-msm8909.tar.gz;name=hybris \
+SRC_URI = "https://dl.dropboxusercontent.com/s/8b9t2renrxbl4gq/hybris-o-msm8909.tar.gz;name=hybris \
     https://dl.dropboxusercontent.com/s/al40eklhv50l6z5/system-ray-pie-preview.tar.gz;name=system \
     file://60-i2c.rules \
 "
-SRC_URI[hybris.md5sum] = "7891147518b1c1a3071af6173c9fd38f"
-SRC_URI[hybris.sha256sum] = "61c59dbcb894e693c0fd092d690efdb5fa63fd5784be63e0e3749f25af800ce8"
+SRC_URI[hybris.md5sum] = "edc1f8304b58af335a9c9ba8136bc1b8"
+SRC_URI[hybris.sha256sum] = "626bed275cfe2df2377e709498fc26d58e7883045cd13d4e2a6284220d1113b0"
 SRC_URI[system.md5sum] = "6f0d6d01a4bd2396f09754211310d0ba"
 SRC_URI[system.sha256sum] = "f91af5f3115fc9a5d66ea360b6faead0b458fcdbdeaf84a5eac9cac808d1ccda"
 PV = "oreo"
