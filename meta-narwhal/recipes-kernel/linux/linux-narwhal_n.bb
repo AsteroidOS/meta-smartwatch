@@ -14,6 +14,7 @@ SRC_URI = " git://android.googlesource.com/kernel/msm;branch=android-msm-narwhal
     file://0001-scripts-dtc-Remove-redundant-YYLOC-global-declaratio.patch \
     file://0002-ARM-uaccess-remove-put_user-code-duplication.patch \
     file://0003-Backport-mainline-4.1-Bluetooth-subsystem.patch \
+    file://0004-Backport-mainline-4.1-Bluetooth-drivers.patch \
 "
 
 SRCREV = "ef2880c313e30d5b99e138599fd3d81d90daae3e"

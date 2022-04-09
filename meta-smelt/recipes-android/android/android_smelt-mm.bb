@@ -2,9 +2,13 @@ inherit gettext
 
 SUMMARY = "Downloads the Moto 360 2015 /system and /usr/include/android folders and installs them for libhybris"
 LICENSE = "CLOSED"
-SRC_URI = "https://dl.dropboxusercontent.com/s/y94skkze8aq3l5x/system-MEC23G.tar.gz"
-SRC_URI[md5sum] = "fc9e8cb2f7019a6b9b87f0bab0f481e8"
-SRC_URI[sha256sum] = "735bdcc3b5689f5d3abee4d26579323ebd5d591c32e73d93e3d102842828a1ae"
+SRC_URI = "https://dl.dropboxusercontent.com/s/j3lbzk349k2qtn6/hybris-m-msm8226.tar.gz;name=hybris \
+    https://dl.dropboxusercontent.com/s/zflv77ittn50il8/system-smelt-m.tar.gz;name=system \
+"
+SRC_URI[hybris.md5sum] = "e211970b9d541844916dc2e8a70cca2e"
+SRC_URI[hybris.sha256sum] = "baf4b938ab554b0e9941c8f011b2c87a47a9fb0fda64de556ca336479f50fc9f"
+SRC_URI[system.md5sum] = "c30ee9c73a69c7d50406500071768e41"
+SRC_URI[system.sha256sum] = "ecc6262bec41e81cffc3321fad9fb0b890d57a4ee57023a99524c7634f97ddee"
 PV = "marshmallow"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
@@ -39,6 +43,6 @@ do_package_qa() {
 }
 
 PACKAGES =+ "android-system android-headers"
-FILES:android-system = "/system /vendor /usr ${sysconfdir}/udev"
+FILES:android-system = "/system /vendor /usr"
 FILES:android-headers = "${libdir}/pkgconfig ${includedir}/android"
 EXCLUDE_FROM_SHLIBS = "1"

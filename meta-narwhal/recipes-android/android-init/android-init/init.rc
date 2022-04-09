@@ -1,5 +1,6 @@
 on init
     write /sys/devices/platform/soc/4080000.qcom,mss/subsys2/restart_level "RELATED"
+    write /sys/kernel/boot_adsp/boot 1
 
     write /sys/devices/virtual/input/mxt_touch/check_fw "1"
     write /sys/devices/sop716/motor_move_all "45:135"
@@ -7,6 +8,12 @@ on init
 
     mkdir /dev/graphics/
     symlink /dev/fb0 /dev/graphics/fb0
+    write /sys/class/leds/vibrator/trigger "transient"
+    chown system root /sys/class/leds/vibrator/trigger
+    chown system root /sys/class/leds/vibrator/activate
+    chown system root /sys/class/leds/vibrator/brightness
+    chown system root /sys/class/leds/vibrator/duration
+    chown system root /sys/class/leds/vibrator/state
     chown system root /sys/class/timed_output/vibrator/enable
     chmod 666 /sys/devices/sop716/*
 
@@ -44,3 +51,6 @@ service hwservicemanager /system/bin/hwservicemanager
     setenv LD_PRELOAD /usr/libexec/hal-droid/system/lib/libselinux_stubs.so
     class core
 
+service bt /vendor/bin/hw/android.hardware.bluetooth@1.0-service
+    class core
+    oneshot

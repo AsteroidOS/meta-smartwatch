@@ -8,17 +8,19 @@ on init
     chown system system /sys/bus/i2c/devices/5-004a/interactivemode
     chown system system /sys/class/leds/lcd-backlight/interactive
 
+    load_system_props
+
     write /sys/kernel/debug/mdp/allow_cx_vddmin 1
 
     class_start core
 
-service logd /system/bin/logd
+service logd /usr/libexec/hal-droid/system/bin/logd
     class core
     socket logd stream 0666 root root
     socket logdr seqpacket 0666 root root
     socket logdw dgram 0222 root root
 
-service servicemanager /system/bin/servicemanager
+service servicemanager /usr/libexec/hal-droid/system/bin/servicemanager
     class core
 
 service healthd /system/bin/healthd

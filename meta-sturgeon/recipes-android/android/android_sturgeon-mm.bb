@@ -2,11 +2,14 @@ inherit gettext
 
 SUMMARY = "Downloads the Huawei Watch /system and /usr/include/android folders and installs them for libhybris"
 LICENSE = "CLOSED"
-SRC_URI = "https://dl.dropboxusercontent.com/s/liwxoh7zlq7d9sj/system-M9E41V-v2.tar.gz \
+SRC_URI = "https://dl.dropboxusercontent.com/s/j3lbzk349k2qtn6/hybris-m-msm8226.tar.gz;name=hybris \
+    https://dl.dropboxusercontent.com/s/j0s11jkpofx72m8/system-sturgeon-m.tar.gz;name=system \
     file://60-i2c.rules \
 "
-SRC_URI[md5sum] = "890a25658801c8115af8fe621818308f"
-SRC_URI[sha256sum] = "487fd1a078852f67c3f34ac0196cfec26a846aeefeac4aca550c3346e8bb140f"
+SRC_URI[hybris.md5sum] = "e211970b9d541844916dc2e8a70cca2e"
+SRC_URI[hybris.sha256sum] = "baf4b938ab554b0e9941c8f011b2c87a47a9fb0fda64de556ca336479f50fc9f"
+SRC_URI[system.md5sum] = "843743dce59007511051513385fa86a8"
+SRC_URI[system.sha256sum] = "75388f6fa139c635411669cd67691cdaee04a18e6e809ad480d55dc81df26593"
 PV = "marshmallow"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
