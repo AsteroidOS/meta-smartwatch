@@ -17,6 +17,7 @@ SRC_URI = " git://android.googlesource.com/kernel/msm;branch=android-msm-catshar
     file://0004-Backport-mainline-4.1-Bluetooth-subsystem.patch \
     file://0005-Focaltech-Delay-when-sending-wakeup-event.patch \
     file://0006-arm-dts-memory-add-support-for-1G-DDR-on-catfish.patch \
+    file://0007-video-mdp3-Continue-when-the-overlay-wasn-t-released.patch \
 "
 
 SRCREV = "4f9b4f10bbdd5af55057ef5bddf4735cb6a47d6c"
