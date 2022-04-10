@@ -20,6 +20,7 @@ SRC_URI = " git://android.googlesource.com/kernel/msm;branch=android-msm-sawshar
     file://0007-bluesleep-Use-kernel-s-HCI-events-instead-of-proc-bl.patch \
     file://0008-Bluetooth-Fix-incorrect-gpio-definition-in-device-tr.patch \
     file://0009-cyttp5-Add-delay-for-wakeup-report.patch \
+    file://0010-video-mdp3-Continue-when-the-overlay-wasn-t-released.patch \
 "
 
 SRCREV = "66cf3d5be07a599af417695e4f22f304af667979"
