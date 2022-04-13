@@ -25,6 +25,7 @@ SRC_URI = " git://android.googlesource.com/kernel/msm;branch=android-msm-beluga-
     file://0001-usb-gadget-Fix-compilation.patch \
     file://0001-soc-qcom-Fix-compilation.patch \
     file://0001-Import-GPU-drivers-from-ray-oreo.patch \
+    file://0001-video-mdp3-Continue-when-the-overlay-wasn-t-released.patch \
 "
 
 SRCREV = "c9e8c2ecb9a8b9453504c12469b73a3947060a4e"
