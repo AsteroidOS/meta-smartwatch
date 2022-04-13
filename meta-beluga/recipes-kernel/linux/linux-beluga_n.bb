@@ -2,7 +2,7 @@ require recipes-kernel/linux/linux.inc
 inherit gettext
 
 SECTION = "kernel"
-SUMMARY = "Android kernel for the Skagen Falster 2"
+SUMMARY = "Android kernel for the OPPO Watch"
 HOMEPAGE = "https://android.googlesource.com/"
 LICENSE = "GPLv2"
 LIC_FILES_CHKSUM = "file://COPYING;md5=d7810fab7487fb0aad327b76f1be7cd7"
@@ -27,8 +27,7 @@ SRC_URI = " git://android.googlesource.com/kernel/msm;branch=android-msm-beluga-
     file://0001-Import-GPU-drivers-from-ray-oreo.patch \
 "
 
-SRCREV = "1842042ff3513f2cbb813b82891530d43c62df73"
-#SRCREV = "c9e8c2ecb9a8b9453504c12469b73a3947060a4e"
+SRCREV = "c9e8c2ecb9a8b9453504c12469b73a3947060a4e"
 LINUX_VERSION ?= "3.18"
 PV = "${LINUX_VERSION}+oreo"
 S = "${WORKDIR}/git"
