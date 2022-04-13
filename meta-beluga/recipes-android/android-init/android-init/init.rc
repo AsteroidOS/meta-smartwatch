@@ -3,6 +3,7 @@ on init
 
     mkdir /dev/graphics/
     symlink /dev/fb0 /dev/graphics/fb0
+    setprop sys.hwc.gpu_perf_mode 1
 
     write /sys/class/leds/vibrator/trigger "transient"
     chown system root /sys/class/leds/vibrator/trigger
