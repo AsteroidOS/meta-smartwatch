@@ -33,3 +33,6 @@ service hwservicemanager /system/bin/hwservicemanager
     setenv LD_PRELOAD /usr/libexec/hal-droid/system/lib/libselinux_stubs.so
     class core
 
+service bt /vendor/bin/android.hardware.bluetooth@1.0-service-qti
+    class core
+    oneshot
