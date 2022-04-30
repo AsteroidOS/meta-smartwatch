@@ -1,1 +1,0 @@
-DEPENDS:append:sprat = " libhybris "
