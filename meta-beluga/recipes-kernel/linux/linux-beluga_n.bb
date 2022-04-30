@@ -27,6 +27,7 @@ SRC_URI = " git://android.googlesource.com/kernel/msm;branch=android-msm-beluga-
     file://0014-Import-GPU-drivers-from-ray-oreo.patch \
     file://0015-video-mdp3-Continue-when-the-overlay-wasn-t-released.patch \
     file://0016-initramfs-Don-t-skip-initramfs.patch \
+    file://0017-touchscreen-cyttsp5-Add-delay-for-wakeup-report.patch \
 "
 
 SRCREV = "c9e8c2ecb9a8b9453504c12469b73a3947060a4e"
