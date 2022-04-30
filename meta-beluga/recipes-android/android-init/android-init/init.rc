@@ -46,3 +46,11 @@ service hwservicemanager /system/bin/hwservicemanager
 service bt /vendor/bin/android.hardware.bluetooth@1.0-service-qti
     class core
     oneshot
+
+service sensors /vendor/bin/android.hardware.sensors@1.0-service
+    class core
+    oneshot
+
+service deamonserver /vendor/bin/deamonserver
+    class core
+    oneshot
