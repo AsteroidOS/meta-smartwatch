@@ -9,8 +9,8 @@ SRC_URI = "https://dl.dropboxusercontent.com/s/8b9t2renrxbl4gq/hybris-o-msm8909.
 "
 SRC_URI[hybris.md5sum] = "edc1f8304b58af335a9c9ba8136bc1b8"
 SRC_URI[hybris.sha256sum] = "626bed275cfe2df2377e709498fc26d58e7883045cd13d4e2a6284220d1113b0"
-SRC_URI[system.md5sum] = "afa01ab34d6e1192d81e91647a833156"
-SRC_URI[system.sha256sum] = "28f6834788f2bbcad80b41b7ff16d393459280faa25d44285ef362cd5ebef273"
+SRC_URI[system.md5sum] = "9b8a27701f7ee1f8b4247253cebab9d6"
+SRC_URI[system.sha256sum] = "9c8aa12ed8873ec989ee055debca2c606f066da5553f7d63b41a12525e5dd7aa"
 PV = "oreo"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
