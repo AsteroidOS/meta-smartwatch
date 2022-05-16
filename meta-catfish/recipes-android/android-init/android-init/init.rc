@@ -55,7 +55,3 @@ service hwservicemanager /system/bin/hwservicemanager
 service bt /vendor/bin/hw/android.hardware.bluetooth@1.0-service
     class core
     oneshot
-
-service upgrade-nanohub /vendor/bin/nanoapp_cmd "download"
-    class core
-    oneshot
