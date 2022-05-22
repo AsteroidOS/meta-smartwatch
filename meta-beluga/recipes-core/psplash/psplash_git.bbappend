@@ -1,4 +1,4 @@
-SRC_URI:append:beluga += " file://0002-Disable-double-buffering.patch"
+SRC_URI:append:beluga = " file://0002-Disable-double-buffering.patch"
 
 do_install:append:beluga() {
     install -d ${D}/usr/share/

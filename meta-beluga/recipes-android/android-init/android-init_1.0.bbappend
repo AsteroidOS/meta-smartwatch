@@ -8,4 +8,4 @@ do_install:append:beluga() {
     install -m 0644 ${WORKDIR}/plat* ${D}/
 }
 
-FILES:${PN}:append:beluga += "/nonplat* /plat*"
+FILES:${PN}:append:beluga = " /nonplat* /plat*"
