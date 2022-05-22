@@ -1,7 +1,7 @@
 FILESEXTRAPATHS:prepend:sturgeon := "${THISDIR}/${PN}:"
 COMPATIBLE_MACHINE:sturgeon = "sturgeon"
 
-SRC_URI:append:sturgeon += " file://init.machine.sh"
+SRC_URI:append:sturgeon = " file://init.machine.sh"
 
 do_install:append:sturgeon() {
     install -m 0755 ${WORKDIR}/init.machine.sh ${D}/init.machine
