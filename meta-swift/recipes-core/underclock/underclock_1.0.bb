@@ -3,7 +3,7 @@ PR = "r0"
 SRC_URI = "file://underclock.service \
            file://underclock \
            file://COPYING"
-LICENSE = "GPLv3"
+LICENSE = "GPL-3.0-only"
 LIC_FILES_CHKSUM = "file://COPYING;md5=84dcc94da3adb52b53ae4fa38fe49e5d"
 S = "${WORKDIR}"
 PACKAGE_ARCH = "${MACHINE_ARCH}"
