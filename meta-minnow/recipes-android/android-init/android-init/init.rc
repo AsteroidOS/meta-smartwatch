@@ -1,0 +1,27 @@
+on init
+    write /sys/kernel/boot_adsp/boot 1
+
+    mkdir /dev/graphics/
+    symlink /dev/fb0 /dev/graphics/fb0
+    chown system root /sys/class/timed_output/vibrator/enable
+
+    load_system_props
+
+    write /sys/kernel/debug/mdp/allow_cx_vddmin 1
+
+    class_start core
+
+service logd /usr/libexec/hal-droid/system/bin/logd
+    class core
+    socket logd stream 0666 root root
+    socket logdr seqpacket 0666 root root
+    socket logdw dgram 0222 root root
+
+service servicemanager /usr/libexec/hal-droid/system/bin/servicemanager
+    class core
+
+service sensorhd /system/bin/shd
+    class core
+
+on property:sys.powerctl=*
+    powerctl ${sys.powerctl}

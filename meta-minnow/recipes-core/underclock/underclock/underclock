@@ -1,0 +1,19 @@
+#!/bin/sh
+
+# Set the CPU's freq to 787MHz and disable three cores
+echo ondemand > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+echo 0        > /sys/module/lpm_levels/parameters/sleep_disabled
+echo 0        > /sys/devices/system/cpu/cpu1/online
+echo 0        > /sys/devices/system/cpu/cpu2/online
+echo 0        > /sys/devices/system/cpu/cpu3/online
+
+# Set the GPU's freq to 200MHz
+echo 320000000   > /sys/class/kgsl/kgsl-3d0/devfreq/max_freq
+echo 200000000   > /sys/class/kgsl/kgsl-3d0/devfreq/min_freq
+echo performance > /sys/class/kgsl/kgsl-3d0/devfreq/governor
+
+# CPU IDLE Low Power Mode config
+echo 1 > /sys/module/lpm_levels/system/cpu0/pc/suspend_enabled
+echo 1 > /sys/module/lpm_levels/system/cpu0/standalone_pc/suspend_enabled
+echo 1 > /sys/module/lpm_levels/system/cpu0/standalone_pc/idle_enabled
+echo 1 > /sys/module/lpm_levels/system/cpu0/pc/idle_enabled

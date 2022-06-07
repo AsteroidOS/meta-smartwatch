@@ -1,0 +1,26 @@
+From 45f0baec9a7db16db50a7a309486afeef4b20f61 Mon Sep 17 00:00:00 2001
+From: MagneFire <IDaNLContact@gmail.com>
+Date: Tue, 1 Dec 2020 20:24:52 +0100
+Subject: [PATCH] HybrisStepCounterAdapter: Set delay to normal speed. Fixes
+ the stepcounter on at least minnow.
+
+---
+ adaptors/hybrisstepcounteradaptor/hybrisstepcounteradaptor.cpp | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/adaptors/hybrisstepcounteradaptor/hybrisstepcounteradaptor.cpp b/adaptors/hybrisstepcounteradaptor/hybrisstepcounteradaptor.cpp
+index f51318e..7a8746d 100644
+--- a/adaptors/hybrisstepcounteradaptor/hybrisstepcounteradaptor.cpp
++++ b/adaptors/hybrisstepcounteradaptor/hybrisstepcounteradaptor.cpp
+@@ -46,6 +46,8 @@ HybrisStepCounterAdaptor::HybrisStepCounterAdaptor(const QString& id) :
+     	sensordLogW() << "Path does not exists: " << powerStatePath;
+     	powerStatePath.clear();
+     }
++    // Set default delay.
++    setInterval(200, 0);
+ }
+ 
+ HybrisStepCounterAdaptor::~HybrisStepCounterAdaptor()
+-- 
+2.29.2
+
