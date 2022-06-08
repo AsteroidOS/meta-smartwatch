@@ -1,0 +1,54 @@
+From b49d6b812ead9026579e894d8abe6cd3159bd815 Mon Sep 17 00:00:00 2001
+From: Arnd Bergmann <arnd@arndb.de>
+Date: Sun, 8 May 2022 18:52:34 +0200
+Subject: [PATCH] ARM: dma-mapping: fix out of bounds access in CMA
+ Dereferencing a zero-length array is always a bug, and we get a warning with
+ 'make W=1' here:
+
+arch/arm/mm/dma-mapping.c: In function 'dma_contiguous_early_fixup':
+arch/arm/mm/dma-mapping.c:395:15: error: array subscript <unknown> is outside array bounds of 'struct dma_contig_early_reserve[0]' [-Werror=array-bounds]
+  395 |  dma_mmu_remap[dma_mmu_remap_num].base = base;
+      |  ~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~
+arch/arm/mm/dma-mapping.c:389:40: note: while referencing 'dma_mmu_remap'
+  389 | static struct dma_contig_early_reserve dma_mmu_remap[MAX_CMA_AREAS] __initdata;
+      |                                        ^~~~~~~~~~~~~
+arch/arm/mm/dma-mapping.c:396:15: error: array subscript <unknown> is outside array bounds of 'struct dma_contig_early_reserve[0]' [-Werror=array-bounds]
+
+Add a runtime check to prevent this from happening, while also
+avoiding the compile-time warning.
+
+Fixes: c79095092834 ("ARM: integrate CMA with DMA-mapping subsystem")
+Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+---
+ arch/arm/mm/dma-mapping.c | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/arch/arm/mm/dma-mapping.c b/arch/arm/mm/dma-mapping.c
+index ef3e0f3aac9..e05077f2dbe 100644
+--- a/arch/arm/mm/dma-mapping.c
++++ b/arch/arm/mm/dma-mapping.c
+@@ -404,6 +404,10 @@ static int dma_mmu_remap_num __initdata;
+ 
+ void __init dma_contiguous_early_fixup(phys_addr_t base, unsigned long size)
+ {
++	if (!MAX_CMA_AREAS || dma_mmu_remap_num >= MAX_CMA_AREAS) {
++		WARN_ONCE(1, "number of CMA areas\n");
++		return;
++	}
+ 	dma_mmu_remap[dma_mmu_remap_num].base = base;
+ 	dma_mmu_remap[dma_mmu_remap_num].size = size;
+ 	dma_mmu_remap_num++;
+@@ -412,6 +416,10 @@ void __init dma_contiguous_early_fixup(phys_addr_t base, unsigned long size)
+ void __init dma_contiguous_remap(void)
+ {
+ 	int i;
++
++	if (!MAX_CMA_AREAS)
++		return;
++
+ 	for (i = 0; i < dma_mmu_remap_num; i++) {
+ 		phys_addr_t start = dma_mmu_remap[i].base;
+ 		phys_addr_t end = start + dma_mmu_remap[i].size;
+-- 
+2.35.1
+
