@@ -1,0 +1,53 @@
+From d9d419824a1e02827d242cb3441cd4d3978ee1f3 Mon Sep 17 00:00:00 2001
+From: MagneFire <dgriet@gmail.com>
+Date: Sun, 8 May 2022 19:03:55 +0200
+Subject: [PATCH] Fix compilation warnings.
+
+---
+ Makefile                   | 2 +-
+ arch/arm/kernel/bootinfo.c | 2 +-
+ arch/arm/mach-omap2/id.c   | 2 +-
+ 3 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/Makefile b/Makefile
+index dc8b8475cb1..79984a5f4cb 100644
+--- a/Makefile
++++ b/Makefile
+@@ -369,7 +369,7 @@ LINUXINCLUDE    := \
+ 
+ KBUILD_CPPFLAGS := -D__KERNEL__
+ 
+-KBUILD_CFLAGS   := -Werror -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
++KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
+ 		   -fno-strict-aliasing -fno-common \
+ 		   -Werror-implicit-function-declaration \
+ 		   -Wno-format-security \
+diff --git a/arch/arm/kernel/bootinfo.c b/arch/arm/kernel/bootinfo.c
+index 52a52a4f121..94d9bd93adc 100644
+--- a/arch/arm/kernel/bootinfo.c
++++ b/arch/arm/kernel/bootinfo.c
+@@ -151,7 +151,7 @@ EXPORT_SYMBOL(bi_bootreason);
+ 
+ static void bootinfo_annotate_lastkmsg(void)
+ {
+-	char buf[BOOTREASON_MAX_LEN];
++	char buf[BOOTREASON_MAX_LEN + 20];
+ 	pstore_annotate("Boot info:\n");
+ 	EMIT_BOOTINFO_LASTKMSG(buf, "Last boot reason", "%s", bootreason);
+ }
+diff --git a/arch/arm/mach-omap2/id.c b/arch/arm/mach-omap2/id.c
+index 1272c41d474..7f6cc410f9e 100644
+--- a/arch/arm/mach-omap2/id.c
++++ b/arch/arm/mach-omap2/id.c
+@@ -601,7 +601,7 @@ void __init omap2_set_globals_tap(u32 class, void __iomem *tap)
+ 
+ #ifdef CONFIG_SOC_BUS
+ 
+-static const char const *omap_types[] = {
++static const char *omap_types[] = {
+ 	[OMAP2_DEVICE_TYPE_TEST]	= "TST",
+ 	[OMAP2_DEVICE_TYPE_EMU]		= "EMU",
+ 	[OMAP2_DEVICE_TYPE_SEC]		= "HS",
+-- 
+2.35.1
+

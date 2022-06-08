@@ -1,0 +1,30 @@
+From d883c6d6a0d26aa9062a0b31d592003fc399d7a4 Mon Sep 17 00:00:00 2001
+From: MagneFire <dgriet@gmail.com>
+Date: Sun, 8 May 2022 18:37:06 +0200
+Subject: [PATCH] dtcat: Port to Python 3.
+
+---
+ scripts/dtcat.py | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/scripts/dtcat.py b/scripts/dtcat.py
+index add986245e2..060f9e17a56 100755
+--- a/scripts/dtcat.py
++++ b/scripts/dtcat.py
+@@ -28,10 +28,10 @@ def padding(v):
+ 
+ for f in sys.argv[1:]:
+     s = os.stat(f).st_size
+-    print >> sys.stderr, f, 'size', s, 'padding', padding(s)
++    print(f, 'size', s, 'padding', padding(s), file=sys.stderr)
+     with open(f, 'rb') as fp:
+         data = fp.read()
+-        sys.stdout.write(data)
++        sys.stdout.buffer.write(data)
+         for i in range(padding(s)):
+-            sys.stdout.write(B'0')
++            sys.stdout.buffer.write(B'0')
+ 
+-- 
+2.35.1
+
