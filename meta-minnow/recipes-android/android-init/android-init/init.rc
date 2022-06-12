@@ -14,6 +14,14 @@ on init
     symlink /dev/fb0 /dev/graphics/fb0
     chown system root /sys/class/timed_output/vibrator/enable
 
+    mkdir /data/ 0770 root root
+    mkdir /data/adspd/ 0770 root root
+    mkdir /data/adspd/1/ 0770 root root
+
+    # Needed by adspd to verify the DSP flash.
+    mkdir /dev/mtd/
+    symlink /dev/mtd0 /dev/mtd/mtd0
+
     # TCMD Engine Support
     chown system root /dev/mmcblk0p7
     chmod 660 /dev/mmcblk0p7
@@ -36,3 +44,6 @@ service pvrsrv /system/bin/pvrsrvctl_SGX530_125 --start --no-module
     class core
     oneshot
 
+service adspd /system/bin/adspd /dev/ttyO0
+    class core
+    socket adspdsock stream 0660 system audio
