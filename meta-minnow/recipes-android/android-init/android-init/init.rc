@@ -1,5 +1,14 @@
 on init
-    write /sys/kernel/boot_adsp/boot 1
+    chown system root /dev/pvrsrvkm
+    chown system root /dev/pvr_sync
+
+    chown system root /sys/devices/platform/omapdss/display0/vsync_events_enabled
+    chown system root /sys/devices/platform/omapdss/display0/interactivemode
+    chown system root /sys/devices/ocp.2/i2c.8/i2c-2/2-0036/alert_threshold
+    chown system root /sys/devices/0.c55-ctrl/enable
+    chown system root /sys/devices/0.bq5105x-ctrl/charge_reduce/value
+    chown system root /sys/devices/ocp.2/i2c.6/i2c-0/0-004a/interactivemode
+    chown system root /sys/class/leds/lcd-backlight/interactive
 
     mkdir /dev/graphics/
     symlink /dev/fb0 /dev/graphics/fb0
@@ -7,7 +16,6 @@ on init
 
     load_system_props
 
-    write /sys/kernel/debug/mdp/allow_cx_vddmin 1
 
     class_start core
 
@@ -20,8 +28,7 @@ service logd /usr/libexec/hal-droid/system/bin/logd
 service servicemanager /usr/libexec/hal-droid/system/bin/servicemanager
     class core
 
-service sensorhd /system/bin/shd
+service pvrsrv /system/bin/pvrsrvctl_SGX530_125 --start --no-module
     class core
+    oneshot
 
-on property:sys.powerctl=*
-    powerctl ${sys.powerctl}
