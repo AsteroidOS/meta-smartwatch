@@ -14,8 +14,12 @@ on init
     symlink /dev/fb0 /dev/graphics/fb0
     chown system root /sys/class/timed_output/vibrator/enable
 
-    load_system_props
+    # TCMD Engine Support
+    chown system root /dev/mmcblk0p7
+    chmod 660 /dev/mmcblk0p7
+    write /proc/config/reload 1
 
+    load_system_props
 
     class_start core
 
