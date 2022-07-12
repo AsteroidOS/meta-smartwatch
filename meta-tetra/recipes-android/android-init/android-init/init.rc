@@ -3,6 +3,9 @@ on init
     mkdir /dev/graphics/
     symlink /dev/fb0 /dev/graphics/fb0
 
+# PMU init
+    write /sys/module/pwr_mgr/parameters/pm_late_init 1
+
 # Vibrator
     chown system root /sys/class/timed_output/vibrator/enable
 
