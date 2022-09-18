@@ -8,7 +8,7 @@ LICENSE = "GPL-2.0-only"
 LIC_FILES_CHKSUM = "file://COPYING;md5=d7810fab7487fb0aad327b76f1be7cd7"
 COMPATIBLE_MACHINE = "catfish"
 
-SRC_URI = " git://android.googlesource.com/kernel/msm;branch=android-msm-catshark-3.18-oreo-wear-dr;protocol=https \
+SRC_URI = " git://android.googlesource.com/kernel/msm;branch=android-msm-catshark-3.18-pie-wear-dr;protocol=https \
     file://defconfig \
     file://img_info \
     file://0001-scripts-dtc-Remove-redundant-YYLOC-global-declaratio.patch \
@@ -20,9 +20,9 @@ SRC_URI = " git://android.googlesource.com/kernel/msm;branch=android-msm-catshar
     file://0007-video-mdp3-Continue-when-the-overlay-wasn-t-released.patch \
 "
 
-SRCREV = "4f9b4f10bbdd5af55057ef5bddf4735cb6a47d6c"
+SRCREV = "2b65638aaf038943506d1e6e7a942a4948490a42"
 LINUX_VERSION ?= "3.18"
-PV = "${LINUX_VERSION}+oreo"
+PV = "${LINUX_VERSION}+pie"
 S = "${WORKDIR}/git"
 B = "${S}"
 
