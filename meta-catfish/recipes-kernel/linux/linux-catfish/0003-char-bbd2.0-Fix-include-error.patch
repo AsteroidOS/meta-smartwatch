@@ -1,4 +1,4 @@
-From 2894108fb7e292e942e2f5bbe948c4c5e9017a8c Mon Sep 17 00:00:00 2001
+From 7d03a308da5c7b427edd641610aaf6feaa4c1663 Mon Sep 17 00:00:00 2001
 From: MagneFire <IDaNLContact@gmail.com>
 Date: Wed, 3 Nov 2021 12:42:48 +0100
 Subject: [PATCH] char: bbd2.0: Fix include error.
@@ -8,7 +8,7 @@ Subject: [PATCH] char: bbd2.0: Fix include error.
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/drivers/char/broadcom/bbd2.0/bcm_gps_hostwake.c b/drivers/char/broadcom/bbd2.0/bcm_gps_hostwake.c
-index 9720898318e..c7e5dfbb4af 100644
+index 9720898318e3..c7e5dfbb4afd 100644
 --- a/drivers/char/broadcom/bbd2.0/bcm_gps_hostwake.c
 +++ b/drivers/char/broadcom/bbd2.0/bcm_gps_hostwake.c
 @@ -39,7 +39,7 @@
@@ -20,6 +20,3 @@ index 9720898318e..c7e5dfbb4af 100644
  
  #define GPS_VERSION	"1.01"
  #define PFX			"bcmgps: "
--- 
-2.33.1
-

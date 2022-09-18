@@ -1,4 +1,4 @@
-From e772935a36cda28fcc2811530ced689f96edc0eb Mon Sep 17 00:00:00 2001
+From c199fcff42cbc559de3418d3348e6841867c94ce Mon Sep 17 00:00:00 2001
 From: MagneFire <IDaNLContact@gmail.com>
 Date: Sun, 28 Nov 2021 21:29:31 +0100
 Subject: [PATCH] Focaltech: Delay when sending wakeup event.
@@ -8,7 +8,7 @@ Subject: [PATCH] Focaltech: Delay when sending wakeup event.
  1 file changed, 19 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/input/touchscreen/focaltech_touch/focaltech_core.c b/drivers/input/touchscreen/focaltech_touch/focaltech_core.c
-index d4d19e92752..d6a023f5649 100644
+index 26ab6bb14e2f..b318b70c825d 100644
 --- a/drivers/input/touchscreen/focaltech_touch/focaltech_core.c
 +++ b/drivers/input/touchscreen/focaltech_touch/focaltech_core.c
 @@ -42,6 +42,8 @@
@@ -28,9 +28,9 @@ index d4d19e92752..d6a023f5649 100644
  
  #if FTS_DEBUG_EN
  int g_show_log = 1;
-@@ -753,10 +756,22 @@ static irqreturn_t fts_ts_interrupt(int irq, void *dev_id)
- 			< 1000000000)
+@@ -800,10 +803,22 @@ static irqreturn_t fts_ts_interrupt(int irq, void *dev_id)
  			return IRQ_HANDLED;
+ 		}
  #endif
 -		input_report_key(fts_input_dev, KEY_WAKEUP, 1);
 +		wake_lock(&touch_lock);
@@ -53,15 +53,15 @@ index d4d19e92752..d6a023f5649 100644
  		wakeup_flag = 1;
  		printk(KERN_DEBUG "FTS: wakeup system from ambient mode\n");
  		return IRQ_HANDLED;
-@@ -1127,6 +1142,7 @@ static int fts_ts_probe(struct i2c_client *client,
- 	spin_lock_init(&fts_wq_data->irq_lock);
- 	mutex_init(&fts_wq_data->report_mutex);
+@@ -1288,6 +1303,7 @@ static int fts_ts_probe(struct i2c_client *client,
+ 		}
+ 	}
  
 +	wake_lock_init(&touch_lock, WAKE_LOCK_SUSPEND, "touch-lock");
  	fts_input_dev_init(client, data, input_dev, pdata);
+ 	client->irq = gpio_to_irq(pdata->irq_gpio);
  
- 	fts_ctpm_get_upgrade_array();
-@@ -1241,6 +1257,7 @@ free_gpio:
+@@ -1383,6 +1399,7 @@ free_gpio:
  	regulator_put(data->vdd);
  #endif
  	input_free_device(input_dev);
@@ -69,6 +69,3 @@ index d4d19e92752..d6a023f5649 100644
  
  	FTS_ERROR("[FTS]fts_ts_probe failed!");
  err_switch_gpio_req:
--- 
-2.33.1
-
