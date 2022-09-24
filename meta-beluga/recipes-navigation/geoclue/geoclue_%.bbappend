@@ -1,1 +1,1 @@
-RDEPENDS:${PN}:append:beluga = " geoclue-provider-hybris "
+RDEPENDS:${PN}:append:beluga = " geoclue-provider-hybris-hal "

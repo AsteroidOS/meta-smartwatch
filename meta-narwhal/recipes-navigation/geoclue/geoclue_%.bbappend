@@ -1,1 +1,1 @@
-RDEPENDS:${PN}:append:narwhal = " geoclue-provider-hybris "
+RDEPENDS:${PN}:append:narwhal = " geoclue-provider-hybris-hal "
