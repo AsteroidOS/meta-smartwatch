@@ -1,0 +1,28 @@
+From 9ed37702a42b16d2d47b464a7f1dd8795b2aa245 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Darrel=20Gri=C3=ABt?= <dgriet@gmail.com>
+Date: Fri, 19 Aug 2022 19:43:31 +0200
+Subject: [PATCH] Fix compilations warnings.
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: Darrel Griët <dgriet@gmail.com>
+---
+ Makefile | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/Makefile b/Makefile
+index c024749431a..11f449597d1 100644
+--- a/Makefile
++++ b/Makefile
+@@ -403,7 +403,6 @@ KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
+ 		   -fno-strict-aliasing -fno-common \
+ 		   -Werror-implicit-function-declaration \
+ 		   -Wno-format-security \
+-		   -Werror \
+ 		   -std=gnu89
+ 
+ KBUILD_AFLAGS_KERNEL :=
+-- 
+2.36.1
+
