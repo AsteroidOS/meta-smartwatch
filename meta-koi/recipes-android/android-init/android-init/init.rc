@@ -1,0 +1,38 @@
+on init
+    write /sys/kernel/boot_adsp/boot 1
+
+    mkdir /dev/graphics/
+    symlink /dev/fb0 /dev/graphics/fb0
+    chown system root /sys/class/timed_output/vibrator/enable
+
+    mkdir /data/
+
+    class_start core
+
+service logd /system/bin/logd
+    class core
+    socket logd stream 0666 root root
+    socket logdr seqpacket 0666 root root
+    socket logdw dgram 0222 root root
+
+service logcat /system/bin/logcat -f /dev/kmsg
+    class core
+
+service servicemanager /system/bin/servicemanager
+    class core
+
+service sensorhd /system/bin/shd
+    class core
+
+service bt_vendor /system/bin/bt_vendor.sh
+    class core
+    oneshot
+
+on property:sys.powerctl=*
+    powerctl ${sys.powerctl}
+
+on property:sys.bt_modem.type=MODEM-BOARD
+    write /dev/kmsg "Start Modem service"
+
+on property:sys.bt_modem.type=BT-BOARD
+    write /dev/kmsg "Start BT service"
