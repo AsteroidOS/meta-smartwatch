@@ -24,9 +24,6 @@ do_install() {
     install -d ${D}${sysconfdir}/udev/rules.d
     install -m 0644 ${WORKDIR}/60-i2c.rules ${D}${sysconfdir}/udev/rules.d/
 
-    install -d ${D}/system/
-    cp -r system/* ${D}/system/
-
     install -d ${D}/usr/
     cp -r usr/* ${D}/usr/
 
