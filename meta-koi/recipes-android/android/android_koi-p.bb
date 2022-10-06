@@ -1,13 +1,13 @@
 inherit gettext
 
-SUMMARY = "Downloads the Casio F20 Bluetooth /system and /usr/include/android folders and installs them for libhybris"
+SUMMARY = "Downloads the Snapdragon Wear 2100/3100 /usr/libexec/hal-droid and /usr/include/android folders and installs them for libhybris"
 LICENSE = "CLOSED"
-SRC_URI = "https://dl.dropboxusercontent.com/s/u1o3mtnlojg49jt/system-NXH20B.tar.gz \
-    file://60-i2c.rules \
-"
-SRC_URI[md5sum] = "f9c576ef60fc4046155cb1e3432962bc"
-SRC_URI[sha256sum] = "2fc8a0d7d67962244ffd5479cbd2cbd65d318ac92da92359260153ab27756271"
-PV = "nougat"
+
+SRC_URI = "https://dl.dropboxusercontent.com/s/4d8pkmd62rxl464/hybris-o-msm8909.tar.gz;name=hybris \
+    file://audio_policy.conf"
+SRC_URI[hybris.md5sum] = "039a387a3e4ccd09d28b05195280d162"
+SRC_URI[hybris.sha256sum] = "ddc725dd280d8c5f546ff47f727b67ea99def9a4883edeebfe0edfdc5a61a636"
+PV = "oreo"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 INHIBIT_PACKAGE_STRIP = "1"
@@ -20,9 +20,9 @@ PROVIDES += "virtual/android-system-image"
 PROVIDES += "virtual/android-headers"
 
 do_install() {
-    # Allow pulseaudio to control I2C devices, for speaker.
-    install -d ${D}${sysconfdir}/udev/rules.d
-    install -m 0644 ${WORKDIR}/60-i2c.rules ${D}${sysconfdir}/udev/rules.d/
+    # The stock audio policy contains invalid entries that cause the droid module to fail.
+    install -d ${D}${sysconfdir}/pulse
+    install -m 0644 ${WORKDIR}/audio_policy.conf ${D}${sysconfdir}/pulse/
 
     install -d ${D}/usr/
     cp -r usr/* ${D}/usr/
@@ -33,13 +33,6 @@ do_install() {
     install -d ${D}${libdir}/pkgconfig
     install -m 0644 ${D}${includedir}/android/android-headers.pc ${D}${libdir}/pkgconfig
     rm ${D}${includedir}/android/android-headers.pc
-    cd ${D}
-    ln -s system/vendor vendor
-    # Make symlink for speaker functionality.
-    ln -s /system/etc/Tfa98xx.cnt etc/Tfa98xx.cnt
-
-    install -d ${D}/
-    install -m 644 system/property_contexts ${D}/
 }
 
 # FIXME: QA Issue: Architecture did not match (40 to 164) on /work/dory-oe-linux-gnueabi/android/lollipop-r0/packages-split/android-system/system/vendor/firmware/adsp.b00 [arch]
@@ -47,6 +40,6 @@ do_package_qa() {
 }
 
 PACKAGES =+ "android-system android-headers"
-FILES:android-system = "/system /vendor /usr ${sysconfdir}/udev ${sysconfdir}/Tfa98xx.cnt /property_contexts"
+FILES:android-system = "/usr ${sysconfdir}/pulse/"
 FILES:android-headers = "${libdir}/pkgconfig ${includedir}/android"
 EXCLUDE_FROM_SHLIBS = "1"
