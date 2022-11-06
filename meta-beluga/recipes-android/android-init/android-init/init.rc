@@ -1,4 +1,8 @@
 on init
+    # Required to fix some symbolic links in wcnss firmware files.
+    mkdir /mnt/vendor/
+    symlink /persist /mnt/vendor/persist
+
     write /dev/wcnss_wlan 1
 
     mkdir /dev/graphics/
@@ -16,41 +20,29 @@ on init
     load_system_props
     restorecon_recursive /persist
 
+    # Needed to allow the launcher to talk to the hwbinder.
+    chown system root /dev/hwbinder
+    chown system root /dev/vndbinder
+
+    chmod 777 /dev/hwbinder
+    chmod 777 /dev/vndbinder
+
     mkdir /data/
 
-    setprop init.svc.bluetooth running
-
     class_start core
-
-service logd /usr/libexec/hal-droid/system/bin/logd
-    class core
-    socket logd stream 0666 logd logd
-    socket logdr seqpacket 0666 logd logd
-    socket logdw dgram 0222 logd logd
-    file /proc/kmsg r
-    file /dev/kmsg w
-    user logd
-    group logd system readproc
+    class_start hal
 
 service rmt_storage /vendor/bin/rmt_storage
     class core
 
-service servicemanager /usr/libexec/hal-droid/system/bin/servicemanager
-    setenv LD_PRELOAD /usr/libexec/hal-droid/system/lib/libselinux_stubs.so
-    class core
-
-service hwservicemanager /system/bin/hwservicemanager
-    setenv LD_PRELOAD /usr/libexec/hal-droid/system/lib/libselinux_stubs.so
-    class core
-
-service bt /vendor/bin/android.hardware.bluetooth@1.0-service-qti
-    class core
+service vendor.bluetooth-1-0 /vendor/bin/hw/android.hardware.bluetooth@1.0-service-qti
+    class hal
     oneshot
 
-service sensors /vendor/bin/android.hardware.sensors@1.0-service
-    class core
+service vendor.sensors-hal-1-0 /vendor/bin/hw/android.hardware.sensors@1.0-service
+    class hal
     oneshot
 
-service deamonserver /vendor/bin/deamonserver
+service deamonserver /system/bin/deamonserver
     class core
     oneshot
