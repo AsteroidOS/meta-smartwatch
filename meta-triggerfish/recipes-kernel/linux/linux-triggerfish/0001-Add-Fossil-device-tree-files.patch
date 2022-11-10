@@ -1,0 +1,3317 @@
+From d1376b76b56c5098a66a9a251d3fd494fc93b9e2 Mon Sep 17 00:00:00 2001
+From: Arseniy Movshev <dodoradio@outlook.com>
+Date: Wed, 9 Nov 2022 22:34:41 +0000
+Subject: [PATCH 1/2] Add Fossil device tree files from
+ https://android.googlesource.com/kernel/msm-extra/config/+/refs/heads/android-msm-sole-4.9-pie-wear-mr1/8x09/
+
+---
+ arch/arm/boot/dts/fossil/8x09/Makefile        |  16 +
+ .../dts/fossil/8x09/apq8009w-darter/Makefile  |   6 +
+ .../apq8009w-darter/darter-8909w-pm660.dtsi   |  47 +++
+ .../8x09/apq8009w-darter/darter-apq8009w.dts  | 293 +++++++++++++++++
+ .../darter-dsi-panel-390p-auo-cmd.dtsi        | 187 +++++++++++
+ .../darter-msm8909-mdss-panels.dtsi           |  36 +++
+ .../apq8009w-darter/darter-msm8909-mdss.dtsi  |  14 +
+ .../8x09/apq8009w-darter/darter-msm8909.dtsi  |  13 +
+ .../8x09/apq8009w-darter/darter-touch.dtsi    |  35 +++
+ .../dts/fossil/8x09/apq8009w-sole/Makefile    |   5 +
+ .../8x09/apq8009w-sole/sole-8909w-pm660.dtsi  |  81 +++++
+ .../8x09/apq8009w-sole/sole-apq8009w.dts      | 282 +++++++++++++++++
+ .../sole-dsi-panel-auo-390p-amoled-cmd.dtsi   | 107 +++++++
+ .../sole-msm8909-mdss-panels.dtsi             |  24 ++
+ .../8x09/apq8009w-sole/sole-msm8909-mdss.dtsi |  14 +
+ .../8x09/apq8009w-sole/sole-msm8909.dtsi      |  13 +
+ .../fossil/8x09/apq8009w-sole/sole-touch.dtsi |  23 ++
+ .../fossil/8x09/apq8009w-triggerfish/Makefile |   5 +
+ .../triggerfish-8909w-pm660.dtsi              |  86 +++++
+ .../triggerfish-apq8009w.dts                  | 294 ++++++++++++++++++
+ ...gerfish-dsi-panel-auo-416p-amoled-cmd.dtsi |  12 +
+ .../triggerfish-msm8909-mdss-panels.dtsi      |  23 ++
+ .../triggerfish-msm8909-mdss.dtsi             |  14 +
+ .../triggerfish-msm8909.dtsi                  |  13 +
+ .../triggerfish-touch.dtsi                    |  23 ++
+ .../8x09/common/8909w-pm660-regulator.dtsi    |  23 ++
+ .../common/dsi-panel-auo-416p-amoled-cmd.dtsi | 120 +++++++
+ .../fg-gen3-batterydata-apack-300mah.dtsi     |  72 +++++
+ .../fg-gen3-batterydata-apack-310mah.dtsi     |  83 +++++
+ .../fg-gen3-batterydata-apack-355mah.dtsi     |  72 +++++
+ .../fg-gen3-batterydata-apack-410mAh.dtsi     |  72 +++++
+ .../fg-gen3-batterydata-itech-3000mah.dtsi    |  17 +
+ .../fg-gen3-batterydata-lishen-300mah.dtsi    |  75 +++++
+ .../8x09/common/msm8909-audio-bg_codec.dtsi   |  23 ++
+ .../8x09/common/msm8909-mdss-panels.dtsi      |  37 +++
+ .../boot/dts/fossil/8x09/common/msm8909w.dtsi |  65 ++++
+ .../boot/dts/fossil/8x09/common/touch.dtsi    |  34 ++
+ .../dts/fossil/8x09/msm8909w-gila/Makefile    |   5 +
+ .../8x09/msm8909w-gila/gila-8909w-pm660.dtsi  |  99 ++++++
+ .../gila-dsi-panel-auo-416p-amoled-cmd.dtsi   |  12 +
+ .../gila-msm8909-audio-bg_codec.dtsi          |  23 ++
+ .../gila-msm8909-mdss-panels.dtsi             |  47 +++
+ .../8x09/msm8909w-gila/gila-msm8909-mdss.dtsi |  14 +
+ .../8x09/msm8909w-gila/gila-msm8909.dtsi      |  13 +
+ .../8x09/msm8909w-gila/gila-msm8909w.dts      | 294 ++++++++++++++++++
+ .../8x09/msm8909w-gila/gila-msm8909w.dtsi     |  42 +++
+ .../fossil/8x09/msm8909w-gila/gila-touch.dtsi |  21 ++
+ 47 files changed, 2929 insertions(+)
+ create mode 100644 arch/arm/boot/dts/fossil/8x09/Makefile
+ create mode 100644 arch/arm/boot/dts/fossil/8x09/apq8009w-darter/Makefile
+ create mode 100644 arch/arm/boot/dts/fossil/8x09/apq8009w-darter/darter-8909w-pm660.dtsi
+ create mode 100644 arch/arm/boot/dts/fossil/8x09/apq8009w-darter/darter-apq8009w.dts
+ create mode 100644 arch/arm/boot/dts/fossil/8x09/apq8009w-darter/darter-dsi-panel-390p-auo-cmd.dtsi
+ create mode 100644 arch/arm/boot/dts/fossil/8x09/apq8009w-darter/darter-msm8909-mdss-panels.dtsi
+ create mode 100644 arch/arm/boot/dts/fossil/8x09/apq8009w-darter/darter-msm8909-mdss.dtsi
+ create mode 100644 arch/arm/boot/dts/fossil/8x09/apq8009w-darter/darter-msm8909.dtsi
+ create mode 100644 arch/arm/boot/dts/fossil/8x09/apq8009w-darter/darter-touch.dtsi
+ create mode 100644 arch/arm/boot/dts/fossil/8x09/apq8009w-sole/Makefile
+ create mode 100644 arch/arm/boot/dts/fossil/8x09/apq8009w-sole/sole-8909w-pm660.dtsi
+ create mode 100644 arch/arm/boot/dts/fossil/8x09/apq8009w-sole/sole-apq8009w.dts
+ create mode 100644 arch/arm/boot/dts/fossil/8x09/apq8009w-sole/sole-dsi-panel-auo-390p-amoled-cmd.dtsi
+ create mode 100644 arch/arm/boot/dts/fossil/8x09/apq8009w-sole/sole-msm8909-mdss-panels.dtsi
+ create mode 100644 arch/arm/boot/dts/fossil/8x09/apq8009w-sole/sole-msm8909-mdss.dtsi
+ create mode 100644 arch/arm/boot/dts/fossil/8x09/apq8009w-sole/sole-msm8909.dtsi
+ create mode 100644 arch/arm/boot/dts/fossil/8x09/apq8009w-sole/sole-touch.dtsi
+ create mode 100644 arch/arm/boot/dts/fossil/8x09/apq8009w-triggerfish/Makefile
+ create mode 100644 arch/arm/boot/dts/fossil/8x09/apq8009w-triggerfish/triggerfish-8909w-pm660.dtsi
+ create mode 100644 arch/arm/boot/dts/fossil/8x09/apq8009w-triggerfish/triggerfish-apq8009w.dts
+ create mode 100644 arch/arm/boot/dts/fossil/8x09/apq8009w-triggerfish/triggerfish-dsi-panel-auo-416p-amoled-cmd.dtsi
+ create mode 100644 arch/arm/boot/dts/fossil/8x09/apq8009w-triggerfish/triggerfish-msm8909-mdss-panels.dtsi
+ create mode 100644 arch/arm/boot/dts/fossil/8x09/apq8009w-triggerfish/triggerfish-msm8909-mdss.dtsi
+ create mode 100644 arch/arm/boot/dts/fossil/8x09/apq8009w-triggerfish/triggerfish-msm8909.dtsi
+ create mode 100644 arch/arm/boot/dts/fossil/8x09/apq8009w-triggerfish/triggerfish-touch.dtsi
+ create mode 100644 arch/arm/boot/dts/fossil/8x09/common/8909w-pm660-regulator.dtsi
+ create mode 100644 arch/arm/boot/dts/fossil/8x09/common/dsi-panel-auo-416p-amoled-cmd.dtsi
+ create mode 100644 arch/arm/boot/dts/fossil/8x09/common/fg-gen3-batterydata-apack-300mah.dtsi
+ create mode 100644 arch/arm/boot/dts/fossil/8x09/common/fg-gen3-batterydata-apack-310mah.dtsi
+ create mode 100755 arch/arm/boot/dts/fossil/8x09/common/fg-gen3-batterydata-apack-355mah.dtsi
+ create mode 100755 arch/arm/boot/dts/fossil/8x09/common/fg-gen3-batterydata-apack-410mAh.dtsi
+ create mode 100644 arch/arm/boot/dts/fossil/8x09/common/fg-gen3-batterydata-itech-3000mah.dtsi
+ create mode 100644 arch/arm/boot/dts/fossil/8x09/common/fg-gen3-batterydata-lishen-300mah.dtsi
+ create mode 100644 arch/arm/boot/dts/fossil/8x09/common/msm8909-audio-bg_codec.dtsi
+ create mode 100644 arch/arm/boot/dts/fossil/8x09/common/msm8909-mdss-panels.dtsi
+ create mode 100644 arch/arm/boot/dts/fossil/8x09/common/msm8909w.dtsi
+ create mode 100644 arch/arm/boot/dts/fossil/8x09/common/touch.dtsi
+ create mode 100644 arch/arm/boot/dts/fossil/8x09/msm8909w-gila/Makefile
+ create mode 100644 arch/arm/boot/dts/fossil/8x09/msm8909w-gila/gila-8909w-pm660.dtsi
+ create mode 100644 arch/arm/boot/dts/fossil/8x09/msm8909w-gila/gila-dsi-panel-auo-416p-amoled-cmd.dtsi
+ create mode 100644 arch/arm/boot/dts/fossil/8x09/msm8909w-gila/gila-msm8909-audio-bg_codec.dtsi
+ create mode 100644 arch/arm/boot/dts/fossil/8x09/msm8909w-gila/gila-msm8909-mdss-panels.dtsi
+ create mode 100644 arch/arm/boot/dts/fossil/8x09/msm8909w-gila/gila-msm8909-mdss.dtsi
+ create mode 100644 arch/arm/boot/dts/fossil/8x09/msm8909w-gila/gila-msm8909.dtsi
+ create mode 100644 arch/arm/boot/dts/fossil/8x09/msm8909w-gila/gila-msm8909w.dts
+ create mode 100644 arch/arm/boot/dts/fossil/8x09/msm8909w-gila/gila-msm8909w.dtsi
+ create mode 100644 arch/arm/boot/dts/fossil/8x09/msm8909w-gila/gila-touch.dtsi
+
+diff --git a/arch/arm/boot/dts/fossil/8x09/Makefile b/arch/arm/boot/dts/fossil/8x09/Makefile
+new file mode 100644
+index 000000000000..49ecacf75bae
+--- /dev/null
++++ b/arch/arm/boot/dts/fossil/8x09/Makefile
+@@ -0,0 +1,16 @@
++# DTB Makefile
++
++8x09_dtb = apq8009w-darter
++ifeq ($(CONFIG_BUILD_TRIGGERFISH),y)
++	8x09_dtb = apq8009w-triggerfish
++else ifeq ($(CONFIG_BUILD_SOLE),y)
++	8x09_dtb = apq8009w-sole
++else ifeq ($(CONFIG_BUILD_GILA),y)
++	8x09_dtb = msm8909w-gila
++endif
++include $(srctree)/arch/arm/boot/dts/fossil/8x09/$(8x09_dtb)/Makefile
++$(obj)/%.dtb: $(src)/../../../../arm/boot/dts/fossil/8x09/$(8x09_dtb)/%.dts FORCE
++	$(call if_changed_dep,dtc)
++	@echo "$< $@"
++dtbs: $(addprefix $(obj)/,$(dtb-y))
++clean-files := *.dtb
+diff --git a/arch/arm/boot/dts/fossil/8x09/apq8009w-darter/Makefile b/arch/arm/boot/dts/fossil/8x09/apq8009w-darter/Makefile
+new file mode 100644
+index 000000000000..e740832545cb
+--- /dev/null
++++ b/arch/arm/boot/dts/fossil/8x09/apq8009w-darter/Makefile
+@@ -0,0 +1,6 @@
++
++dtb-$(CONFIG_ARCH_MSM8909) += darter-apq8009w.dtb
++
++always		:= $(dtb-y)
++subdir-y	:= $(dts-dirs)
++clean-files	:= *.dtb
+diff --git a/arch/arm/boot/dts/fossil/8x09/apq8009w-darter/darter-8909w-pm660.dtsi b/arch/arm/boot/dts/fossil/8x09/apq8009w-darter/darter-8909w-pm660.dtsi
+new file mode 100644
+index 000000000000..97b2629a898f
+--- /dev/null
++++ b/arch/arm/boot/dts/fossil/8x09/apq8009w-darter/darter-8909w-pm660.dtsi
+@@ -0,0 +1,47 @@
++/*
++ * Copyright (c) 2017-2018, The Linux Foundation. All rights reserved.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 and
++ * only version 2 as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ */
++#include "darter-touch.dtsi"
++
++&pm660_fg {
++	qcom,fg-jeita-thresholds = <2 16 44 58>;
++	qcom,fg-jeita-hyst-temp = <2>;
++	qcom,fg-jeita-en = <1>;
++	qcom,fg-jeita-soft-hot-fv-cc = <4200 350>;
++	qcom,fg-jeita-soft-cold-fv-cc = <4000 100>;
++	qcom,battery-data = <&qrd_batterydata>;
++	qcom,fg-chg-term-current = <25>;
++	qcom,battery-thermal-coefficients = [d2 50 ff];
++	qcom,fg-rsense-sel = <1>;
++	qcom,fg-force-load-profile;
++	qcom,fg-recharge-soc-thr = <99>;
++	qcom,fg-cutoff-current = <40>;
++	qcom,fg-cutoff-voltage = <3000>;
++};
++
++/ {
++	/delete-node/ qcom,battery-data;
++	mtp_batterydata: qcom,battery-data {
++		qcom,batt-id-range-pct = <15>;
++		#include "../common/fg-gen3-batterydata-itech-3000mah.dtsi"
++	};
++	qrd_batterydata: qcom,battery-data {
++		qcom,batt-id-range-pct = <60>;
++		#include "../common/fg-gen3-batterydata-apack-355mah.dtsi"
++	};
++};
++
++&pm660_pon {
++	qcom,pon_2 {
++		linux,code = <266>;
++	};
++};
+diff --git a/arch/arm/boot/dts/fossil/8x09/apq8009w-darter/darter-apq8009w.dts b/arch/arm/boot/dts/fossil/8x09/apq8009w-darter/darter-apq8009w.dts
+new file mode 100644
+index 000000000000..452c23cbf741
+--- /dev/null
++++ b/arch/arm/boot/dts/fossil/8x09/apq8009w-darter/darter-apq8009w.dts
+@@ -0,0 +1,293 @@
++/*
++ * Copyright (c) 2017-2018 The Linux Foundation. All rights reserved.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 and
++ * only version 2 as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ */
++
++/dts-v1/;
++
++#include "../../../../arm64/boot/dts/qcom/msm8909-mtp.dtsi"
++#include "../../../../arm64/boot/dts/qcom/msm8909w.dtsi"
++#include "../../../../arm64/boot/dts/qcom/8909w-pm660.dtsi"
++#include "../../../../arm64/boot/dts/qcom/msm8909w-gpu.dtsi"
++#include "../../../../arm64/boot/dts/qcom/apq8009w-bg-memory.dtsi"
++#include "../../../../arm64/boot/dts/qcom/msm8909-audio-bg_codec.dtsi"
++#include "darter-msm8909.dtsi"
++#include "../common/msm8909w.dtsi"
++#include "darter-8909w-pm660.dtsi"
++#include "../common/8909w-pm660-regulator.dtsi"
++
++/ {
++	model = "Fossil Group, Inc. based on APQ8009W-PM660 BG Alpha SDW3100";
++	compatible = "qcom,apq8009-mtp", "qcom,apq8009", "qcom,mtp";
++	qcom,msm-id =   <265 0>,
++			<301 0>;
++	qcom,board-id = <8 0x113>;
++	qcom,pmic-id =  <0x0001001b 0x0 0x0 0x0>,
++			<0x0001011b 0x0 0x0 0x0>;
++};
++
++&soc {
++	qcom,blackghost {
++		compatible = "qcom,pil-blackghost";
++
++		qcom,pil-force-shutdown;
++		qcom,firmware-name = "bg-wear";
++		/* GPIO inputs from blackghost */
++		qcom,bg2ap-status-gpio = <&msm_gpio 97 0>;
++		qcom,bg2ap-errfatal-gpio = <&msm_gpio 95 0>;
++		/* GPIO output to blackghost */
++		qcom,ap2bg-status-gpio = <&msm_gpio 17 0>;
++		qcom,ap2bg-errfatal-gpio = <&msm_gpio 23 0>;
++	};
++
++	qcom,msm-ssc-sensors {
++		compatible = "qcom,msm-ssc-sensors";
++	};
++
++	qcom,glink-bgcom-xprt-bg {
++		compatible = "qcom,glink-bgcom-xprt";
++		label = "bg";
++		qcom,qos-config = <&glink_qos_bg>;
++		qcom,ramp-time = <0x10>,
++				     <0x20>,
++				     <0x30>,
++				     <0x40>;
++	};
++
++	glink_qos_bg: qcom,glink-qos-config-bg {
++		compatible = "qcom,glink-qos-config";
++		qcom,flow-info = <0x80 0x0>,
++				 <0x70 0x1>,
++				 <0x60 0x2>,
++				 <0x50 0x3>;
++		qcom,mtu-size = <0x800>;
++		qcom,tput-stats-cycle = <0xa>;
++	};
++
++	qcom,glink_pkt {
++		compatible = "qcom,glinkpkt";
++
++		qcom,glinkpkt-bg-daemon {
++			qcom,glinkpkt-transport = "bgcom";
++			qcom,glinkpkt-edge = "bg";
++			qcom,glinkpkt-ch-name = "bg-daemon";
++			qcom,glinkpkt-dev-name = "glink_pkt_bg_daemon";
++		};
++
++		qcom,glinkpkt-bg-display-ctrl {
++			qcom,glinkpkt-transport = "bgcom";
++			qcom,glinkpkt-edge = "bg";
++			qcom,glinkpkt-ch-name = "display-ctrl";
++			qcom,glinkpkt-dev-name = "glink_pkt_bg_display_ctrl";
++		};
++
++		qcom,glinkpkt-bg-display-data {
++			qcom,glinkpkt-transport = "bgcom";
++			qcom,glinkpkt-edge = "bg";
++			qcom,glinkpkt-ch-name = "display-data";
++			qcom,glinkpkt-dev-name = "glink_pkt_bg_display_data";
++		};
++
++		qcom,glinkpkt-bg-rsb-ctrl {
++			qcom,glinkpkt-transport = "bgcom";
++			qcom,glinkpkt-edge = "bg";
++			qcom,glinkpkt-ch-name = "RSB_CTRL";
++			qcom,glinkpkt-dev-name = "glink_pkt_bg_rsb_ctrl";
++		};	
++		qcom,glinkpkt-bg-sso-ctrl {
++			qcom,glinkpkt-transport = "bgcom";
++			qcom,glinkpkt-edge = "bg";
++			qcom,glinkpkt-ch-name = "sso-ctrl";
++			qcom,glinkpkt-dev-name = "glink_pkt_bg_sso_ctrl";
++		};
++	};
++
++	spi@78B8000 {  /* BLSP1 QUP4 */
++		status = "ok";
++		qcom,bg-spi {
++			compatible = "qcom,bg-spi";
++			reg = <0>;
++			spi-max-frequency = <16000000>;
++			interrupt-parent = <&msm_gpio>;
++			qcom,irq-gpio = <&msm_gpio 110 1>;
++		};
++	};
++
++	qcom,bg-rsb {
++		compatible = "qcom,bg-rsb";
++		vdd-ldo1-supply = <&pm660_l11>;
++		vdd-ldo2-supply = <&pm660_l15>;
++	};
++
++	qcom,bg-daemon {
++		compatible = "qcom,bg-daemon";
++		qcom,bg-reset-gpio = <&pm660_gpios 5 0>;
++		ssr-reg1-supply = <&pm660_l3>;
++		ssr-reg2-supply = <&pm660_l9>;
++	};
++};
++
++&i2c_1 {
++	status = "okay";
++	nq@28 {
++		compatible = "qcom,nq-nci";
++		reg = <0x28>;
++		qcom,nq-irq = <&msm_gpio 50 0x00>;
++		qcom,nq-ven = <&msm_gpio 36 0x00>;
++		qcom,nq-firm = <&msm_gpio 38 0x00>;
++		qcom,nq-esepwr = <&msm_gpio 51 0x00>;
++		qcom,nq-clkreq = <&pm660_gpios 4 0x00>;
++		qcom,clk-src = "BBCLK3";
++		interrupt-parent = <&msm_gpio>;
++		interrupts = <50 0>;
++		interrupt-names = "nfc_irq";
++		pinctrl-names = "nfc_active","nfc_suspend";
++		pinctrl-0 = <&nfcw_int_active
++			     &nfcw_disable_active
++			     &nfc_clk_default>;
++		pinctrl-1 = <&nfcw_int_suspend &nfcw_disable_suspend>;
++		clocks = <&clock_rpm clk_bb_clk3_pin>;
++		clock-names = "ref_clk";
++	};
++};
++
++&spi_0 {
++	status = "disabled";
++};
++
++&i2c_3 {
++	status = "disabled";
++};
++
++&i2c_4 {
++	status = "disabled";
++};
++
++&i2c_2 {
++	status = "disabled";
++};
++
++&sdc1_clk_off {
++	config {
++		pins = "sdc1_clk";
++		bias-disable; /* NO pull */
++		drive-strength = <2>; /* 2 MA */
++		output-low;
++	};
++};
++
++&sdc1_cmd_off {
++	config {
++		pins = "sdc1_cmd";
++		bias-disable; /* NO pull */
++		drive-strength = <2>; /* 2 MA */
++		output-low;
++	};
++};
++
++&sdc1_data_off {
++	config {
++		pins = "sdc1_data";
++		bias-disable; /* NO pull */
++		drive-strength = <2>; /* 2 MA */
++		output-low;
++	};
++};
++
++&sdhc_2 {
++	status = "disabled";
++};
++
++&audio_codec_mtp {
++	status = "disabled";
++};
++
++&audio_codec_bg {
++	status = "ok";
++};
++
++&bg_cdc {
++	status = "ok";
++	vdd-spkr-supply = <&pm660_l11>;
++	/delete-property/ qcom,bg-speaker-connected;
++};
++
++&blsp1_uart1 {
++	status = "ok";
++	pinctrl-names = "default";
++	pinctrl-0 = <&uart_console_sleep>;
++};
++
++/* Pinctrl dt nodes for interrupt and reset gpio for Synaptics controller */
++&ts_int_active {
++	mux {
++		pins = "gpio98";
++	};
++
++	config {
++		pins = "gpio98";
++	};
++};
++
++&ts_int_suspend {
++	mux {
++		pins = "gpio98";
++	};
++
++	config {
++		pins = "gpio98";
++		/delete-property/ bias-pull-down;
++		bias-disable; /* No PULL */
++	};
++};
++
++&ts_reset_active {
++	mux {
++		pins = "gpio16";
++	};
++
++	config {
++		pins = "gpio16";
++	};
++};
++
++&ts_reset_suspend {
++	mux {
++		pins = "gpio16";
++	};
++
++	config {
++		pins = "gpio16";
++	};
++};
++
++&ts_release {
++	mux {
++		pins = "gpio98", "gpio16";
++	};
++
++	config {
++		pins = "gpio98", "gpio16";
++	};
++};
++
++&spi4_cs0_active {
++	mux {
++		pins = "gpio14";
++		function = "blsp_spi4";
++	};
++	config {
++		pins = "gpio14";
++		drive-strength = <2>;
++		bias-disable; /* No PULL */
++		output-high;
++	};
++};
+diff --git a/arch/arm/boot/dts/fossil/8x09/apq8009w-darter/darter-dsi-panel-390p-auo-cmd.dtsi b/arch/arm/boot/dts/fossil/8x09/apq8009w-darter/darter-dsi-panel-390p-auo-cmd.dtsi
+new file mode 100644
+index 000000000000..9764395f08e2
+--- /dev/null
++++ b/arch/arm/boot/dts/fossil/8x09/apq8009w-darter/darter-dsi-panel-390p-auo-cmd.dtsi
+@@ -0,0 +1,187 @@
++/* Copyright (c) 2017-2018, The Linux Foundation. All rights reserved.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 and
++ * only version 2 as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ */
++
++&mdss_mdp {
++	dsi_auo_x120_amoled_cmd: qcom,mdss_dsi_auo_x120_amoled_cmd {
++		qcom,mdss-dsi-panel-name = "AUO 390p command mode dsi panel";
++		qcom,mdss-dsi-panel-type = "dsi_cmd_mode";
++		qcom,mdss-dsi-panel-framerate = <45>;
++		qcom,mdss-dsi-virtual-channel-id = <0>;
++		qcom,mdss-dsi-stream = <0>;
++		qcom,mdss-dsi-panel-width = <390>;
++		qcom,mdss-dsi-panel-height = <390>;
++		qcom,mdss-pan-physical-height-dimension = <29>;
++		qcom,mdss-pan-physical-width-dimension = <29>;
++		qcom,mdss-dsi-h-front-porch = <4>;
++		qcom,mdss-dsi-h-back-porch = <4>;
++		qcom,mdss-dsi-h-pulse-width = <4>;
++		qcom,mdss-dsi-h-sync-skew = <0>;
++		qcom,mdss-dsi-v-back-porch = <8>;
++		qcom,mdss-dsi-v-front-porch = <8>;
++		qcom,mdss-dsi-v-pulse-width = <8>;
++		qcom,mdss-dsi-h-left-border = <0>;
++		qcom,mdss-dsi-h-right-border = <0>;
++		qcom,mdss-dsi-v-top-border = <0>;
++		qcom,mdss-dsi-v-bottom-border = <0>;
++		qcom,mdss-dsi-bpp = <24>;
++		qcom,mdss-dsi-color-order = "rgb_swap_rgb";
++		qcom,mdss-dsi-underflow-color = <0xff>;
++		qcom,mdss-dsi-border-color = <0>;
++		qcom,mdss-tear-check-frame-rate = <4500>;
++		/*
++		byte 0: dcs data type
++		byte 1: set to indicate;
++			this is an individual packet (no chain) 
++		byte 2: virtual channel number
++		byte 3: expect ack from client (dcs read command)
++		byte 4: wait number of specified ms;
++			 after dcs command transmitted 
++		byte 5, 6: 16 bits length in network byte order
++		byte 7 and beyond: number byte of payload
++		*/
++		qcom,mdss-dsi-on-command = [
++			05 01 00 00 03 00 02 00 00
++			15 01 00 00 00 00 02 FE 01
++			15 01 00 00 00 00 02 0A F0
++			15 01 00 00 00 00 02 FE 0A
++			15 01 00 00 00 00 02 29 92
++			15 01 00 00 00 00 02 FE 00
++			29 01 00 00 00 00 05 2A 00 02 01 87
++			29 01 00 00 00 00 05 2B 00 00 01 85
++			29 01 00 00 00 00 05 30 00 00 01 85
++			29 01 00 00 00 00 05 31 00 02 01 87
++			05 01 00 00 00 00 02 12 00
++			15 01 00 00 00 00 02 35 00
++			15 01 00 00 00 00 02 53 20
++			15 01 00 00 00 00 02 FE 07
++		        15 01 00 00 00 00 02 00 30
++	           	15 01 00 00 00 00 02 FE 00
++			/*05 01 00 00 96 00 02 11 00:
++			reduce delay from 150ms(0x96)
++				to 82 ms (0x52)
++			*/
++	           	05 01 00 00 52 00 02 11 00
++			];
++		qcom,mdss-dsi-post-panel-on-command = [
++			05 01 00 00 00 00 02 29 00];
++
++		qcom,mdss-dsi-off-command = [
++			05 01 00 00 00 00 02 28 00
++			05 01 00 00 78 00 02 10 00
++			];
++		qcom,mdss-dsi-on-command-state = "dsi_lp_mode";
++		qcom,mdss-dsi-off-command-state = "dsi_hs_mode";
++
++		qcom,mdss-dsi-idle-on-command = [
++			05 01 00 00 00 00 01 39 /* Idle-Mode On */
++			];
++		qcom,mdss-dsi-idle-on-command-state = "dsi_hs_mode";
++		qcom,mdss-dsi-idle-off-command = [
++			05 01 00 00 00 00 01 38 /* Idle-Mode Off  */
++			/* Reset column start address*/
++			29 01 00 00 00 00 05 2a 00 04 01 89
++			/* Reset row start address */
++			29 01 00 00 00 00 05 2b 00 00 01 85
++			15 01 00 00 00 00 02 fe 01
++			15 01 00 00 00 00 02 04 00
++			15 01 00 00 00 00 02 fe 00
++			15 01 00 00 00 00 02 3a 77
++			];
++		qcom,mdss-dsi-hbm0-on-command = [
++			15 01 00 00 00 00 02 fe 06
++			15 01 00 00 00 00 02 ac 02
++			15 01 00 00 00 00 02 ab 6a
++			15 01 00 00 00 00 02 b6 01
++			15 01 00 00 00 00 02 fe 00
++			/* Wait 101 ms: 0x65*/
++			15 01 00 00 65 00 02 55 01
++			15 01 00 00 00 00 02 fe 01
++			15 01 00 00 00 00 02 29 42
++			15 01 00 00 00 00 02 fe 05
++			15 01 00 00 00 00 02 00 12
++			15 01 00 00 00 00 02 2a 08
++			15 01 00 00 00 00 02 2f 04
++			15 01 00 00 00 00 02 36 33
++			15 01 00 00 00 00 02 fe 00
++			15 01 00 00 65 00 02 55 01
++			/* Wait 31 ms: 0x1f */
++			15 01 00 00 1f 00 02 b0 06
++			15 01 00 00 00 00 02 fe 01
++			15 01 00 00 00 00 02 29 40
++			15 01 00 00 00 00 02 11 93
++			15 01 00 00 00 00 02 19 44
++			15 01 00 00 00 00 02 fe 00
++			];
++		qcom,mdss-dsi-hbm1-on-command = [
++			15 01 00 00 00 00 02 FE 00
++			15 01 00 00 65 00 02 55 00
++			15 01 00 00 00 00 02 FE 01
++			15 01 00 00 00 00 02 29 42
++			15 01 00 00 00 00 02 FE 05
++			15 01 00 00 00 00 02 00 12
++			15 01 00 00 00 00 02 2A 08
++			15 01 00 00 00 00 02 2F 04
++			15 01 00 00 00 00 02 36 33
++			15 01 00 00 00 00 02 FE 00
++			15 01 00 00 1F 00 02 B0 06
++			15 01 00 00 00 00 02 FE 01
++			15 01 00 00 00 00 02 29 40
++			15 01 00 00 00 00 02 11 93
++			15 01 00 00 1F 00 02 19 44
++			15 01 00 00 00 00 02 FE 00
++		];
++
++		qcom,mdss-dsi-hbm-off-command = [
++			15 01 00 00 00 00 02 FE 01
++			15 01 00 00 00 00 02 29 42
++			15 01 00 00 00 00 02 FE 00
++			15 01 00 00 1F 00 02 B0 04
++			15 01 00 00 00 00 02 FE 05
++			15 01 00 00 00 00 02 00 12
++			15 01 00 00 00 00 02 2A 08
++			15 01 00 00 00 00 02 2F 04
++			15 01 00 00 00 00 02 36 41
++			15 01 00 00 00 00 02 FE 01
++			15 01 00 00 00 00 02 29 40
++			15 01 00 00 00 00 02 11 80
++			15 01 00 00 00 00 02 19 33
++			15 01 00 00 00 00 02 FE 00
++			15 01 00 00 00 00 02 55 00
++		];
++		qcom,mdss-dsi-traffic-mode = "burst_mode";
++		qcom,mdss-dsi-lane-map = "lane_map_0123";
++		qcom,mdss-dsi-bllp-eof-power-mode;
++		qcom,mdss-dsi-bllp-power-mode;
++		qcom,mdss-dsi-lane-0-state;
++		qcom,mdss-dsi-te-pin-select = <1>;
++		qcom,mdss-dsi-te-dcs-command = <1>;
++		qcom,mdss-dsi-te-using-te-pin;
++		qcom,mdss-dsi-idle-fps = <10>;
++		qcom,mdss-dsi-te-check-enable;
++		qcom,mdss-dsi-panel-timings = [
++			5f 12 0a 00 32 34 10 16 0f 03 04 00
++		];
++		qcom,mdss-dsi-t-clk-post = <0x05>;
++		qcom,mdss-dsi-t-clk-pre = <0x11>;
++		qcom,mdss-dsi-bl-min-level = <1>;
++		qcom,mdss-dsi-bl-max-level = <255>;
++		qcom,mdss-dsi-dma-trigger = "trigger_sw";
++		qcom,mdss-dsi-mdp-trigger = "none";
++		qcom,mdss-dsi-bl-pmic-control-type = "bl_ctrl_dcs";
++		qcom,mdss-dsi-reset-sequence = <0 10>, <1 15>;
++		/* clk = totlaH * totalV * bpp* 66fps */
++		//qcom,mdss-dsi-panel-clockrate = <276705792>;
++		qcom,mdss-dsi-panel-clockrate = <229213440>;
++		qcom,esd-check-enabled;
++		qcom,mdss-dsi-panel-status-check-mode = "te_signal_check";
++	};
++};
+diff --git a/arch/arm/boot/dts/fossil/8x09/apq8009w-darter/darter-msm8909-mdss-panels.dtsi b/arch/arm/boot/dts/fossil/8x09/apq8009w-darter/darter-msm8909-mdss-panels.dtsi
+new file mode 100644
+index 000000000000..aef58f758e8f
+--- /dev/null
++++ b/arch/arm/boot/dts/fossil/8x09/apq8009w-darter/darter-msm8909-mdss-panels.dtsi
+@@ -0,0 +1,36 @@
++/* Copyright (c) 2014-2018, The Linux Foundation. All rights reserved.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 and
++ * only version 2 as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ */
++
++#include "darter-dsi-panel-390p-auo-cmd.dtsi"
++
++&mdss_dsi0 {
++	qcom,dsi-pref-prim-pan = <&dsi_auo_x120_amoled_cmd>;
++	pinctrl-names = "mdss_default", "mdss_sleep";
++	pinctrl-0 = <&mdss_dsi_active &mdss_te_active>;
++	pinctrl-1 = <&mdss_dsi_suspend &mdss_te_suspend>;
++
++	qcom,platform-te-gpio = <&msm_gpio 24 0>;
++	qcom,platform-reset-gpio = <&msm_gpio 25 0>;
++	qcom,platform-tsresout-gpio = <&msm_gpio 16 0>;
++	qcom,platform-enable-gpio = <&msm_gpio 59 0>;
++	/delete-property/ qcom,platform-bklight-en-gpio;
++};
++&mdss_mdp {
++	/delete-node/ qcom,mdss_dsi_auo_390p_cmd;
++};
++
++&dsi_auo_x120_amoled_cmd {
++	qcom,mdss-dsi-bl-pmic-control-type = "bl_ctrl_dcs";
++	qcom,panel-supply-entries = <&dsi_pm660_panel_pwr_supply>;
++	qcom,mdss-dsi-power-off-disable;
++	qcom,mdss-dsi-tear-disable;
++};
+diff --git a/arch/arm/boot/dts/fossil/8x09/apq8009w-darter/darter-msm8909-mdss.dtsi b/arch/arm/boot/dts/fossil/8x09/apq8009w-darter/darter-msm8909-mdss.dtsi
+new file mode 100644
+index 000000000000..ab36729a3a23
+--- /dev/null
++++ b/arch/arm/boot/dts/fossil/8x09/apq8009w-darter/darter-msm8909-mdss.dtsi
+@@ -0,0 +1,14 @@
++/*
++ * Copyright (c) 2014-2016,2018, The Linux Foundation. All rights reserved.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 and
++ * only version 2 as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ */
++
++#include "darter-msm8909-mdss-panels.dtsi"
+diff --git a/arch/arm/boot/dts/fossil/8x09/apq8009w-darter/darter-msm8909.dtsi b/arch/arm/boot/dts/fossil/8x09/apq8009w-darter/darter-msm8909.dtsi
+new file mode 100644
+index 000000000000..97602e797962
+--- /dev/null
++++ b/arch/arm/boot/dts/fossil/8x09/apq8009w-darter/darter-msm8909.dtsi
+@@ -0,0 +1,13 @@
++/* Copyright (c) 2014-2018, The Linux Foundation. All rights reserved.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 and
++ * only version 2 as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ */
++
++#include "darter-msm8909-mdss.dtsi"
+diff --git a/arch/arm/boot/dts/fossil/8x09/apq8009w-darter/darter-touch.dtsi b/arch/arm/boot/dts/fossil/8x09/apq8009w-darter/darter-touch.dtsi
+new file mode 100644
+index 000000000000..c8e6fa4d5f4c
+--- /dev/null
++++ b/arch/arm/boot/dts/fossil/8x09/apq8009w-darter/darter-touch.dtsi
+@@ -0,0 +1,35 @@
++/*
++ * Copyright (c) 2017-2018, The Linux Foundation. All rights reserved.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 and
++ * only version 2 as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ */
++
++&soc {
++	i2c@78b9000 {
++		raydium@39 {
++			compatible = "raydium,raydium-ts-ray-390p";
++			reg = <0x39>;
++			interrupt-parent = <&msm_gpio>;
++			interrupts = <98 0x2008>;
++			vcc_i2c-supply = <&pm660_l13>;
++			raydium,reset-gpio = <&msm_gpio 16 0x00>;
++			raydium,irq-gpio =<&msm_gpio 98 0x2008>;
++			/* pins used by touchscreen */
++			pinctrl-names = "pmx_ts_active","pmx_ts_suspend","pmx_ts_release";
++			pinctrl-0 = <&ts_int_active &ts_reset_active>;
++			pinctrl-1 = <&ts_int_suspend &ts_reset_suspend>;
++			pinctrl-2 = <&ts_release>;
++			raydium,display-coords = <0 0 390 390>;
++			raydium,hard-reset-delay-ms = <5>;
++			raydium,soft-reset-delay-ms = <360>;
++			raydium,num-max-touches = <2>;
++		};
++	};
++};
+diff --git a/arch/arm/boot/dts/fossil/8x09/apq8009w-sole/Makefile b/arch/arm/boot/dts/fossil/8x09/apq8009w-sole/Makefile
+new file mode 100644
+index 000000000000..d834494b81c9
+--- /dev/null
++++ b/arch/arm/boot/dts/fossil/8x09/apq8009w-sole/Makefile
+@@ -0,0 +1,5 @@
++dtb-$(CONFIG_ARCH_MSM8909) += sole-apq8009w.dtb
++
++always		:= $(dtb-y)
++subdir-y	:= $(dts-dirs)
++clean-files	:= *.dtb
+diff --git a/arch/arm/boot/dts/fossil/8x09/apq8009w-sole/sole-8909w-pm660.dtsi b/arch/arm/boot/dts/fossil/8x09/apq8009w-sole/sole-8909w-pm660.dtsi
+new file mode 100644
+index 000000000000..3f1478f83562
+--- /dev/null
++++ b/arch/arm/boot/dts/fossil/8x09/apq8009w-sole/sole-8909w-pm660.dtsi
+@@ -0,0 +1,81 @@
++/*
++ * Copyright (c) 2017-2018, The Linux Foundation. All rights reserved.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 and
++ * only version 2 as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ */
++#include "sole-touch.dtsi"
++
++&pm660_fg {
++	qcom,fg-jeita-thresholds = <2 16 46 60>;
++	qcom,fg-jeita-hyst-temp = <2>;
++	qcom,fg-jeita-en = <1>;
++	qcom,fg-jeita-soft-hot-fv-cc = <4200 300>;
++	qcom,fg-jeita-soft-cold-fv-cc = <4000 60>;
++	qcom,battery-data = <&qrd_batterydata>;
++	qcom,fg-chg-term-current = <25>;
++	qcom,battery-thermal-coefficients = [d2 50 ff];
++	qcom,fg-rsense-sel = <1>;
++	qcom,fg-force-load-profile;
++	qcom,fg-recharge-soc-thr = <99>;
++	qcom,fg-cutoff-current = <40>;
++	qcom,fg-cutoff-voltage = <3200>;
++};
++
++/ {
++	/delete-node/ qcom,battery-data;
++	mtp_batterydata: qcom,battery-data {
++		qcom,batt-id-range-pct = <15>;
++		#include "../common/fg-gen3-batterydata-itech-3000mah.dtsi"
++	};
++	qrd_batterydata: qcom,battery-data {
++		qcom,batt-id-range-pct = <60>;
++		#include "../common/fg-gen3-batterydata-apack-300mah.dtsi"
++	};
++	qrd_batterydata: qcom,battery-data {
++		qcom,batt-id-range-pct = <30>;
++		#include "../common/fg-gen3-batterydata-lishen-300mah.dtsi"
++	};
++};
++&pm660_pon {
++	/delete-node/ qcom,pon_2;
++};
++
++&rpm_bus {
++	rpm-regulator-ldoa18 {
++		pm660_l18: regulator-l18 {
++			/delete-property/ supply-min-voltage;
++			/delete-property/ supply-max-voltage;
++			/delete-property/ qcom,init-voltage;
++			regulator-min-microvolt = <3300000>;
++			regulator-max-microvolt = <3300000>;
++			qcom,init-voltage = <3300000>;
++		};
++	};
++
++	/* Reconfig for PPG sensor of DVT */
++	rpm-regulator-ldoa14 {
++		pm660_l14: regulator-l14 {
++			regulator-always-on;
++			regulator-min-microvolt = <1900000>;
++			regulator-max-microvolt = <1900000>;
++			qcom,init-voltage = <1900000>;
++		};
++	};
++};
++
++&mdss_dsi {
++	qcom,mdss_dsi_ctrl0@1ac8000 {
++		/delete-property/ bklt-supply;
++	};
++};
++
++&soc {
++	/delete-node/ bob_vreg;
++};
+diff --git a/arch/arm/boot/dts/fossil/8x09/apq8009w-sole/sole-apq8009w.dts b/arch/arm/boot/dts/fossil/8x09/apq8009w-sole/sole-apq8009w.dts
+new file mode 100644
+index 000000000000..56f1ccae10ac
+--- /dev/null
++++ b/arch/arm/boot/dts/fossil/8x09/apq8009w-sole/sole-apq8009w.dts
+@@ -0,0 +1,282 @@
++/*
++ * Copyright (c) 2017-2018 The Linux Foundation. All rights reserved.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 and
++ * only version 2 as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ */
++
++/dts-v1/;
++
++#include "../../../../arm64/boot/dts/qcom/msm8909-mtp.dtsi"
++#include "../../../../arm64/boot/dts/qcom/msm8909w.dtsi"
++#include "../../../../arm64/boot/dts/qcom/8909w-pm660.dtsi"
++#include "../../../../arm64/boot/dts/qcom/msm8909w-gpu.dtsi"
++#include "../../../../arm64/boot/dts/qcom/apq8009w-bg-memory.dtsi"
++#include "../common/msm8909-audio-bg_codec.dtsi"
++#include "sole-msm8909.dtsi"
++#include "../common/msm8909w.dtsi"
++#include "sole-8909w-pm660.dtsi"
++#include "../common/8909w-pm660-regulator.dtsi"
++
++/ {
++	model = "Fossil Group, Inc. based on APQ8009W-PM660 BG Alpha SDW3100";
++	compatible = "qcom,apq8009-mtp", "qcom,apq8009", "qcom,mtp";
++	qcom,msm-id =   <301 0>;
++	qcom,board-id = <8 0x01e>;
++	qcom,pmic-id =  <0x0001001b 0x0 0x0 0x0>,
++			<0x0001011b 0x0 0x0 0x0>;
++};
++
++&soc {
++	/* delete stem_1 of gpio-key in common folder */
++	/delete-node/ gpio_keys;
++	qcom,blackghost {
++		compatible = "qcom,pil-blackghost";
++
++		qcom,pil-force-shutdown;
++		qcom,firmware-name = "bg-wear";
++		/* GPIO inputs from blackghost */
++		qcom,bg2ap-status-gpio = <&msm_gpio 97 0>;
++		qcom,bg2ap-errfatal-gpio = <&msm_gpio 95 0>;
++		/* GPIO output to blackghost */
++		qcom,ap2bg-status-gpio = <&msm_gpio 17 0>;
++		qcom,ap2bg-errfatal-gpio = <&msm_gpio 23 0>;
++	};
++
++	qcom,msm-ssc-sensors {
++		compatible = "qcom,msm-ssc-sensors";
++	};
++
++	qcom,glink-bgcom-xprt-bg {
++		compatible = "qcom,glink-bgcom-xprt";
++		label = "bg";
++		qcom,qos-config = <&glink_qos_bg>;
++		qcom,ramp-time = <0x10>,
++				     <0x20>,
++				     <0x30>,
++				     <0x40>;
++	};
++
++	glink_qos_bg: qcom,glink-qos-config-bg {
++		compatible = "qcom,glink-qos-config";
++		qcom,flow-info = <0x80 0x0>,
++				 <0x70 0x1>,
++				 <0x60 0x2>,
++				 <0x50 0x3>;
++		qcom,mtu-size = <0x800>;
++		qcom,tput-stats-cycle = <0xa>;
++	};
++
++	qcom,glink_pkt {
++		compatible = "qcom,glinkpkt";
++
++		qcom,glinkpkt-bg-daemon {
++			qcom,glinkpkt-transport = "bgcom";
++			qcom,glinkpkt-edge = "bg";
++			qcom,glinkpkt-ch-name = "bg-daemon";
++			qcom,glinkpkt-dev-name = "glink_pkt_bg_daemon";
++		};
++
++		qcom,glinkpkt-bg-display-ctrl {
++			qcom,glinkpkt-transport = "bgcom";
++			qcom,glinkpkt-edge = "bg";
++			qcom,glinkpkt-ch-name = "display-ctrl";
++			qcom,glinkpkt-dev-name = "glink_pkt_bg_display_ctrl";
++		};
++
++		qcom,glinkpkt-bg-display-data {
++			qcom,glinkpkt-transport = "bgcom";
++			qcom,glinkpkt-edge = "bg";
++			qcom,glinkpkt-ch-name = "display-data";
++			qcom,glinkpkt-dev-name = "glink_pkt_bg_display_data";
++		};
++
++		qcom,glinkpkt-bg-sso-ctrl {
++			qcom,glinkpkt-transport = "bgcom";
++			qcom,glinkpkt-edge = "bg";
++			qcom,glinkpkt-ch-name = "sso-ctrl";
++			qcom,glinkpkt-dev-name = "glink_pkt_bg_sso_ctrl";
++		};
++	};
++
++	spi@78B8000 {  /* BLSP1 QUP4 */
++		status = "ok";
++		qcom,bg-spi {
++			compatible = "qcom,bg-spi";
++			reg = <0>;
++			spi-max-frequency = <16000000>;
++			interrupt-parent = <&msm_gpio>;
++			qcom,irq-gpio = <&msm_gpio 110 1>;
++		};
++	};
++
++	qcom,bg-daemon {
++		compatible = "qcom,bg-daemon";
++		qcom,bg-reset-gpio = <&pm660_gpios 5 0>;
++		ssr-reg1-supply = <&pm660_l3>;
++		ssr-reg2-supply = <&pm660_l9>;
++	};
++};
++
++&i2c_1 {
++	status = "okay";
++	nq@28 {
++		compatible = "qcom,nq-nci";
++		reg = <0x28>;
++		qcom,nq-irq = <&msm_gpio 50 0x00>;
++		qcom,nq-ven = <&msm_gpio 36 0x00>;
++		qcom,nq-firm = <&msm_gpio 38 0x00>;
++		qcom,nq-esepwr = <&msm_gpio 51 0x00>;
++		qcom,nq-clkreq = <&pm660_gpios 4 0x00>;
++		qcom,clk-src = "BBCLK3";
++		interrupt-parent = <&msm_gpio>;
++		interrupts = <50 0>;
++		interrupt-names = "nfc_irq";
++		pinctrl-names = "nfc_active","nfc_suspend";
++		pinctrl-0 = <&nfcw_int_active
++			     &nfcw_disable_active
++			     &nfc_clk_default>;
++		pinctrl-1 = <&nfcw_int_suspend &nfcw_disable_suspend>;
++		clocks = <&clock_rpm clk_bb_clk3_pin>;
++		clock-names = "ref_clk";
++	};
++};
++
++&spi_0 {
++	status = "disabled";
++};
++
++&i2c_3 {
++	status = "disabled";
++};
++
++&i2c_4 {
++	status = "disabled";
++};
++
++&i2c_2 {
++	status = "disabled";
++};
++
++&sdc1_clk_off {
++	config {
++		pins = "sdc1_clk";
++		bias-disable; /* NO pull */
++		drive-strength = <2>; /* 2 MA */
++		output-low;
++	};
++};
++
++&sdc1_cmd_off {
++	config {
++		pins = "sdc1_cmd";
++		bias-disable; /* NO pull */
++		drive-strength = <2>; /* 2 MA */
++		output-low;
++	};
++};
++
++&sdc1_data_off {
++	config {
++		pins = "sdc1_data";
++		bias-disable; /* NO pull */
++		drive-strength = <2>; /* 2 MA */
++		output-low;
++	};
++};
++
++&sdhc_2 {
++	status = "disabled";
++};
++
++&audio_codec_mtp {
++	status = "disabled";
++};
++
++&audio_codec_bg {
++	status = "ok";
++};
++
++&bg_cdc {
++	status = "ok";
++	vdd-spkr-supply = <&pm660_l11>;
++	qcom,bg-speaker-connected;
++};
++
++&blsp1_uart1 {
++	status = "ok";
++	pinctrl-names = "default";
++	pinctrl-0 = <&uart_console_sleep>;
++};
++
++/* Pinctrl dt nodes for interrupt and reset gpio for Synaptics controller */
++&ts_int_active {
++	mux {
++		pins = "gpio98";
++	};
++
++	config {
++		pins = "gpio98";
++	};
++};
++
++&ts_int_suspend {
++	mux {
++		pins = "gpio98";
++	};
++
++	config {
++		pins = "gpio98";
++		/delete-property/ bias-pull-down;
++		bias-disable; /* No PULL */
++	};
++};
++
++&ts_reset_active {
++	mux {
++		pins = "gpio16";
++	};
++
++	config {
++		pins = "gpio16";
++	};
++};
++
++&ts_reset_suspend {
++	mux {
++		pins = "gpio16";
++	};
++
++	config {
++		pins = "gpio16";
++	};
++};
++
++&ts_release {
++	mux {
++		pins = "gpio98", "gpio16";
++	};
++
++	config {
++		pins = "gpio98", "gpio16";
++	};
++};
++
++&spi4_cs0_active {
++	mux {
++		pins = "gpio14";
++		function = "blsp_spi4";
++	};
++	config {
++		pins = "gpio14";
++		drive-strength = <2>;
++		bias-disable; /* No PULL */
++		output-high;
++	};
++};
+diff --git a/arch/arm/boot/dts/fossil/8x09/apq8009w-sole/sole-dsi-panel-auo-390p-amoled-cmd.dtsi b/arch/arm/boot/dts/fossil/8x09/apq8009w-sole/sole-dsi-panel-auo-390p-amoled-cmd.dtsi
+new file mode 100644
+index 000000000000..bded16057949
+--- /dev/null
++++ b/arch/arm/boot/dts/fossil/8x09/apq8009w-sole/sole-dsi-panel-auo-390p-amoled-cmd.dtsi
+@@ -0,0 +1,107 @@
++/* Copyright (c) 2013, The Linux Foundation. All rights reserved.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 and
++ * only version 2 as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ */
++
++&mdss_mdp {
++	dsi_auo_390p_amoled_cmd: qcom,mdss_dsi_auo_390p_amoled_cmd {
++	qcom,mdss-dsi-panel-name = "AUO 390p AMOLED command mode dsi panel";
++		qcom,mdss-dsi-panel-controller = <&mdss_dsi0>;
++		qcom,mdss-dsi-panel-type = "dsi_cmd_mode";
++		qcom,mdss-dsi-panel-destination = "display_1";
++		qcom,mdss-dsi-panel-framerate = <45>;
++		qcom,mdss-dsi-virtual-channel-id = <0>;
++		qcom,mdss-dsi-stream = <0>;
++		qcom,mdss-dsi-panel-width = <390>;
++		qcom,mdss-dsi-panel-height = <390>;
++		qcom,mdss-dsi-h-front-porch = <4>;
++		qcom,mdss-dsi-h-back-porch = <6>;
++		qcom,mdss-dsi-h-pulse-width = <4>;
++		qcom,mdss-dsi-h-sync-skew = <0>;
++		qcom,mdss-dsi-v-back-porch = <1>;
++		qcom,mdss-dsi-v-front-porch = <1>;
++		qcom,mdss-dsi-v-pulse-width = <2>;
++		qcom,mdss-dsi-h-left-border = <0>;
++		qcom,mdss-dsi-h-right-border = <0>;
++		qcom,mdss-dsi-v-top-border = <0>;
++		qcom,mdss-dsi-v-bottom-border = <0>;
++		qcom,mdss-dsi-bpp = <24>;
++		qcom,mdss-dsi-color-order = "rgb_swap_rgb";
++		qcom,mdss-dsi-underflow-color = <0xff>;
++		qcom,mdss-dsi-border-color = <0>;
++		qcom,mdss-dsi-pixel-packing = "tight";
++		qcom,mdss-dsi-pixel-alignment = <0>;
++		qcom,mdss-dsi-on-command = [
++			05 01 00 00 01 00 02 00 00
++			15 01 00 00 00 00 02 FE 01
++			15 01 00 00 00 00 02 0A F0
++			15 01 00 00 00 00 02 FE 00
++			29 01 00 00 00 00 05 2A 00 02 01 87
++			29 01 00 00 00 00 05 2B 00 00 01 85
++			29 01 00 00 00 00 05 30 00 00 01 85
++			29 01 00 00 00 00 05 31 00 02 01 87
++			05 01 00 00 00 00 02 12 00
++			15 01 00 00 00 00 02 35 02
++			15 01 00 00 00 00 02 53 20
++			15 01 00 00 00 00 02 51 FF
++			15 01 00 00 00 00 02 63 FF
++			05 01 00 00 32 00 02 11 00
++			15 01 00 00 00 00 02 51 00
++			05 01 00 00 1E 00 02 29 00
++		];
++		qcom,mdss-dsi-off-command = [
++			05 01 00 00 00 00 02 28 00
++			05 01 00 00 78 00 02 10 00
++		];
++		qcom,mdss-dsi-on-command-state = "dsi_lp_mode";
++		qcom,mdss-dsi-off-command-state = "dsi_hs_mode";
++		qcom,mdss-dsi-idle-on-command = [
++			15 01 00 00 46 00 02 FE 00
++			05 01 00 00 00 00 01 39
++		];
++		qcom,mdss-dsi-idle-on-command-state = "dsi_hs_mode";
++		/*TODO: will remove set colum/row address*/
++		qcom,mdss-dsi-idle-off-command = [
++			05 01 00 00 1f 00 01 38 /* Idle-Mode Off  */
++			15 01 00 00 00 00 02 FE 00
++			29 01 00 00 00 00 05 2A 00 02 01 87
++			29 01 00 00 00 00 05 2B 00 00 01 85
++			29 01 00 00 00 00 05 30 00 00 01 85
++			29 01 00 00 00 00 05 31 00 02 01 87
++			05 01 00 00 00 00 02 12 00
++		];
++
++		qcom,mdss-dsi-h-sync-pulse = <1>;
++		qcom,mdss-dsi-traffic-mode = "burst_mode";
++		qcom,mdss-dsi-lane-map = "lane_map_0123";
++		qcom,mdss-dsi-bllp-eof-power-mode;
++		qcom,mdss-dsi-bllp-power-mode;
++		qcom,mdss-dsi-lane-0-state;
++		qcom,mdss-tear-check-frame-rate = <4500>;
++		qcom,mdss-dsi-idle-fps = <15>;
++		/* clk = totlaH * totalV * bpp* 60fps */
++		qcom,mdss-dsi-panel-clockrate = <308655360>;
++		qcom,mdss-dsi-te-pin-select = <1>;
++		qcom,mdss-dsi-te-dcs-command = <1>;
++		qcom,mdss-dsi-te-using-te-pin;
++		qcom,mdss-dsi-te-check-enable;
++		qcom,mdss-dsi-panel-timings = [
++			4E 0E 08 00 2E 30 0E 12 0A 03 04 00
++		];
++		qcom,mdss-dsi-t-clk-post = <0x05>;
++		qcom,mdss-dsi-t-clk-pre = <0x12>;
++		qcom,mdss-dsi-bl-min-level = <1>;
++		qcom,mdss-dsi-bl-max-level = <255>;
++		qcom,mdss-dsi-dma-trigger = "trigger_sw";
++		qcom,mdss-dsi-mdp-trigger = "none";
++		qcom,mdss-dsi-bl-pmic-control-type = "bl_ctrl_dcs";
++		qcom,mdss-dsi-reset-sequence = <0 10>, <1 10>;
++	};
++};
+diff --git a/arch/arm/boot/dts/fossil/8x09/apq8009w-sole/sole-msm8909-mdss-panels.dtsi b/arch/arm/boot/dts/fossil/8x09/apq8009w-sole/sole-msm8909-mdss-panels.dtsi
+new file mode 100644
+index 000000000000..cfe7ca85deb3
+--- /dev/null
++++ b/arch/arm/boot/dts/fossil/8x09/apq8009w-sole/sole-msm8909-mdss-panels.dtsi
+@@ -0,0 +1,24 @@
++/* Copyright (c) 2014-2018, The Linux Foundation. All rights reserved.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 and
++ * only version 2 as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ */
++#include "sole-dsi-panel-auo-390p-amoled-cmd.dtsi"
++#include "../common/msm8909-mdss-panels.dtsi"
++
++&mdss_dsi0 {
++	qcom,dsi-pref-prim-pan = <&dsi_auo_390p_amoled_cmd>;
++};
++&dsi_auo_390p_amoled_cmd {
++	qcom,mdss-dsi-bl-pmic-control-type = "bl_ctrl_dcs";
++	qcom,panel-supply-entries = <&dsi_pm660_panel_pwr_supply>;
++	qcom,mdss-dsi-power-off-disable;
++	qcom,mdss-dsi-tear-disable;
++	qcom,esd-check-model = "auo_h128blx";
++};
+diff --git a/arch/arm/boot/dts/fossil/8x09/apq8009w-sole/sole-msm8909-mdss.dtsi b/arch/arm/boot/dts/fossil/8x09/apq8009w-sole/sole-msm8909-mdss.dtsi
+new file mode 100644
+index 000000000000..7d356195a123
+--- /dev/null
++++ b/arch/arm/boot/dts/fossil/8x09/apq8009w-sole/sole-msm8909-mdss.dtsi
+@@ -0,0 +1,14 @@
++/*
++ * Copyright (c) 2014-2016,2018, The Linux Foundation. All rights reserved.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 and
++ * only version 2 as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ */
++
++#include "sole-msm8909-mdss-panels.dtsi"
+diff --git a/arch/arm/boot/dts/fossil/8x09/apq8009w-sole/sole-msm8909.dtsi b/arch/arm/boot/dts/fossil/8x09/apq8009w-sole/sole-msm8909.dtsi
+new file mode 100644
+index 000000000000..4ae65f559504
+--- /dev/null
++++ b/arch/arm/boot/dts/fossil/8x09/apq8009w-sole/sole-msm8909.dtsi
+@@ -0,0 +1,13 @@
++/* Copyright (c) 2014-2018, The Linux Foundation. All rights reserved.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 and
++ * only version 2 as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ */
++
++#include "sole-msm8909-mdss.dtsi"
+diff --git a/arch/arm/boot/dts/fossil/8x09/apq8009w-sole/sole-touch.dtsi b/arch/arm/boot/dts/fossil/8x09/apq8009w-sole/sole-touch.dtsi
+new file mode 100644
+index 000000000000..3882ba73c150
+--- /dev/null
++++ b/arch/arm/boot/dts/fossil/8x09/apq8009w-sole/sole-touch.dtsi
+@@ -0,0 +1,23 @@
++/*
++ * Copyright (c) 2017-2019, The Linux Foundation. All rights reserved.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 and
++ * only version 2 as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ */
++#include "../common/touch.dtsi"
++&soc {
++	i2c@78b9000 {
++		raydium@39 {
++			raydium,display-coords = <0 0 390 390>;
++			raydium,hard-reset-delay-ms = <100>;
++			raydium,soft-reset-delay-ms = <50>;
++			raydium,num-max-touches = <2>;
++		};
++	};
++};
+diff --git a/arch/arm/boot/dts/fossil/8x09/apq8009w-triggerfish/Makefile b/arch/arm/boot/dts/fossil/8x09/apq8009w-triggerfish/Makefile
+new file mode 100644
+index 000000000000..676702008709
+--- /dev/null
++++ b/arch/arm/boot/dts/fossil/8x09/apq8009w-triggerfish/Makefile
+@@ -0,0 +1,5 @@
++dtb-$(CONFIG_ARCH_MSM8909) += triggerfish-apq8009w.dtb 
++
++always		:= $(dtb-y)
++subdir-y	:= $(dts-dirs)
++clean-files	:= *.dtb
+diff --git a/arch/arm/boot/dts/fossil/8x09/apq8009w-triggerfish/triggerfish-8909w-pm660.dtsi b/arch/arm/boot/dts/fossil/8x09/apq8009w-triggerfish/triggerfish-8909w-pm660.dtsi
+new file mode 100644
+index 000000000000..f4681b2c170d
+--- /dev/null
++++ b/arch/arm/boot/dts/fossil/8x09/apq8009w-triggerfish/triggerfish-8909w-pm660.dtsi
+@@ -0,0 +1,86 @@
++/*
++ * Copyright (c) 2017-2018, The Linux Foundation. All rights reserved.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 and
++ * only version 2 as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ */
++#include "triggerfish-touch.dtsi"
++
++&pm660_fg {
++	qcom,fg-jeita-thresholds = <2 16 46 60>;
++	qcom,fg-jeita-hyst-temp = <2>;
++	qcom,fg-jeita-en = <1>;
++	qcom,fg-jeita-soft-hot-fv-cc = <4200 300>;
++	qcom,fg-jeita-soft-cold-fv-cc = <4000 75>;
++	qcom,battery-data = <&qrd_batterydata>;
++	qcom,fg-chg-term-current = <25>;
++	qcom,battery-thermal-coefficients = [d2 50 ff];
++	qcom,fg-rsense-sel = <1>;
++	qcom,fg-force-load-profile;
++	qcom,fg-recharge-soc-thr = <99>;
++	qcom,fg-cutoff-current = <40>;
++	qcom,fg-cutoff-voltage = <3200>;
++};
++
++/ {
++	/delete-node/ qcom,battery-data;
++	mtp_batterydata: qcom,battery-data {
++		qcom,batt-id-range-pct = <15>;
++		#include "../common/fg-gen3-batterydata-itech-3000mah.dtsi"
++	};
++	qrd_batterydata: qcom,battery-data {
++		qcom,batt-id-range-pct = <60>;
++		#include "../common/fg-gen3-batterydata-apack-310mah.dtsi"
++	};
++};
++
++&pm660_pon {
++	qcom,pon_2 {
++		linux,code = <266>;
++	};
++};
++
++&pm660_0 {
++	pm660_charger: qcom,qpnp-smb2 {
++		qcom,aicl_rerun_enable;
++	};
++};
++
++&rpm_bus {
++	rpm-regulator-ldoa18 {
++		pm660_l18: regulator-l18 {
++			/delete-property/ supply-min-voltage;
++			/delete-property/ supply-max-voltage;
++			/delete-property/ qcom,init-voltage;
++			regulator-min-microvolt = <3300000>;
++			regulator-max-microvolt = <3300000>;
++			qcom,init-voltage = <3300000>;
++		};
++	};
++
++	/* Reconfig for PPG sensor of DVT */
++	rpm-regulator-ldoa14 {
++		pm660_l14: regulator-l14 {
++			regulator-always-on;
++			regulator-min-microvolt = <1900000>;
++			regulator-max-microvolt = <1900000>;
++			qcom,init-voltage = <1900000>;
++		};
++	};
++};
++
++&mdss_dsi {
++	qcom,mdss_dsi_ctrl0@1ac8000 {
++		/delete-property/ bklt-supply;
++	};
++};
++
++&soc {
++	/delete-node/ bob_vreg;
++};
+diff --git a/arch/arm/boot/dts/fossil/8x09/apq8009w-triggerfish/triggerfish-apq8009w.dts b/arch/arm/boot/dts/fossil/8x09/apq8009w-triggerfish/triggerfish-apq8009w.dts
+new file mode 100644
+index 000000000000..f75afb8544e0
+--- /dev/null
++++ b/arch/arm/boot/dts/fossil/8x09/apq8009w-triggerfish/triggerfish-apq8009w.dts
+@@ -0,0 +1,294 @@
++/*
++ * Copyright (c) 2017-2018 The Linux Foundation. All rights reserved.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 and
++ * only version 2 as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ */
++
++/dts-v1/;
++
++#include "../../../../arm64/boot/dts/qcom/msm8909-mtp.dtsi"
++#include "../../../../arm64/boot/dts/qcom/msm8909w.dtsi"
++#include "../../../../arm64/boot/dts/qcom/8909w-pm660.dtsi"
++#include "../../../../arm64/boot/dts/qcom/msm8909w-gpu.dtsi"
++#include "../../../../arm64/boot/dts/qcom/apq8009w-bg-memory.dtsi"
++#include "../common/msm8909-audio-bg_codec.dtsi"
++#include "triggerfish-msm8909.dtsi"
++#include "../common/msm8909w.dtsi"
++#include "triggerfish-8909w-pm660.dtsi"
++#include "../common/8909w-pm660-regulator.dtsi"
++
++/ {
++	model = "Fossil Group, Inc. based on APQ8009W-PM660 BG Alpha SDW3100";
++	compatible = "qcom,apq8009-mtp", "qcom,apq8009", "qcom,mtp";
++	qcom,msm-id =   <265 0>,
++			<301 0>;
++	qcom,board-id = <8 0x015>;
++	qcom,pmic-id =  <0x0001001b 0x0 0x0 0x0>,
++			<0x0001011b 0x0 0x0 0x0>;
++};
++
++&soc {
++	qcom,blackghost {
++		compatible = "qcom,pil-blackghost";
++
++		qcom,pil-force-shutdown;
++		qcom,firmware-name = "bg-wear";
++		/* GPIO inputs from blackghost */
++		qcom,bg2ap-status-gpio = <&msm_gpio 97 0>;
++		qcom,bg2ap-errfatal-gpio = <&msm_gpio 95 0>;
++		/* GPIO output to blackghost */
++		qcom,ap2bg-status-gpio = <&msm_gpio 17 0>;
++		qcom,ap2bg-errfatal-gpio = <&msm_gpio 23 0>;
++	};
++
++	qcom,msm-ssc-sensors {
++		compatible = "qcom,msm-ssc-sensors";
++	};
++
++	qcom,glink-bgcom-xprt-bg {
++		compatible = "qcom,glink-bgcom-xprt";
++		label = "bg";
++		qcom,qos-config = <&glink_qos_bg>;
++		qcom,ramp-time = <0x10>,
++				     <0x20>,
++				     <0x30>,
++				     <0x40>;
++	};
++
++	glink_qos_bg: qcom,glink-qos-config-bg {
++		compatible = "qcom,glink-qos-config";
++		qcom,flow-info = <0x80 0x0>,
++				 <0x70 0x1>,
++				 <0x60 0x2>,
++				 <0x50 0x3>;
++		qcom,mtu-size = <0x800>;
++		qcom,tput-stats-cycle = <0xa>;
++	};
++
++	qcom,glink_pkt {
++		compatible = "qcom,glinkpkt";
++
++		qcom,glinkpkt-bg-daemon {
++			qcom,glinkpkt-transport = "bgcom";
++			qcom,glinkpkt-edge = "bg";
++			qcom,glinkpkt-ch-name = "bg-daemon";
++			qcom,glinkpkt-dev-name = "glink_pkt_bg_daemon";
++		};
++
++		qcom,glinkpkt-bg-display-ctrl {
++			qcom,glinkpkt-transport = "bgcom";
++			qcom,glinkpkt-edge = "bg";
++			qcom,glinkpkt-ch-name = "display-ctrl";
++			qcom,glinkpkt-dev-name = "glink_pkt_bg_display_ctrl";
++		};
++
++		qcom,glinkpkt-bg-display-data {
++			qcom,glinkpkt-transport = "bgcom";
++			qcom,glinkpkt-edge = "bg";
++			qcom,glinkpkt-ch-name = "display-data";
++			qcom,glinkpkt-dev-name = "glink_pkt_bg_display_data";
++		};
++
++		qcom,glinkpkt-bg-rsb-ctrl {
++			qcom,glinkpkt-transport = "bgcom";
++			qcom,glinkpkt-edge = "bg";
++			qcom,glinkpkt-ch-name = "RSB_CTRL";
++			qcom,glinkpkt-dev-name = "glink_pkt_bg_rsb_ctrl";
++		};
++		
++		qcom,glinkpkt-bg-sso-ctrl {
++			qcom,glinkpkt-transport = "bgcom";
++			qcom,glinkpkt-edge = "bg";
++			qcom,glinkpkt-ch-name = "sso-ctrl";
++			qcom,glinkpkt-dev-name = "glink_pkt_bg_sso_ctrl";
++		};
++	};
++
++	spi@78B8000 {  /* BLSP1 QUP4 */
++		status = "ok";
++		qcom,bg-spi {
++			compatible = "qcom,bg-spi";
++			reg = <0>;
++			spi-max-frequency = <16000000>;
++			interrupt-parent = <&msm_gpio>;
++			qcom,irq-gpio = <&msm_gpio 110 1>;
++		};
++	};
++
++	qcom,bg-rsb {
++		compatible = "qcom,bg-rsb";
++		vdd-ldo1-supply = <&pm660_l11>;
++		vdd-ldo2-supply = <&pm660_l15>;
++	};
++
++	qcom,bg-daemon {
++		compatible = "qcom,bg-daemon";
++		qcom,bg-reset-gpio = <&pm660_gpios 5 0>;
++		ssr-reg1-supply = <&pm660_l3>;
++		ssr-reg2-supply = <&pm660_l9>;
++	};
++};
++
++&i2c_1 {
++	status = "okay";
++	nq@28 {
++		compatible = "qcom,nq-nci";
++		reg = <0x28>;
++		qcom,nq-irq = <&msm_gpio 50 0x00>;
++		qcom,nq-ven = <&msm_gpio 36 0x00>;
++		qcom,nq-firm = <&msm_gpio 38 0x00>;
++		qcom,nq-esepwr = <&msm_gpio 51 0x00>;
++		qcom,nq-clkreq = <&pm660_gpios 4 0x00>;
++		qcom,clk-src = "BBCLK3";
++		interrupt-parent = <&msm_gpio>;
++		interrupts = <50 0>;
++		interrupt-names = "nfc_irq";
++		pinctrl-names = "nfc_active","nfc_suspend";
++		pinctrl-0 = <&nfcw_int_active
++			     &nfcw_disable_active
++			     &nfc_clk_default>;
++		pinctrl-1 = <&nfcw_int_suspend &nfcw_disable_suspend>;
++		clocks = <&clock_rpm clk_bb_clk3_pin>;
++		clock-names = "ref_clk";
++	};
++};
++
++&spi_0 {
++	status = "disabled";
++};
++
++&i2c_3 {
++	status = "disabled";
++};
++
++&i2c_4 {
++	status = "disabled";
++};
++
++&i2c_2 {
++	status = "disabled";
++};
++
++&sdc1_clk_off {
++	config {
++		pins = "sdc1_clk";
++		bias-disable; /* NO pull */
++		drive-strength = <2>; /* 2 MA */
++		output-low;
++	};
++};
++
++&sdc1_cmd_off {
++	config {
++		pins = "sdc1_cmd";
++		bias-disable; /* NO pull */
++		drive-strength = <2>; /* 2 MA */
++		output-low;
++	};
++};
++
++&sdc1_data_off {
++	config {
++		pins = "sdc1_data";
++		bias-disable; /* NO pull */
++		drive-strength = <2>; /* 2 MA */
++		output-low;
++	};
++};
++
++&sdhc_2 {
++	status = "disabled";
++};
++
++&audio_codec_mtp {
++	status = "disabled";
++};
++
++&audio_codec_bg {
++	status = "ok";
++};
++
++&bg_cdc {
++	status = "ok";
++	vdd-spkr-supply = <&pm660_l11>;
++	qcom,bg-speaker-connected;
++};
++
++&blsp1_uart1 {
++	status = "ok";
++	pinctrl-names = "default";
++	pinctrl-0 = <&uart_console_sleep>;
++};
++
++/* Pinctrl dt nodes for interrupt and reset gpio for Synaptics controller */
++&ts_int_active {
++	mux {
++		pins = "gpio98";
++	};
++
++	config {
++		pins = "gpio98";
++	};
++};
++
++&ts_int_suspend {
++	mux {
++		pins = "gpio98";
++	};
++
++	config {
++		pins = "gpio98";
++		/delete-property/ bias-pull-down;
++		bias-disable; /* No PULL */
++	};
++};
++
++&ts_reset_active {
++	mux {
++		pins = "gpio16";
++	};
++
++	config {
++		pins = "gpio16";
++	};
++};
++
++&ts_reset_suspend {
++	mux {
++		pins = "gpio16";
++	};
++
++	config {
++		pins = "gpio16";
++	};
++};
++
++&ts_release {
++	mux {
++		pins = "gpio98", "gpio16";
++	};
++
++	config {
++		pins = "gpio98", "gpio16";
++	};
++};
++
++&spi4_cs0_active {
++	mux {
++		pins = "gpio14";
++		function = "blsp_spi4";
++	};
++	config {
++		pins = "gpio14";
++		drive-strength = <2>;
++		bias-disable; /* No PULL */
++		output-high;
++	};
++};
+diff --git a/arch/arm/boot/dts/fossil/8x09/apq8009w-triggerfish/triggerfish-dsi-panel-auo-416p-amoled-cmd.dtsi b/arch/arm/boot/dts/fossil/8x09/apq8009w-triggerfish/triggerfish-dsi-panel-auo-416p-amoled-cmd.dtsi
+new file mode 100644
+index 000000000000..44063fbb8d2a
+--- /dev/null
++++ b/arch/arm/boot/dts/fossil/8x09/apq8009w-triggerfish/triggerfish-dsi-panel-auo-416p-amoled-cmd.dtsi
+@@ -0,0 +1,12 @@
++/* Copyright (c) 2013, The Linux Foundation. All rights reserved.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 and
++ * only version 2 as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ */
++#include "../common/dsi-panel-auo-416p-amoled-cmd.dtsi"
+diff --git a/arch/arm/boot/dts/fossil/8x09/apq8009w-triggerfish/triggerfish-msm8909-mdss-panels.dtsi b/arch/arm/boot/dts/fossil/8x09/apq8009w-triggerfish/triggerfish-msm8909-mdss-panels.dtsi
+new file mode 100644
+index 000000000000..5bf35d7e90b2
+--- /dev/null
++++ b/arch/arm/boot/dts/fossil/8x09/apq8009w-triggerfish/triggerfish-msm8909-mdss-panels.dtsi
+@@ -0,0 +1,23 @@
++/* Copyright (c) 2014-2018, The Linux Foundation. All rights reserved.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 and
++ * only version 2 as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ */
++#include "triggerfish-dsi-panel-auo-416p-amoled-cmd.dtsi"
++#include "../common/msm8909-mdss-panels.dtsi"
++&mdss_dsi0 {
++	qcom,dsi-pref-prim-pan = <&dsi_auo_416p_amoled_cmd>;
++};
++&dsi_auo_416p_amoled_cmd {
++	qcom,mdss-dsi-bl-pmic-control-type = "bl_ctrl_dcs";
++	qcom,panel-supply-entries = <&dsi_pm660_panel_pwr_supply>;
++	qcom,mdss-dsi-power-off-disable;
++	qcom,mdss-dsi-tear-disable;
++	qcom,esd-check-model = "auo_u128blx";
++};
+diff --git a/arch/arm/boot/dts/fossil/8x09/apq8009w-triggerfish/triggerfish-msm8909-mdss.dtsi b/arch/arm/boot/dts/fossil/8x09/apq8009w-triggerfish/triggerfish-msm8909-mdss.dtsi
+new file mode 100644
+index 000000000000..59918ead90f5
+--- /dev/null
++++ b/arch/arm/boot/dts/fossil/8x09/apq8009w-triggerfish/triggerfish-msm8909-mdss.dtsi
+@@ -0,0 +1,14 @@
++/*
++ * Copyright (c) 2014-2016,2018, The Linux Foundation. All rights reserved.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 and
++ * only version 2 as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ */
++
++#include "triggerfish-msm8909-mdss-panels.dtsi"
+diff --git a/arch/arm/boot/dts/fossil/8x09/apq8009w-triggerfish/triggerfish-msm8909.dtsi b/arch/arm/boot/dts/fossil/8x09/apq8009w-triggerfish/triggerfish-msm8909.dtsi
+new file mode 100644
+index 000000000000..15ba9f1506b4
+--- /dev/null
++++ b/arch/arm/boot/dts/fossil/8x09/apq8009w-triggerfish/triggerfish-msm8909.dtsi
+@@ -0,0 +1,13 @@
++/* Copyright (c) 2014-2018, The Linux Foundation. All rights reserved.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 and
++ * only version 2 as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ */
++
++#include "triggerfish-msm8909-mdss.dtsi"
+diff --git a/arch/arm/boot/dts/fossil/8x09/apq8009w-triggerfish/triggerfish-touch.dtsi b/arch/arm/boot/dts/fossil/8x09/apq8009w-triggerfish/triggerfish-touch.dtsi
+new file mode 100644
+index 000000000000..884ceae0c021
+--- /dev/null
++++ b/arch/arm/boot/dts/fossil/8x09/apq8009w-triggerfish/triggerfish-touch.dtsi
+@@ -0,0 +1,23 @@
++/*
++ * Copyright (c) 2017-2019, The Linux Foundation. All rights reserved.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 and
++ * only version 2 as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ */
++#include "../common/touch.dtsi"
++&soc {
++	i2c@78b9000 {
++		raydium@39 {
++			raydium,display-coords = <0 0 416 416>;
++			raydium,hard-reset-delay-ms = <5>;
++			raydium,soft-reset-delay-ms = <360>;
++			raydium,num-max-touches = <2>;
++		};
++	};
++};
+diff --git a/arch/arm/boot/dts/fossil/8x09/common/8909w-pm660-regulator.dtsi b/arch/arm/boot/dts/fossil/8x09/common/8909w-pm660-regulator.dtsi
+new file mode 100644
+index 000000000000..ceeff9cf7155
+--- /dev/null
++++ b/arch/arm/boot/dts/fossil/8x09/common/8909w-pm660-regulator.dtsi
+@@ -0,0 +1,23 @@
++/* Copyright (c) 2017-2018, The Linux Foundation. All rights reserved.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 and
++ * only version 2 as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ */
++
++&rpm_bus {
++	rpm-regulator-ldoa15 {
++		status = "okay";
++		pm660_l15: regulator-l15 {
++			regulator-min-microvolt = <3000000>;
++			regulator-max-microvolt = <3000000>;
++			qcom,init-voltage = <3000000>;
++			status = "okay";
++		};
++	};
++};
+diff --git a/arch/arm/boot/dts/fossil/8x09/common/dsi-panel-auo-416p-amoled-cmd.dtsi b/arch/arm/boot/dts/fossil/8x09/common/dsi-panel-auo-416p-amoled-cmd.dtsi
+new file mode 100644
+index 000000000000..43b28375cb02
+--- /dev/null
++++ b/arch/arm/boot/dts/fossil/8x09/common/dsi-panel-auo-416p-amoled-cmd.dtsi
+@@ -0,0 +1,120 @@
++/* Copyright (c) 2013, The Linux Foundation. All rights reserved.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 and
++ * only version 2 as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ */
++
++&mdss_mdp {
++	dsi_auo_416p_amoled_cmd: qcom,mdss_dsi_auo_416p_amoled_cmd {
++	qcom,mdss-dsi-panel-name = "AUO 416p AMOLED command mode dsi panel";
++		qcom,mdss-dsi-panel-controller = <&mdss_dsi0>;
++		qcom,mdss-dsi-panel-type = "dsi_cmd_mode";
++		qcom,mdss-dsi-panel-destination = "display_1";
++		qcom,mdss-dsi-panel-framerate = <45>;
++		qcom,mdss-dsi-virtual-channel-id = <0>;
++		qcom,mdss-dsi-stream = <0>;
++		qcom,mdss-dsi-panel-width = <416>;
++		qcom,mdss-dsi-panel-height = <416>;
++		qcom,mdss-dsi-h-front-porch = <4>;
++		qcom,mdss-dsi-h-back-porch = <6>;
++		qcom,mdss-dsi-h-pulse-width = <4>;
++		qcom,mdss-dsi-h-sync-skew = <0>;
++		qcom,mdss-dsi-v-back-porch = <1>;
++		qcom,mdss-dsi-v-front-porch = <1>;
++		qcom,mdss-dsi-v-pulse-width = <2>;
++		qcom,mdss-dsi-h-left-border = <0>;
++		qcom,mdss-dsi-h-right-border = <0>;
++		qcom,mdss-dsi-v-top-border = <0>;
++		qcom,mdss-dsi-v-bottom-border = <0>;
++		qcom,mdss-dsi-bpp = <24>;
++		qcom,mdss-dsi-color-order = "rgb_swap_rgb";
++		qcom,mdss-dsi-underflow-color = <0xff>;
++		qcom,mdss-dsi-border-color = <0>;
++		qcom,mdss-dsi-pixel-packing = "tight";
++		qcom,mdss-dsi-pixel-alignment = <0>;
++		qcom,mdss-dsi-on-command = [
++			05 01 00 00 01 00 02 00 00
++			15 01 00 00 00 00 02 FE 01
++			15 01 00 00 00 00 02 0A F0
++			15 01 00 00 00 00 02 FE 00
++			29 01 00 00 00 00 05 2A 00 1E 01 BD
++			29 01 00 00 00 00 05 2B 00 00 01 9F
++			29 01 00 00 00 00 05 30 00 00 01 9F
++			29 01 00 00 00 00 05 31 00 1E 01 BD
++			05 01 00 00 00 00 02 12 00
++			15 01 00 00 00 00 02 35 02
++			15 01 00 00 00 00 02 53 20
++			15 01 00 00 00 00 02 51 FF
++			15 01 00 00 00 00 02 63 FF
++			05 01 00 00 32 00 02 11 00
++			15 01 00 00 00 00 02 51 00
++			05 01 00 00 1E 00 02 29 00
++		];
++		qcom,mdss-dsi-off-command = [
++			05 01 00 00 00 00 02 28 00
++			05 01 00 00 78 00 02 10 00
++		];
++		qcom,mdss-dsi-on-command-state = "dsi_lp_mode";
++		qcom,mdss-dsi-off-command-state = "dsi_hs_mode";
++		qcom,mdss-dsi-idle-on-command = [
++			15 01 00 00 46 00 02 FE 00
++			05 01 00 00 00 00 01 39
++		];
++		qcom,mdss-dsi-idle-on-command-state = "dsi_hs_mode";
++		/*TODO: will remove set colum/row address*/
++		qcom,mdss-dsi-idle-off-command = [
++			05 01 00 00 1f 00 01 38 /* Idle-Mode Off  */
++			15 01 00 00 00 00 02 FE 00
++			29 01 00 00 00 00 05 2A 00 1E 01 BD
++			29 01 00 00 00 00 05 2B 00 00 01 9F
++			29 01 00 00 00 00 05 30 00 00 01 9F
++			29 01 00 00 00 00 05 31 00 1E 01 BD
++			05 01 00 00 00 00 02 12 00
++		];
++
++		qcom,mdss-dsi-hbm0-on-command = [
++			15 01 00 00 00 00 02 FE 01
++			15 01 00 00 00 00 02 11 93
++			15 01 00 00 00 00 02 FE 00
++			15 01 00 00 00 00 02 66 02
++		];
++		qcom,mdss-dsi-hbm-off-command = [
++			15 01 00 00 00 00 02 FE 00
++			15 01 00 00 28 00 02 66 00
++			15 01 00 00 00 00 02 FE 01
++			15 01 00 00 00 00 02 11 80
++			15 01 00 00 00 00 02 FE 00
++		];
++		qcom,mdss-dsi-h-sync-pulse = <1>;
++		qcom,mdss-dsi-traffic-mode = "burst_mode";
++		qcom,mdss-dsi-lane-map = "lane_map_0123";
++		qcom,mdss-dsi-bllp-eof-power-mode;
++		qcom,mdss-dsi-bllp-power-mode;
++		qcom,mdss-dsi-lane-0-state;
++		qcom,mdss-tear-check-frame-rate = <4500>;
++		qcom,mdss-dsi-idle-fps = <15>;
++		/* clk = totlaH * totalV * bpp* 60fps */
++		qcom,mdss-dsi-panel-clockrate = <308655360>;
++		qcom,mdss-dsi-te-pin-select = <1>;
++		qcom,mdss-dsi-te-dcs-command = <1>;
++		qcom,mdss-dsi-te-using-te-pin;
++		qcom,mdss-dsi-te-check-enable;
++		qcom,mdss-dsi-panel-timings = [
++			4E 0E 08 00 2E 30 0E 12 0A 03 04 00
++		];
++		qcom,mdss-dsi-t-clk-post = <0x05>;
++		qcom,mdss-dsi-t-clk-pre = <0x12>;
++		qcom,mdss-dsi-bl-min-level = <1>;
++		qcom,mdss-dsi-bl-max-level = <255>;
++		qcom,mdss-dsi-dma-trigger = "trigger_sw";
++		qcom,mdss-dsi-mdp-trigger = "none";
++		qcom,mdss-dsi-bl-pmic-control-type = "bl_ctrl_dcs";
++		qcom,mdss-dsi-reset-sequence = <0 10>, <1 10>;
++	};
++};
+diff --git a/arch/arm/boot/dts/fossil/8x09/common/fg-gen3-batterydata-apack-300mah.dtsi b/arch/arm/boot/dts/fossil/8x09/common/fg-gen3-batterydata-apack-300mah.dtsi
+new file mode 100644
+index 000000000000..379d4fbf534e
+--- /dev/null
++++ b/arch/arm/boot/dts/fossil/8x09/common/fg-gen3-batterydata-apack-300mah.dtsi
+@@ -0,0 +1,72 @@
++
++qcom,4189349_compal_fft1_300mah_averaged_masterslave_oct2nd2019 {
++	qcom, = <24>;
++	/* #4189349_Compal_FFT1_300mAh_averaged_MasterSlave_Oct2nd2019*/
++	qcom,max-voltage-uv = <4395000>;
++	qcom,fg-cc-cv-threshold-mv = <4385>;
++	qcom,fastchg-current-ma = <300>;
++	qcom,nom-batt-capacity-mah = <300>;
++	qcom,batt-id-kohm = <60>;
++	qcom,battery-beta = <4250>;
++	qcom,battery-type = "apack_300mah_oct2nd2019";
++	qcom,checksum = <0x616B>;
++	qcom,gui-version = "PM660GUI - 0.0.0.45";
++	qcom,fg-profile-data = [
++		 19 26 D2 15
++		 42 13 74 0D
++		 13 1D 1F 01
++		 6B FD D9 01
++		 4B 19 0B 22
++		 40 3D 8D 4A
++		 B0 00 00 00
++		 17 00 00 00
++		 00 00 A2 CD
++		 64 C4 8F C3
++		 42 00 08 00
++		 FE E3 F1 F5
++		 41 C3 CC DD
++		 44 E5 1C 0A
++		 16 EC 39 2A
++		 25 06 09 20
++		 27 00 14 00
++		 83 20 A7 04
++		 3D 0B 7D 05
++		 ED 1C 40 02
++		 6A 0D CA 0A
++		 BD 18 49 23
++		 D7 44 19 5A
++		 7B 00 00 00
++		 10 00 00 00
++		 00 00 E4 CC
++		 0F C5 03 CB
++		 39 00 00 00
++		 21 F3 F1 F5
++		 F8 E2 13 E4
++		 50 00 02 02
++		 77 F3 A1 13
++		 99 33 CC FF
++		 07 10 00 00
++		 22 01 51 46
++		 39 00 40 00
++		 82 06 0A FA
++		 FF 00 00 00
++		 00 00 00 00
++		 00 00 00 00
++		 00 00 00 00
++		 00 00 00 00
++		 00 00 00 00
++		 00 00 00 00
++		 00 00 00 00
++		 00 00 00 00
++		 00 00 00 00
++		 00 00 00 00
++		 00 00 00 00
++		 00 00 00 00
++		 00 00 00 00
++		 00 00 00 00
++		 00 00 00 00
++		 00 00 00 00
++		 00 00 00 00
++		 00 00 00 00
++	];
++};
+diff --git a/arch/arm/boot/dts/fossil/8x09/common/fg-gen3-batterydata-apack-310mah.dtsi b/arch/arm/boot/dts/fossil/8x09/common/fg-gen3-batterydata-apack-310mah.dtsi
+new file mode 100644
+index 000000000000..a5f7d9194e0d
+--- /dev/null
++++ b/arch/arm/boot/dts/fossil/8x09/common/fg-gen3-batterydata-apack-310mah.dtsi
+@@ -0,0 +1,83 @@
++/*
++ * Copyright (c) 2018, Compal Electronics.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 and
++ * only version 2 as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ */
++
++qcom,3769662_compal_efta_310mah_averaged_masterslave_jan4th2019 {
++	qcom, = <24>;
++	/* #3769662_Compal_EFTA_310mAh_averaged_MasterSlave_Jan4th2019*/
++	qcom,max-voltage-uv = <4395000>;
++	qcom,fg-cc-cv-threshold-mv = <4385>;
++	qcom,nom-batt-capacity-mah = <310>;
++	qcom,batt-id-kohm = <60>;
++	qcom,battery-beta = <3435>;
++	qcom,battery-type = "triggerfish_310mah_jan4th2019";
++	qcom,checksum = <0x9AD4>;
++	qcom,gui-version = "PM660GUI - 0.0.0.45";
++	qcom,fg-profile-data = [
++		10 21 F6 0D
++		A3 0B 4B 05
++		CB 1C F2 01
++		F7 0D 35 0A
++		F7 18 FE 1B
++		86 3D 24 4A
++		88 00 00 00
++		18 00 00 00
++		00 00 85 C5
++		16 C4 CB C2
++		33 00 08 00
++		34 E3 12 F5
++		A5 ED 63 D3
++		D5 0D BE 04
++		55 EA 82 42
++		16 06 09 20
++		27 00 14 00
++		39 20 F6 04
++		F3 0A D8 05
++		DB 1C 8E 02
++		C1 0C 81 0B
++		B4 18 47 23
++		DC 44 15 5A
++		73 00 00 00
++		10 00 00 00
++		00 00 B1 D5
++		76 9A 24 CA
++		35 00 00 00
++		89 FA 12 F5
++		E8 E5 3D E5
++		1A F2 0B 02
++		13 03 EA 1A
++		B7 33 CC FF
++		07 10 00 00
++		3A 01 51 46
++		35 00 40 00
++		64 05 0A FA
++		FF 00 00 00
++		00 00 00 00
++		00 00 00 00
++		00 00 00 00
++		00 00 00 00
++		00 00 00 00
++		00 00 00 00
++		00 00 00 00
++		00 00 00 00
++		00 00 00 00
++		00 00 00 00
++		00 00 00 00
++		00 00 00 00
++		00 00 00 00
++		00 00 00 00
++		00 00 00 00
++		00 00 00 00
++		00 00 00 00
++		00 00 00 00
++		];
++};
+diff --git a/arch/arm/boot/dts/fossil/8x09/common/fg-gen3-batterydata-apack-355mah.dtsi b/arch/arm/boot/dts/fossil/8x09/common/fg-gen3-batterydata-apack-355mah.dtsi
+new file mode 100755
+index 000000000000..1c2e1ef95067
+--- /dev/null
++++ b/arch/arm/boot/dts/fossil/8x09/common/fg-gen3-batterydata-apack-355mah.dtsi
+@@ -0,0 +1,72 @@
++
++qcom,3452922_compal_ffwa_355mah_averaged_masterslave_jun18th2018 {
++	qcom, = <24>;
++	/* #3452922_Compal_FFWA_355mAh_averaged_MasterSlave_Jun18th2018*/
++	qcom,max-voltage-uv = <4395000>;
++	qcom,fastchg-current-ma = <350>;
++	qcom,nom-batt-capacity-mah = <355>;
++	qcom,batt-id-kohm = <60>;
++	qcom,battery-beta = <3435>;
++	qcom,fg-cc-cv-threshold-mv = <4385>;
++	qcom,battery-type = "darter_355mah_jun18th2018";
++	qcom,checksum = <0x0130>;
++	qcom,gui-version = "PM660GUI - 0.0.0.45";
++	qcom,fg-profile-data = [
++		 83 21 C0 0D
++		 DF 0B 21 05
++		 CC 1C C8 01
++		 91 04 C0 03
++		 02 19 DC 1B
++		 A6 3D FD 43
++		 90 00 00 00
++		 19 00 00 00
++		 00 00 78 C5
++		 F1 CD 19 C3
++		 44 00 08 00
++		 CA DB 99 F5
++		 41 ED FC 07
++		 D4 E2 8A 03
++		 C6 F5 18 3A
++		 22 06 09 20
++		 27 00 14 00
++		 E2 1F 5A 05
++		 AE 0A 25 FC
++		 C9 1C BC 02
++		 72 0C DA 0B
++		 9F 18 4C 23
++		 DA 44 17 5A
++		 6E 00 00 00
++		 10 00 00 00
++		 00 00 52 D5
++		 E5 AB 8C CB
++		 40 00 00 00
++		 16 01 99 F5
++		 DF 07 F5 ED
++		 9E F2 15 02
++		 D4 02 1A 13
++		 C0 33 CC FF
++		 07 10 00 00
++		 62 01 51 46
++		 40 00 40 00
++		 5E 06 0A FA
++		 FF 00 00 00
++		 00 00 00 00
++		 00 00 00 00
++		 00 00 00 00
++		 00 00 00 00
++		 00 00 00 00
++		 00 00 00 00
++		 00 00 00 00
++		 00 00 00 00
++		 00 00 00 00
++		 00 00 00 00
++		 00 00 00 00
++		 00 00 00 00
++		 00 00 00 00
++		 00 00 00 00
++		 00 00 00 00
++		 00 00 00 00
++		 00 00 00 00
++		 00 00 00 00
++	];
++};
+diff --git a/arch/arm/boot/dts/fossil/8x09/common/fg-gen3-batterydata-apack-410mAh.dtsi b/arch/arm/boot/dts/fossil/8x09/common/fg-gen3-batterydata-apack-410mAh.dtsi
+new file mode 100755
+index 000000000000..92e2ae809eb3
+--- /dev/null
++++ b/arch/arm/boot/dts/fossil/8x09/common/fg-gen3-batterydata-apack-410mAh.dtsi
+@@ -0,0 +1,72 @@
++
++qcom,4191630_compal_efc1_410mah_averaged_masterslave_oct9th2019 {
++	qcom, = <24>;
++	/* #4191630_Compal_EFC1_410mAh_averaged_MasterSlave_Oct9th2019*/
++	qcom,max-voltage-uv = <4400000>;
++	qcom,fg-cc-cv-threshold-mv = <4390>;
++	qcom,fastchg-current-ma = <400>;
++	qcom,nom-batt-capacity-mah = <410>;
++	qcom,batt-id-kohm = <60>;
++	qcom,battery-beta = <4250>;
++	qcom,battery-type = "gila_410mah_oct9th2019";
++	qcom,checksum = <0xB8F5>;
++	qcom,gui-version = "PM660GUI - 0.0.0.45";
++	qcom,fg-profile-data = [
++		 83 20 7B 04
++		 57 0B 7A 05
++		 DA 1C D2 01
++		 47 04 1D 0A
++		 F4 18 10 22
++		 60 3D 52 4A
++		 83 00 00 00
++		 18 00 00 00
++		 00 00 16 C4
++		 36 C5 AA C3
++		 2E 00 08 00
++		 9C E3 D9 F5
++		 4E F5 9E EA
++		 B5 0D 55 FC
++		 6C 0D F1 42
++		 10 06 09 20
++		 27 00 14 00
++		 09 20 19 05
++		 F2 0A C6 05
++		 D1 1C B9 02
++		 66 0C F7 0B
++		 A0 18 6A 23
++		 A0 44 4F 5A
++		 6E 00 00 00
++		 0F 00 00 00
++		 00 00 8A D5
++		 C4 B2 72 CB
++		 2D 00 00 00
++		 69 F3 D9 F5
++		 35 ED 24 D5
++		 D6 07 53 FB
++		 1C 01 B8 13
++		 A4 33 CC FF
++		 07 10 00 00
++		 94 01 66 46
++		 2D 00 40 00
++		 8A 05 0A FA
++		 FF 00 00 00
++		 00 00 00 00
++		 00 00 00 00
++		 00 00 00 00
++		 00 00 00 00
++		 00 00 00 00
++		 00 00 00 00
++		 00 00 00 00
++		 00 00 00 00
++		 00 00 00 00
++		 00 00 00 00
++		 00 00 00 00
++		 00 00 00 00
++		 00 00 00 00
++		 00 00 00 00
++		 00 00 00 00
++		 00 00 00 00
++		 00 00 00 00
++		 00 00 00 00
++	];
++};
+diff --git a/arch/arm/boot/dts/fossil/8x09/common/fg-gen3-batterydata-itech-3000mah.dtsi b/arch/arm/boot/dts/fossil/8x09/common/fg-gen3-batterydata-itech-3000mah.dtsi
+new file mode 100644
+index 000000000000..ee10b8887cbf
+--- /dev/null
++++ b/arch/arm/boot/dts/fossil/8x09/common/fg-gen3-batterydata-itech-3000mah.dtsi
+@@ -0,0 +1,17 @@
++/* Copyright (c) 2016-2017, The Linux Foundation. All rights reserved.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 and
++ * only version 2 as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ */
++
++#include "../../../../arm64/boot/dts/qcom/fg-gen3-batterydata-itech-3000mah.dtsi"
++
++qcom,itech_3000mah {
++	qcom,fastchg-current-ma = <3000>;
++};
+diff --git a/arch/arm/boot/dts/fossil/8x09/common/fg-gen3-batterydata-lishen-300mah.dtsi b/arch/arm/boot/dts/fossil/8x09/common/fg-gen3-batterydata-lishen-300mah.dtsi
+new file mode 100644
+index 000000000000..e8d0dcdaffb7
+--- /dev/null
++++ b/arch/arm/boot/dts/fossil/8x09/common/fg-gen3-batterydata-lishen-300mah.dtsi
+@@ -0,0 +1,75 @@
++
++qcom,4198837_compal_fft1_300mah_averaged_masterslave_nov1st2019 {
++	qcom, = <24>;
++	/* #4198837_Compal_FFT1_300mAh_averaged_MasterSlave_Nov1st2019*/
++	qcom,max-voltage-uv = <4395000>;
++	qcom,fg-cc-cv-threshold-mv = <4385>;
++	qcom,fastchg-current-ma = <300>;
++	qcom,nom-batt-capacity-mah = <300>;
++	/* add another jeita setting for 2nd battery*/
++	qcom,bp-jeita-soft-hot-fv-cc = <4200 150>;
++	qcom,bp-jeita-soft-cold-fv-cc = <4400 60>;
++	qcom,batt-id-kohm = <30>;
++	qcom,battery-beta = <4250>;
++	qcom,battery-type = "sole_lishen_300mah_nov1st2019";
++	qcom,checksum = <0xC0DA>;
++	qcom,gui-version = "PM660GUI - 0.0.0.45";
++	qcom,fg-profile-data = [
++		 6E 1E 63 F4
++		 73 02 A4 EC
++		 CF 1C 26 02
++		 66 0D FF 0A
++		 7A 19 22 22
++		 C4 3C 6C 4B
++		 66 00 00 00
++		 14 00 00 00
++		 00 00 02 C5
++		 0F C5 CB C2
++		 4A 00 08 00
++		 57 E3 E3 EC
++		 64 06 20 01
++		 4F 05 59 01
++		 65 FC 51 32
++		 21 06 09 20
++		 27 00 14 00
++		 3D 1F AB FC
++		 93 03 21 F4
++		 D9 1C C4 02
++		 4F 0C 05 12
++		 AB 18 05 2A
++		 9D 4D E7 5B
++		 67 00 00 00
++		 0D 00 00 00
++		 00 00 54 CC
++		 01 00 62 C2
++		 38 00 00 00
++		 92 00 E3 EC
++		 BD F5 2C EA
++		 CD DB FF 01
++		 96 00 60 12
++		 99 33 CC FF
++		 07 10 00 00
++		 3E 01 51 46
++		 38 00 40 00
++		 B7 05 0A FA
++		 FF 00 00 00
++		 00 00 00 00
++		 00 00 00 00
++		 00 00 00 00
++		 00 00 00 00
++		 00 00 00 00
++		 00 00 00 00
++		 00 00 00 00
++		 00 00 00 00
++		 00 00 00 00
++		 00 00 00 00
++		 00 00 00 00
++		 00 00 00 00
++		 00 00 00 00
++		 00 00 00 00
++		 00 00 00 00
++		 00 00 00 00
++		 00 00 00 00
++		 00 00 00 00
++	];
++};
+diff --git a/arch/arm/boot/dts/fossil/8x09/common/msm8909-audio-bg_codec.dtsi b/arch/arm/boot/dts/fossil/8x09/common/msm8909-audio-bg_codec.dtsi
+new file mode 100644
+index 000000000000..26c8654c2ddc
+--- /dev/null
++++ b/arch/arm/boot/dts/fossil/8x09/common/msm8909-audio-bg_codec.dtsi
+@@ -0,0 +1,23 @@
++/* Copyright (c) 2017-2018 The Linux Foundation. All rights reserved.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 and
++ * only version 2 as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ */
++#include "../../../../arm64/boot/dts/qcom/msm8909-audio-bg_codec.dtsi"
++&soc {
++	audio_codec_bg: sound {
++		/delete-property/ status;
++		status = "okay";
++	};
++
++	bg_cdc: bg_codec {
++		/delete-property/ status;
++		status = "okay";
++	};
++};
+diff --git a/arch/arm/boot/dts/fossil/8x09/common/msm8909-mdss-panels.dtsi b/arch/arm/boot/dts/fossil/8x09/common/msm8909-mdss-panels.dtsi
+new file mode 100644
+index 000000000000..dd4e1be88f35
+--- /dev/null
++++ b/arch/arm/boot/dts/fossil/8x09/common/msm8909-mdss-panels.dtsi
+@@ -0,0 +1,37 @@
++/* Copyright (c) 2014-2018, The Linux Foundation. All rights reserved.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 and
++ * only version 2 as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ */
++
++&mdss_dsi0 {
++	pinctrl-names = "mdss_default", "mdss_sleep";
++	pinctrl-0 = <&mdss_dsi_active &mdss_te_active>;
++	pinctrl-1 = <&mdss_dsi_suspend &mdss_te_suspend>;
++
++	qcom,platform-te-gpio = <&msm_gpio 24 0>;
++	qcom,platform-reset-gpio = <&msm_gpio 25 0>;
++	qcom,platform-tsresout-gpio = <&msm_gpio 16 0>;
++	qcom,platform-enable-gpio = <&msm_gpio 59 0>;
++	qcom,platform-avdden-gpio = <&pm660_gpios 12 0>;
++	/delete-property/ qcom,platform-bklight-en-gpio;
++};
++&mdss_mdp {
++	/delete-node/ qcom,mdss_dsi_auo_390p_cmd;
++};
++&soc {
++	dsi_pm660_panel_pwr_supply {
++		qcom,panel-supply-entry@0 {
++			/delete-property/ qcom,supply-min-voltage;
++			/delete-property/ qcom,supply-max-voltage;
++			qcom,supply-min-voltage = <3300000>;
++			qcom,supply-max-voltage = <3300000>;
++		};
++	};
++};
+diff --git a/arch/arm/boot/dts/fossil/8x09/common/msm8909w.dtsi b/arch/arm/boot/dts/fossil/8x09/common/msm8909w.dtsi
+new file mode 100644
+index 000000000000..5df638151a2d
+--- /dev/null
++++ b/arch/arm/boot/dts/fossil/8x09/common/msm8909w.dtsi
+@@ -0,0 +1,65 @@
++/* Copyright (c) 2015-2018, The Linux Foundation. All rights reserved.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 and
++ * only version 2 as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ */
++
++&soc {
++	i2c@78b9000 { /* BLSP1 QUP5 */
++		/delete-node/ synaptics@20;
++	};
++
++	gpio_keys {
++		label = "gpio-keys";
++		/delete-node/ camera_focus;
++		/delete-node/ camera_snapshot;
++		/delete-node/ vol_up;
++		stem_1 {
++			label = "STEM_1";
++			gpios = <&msm_gpio 90 0x1>;
++			linux,input-type = <1>;
++			linux,code = <265>;
++			gpio-key,wakeup;
++			debounce-interval = <15>;
++		};
++	};
++};
++&soc {
++	qcom,msm-cpufreq {
++		/delete-property/ qcom,cpufreq-table;
++		qcom,cpufreq-table =
++			<  800000 >,
++			< 1094400 >;
++	};
++	/delete-node/ qcom,cpubw;
++	cpubw: qcom,cpubw {
++		compatible = "qcom,devbw";
++		governor = "cpufreq";
++		qcom,src-dst-ports = <1 512>;
++		qcom,active-only;
++		qcom,bw-tbl =
++			< 1464 /* 192 MHz */>,
++			< 2929 /* 384 MHz */>;
++	};
++	/delete-node/ devfreq-cpufreq;
++	devfreq-cpufreq {
++		cpubw-cpufreq {
++			target-dev = <&cpubw>;
++			cpu-to-dev-map =
++				<  800000  2929>,
++				< 1094400  2929>;
++		};
++	};
++};
++
++&thermal_zones {
++	/delete-node/ case-therm-step;
++};
++
++
+diff --git a/arch/arm/boot/dts/fossil/8x09/common/touch.dtsi b/arch/arm/boot/dts/fossil/8x09/common/touch.dtsi
+new file mode 100644
+index 000000000000..283aa2c07fdb
+--- /dev/null
++++ b/arch/arm/boot/dts/fossil/8x09/common/touch.dtsi
+@@ -0,0 +1,34 @@
++/*
++ * Copyright (c) 2017-2019, The Linux Foundation. All rights reserved.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 and
++ * only version 2 as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ */
++&soc {
++	i2c@78b9000 {
++		raydium@39 {
++			compatible = "raydium,raydium-ts-ub128blx01", "raydium,raydium-ts-h120blx01";
++			reg = <0x39>;
++			interrupt-parent = <&msm_gpio>;
++			interrupts = <98 0x2002>;
++			vcc_i2c-supply = <&pm660_l13>;
++			raydium,reset-gpio = <&msm_gpio 16 0x00>;
++			raydium,irq-gpio =<&msm_gpio 98 0x2002>;
++			/* pins used by touchscreen */
++			pinctrl-names = "pmx_ts_active","pmx_ts_suspend","pmx_ts_release";
++			pinctrl-0 = <&ts_int_active &ts_reset_active>;
++			pinctrl-1 = <&ts_int_suspend &ts_reset_suspend>;
++			pinctrl-2 = <&ts_release>;
++			raydium,display-coords = <0 0 416 416>;
++			raydium,hard-reset-delay-ms = <5>;
++			raydium,soft-reset-delay-ms = <360>;
++			raydium,num-max-touches = <2>;
++		};
++	};
++};
+diff --git a/arch/arm/boot/dts/fossil/8x09/msm8909w-gila/Makefile b/arch/arm/boot/dts/fossil/8x09/msm8909w-gila/Makefile
+new file mode 100644
+index 000000000000..5dd7a3f85ef0
+--- /dev/null
++++ b/arch/arm/boot/dts/fossil/8x09/msm8909w-gila/Makefile
+@@ -0,0 +1,5 @@
++dtb-$(CONFIG_ARCH_MSM8909) += gila-msm8909w.dtb
++
++always		:= $(dtb-y)
++subdir-y	:= $(dts-dirs)
++clean-files	:= *.dtb
+diff --git a/arch/arm/boot/dts/fossil/8x09/msm8909w-gila/gila-8909w-pm660.dtsi b/arch/arm/boot/dts/fossil/8x09/msm8909w-gila/gila-8909w-pm660.dtsi
+new file mode 100644
+index 000000000000..20392e6320c9
+--- /dev/null
++++ b/arch/arm/boot/dts/fossil/8x09/msm8909w-gila/gila-8909w-pm660.dtsi
+@@ -0,0 +1,99 @@
++/*
++ * Copyright (c) 2017-2018, The Linux Foundation. All rights reserved.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 and
++ * only version 2 as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ */
++#include "gila-touch.dtsi"
++
++&pm660_fg {
++	qcom,fg-jeita-thresholds = <2 16 44 58>;
++	qcom,fg-jeita-hyst-temp = <2>;
++	qcom,fg-jeita-en = <1>;
++	qcom,fg-jeita-soft-hot-fv-cc = <4300 200>;
++	qcom,fg-jeita-soft-cold-fv-cc = <4400 80>;
++	qcom,battery-data = <&qrd_batterydata>;
++	qcom,fg-chg-term-current = <25>;
++	qcom,battery-thermal-coefficients = [d2 50 ff];
++	qcom,fg-rsense-sel = <1>;
++	qcom,fg-force-load-profile;
++	qcom,fg-recharge-soc-thr = <99>;
++	qcom,fg-cutoff-current = <40>;
++	qcom,fg-cutoff-voltage = <3200>;
++	qcom,twm-soc-reserve = <3>;
++	io-channels = <&pm660_rradc 0>,
++		<&pm660_rradc 3>,
++		<&pm660_rradc 4>,
++		<&pm660_rradc 7>;
++	io-channel-names = "rradc_batt_id",
++		"rradc_usbin_i",
++		"rradc_usbin_v",
++		"rradc_die_temp";
++};
++
++/ {
++	/delete-node/ qcom,battery-data;
++	mtp_batterydata: qcom,battery-data {
++		qcom,batt-id-range-pct = <15>;
++		#include "../common/fg-gen3-batterydata-itech-3000mah.dtsi"
++	};
++	qrd_batterydata: qcom,battery-data {
++		qcom,batt-id-range-pct = <60>;
++		#include "../common/fg-gen3-batterydata-apack-410mAh.dtsi"
++	};
++};
++
++&pm660_pon {
++	qcom,pon_2 {
++		linux,code = <266>;
++	};
++};
++
++&pm660_0 {
++	pm660_charger: qcom,qpnp-smb2 {
++		qcom,aicl_rerun_enable;
++	};
++};
++
++&rpm_bus {
++	rpm-regulator-ldoa18 {
++		pm660_l18: regulator-l18 {
++			/delete-property/ supply-min-voltage;
++			/delete-property/ supply-max-voltage;
++			/delete-property/ qcom,init-voltage;
++			regulator-min-microvolt = <3300000>;
++			regulator-max-microvolt = <3300000>;
++			qcom,init-voltage = <3300000>;
++		};
++	};
++
++	/* Reconfig for PPG sensor of DVT */
++	rpm-regulator-ldoa14 {
++		pm660_l14: regulator-l14 {
++			regulator-always-on;
++			regulator-min-microvolt = <1900000>;
++			regulator-max-microvolt = <1900000>;
++			qcom,init-voltage = <1900000>;
++		};
++	};
++};
++
++&mdss_dsi {
++	qcom,mdss_dsi_ctrl0@1ac8000 {
++		/delete-property/ bklt-supply;
++	};
++};
++
++&soc {
++	/delete-node/ bob_vreg;
++};
++
++&pm660_charger {
++	qcom,vzn-retailmode-charging;
++};
+diff --git a/arch/arm/boot/dts/fossil/8x09/msm8909w-gila/gila-dsi-panel-auo-416p-amoled-cmd.dtsi b/arch/arm/boot/dts/fossil/8x09/msm8909w-gila/gila-dsi-panel-auo-416p-amoled-cmd.dtsi
+new file mode 100644
+index 000000000000..6adfed93c2d8
+--- /dev/null
++++ b/arch/arm/boot/dts/fossil/8x09/msm8909w-gila/gila-dsi-panel-auo-416p-amoled-cmd.dtsi
+@@ -0,0 +1,12 @@
++/* Copyright (c) 2019, The Linux Foundation. All rights reserved.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 and
++ * only version 2 as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ */
++#include "../common/dsi-panel-auo-416p-amoled-cmd.dtsi"
+diff --git a/arch/arm/boot/dts/fossil/8x09/msm8909w-gila/gila-msm8909-audio-bg_codec.dtsi b/arch/arm/boot/dts/fossil/8x09/msm8909w-gila/gila-msm8909-audio-bg_codec.dtsi
+new file mode 100644
+index 000000000000..26c8654c2ddc
+--- /dev/null
++++ b/arch/arm/boot/dts/fossil/8x09/msm8909w-gila/gila-msm8909-audio-bg_codec.dtsi
+@@ -0,0 +1,23 @@
++/* Copyright (c) 2017-2018 The Linux Foundation. All rights reserved.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 and
++ * only version 2 as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ */
++#include "../../../../arm64/boot/dts/qcom/msm8909-audio-bg_codec.dtsi"
++&soc {
++	audio_codec_bg: sound {
++		/delete-property/ status;
++		status = "okay";
++	};
++
++	bg_cdc: bg_codec {
++		/delete-property/ status;
++		status = "okay";
++	};
++};
+diff --git a/arch/arm/boot/dts/fossil/8x09/msm8909w-gila/gila-msm8909-mdss-panels.dtsi b/arch/arm/boot/dts/fossil/8x09/msm8909w-gila/gila-msm8909-mdss-panels.dtsi
+new file mode 100644
+index 000000000000..add840147990
+--- /dev/null
++++ b/arch/arm/boot/dts/fossil/8x09/msm8909w-gila/gila-msm8909-mdss-panels.dtsi
+@@ -0,0 +1,47 @@
++/* Copyright (c) 2014-2018, The Linux Foundation. All rights reserved.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 and
++ * only version 2 as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ */
++
++#include "gila-dsi-panel-auo-416p-amoled-cmd.dtsi"
++
++&mdss_dsi0 {
++	qcom,dsi-pref-prim-pan = <&dsi_auo_416p_amoled_cmd>;
++	pinctrl-names = "mdss_default", "mdss_sleep";
++	pinctrl-0 = <&mdss_dsi_active &mdss_te_active>;
++	pinctrl-1 = <&mdss_dsi_suspend &mdss_te_suspend>;
++
++	qcom,platform-te-gpio = <&msm_gpio 24 0>;
++	qcom,platform-reset-gpio = <&msm_gpio 25 0>;
++	qcom,platform-tsresout-gpio = <&msm_gpio 16 0>;
++	qcom,platform-enable-gpio = <&msm_gpio 59 0>;
++	qcom,platform-avdden-gpio = <&pm660_gpios 12 0>;
++	/delete-property/ qcom,platform-bklight-en-gpio;
++};
++&mdss_mdp {
++	/delete-node/ qcom,mdss_dsi_auo_390p_cmd;
++};
++&soc {
++	dsi_pm660_panel_pwr_supply {
++		qcom,panel-supply-entry@0 {
++			/delete-property/ qcom,supply-min-voltage;
++			/delete-property/ qcom,supply-max-voltage;
++			qcom,supply-min-voltage = <3300000>;
++			qcom,supply-max-voltage = <3300000>;
++		};
++	};
++};
++&dsi_auo_416p_amoled_cmd {
++	qcom,mdss-dsi-bl-pmic-control-type = "bl_ctrl_dcs";
++	qcom,panel-supply-entries = <&dsi_pm660_panel_pwr_supply>;
++	qcom,mdss-dsi-power-off-disable;
++	qcom,mdss-dsi-tear-disable;
++	qcom,esd-check-model = "auo_u128blx";
++};
+diff --git a/arch/arm/boot/dts/fossil/8x09/msm8909w-gila/gila-msm8909-mdss.dtsi b/arch/arm/boot/dts/fossil/8x09/msm8909w-gila/gila-msm8909-mdss.dtsi
+new file mode 100644
+index 000000000000..aea98fd36a11
+--- /dev/null
++++ b/arch/arm/boot/dts/fossil/8x09/msm8909w-gila/gila-msm8909-mdss.dtsi
+@@ -0,0 +1,14 @@
++/*
++ * Copyright (c) 2014-2016,2018, The Linux Foundation. All rights reserved.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 and
++ * only version 2 as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ */
++
++#include "gila-msm8909-mdss-panels.dtsi"
+diff --git a/arch/arm/boot/dts/fossil/8x09/msm8909w-gila/gila-msm8909.dtsi b/arch/arm/boot/dts/fossil/8x09/msm8909w-gila/gila-msm8909.dtsi
+new file mode 100644
+index 000000000000..4c9d0e573e1f
+--- /dev/null
++++ b/arch/arm/boot/dts/fossil/8x09/msm8909w-gila/gila-msm8909.dtsi
+@@ -0,0 +1,13 @@
++/* Copyright (c) 2014-2018, The Linux Foundation. All rights reserved.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 and
++ * only version 2 as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ */
++
++#include "gila-msm8909-mdss.dtsi"
+diff --git a/arch/arm/boot/dts/fossil/8x09/msm8909w-gila/gila-msm8909w.dts b/arch/arm/boot/dts/fossil/8x09/msm8909w-gila/gila-msm8909w.dts
+new file mode 100644
+index 000000000000..edd36774a9a7
+--- /dev/null
++++ b/arch/arm/boot/dts/fossil/8x09/msm8909w-gila/gila-msm8909w.dts
+@@ -0,0 +1,294 @@
++/*
++ * Copyright (c) 2017-2018 The Linux Foundation. All rights reserved.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 and
++ * only version 2 as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ */
++
++/dts-v1/;
++
++#include "../../../../arm64/boot/dts/qcom/msm8909-mtp.dtsi"
++#include "../../../../arm64/boot/dts/qcom/msm8909w.dtsi"
++#include "../../../../arm64/boot/dts/qcom/8909w-pm660.dtsi"
++#include "../../../../arm64/boot/dts/qcom/msm8909w-gpu.dtsi"
++#include "../../../../arm64/boot/dts/qcom/msm8909w-bg-memory.dtsi"
++#include "gila-msm8909-audio-bg_codec.dtsi"
++#include "gila-msm8909.dtsi"
++#include "../common/msm8909w.dtsi"
++#include "gila-msm8909w.dtsi"
++#include "gila-8909w-pm660.dtsi"
++#include "../common/8909w-pm660-regulator.dtsi"
++
++/ {
++	model = "Fossil Group, Inc. Based on MSM8909W-PM660 BG Alpha SDW3100";
++	compatible = "qcom,msm8909-mtp", "qcom,msm8909", "qcom,mtp";
++	qcom,msm-id =   <300 0>;
++	qcom,board-id = <8 0x01f>;
++	qcom,pmic-id =  <0x0001001b 0x0 0x0 0x0>,
++			<0x0001011b 0x0 0x0 0x0>;
++};
++
++&soc {
++	qcom,blackghost {
++		compatible = "qcom,pil-blackghost";
++
++		qcom,pil-force-shutdown;
++		qcom,firmware-name = "bg-wear";
++		/* GPIO inputs from blackghost */
++		qcom,bg2ap-status-gpio = <&msm_gpio 97 0>;
++		qcom,bg2ap-errfatal-gpio = <&msm_gpio 95 0>;
++		/* GPIO output to blackghost */
++		qcom,ap2bg-status-gpio = <&msm_gpio 17 0>;
++		qcom,ap2bg-errfatal-gpio = <&msm_gpio 23 0>;
++	};
++
++	qcom,msm-ssc-sensors {
++		compatible = "qcom,msm-ssc-sensors";
++	};
++
++	qcom,glink-bgcom-xprt-bg {
++		compatible = "qcom,glink-bgcom-xprt";
++		label = "bg";
++		qcom,qos-config = <&glink_qos_bg>;
++		qcom,ramp-time = <0x10>,
++				     <0x20>,
++				     <0x30>,
++				     <0x40>;
++	};
++
++	glink_qos_bg: qcom,glink-qos-config-bg {
++		compatible = "qcom,glink-qos-config";
++		qcom,flow-info = <0x80 0x0>,
++				 <0x70 0x1>,
++				 <0x60 0x2>,
++				 <0x50 0x3>;
++		qcom,mtu-size = <0x800>;
++		qcom,tput-stats-cycle = <0xa>;
++	};
++
++	qcom,glink_pkt {
++		compatible = "qcom,glinkpkt";
++
++		qcom,glinkpkt-bg-daemon {
++			qcom,glinkpkt-transport = "bgcom";
++			qcom,glinkpkt-edge = "bg";
++			qcom,glinkpkt-ch-name = "bg-daemon";
++			qcom,glinkpkt-dev-name = "glink_pkt_bg_daemon";
++		};
++
++		qcom,glinkpkt-bg-display-ctrl {
++			qcom,glinkpkt-transport = "bgcom";
++			qcom,glinkpkt-edge = "bg";
++			qcom,glinkpkt-ch-name = "display-ctrl";
++			qcom,glinkpkt-dev-name = "glink_pkt_bg_display_ctrl";
++		};
++
++		qcom,glinkpkt-bg-display-data {
++			qcom,glinkpkt-transport = "bgcom";
++			qcom,glinkpkt-edge = "bg";
++			qcom,glinkpkt-ch-name = "display-data";
++			qcom,glinkpkt-dev-name = "glink_pkt_bg_display_data";
++		};
++
++		qcom,glinkpkt-bg-rsb-ctrl {
++			qcom,glinkpkt-transport = "bgcom";
++			qcom,glinkpkt-edge = "bg";
++			qcom,glinkpkt-ch-name = "RSB_CTRL";
++			qcom,glinkpkt-dev-name = "glink_pkt_bg_rsb_ctrl";
++		};
++		
++		qcom,glinkpkt-bg-sso-ctrl {
++			qcom,glinkpkt-transport = "bgcom";
++			qcom,glinkpkt-edge = "bg";
++			qcom,glinkpkt-ch-name = "sso-ctrl";
++			qcom,glinkpkt-dev-name = "glink_pkt_bg_sso_ctrl";
++		};
++	};
++
++	spi@78B8000 {  /* BLSP1 QUP4 */
++		status = "ok";
++		qcom,bg-spi {
++			compatible = "qcom,bg-spi";
++			reg = <0>;
++			spi-max-frequency = <16000000>;
++			interrupt-parent = <&msm_gpio>;
++			qcom,irq-gpio = <&msm_gpio 110 1>;
++		};
++	};
++
++	qcom,bg-rsb {
++		compatible = "qcom,bg-rsb";
++		vdd-ldo1-supply = <&pm660_l11>;
++		vdd-ldo2-supply = <&pm660_l15>;
++	};
++
++	qcom,bg-daemon {
++		compatible = "qcom,bg-daemon";
++		qcom,bg-reset-gpio = <&pm660_gpios 5 0>;
++		ssr-reg1-supply = <&pm660_l3>;
++		ssr-reg2-supply = <&pm660_l9>;
++	};
++};
++
++&i2c_1 {
++	status = "okay";
++	nq@28 {
++		compatible = "qcom,nq-nci";
++		reg = <0x28>;
++		qcom,nq-irq = <&msm_gpio 50 0x00>;
++		qcom,nq-ven = <&msm_gpio 36 0x00>;
++		qcom,nq-firm = <&msm_gpio 38 0x00>;
++		qcom,nq-esepwr = <&msm_gpio 51 0x00>;
++		qcom,nq-clkreq = <&pm660_gpios 4 0x00>;
++		qcom,clk-src = "BBCLK3";
++		interrupt-parent = <&msm_gpio>;
++		interrupts = <50 0>;
++		interrupt-names = "nfc_irq";
++		pinctrl-names = "nfc_active","nfc_suspend";
++		pinctrl-0 = <&nfcw_int_active
++			     &nfcw_disable_active
++			     &nfc_clk_default>;
++		pinctrl-1 = <&nfcw_int_suspend &nfcw_disable_suspend>;
++		clocks = <&clock_rpm clk_bb_clk3_pin>;
++		clock-names = "ref_clk";
++	};
++};
++
++&spi_0 {
++	status = "disabled";
++};
++
++&i2c_3 {
++	status = "disabled";
++};
++
++&i2c_4 {
++	status = "disabled";
++};
++
++&i2c_2 {
++	status = "disabled";
++};
++
++&sdc1_clk_off {
++	config {
++		pins = "sdc1_clk";
++		bias-disable; /* NO pull */
++		drive-strength = <2>; /* 2 MA */
++		output-low;
++	};
++};
++
++&sdc1_cmd_off {
++	config {
++		pins = "sdc1_cmd";
++		bias-disable; /* NO pull */
++		drive-strength = <2>; /* 2 MA */
++		output-low;
++	};
++};
++
++&sdc1_data_off {
++	config {
++		pins = "sdc1_data";
++		bias-disable; /* NO pull */
++		drive-strength = <2>; /* 2 MA */
++		output-low;
++	};
++};
++
++&sdhc_2 {
++	status = "disabled";
++};
++
++&audio_codec_mtp {
++	status = "disabled";
++};
++
++&audio_codec_bg {
++	status = "ok";
++};
++
++&bg_cdc {
++	status = "ok";
++	vdd-spkr-supply = <&pm660_l11>;
++	qcom,bg-speaker-connected;
++};
++
++&blsp1_uart1 {
++	status = "ok";
++	pinctrl-names = "default";
++	pinctrl-0 = <&uart_console_sleep>;
++};
++
++/* Pinctrl dt nodes for interrupt and reset gpio for Synaptics controller */
++&ts_int_active {
++	mux {
++		pins = "gpio98";
++	};
++
++	config {
++		pins = "gpio98";
++	};
++};
++
++&ts_int_suspend {
++	mux {
++		pins = "gpio98";
++	};
++
++	config {
++		pins = "gpio98";
++		/delete-property/ bias-pull-down;
++		bias-disable; /* No PULL */
++	};
++};
++
++&ts_reset_active {
++	mux {
++		pins = "gpio16";
++	};
++
++	config {
++		pins = "gpio16";
++	};
++};
++
++&ts_reset_suspend {
++	mux {
++		pins = "gpio16";
++	};
++
++	config {
++		pins = "gpio16";
++	};
++};
++
++&ts_release {
++	mux {
++		pins = "gpio98", "gpio16";
++	};
++
++	config {
++		pins = "gpio98", "gpio16";
++	};
++};
++
++&spi4_cs0_active {
++	mux {
++		pins = "gpio14";
++		function = "blsp_spi4";
++	};
++	config {
++		pins = "gpio14";
++		drive-strength = <2>;
++		bias-disable; /* No PULL */
++		output-high;
++	};
++};
+diff --git a/arch/arm/boot/dts/fossil/8x09/msm8909w-gila/gila-msm8909w.dtsi b/arch/arm/boot/dts/fossil/8x09/msm8909w-gila/gila-msm8909w.dtsi
+new file mode 100644
+index 000000000000..9fe9aad0d176
+--- /dev/null
++++ b/arch/arm/boot/dts/fossil/8x09/msm8909w-gila/gila-msm8909w.dtsi
+@@ -0,0 +1,42 @@
++/* Copyright (c) 2015-2018, The Linux Foundation. All rights reserved.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 and
++ * only version 2 as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ */
++&thermal_zones {
++	case-therm-step {
++		polling-delay-passive = <5000>;
++		polling-delay = <0>;
++		thermal-sensors = <&pm660_adc_tm 0x51>;
++		thermal-governor = "step_wise";
++		wake-capable-sensor;
++		trips {
++			modem_mon_trip0: modem-mon-trip0 {
++				temperature = <45000>;
++				hysteresis = <2000>;
++				type = "passive";
++			};
++			modem_mon_trip1: modem-mon-trip1 {
++				temperature = <55000>;
++				hysteresis = <2000>;
++				type = "passive";
++			};
++		};
++		cooling-maps {
++			modem_lvl1 {
++				trip = <&modem_mon_trip0>;
++				cooling-device = <&modem_pa 2 2>;
++			};
++			modem_lvl2 {
++				trip = <&modem_mon_trip1>;
++				cooling-device = <&modem_pa 3 3>;
++			};
++		};
++	};
++};
+diff --git a/arch/arm/boot/dts/fossil/8x09/msm8909w-gila/gila-touch.dtsi b/arch/arm/boot/dts/fossil/8x09/msm8909w-gila/gila-touch.dtsi
+new file mode 100644
+index 000000000000..4f6af8508c59
+--- /dev/null
++++ b/arch/arm/boot/dts/fossil/8x09/msm8909w-gila/gila-touch.dtsi
+@@ -0,0 +1,21 @@
++/*
++ * Copyright (c) 2017-2019, The Linux Foundation. All rights reserved.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 and
++ * only version 2 as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ */
++#include "../common/touch.dtsi"
++&soc {
++	i2c@78b9000 {
++		raydium@39 {
++			raydium,hard-reset-delay-ms = <100>;
++			raydium,soft-reset-delay-ms = <50>;
++		};
++	};
++};
+-- 
+2.37.3
+
