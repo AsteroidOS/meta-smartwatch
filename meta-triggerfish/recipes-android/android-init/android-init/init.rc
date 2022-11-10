@@ -1,0 +1,56 @@
+on init
+    write /sys/devices/platform/soc/4080000.qcom,mss/subsys2/restart_level "RELATED"
+    write /sys/kernel/boot_adsp/boot 1
+
+    write /sys/class/nanohub/nanohub/lcd_mutex 1
+
+    mkdir /dev/graphics/
+    symlink /dev/fb0 /dev/graphics/fb0
+    setprop sys.hwc.gpu_perf_mode 1
+
+    chown system root /sys/class/timed_output/vibrator/enable
+
+    chown system root /dev/hwbinder
+    chown system root /dev/vndbinder
+
+    chmod 777 /dev/hwbinder
+    chmod 777 /dev/vndbinder
+
+    load_system_props
+    restorecon_recursive /persist
+
+    mkdir /data/
+    mkdir /data/system/
+    mkdir /data/system/gps/
+    mkdir /data/vendor
+    mkdir /data/vendor/sensor
+    mkdir /data/vendor/sensor/nanohub_lock
+    # TODO: Fix when proper policies and access control are implemented
+    chown 1000 root /sys/class/nanohub/nanohub/mode
+    chown 1000 root /sys/class/nanohub/nanohub/lcd_mutex
+    chown 1000 root /sys/class/graphics/fb0/msm_fb_lcd_loadswitch
+    chown 1000 root /sys/class/nanohub/nanohub/app_info
+    chown 1000 root /data/vendor/sensor/nanohub_lock
+    chown 1000 root /dev/nanohub
+    chown 1000 root /dev/nanohub_comms
+    chown 1000 root /dev/nanohub_custom_flash
+
+    class_start core
+    class_start hal
+
+service rmt_storage /vendor/bin/rmt_storage
+    class core
+
+on property:ro.gps_hardware.name=brcm
+    start lhd
+    start gpsd
+
+# SensorHub (Location Hub) different lhd.conf
+service lhd /vendor/bin/lhd /vendor/etc/lhd.conf
+    class core
+    disabled
+
+# GPS use special version of gps.xml for 4774 to work with LHD
+service gpsd /vendor/bin/gpsd -c /vendor/etc/gps.xml
+    class core
+    disabled
