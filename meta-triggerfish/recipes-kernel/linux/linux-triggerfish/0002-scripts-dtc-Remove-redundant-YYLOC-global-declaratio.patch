@@ -1,7 +1,7 @@
-From f5eb612dcba997886436657cd693c6c329c46886 Mon Sep 17 00:00:00 2001
+From 0ec2308a2124b564f212f978a2181ce80bd965b9 Mon Sep 17 00:00:00 2001
 From: Dirk Mueller <dmueller@suse.com>
 Date: Tue, 14 Jan 2020 18:53:41 +0100
-Subject: [PATCH] scripts/dtc: Remove redundant YYLOC global declaration
+Subject: [PATCH 2/3] scripts/dtc: Remove redundant YYLOC global declaration
 
 gcc 10 will default to -fno-common, which causes this error at link
 time:
@@ -30,6 +30,8 @@ Signed-off-by: David Gibson <david@gibson.dropbear.id.au>
 [robh: cherry-pick from upstream]
 Cc: stable@vger.kernel.org
 Signed-off-by: Rob Herring <robh@kernel.org>
+
+%% original patch: 0002-scripts-dtc-Remove-redundant-YYLOC-global-declaratio.patch
 ---
  scripts/dtc/dtc-lexer.l              | 2 +-
  scripts/dtc/dtc-parser.tab.c_shipped | 2 +-
@@ -61,3 +63,6 @@ index 31cec50a1265..da139e3f5ad9 100644
  # if defined YYLTYPE_IS_TRIVIAL && YYLTYPE_IS_TRIVIAL
    = { 1, 1, 1, 1 }
  # endif
+-- 
+2.37.3
+
