@@ -1,0 +1,35 @@
+From 2e3fa1a1869a8951a24c4f4a583d8e0ced64754d Mon Sep 17 00:00:00 2001
+From: Arseniy <dodoradio@outlook.com>
+Date: Fri, 11 Nov 2022 19:49:25 +0000
+Subject: [PATCH 3/3] Force triggerfish DTB to build defconfig is unreliable
+ with the option that's meant to enable this - this is a blunt fix that works
+
+---
+ arch/arm/boot/dts/fossil/8x09/Makefile | 13 ++-----------
+ 1 file changed, 2 insertions(+), 11 deletions(-)
+
+diff --git a/arch/arm/boot/dts/fossil/8x09/Makefile b/arch/arm/boot/dts/fossil/8x09/Makefile
+index 49ecacf75bae..6b92d25dc700 100644
+--- a/arch/arm/boot/dts/fossil/8x09/Makefile
++++ b/arch/arm/boot/dts/fossil/8x09/Makefile
+@@ -1,15 +1,6 @@
+ # DTB Makefile
+-
+-8x09_dtb = apq8009w-darter
+-ifeq ($(CONFIG_BUILD_TRIGGERFISH),y)
+-	8x09_dtb = apq8009w-triggerfish
+-else ifeq ($(CONFIG_BUILD_SOLE),y)
+-	8x09_dtb = apq8009w-sole
+-else ifeq ($(CONFIG_BUILD_GILA),y)
+-	8x09_dtb = msm8909w-gila
+-endif
+-include $(srctree)/arch/arm/boot/dts/fossil/8x09/$(8x09_dtb)/Makefile
+-$(obj)/%.dtb: $(src)/../../../../arm/boot/dts/fossil/8x09/$(8x09_dtb)/%.dts FORCE
++include $(srctree)/arch/arm/boot/dts/fossil/8x09/apq8009w-triggerfish/Makefile
++$(obj)/%.dtb: $(src)/../../../../arm/boot/dts/fossil/8x09/apq8009w-triggerfish/%.dts FORCE
+ 	$(call if_changed_dep,dtc)
+ 	@echo "$< $@"
+ dtbs: $(addprefix $(obj)/,$(dtb-y))
+-- 
+2.37.3
+
