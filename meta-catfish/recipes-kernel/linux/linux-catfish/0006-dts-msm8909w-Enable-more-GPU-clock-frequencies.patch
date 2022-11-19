@@ -1,0 +1,60 @@
+From 3d7bc36e2cf0752e134e3cc9d10d027c1e8683b9 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Darrel=20Gri=C3=ABt?= <dgriet@gmail.com>
+Date: Sun, 13 Nov 2022 23:29:48 +0100
+Subject: [PATCH] dts: msm8909w: Enable more GPU clock frequencies.
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: Darrel Griët <dgriet@gmail.com>
+---
+ arch/arm/boot/dts/qcom/msm8909w-gpu.dtsi | 26 +++++++++++++++++++-----
+ 1 file changed, 21 insertions(+), 5 deletions(-)
+
+diff --git a/arch/arm/boot/dts/qcom/msm8909w-gpu.dtsi b/arch/arm/boot/dts/qcom/msm8909w-gpu.dtsi
+index ff2806d9bcd6..8a126fda3b69 100644
+--- a/arch/arm/boot/dts/qcom/msm8909w-gpu.dtsi
++++ b/arch/arm/boot/dts/qcom/msm8909w-gpu.dtsi
+@@ -43,7 +43,7 @@
+ 
+ 		qcom,gpu-pwrlevel@0 {
+ 			reg = <0>;
+-			qcom,gpu-freq = <200000000>;
++			qcom,gpu-freq = <19200000>;
+ 			qcom,bus-freq = <1>;
+ 			qcom,bus-min = <1>;
+ 			qcom,bus-max = <1>;
+@@ -51,10 +51,26 @@
+ 
+ 		qcom,gpu-pwrlevel@1 {
+ 			reg = <1>;
+-			qcom,gpu-freq = <19200000>;
+-			qcom,bus-freq = <0>;
+-			qcom,bus-min = <0>;
+-			qcom,bus-max = <0>;
++			qcom,gpu-freq = <200000000>;
++			qcom,bus-freq = <1>;
++			qcom,bus-min = <1>;
++			qcom,bus-max = <1>;
++		};
++
++		qcom,gpu-pwrlevel@2 {
++			reg = <2>;
++			qcom,gpu-freq = <307200000>;
++			qcom,bus-freq = <1>;
++			qcom,bus-min = <1>;
++			qcom,bus-max = <1>;
++		};
++
++		qcom,gpu-pwrlevel@3 {
++			reg = <3>;
++			qcom,gpu-freq = <456000000>;
++			qcom,bus-freq = <1>;
++			qcom,bus-min = <1>;
++			qcom,bus-max = <1>;
+ 		};
+ 
+ 	};
+-- 
+2.38.1
+

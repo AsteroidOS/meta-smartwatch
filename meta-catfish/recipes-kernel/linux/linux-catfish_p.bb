@@ -16,6 +16,7 @@ SRC_URI = " git://android.googlesource.com/kernel/msm;branch=android-msm-catshar
     file://0003-char-bbd2.0-Fix-include-error.patch \
     file://0004-Backport-mainline-4.1-Bluetooth-subsystem.patch \
     file://0005-Focaltech-Delay-when-sending-wakeup-event.patch \
+    file://0006-dts-msm8909w-Enable-more-GPU-clock-frequencies.patch \
 "
 
 SRCREV = "2b65638aaf038943506d1e6e7a942a4948490a42"
