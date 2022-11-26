@@ -43,6 +43,10 @@ service vendor.sensors-hal-1-0 /vendor/bin/hw/android.hardware.sensors@1.0-servi
     class hal
     oneshot
 
+service gnss_service_becurx /vendor/bin/hw/android.hardware.gnss@1.0-service.cxd5603
+    class hal
+    oneshot
+
 service deamonserver /system/bin/deamonserver
     class core
     oneshot
