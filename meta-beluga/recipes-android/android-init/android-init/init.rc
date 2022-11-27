@@ -47,6 +47,9 @@ service gnss_service_becurx /vendor/bin/hw/android.hardware.gnss@1.0-service.cxd
     class hal
     oneshot
 
+service nfc_hal_service /vendor/bin/hw/android.hardware.nfc@1.1-service
+    class hal
+
 service deamonserver /system/bin/deamonserver
     class core
     oneshot
