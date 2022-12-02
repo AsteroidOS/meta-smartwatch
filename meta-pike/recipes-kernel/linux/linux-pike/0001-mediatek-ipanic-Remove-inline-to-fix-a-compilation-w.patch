@@ -1,0 +1,34 @@
+From 1c6b822fdc040d72efdb995d7d747b3475040a40 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Darrel=20Gri=C3=ABt?= <dgriet@gmail.com>
+Date: Sat, 3 Dec 2022 15:35:24 +0100
+Subject: [PATCH] mediatek: ipanic: Remove inline to fix a compilation warning
+ and error.
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Fixes:
+drivers/misc/mediatek/aee/ipanic/ipanic_rom.c:283:34: warning: 'ipanic_memory_buffer' is static but used in inline function 'ipanic_mem_write' which is not static
+  283 |         return ipanic_next_write(ipanic_memory_buffer, &mem_info, off, len, encrypt);
+
+Signed-off-by: Darrel Griët <dgriet@gmail.com>
+---
+ drivers/misc/mediatek/aee/ipanic/ipanic_rom.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/misc/mediatek/aee/ipanic/ipanic_rom.c b/drivers/misc/mediatek/aee/ipanic/ipanic_rom.c
+index badabe3a1af..f188249867c 100644
+--- a/drivers/misc/mediatek/aee/ipanic/ipanic_rom.c
++++ b/drivers/misc/mediatek/aee/ipanic/ipanic_rom.c
+@@ -273,7 +273,7 @@ inline int ipanic_next_write(fn_next next, void *data, int off, int total, int e
+ 	return ipanic_func_write(next, data, off, total, encrypt);
+ }
+ 
+-inline int ipanic_mem_write(void *buf, int off, int len, int encrypt)
++int ipanic_mem_write(void *buf, int off, int len, int encrypt)
+ {
+ 	struct ipanic_memory_block mem_info = {
+ 		.kstart = (unsigned long)buf,
+-- 
+2.38.1
+
