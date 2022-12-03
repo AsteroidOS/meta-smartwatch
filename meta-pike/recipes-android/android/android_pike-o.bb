@@ -1,6 +1,6 @@
 inherit gettext
 
-SUMMARY = "Downloads the Ticwatch E & S /system and /usr/include/android folders and installs them for libhybris"
+SUMMARY = "Downloads the Polar M600 /system and /usr/include/android folders and installs them for libhybris"
 LICENSE = "CLOSED"
 SRC_URI = "https://dl.dropboxusercontent.com/s/ubcsdhlbv09jxxo/system-pike.tar.gz"
 SRC_URI[md5sum] = "c1d225bca2257d13724600b3edac0e44"
