@@ -1,0 +1,43 @@
+on init
+    load_all_props
+    setprop ro.board.platform mt2601
+    chown system root /sys/class/timed_output/vibrator/enable
+    class_start core
+
+service logd /system/bin/logd
+    class core
+    socket logd stream 0666 root root
+    socket logdr seqpacket 0666 root root
+    socket logdw dgram 0222 root root
+
+service servicemanager /system/bin/servicemanager
+    class core
+
+service 662x_launcher /vendor/bin/6620_launcher -m 4 -p /system/etc/firmware/
+    class core
+
+service wmtLoader /vendor/bin/wmt_loader
+    class core
+    oneshot
+
+service nvram_daemon /vendor/bin/nvram_daemon
+    class core
+    oneshot
+
+service configstore-hal-1-0 /vendor/bin/hw/android.hardware.configstore@1.0-service
+    class core
+
+service gralloc-2-0 /vendor/bin/hw/android.hardware.graphics.allocator@2.0-service
+    capabilities SYS_NICE
+    class core
+
+service memtrack-hal-1-0 /vendor/bin/hw/android.hardware.memtrack@1.0-service
+    class core
+
+service vndservicemanager /vendor/bin/vndservicemanager /dev/vndbinder
+    class core
+    writepid /dev/cpuset/system-background/tasks
+
+service ril-daemon /vendor/bin/hw/rild
+    class core
+    capabilities BLOCK_SUSPEND NET_ADMIN NET_RAW

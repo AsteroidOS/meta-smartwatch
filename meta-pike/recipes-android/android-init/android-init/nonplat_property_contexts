@@ -1,0 +1,14 @@
+ccci.decrypt.state   u:object_r:ccci_decrypt_state_prop:s0
+ctl.bmc156d          u:object_r:ctl_bmc156d_prop:s0
+ctl.ccci_fsd         u:object_r:ctl_ccci_fsd_prop:s0
+ctl.gsm0710muxd      u:object_r:ctl_gsm0710muxd_prop:s0
+ctl.mdlogger         u:object_r:ctl_mdlogger_prop:s0
+ctl.msensord         u:object_r:ctl_msensord_prop:s0
+ctl.ril-daemon-mtk   u:object_r:ctl_ril-daemon-mtk_prop:s0
+debug.mtklog         u:object_r:debug_mtklog_prop:s0
+debug.netlog         u:object_r:debug_netlog_prop:s0
+persist.af.          u:object_r:audioserver_prop:s0
+persist.mtk.aee      u:object_r:persist_mtk_aee_prop:s0
+persist.mtklog       u:object_r:persist_mtklog_prop:s0
+persist.mtk.         u:object_r:mediatek_persist_prop:s0
+service.nvram_init   u:object_r:nvram_init_prop:s0

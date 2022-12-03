@@ -1,0 +1,12 @@
+kernel=%%KERNEL%%
+ramdisk=%%RAMDISK%%
+page_size=2048
+kernel_size=3669168
+ramdisk_size=2751911
+base_addr=0x80100000
+kernel_offset=0x00008000
+ramdisk_offset=0x02000000
+tags_offset=0x01e00000
+cmd_line='buildvariant=user selinux=0'
+board=""
+format=gzip

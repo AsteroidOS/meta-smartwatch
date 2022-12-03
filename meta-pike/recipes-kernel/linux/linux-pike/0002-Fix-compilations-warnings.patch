@@ -1,0 +1,24 @@
+From 69634df2fcc2b6e895955f7527fc4807233390ce Mon Sep 17 00:00:00 2001
+From: Arseniy <dodoradio@outlook.com>
+Date: Sat, 3 Dec 2022 10:20:24 +0000
+Subject: [PATCH 2/2] Fix compilations warnings.
+
+---
+ Makefile | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/Makefile b/Makefile
+index cb45106d2419..92dab86bcad7 100644
+--- a/Makefile
++++ b/Makefile
+@@ -376,7 +376,6 @@ KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
+ 		   -Werror-implicit-function-declaration \
+ 		   -Wno-format-security \
+ 		   -fno-delete-null-pointer-checks \
+-		   -Werror=format -Werror=int-to-pointer-cast -Werror=pointer-to-int-cast
+ 
+ KBUILD_AFLAGS_KERNEL :=
+ KBUILD_CFLAGS_KERNEL :=
+-- 
+2.38.1
+
