@@ -1,0 +1,50 @@
+/system/ directory build instructions
+=====================================
+
+The /system/ directory available on the pike platform and provided in
+prebuilt form by android_pike-o.bb is a tricky mix of an original WearOS
+/system and some recompiled parts. This is due to the half-closed nature of
+WearOS. This file explains you how to rebuild manually your own /system dir.
+
+We first need to adb pull a /system directory from a living WearOS 8.0.0
+installation:
+  adb pull /system/ system
+  cd system/
+  rm -rf app/ fake-libs fonts/ framework/ media/ priv-app/ usr/ xbin/ manifest.xml etc/init vendor/etc/init
+  cp system/vendor/lib/hw/sensors.cywee.so system/lib/hw/sensors.default.so
+
+This installation wouldn't be enough because libhybris needs a patched bionic
+Thankfully, bionic is open-source so we can download AOSP and build it. (This
+may take a while)
+  ### Download
+  curl https://storage.googleapis.com/git-repo-downloads/repo > repo
+  chmod a+x repo
+  mkdir -p android-o/
+  cd android-o
+  ../repo init -u https://github.com/AsteroidOS/android_manifest -b android-8.0.0_r36
+  ../repo sync
+
+  ### Build (can only be done in bash)
+  . build/envsetup.sh
+  mmma system/core/init/
+  mma libminisf
+
+  ### Installation
+  cp out/target/product/generic/root/init ../system/bin/
+  chmod +x ../system/bin/*
+  mkdir -p ../usr/libexec/hal-droid/system/
+  cp -r out/target/product/generic/system/lib ../usr/libexec/hal-droid/system
+
+libhybris headers
+=================
+
+The second part of this tarball contains header files to compile against
+libhybris. There is a script in the libhybris distribution that can pull
+the header files from the downloaded android distribution (above).
+
+  git clone https://github.com/libhybris/libhybris
+  ./libhybris/utils/extract_headers.sh android-pike include 8 0 0
+
+With the system and include directories, you can create the system-dir tarball:
+
+  tar zcvf system.tar.gz system include usr

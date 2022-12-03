@@ -1,0 +1,86 @@
+From b0b451264c5cb31eb5073c8103811cfcdef27b18 Mon Sep 17 00:00:00 2001
+From: Florent Revest <revestflo@gmail.com>
+Date: Sat, 20 Jul 2019 17:36:07 +0200
+Subject: [PATCH] platform_uart: Avoid a kernel panic when restoring an unused
+ uart
+
+---
+ .../misc/mediatek/uart/mt2601/platform_uart.c | 62 ++++++++++---------
+ 1 file changed, 32 insertions(+), 30 deletions(-)
+
+diff --git a/drivers/misc/mediatek/uart/mt2601/platform_uart.c b/drivers/misc/mediatek/uart/mt2601/platform_uart.c
+index 702c437f5e70..186942f93ed1 100644
+--- a/drivers/misc/mediatek/uart/mt2601/platform_uart.c
++++ b/drivers/misc/mediatek/uart/mt2601/platform_uart.c
+@@ -1909,36 +1909,38 @@ void mtk_uart_restore(void)
+     unsigned long flags;
+     struct mtk_uart *uart;
+ 
+-    uart = console_port;
+-    base = uart->base;
+-
+-    mtk_uart_power_up(uart);
+-    spin_lock_irqsave(&mtk_console_lock, flags);
+-    mt_reg_sync_writel(0xbf, UART_LCR);
+-    mt_reg_sync_writel(uart->registers.efr, UART_EFR);
+-    mt_reg_sync_writel(uart->registers.lcr, UART_LCR);
+-    mt_reg_sync_writel(uart->registers.fcr, UART_FCR);
+-
+-    /* baudrate */
+-    mt_reg_sync_writel(uart->registers.highspeed, UART_HIGHSPEED);
+-    mt_reg_sync_writel(uart->registers.fracdiv_l, UART_FRACDIV_L);
+-    mt_reg_sync_writel(uart->registers.fracdiv_m, UART_FRACDIV_M);
+-    mt_reg_sync_writel(uart->registers.lcr | UART_LCR_DLAB, UART_LCR);
+-    mt_reg_sync_writel(uart->registers.dll, UART_DLL);
+-    mt_reg_sync_writel(uart->registers.dlh, UART_DLH);
+-    mt_reg_sync_writel(uart->registers.lcr, UART_LCR);
+-    mt_reg_sync_writel(uart->registers.sample_count, UART_SAMPLE_COUNT);
+-    mt_reg_sync_writel(uart->registers.sample_point, UART_SAMPLE_POINT);
+-    mt_reg_sync_writel(uart->registers.guard, UART_GUARD);
+-
+-    /* flow control */
+-    mt_reg_sync_writel(uart->registers.escape_en, UART_ESCAPE_EN);
+-    mt_reg_sync_writel(uart->registers.mcr, UART_MCR);
+-    mt_reg_sync_writel(uart->registers.ier, UART_IER);
+-
+-    mt_reg_sync_writel(uart->registers.rx_sel, UART_RX_SEL);
+-
+-    spin_unlock_irqrestore(&mtk_console_lock, flags);
++    if(console_port) {
++        uart = console_port;
++        base = uart->base;
++
++        mtk_uart_power_up(uart);
++        spin_lock_irqsave(&mtk_console_lock, flags);
++        mt_reg_sync_writel(0xbf, UART_LCR);
++        mt_reg_sync_writel(uart->registers.efr, UART_EFR);
++        mt_reg_sync_writel(uart->registers.lcr, UART_LCR);
++        mt_reg_sync_writel(uart->registers.fcr, UART_FCR);
++
++        /* baudrate */
++        mt_reg_sync_writel(uart->registers.highspeed, UART_HIGHSPEED);
++        mt_reg_sync_writel(uart->registers.fracdiv_l, UART_FRACDIV_L);
++        mt_reg_sync_writel(uart->registers.fracdiv_m, UART_FRACDIV_M);
++        mt_reg_sync_writel(uart->registers.lcr | UART_LCR_DLAB, UART_LCR);
++        mt_reg_sync_writel(uart->registers.dll, UART_DLL);
++        mt_reg_sync_writel(uart->registers.dlh, UART_DLH);
++        mt_reg_sync_writel(uart->registers.lcr, UART_LCR);
++        mt_reg_sync_writel(uart->registers.sample_count, UART_SAMPLE_COUNT);
++        mt_reg_sync_writel(uart->registers.sample_point, UART_SAMPLE_POINT);
++        mt_reg_sync_writel(uart->registers.guard, UART_GUARD);
++
++        /* flow control */
++        mt_reg_sync_writel(uart->registers.escape_en, UART_ESCAPE_EN);
++        mt_reg_sync_writel(uart->registers.mcr, UART_MCR);
++        mt_reg_sync_writel(uart->registers.ier, UART_IER);
++
++        mt_reg_sync_writel(uart->registers.rx_sel, UART_RX_SEL);
++
++        spin_unlock_irqrestore(&mtk_console_lock, flags);
++    }
+ #endif
+ }
+ 
+-- 
+2.22.0
+

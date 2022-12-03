@@ -1,0 +1,263 @@
+From 5c9bb44ad1e42ea88b349d498b976ec27e980b06 Mon Sep 17 00:00:00 2001
+From: Florent Revest <revestflo@gmail.com>
+Date: Thu, 2 May 2019 00:28:46 +0200
+Subject: [PATCH] Fix various drivers compilation with a recent GCC
+
+---
+ Makefile                                      |  4 ++-
+ drivers/input/touchscreen/mediatek/Makefile   |  2 ++
+ .../common/common_main/core/wmt_core.c        |  2 +-
+ .../connectivity/wlan/gen3/mgmt/rlm.c         | 25 ++++++++++---------
+ drivers/misc/mediatek/leds/mtk_leds_drv.c     |  2 +-
+ drivers/misc/mediatek/m4u/mt2601/m4u.c        |  6 -----
+ .../mediatek/power/mt2601/charging_hw_pmic.c  |  6 ++---
+ drivers/misc/mediatek/pwm/Makefile            |  1 +
+ .../sensorhub/CwMcuSensor/CwMcuSensor.h       |  2 +-
+ .../CwMcuSensor/CwMcuSensor_factory.c         |  2 +-
+ .../misc/mediatek/uart/mt2601/platform_uart.c | 17 +++++--------
+ drivers/misc/mediatek/usb20/mt2601/usb20.c    |  2 +-
+ .../misc/mediatek/usb20/mt2601/usb20_host.c   |  2 +-
+ 13 files changed, 34 insertions(+), 39 deletions(-)
+
+diff --git a/Makefile b/Makefile
+index 65732aa56e4e..e5b4838a5808 100644
+--- a/Makefile
++++ b/Makefile
+@@ -398,7 +398,9 @@ KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
+ 		   -fno-strict-aliasing -fno-common \
+ 		   -Werror-implicit-function-declaration \
+ 		   -Wno-format-security \
+-		   -std=gnu89 $(call cc-option,-fno-PIE)
++		   -std=gnu89 $(call cc-option,-fno-PIE) \
++		   -Wno-error=stringop-overflow \
++		   -Wno-error=stringop-truncation
+ 
+ 
+ KBUILD_AFLAGS_KERNEL :=
+diff --git a/drivers/input/touchscreen/mediatek/Makefile b/drivers/input/touchscreen/mediatek/Makefile
+index 2d2639c252fa..8d4e9007d917 100644
+--- a/drivers/input/touchscreen/mediatek/Makefile
++++ b/drivers/input/touchscreen/mediatek/Makefile
+@@ -12,6 +12,8 @@ obj-y   +=  tpd_init.o
+ obj-y   +=  tpd_misc.o
+ obj-y   +=  tpd_setting.o
+ 
++CFLAGS_tpd_button.o := -Wno-restrict
++
+ obj-$(CONFIG_TOUCHSCREEN_MTK_GT1151)	+= GT1151/
+ obj-$(CONFIG_TOUCHSCREEN_MTK_GT911)	+= GT911/
+ obj-$(CONFIG_TOUCHSCREEN_MTK_GSLX680)	+= gslX680/
+diff --git a/drivers/misc/mediatek/connectivity/common/common_main/core/wmt_core.c b/drivers/misc/mediatek/connectivity/common/common_main/core/wmt_core.c
+index 26cb70b434ec..9ff61e818046 100644
+--- a/drivers/misc/mediatek/connectivity/common/common_main/core/wmt_core.c
++++ b/drivers/misc/mediatek/connectivity/common/common_main/core/wmt_core.c
+@@ -1366,7 +1366,7 @@ static INT32 opfunc_func_off(P_WMT_OP pWmtOp)
+ 			gMtkWmtCtx.eDrvStatus[drvType] = DRV_STS_POWER_OFF;
+ 		else if (drvType == WMTDRV_TYPE_COREDUMP)
+ 			gMtkWmtCtx.eDrvStatus[drvType] = DRV_STS_POWER_OFF;
+-			iRet = 0;
++		iRet = 0;
+ 	}
+ 
+ 	/* shall we put device state to POWER_OFF state when fail? */
+diff --git a/drivers/misc/mediatek/connectivity/wlan/gen3/mgmt/rlm.c b/drivers/misc/mediatek/connectivity/wlan/gen3/mgmt/rlm.c
+index 562f078af9b5..b88ae7b81e4e 100644
+--- a/drivers/misc/mediatek/connectivity/wlan/gen3/mgmt/rlm.c
++++ b/drivers/misc/mediatek/connectivity/wlan/gen3/mgmt/rlm.c
+@@ -1179,24 +1179,25 @@ static VOID rlmFillVhtCapIE(P_ADAPTER_T prAdapter, P_BSS_INFO_T prBssInfo, P_MSD
+ 	prVhtCap->u4VhtCapInfo = VHT_CAP_INFO_DEFAULT_VAL;
+ 
+ 	if (IS_FEATURE_ENABLED(prAdapter->rWifiVar.ucStaVhtBfee) && (wlanGetEcoVersion(prAdapter) > 2))
+-		prVhtCap->u4VhtCapInfo |= FIELD_VHT_CAP_INFO_BF;
+-		if(IS_FEATURE_ENABLED(prAdapter->rWifiVar.ucStaVhtMuBfee))
+-			prVhtCap->u4VhtCapInfo |= VHT_CAP_INFO_MU_BEAMFOMEE_CAPABLE;
++	    prVhtCap->u4VhtCapInfo |= FIELD_VHT_CAP_INFO_BF;
+ 
+-	if (IS_FEATURE_ENABLED(prAdapter->rWifiVar.ucRxShortGI))
+-		prVhtCap->u4VhtCapInfo |= VHT_CAP_INFO_SHORT_GI_80;
++    if (IS_FEATURE_ENABLED(prAdapter->rWifiVar.ucStaVhtMuBfee))
++        prVhtCap->u4VhtCapInfo |= VHT_CAP_INFO_MU_BEAMFOMEE_CAPABLE;
+ 
+-	if (IS_FEATURE_ENABLED(prAdapter->rWifiVar.ucRxLdpc) && (wlanGetEcoVersion(prAdapter) > 2))
+-		prVhtCap->u4VhtCapInfo |= VHT_CAP_INFO_RX_LDPC;
++    if (IS_FEATURE_ENABLED(prAdapter->rWifiVar.ucRxShortGI))
++        prVhtCap->u4VhtCapInfo |= VHT_CAP_INFO_SHORT_GI_80;
+ 
+-	if (IS_FEATURE_ENABLED(prAdapter->rWifiVar.ucRxStbc))
+-		prVhtCap->u4VhtCapInfo |= VHT_CAP_INFO_RX_STBC_ONE_STREAM;
++    if (IS_FEATURE_ENABLED(prAdapter->rWifiVar.ucRxLdpc) && (wlanGetEcoVersion(prAdapter) > 2))
++        prVhtCap->u4VhtCapInfo |= VHT_CAP_INFO_RX_LDPC;
+ 
+-	if (IS_FEATURE_ENABLED(prAdapter->rWifiVar.ucTxStbc))
+-		prVhtCap->u4VhtCapInfo |= VHT_CAP_INFO_TX_STBC;
++    if (IS_FEATURE_ENABLED(prAdapter->rWifiVar.ucRxStbc))
++        prVhtCap->u4VhtCapInfo |= VHT_CAP_INFO_RX_STBC_ONE_STREAM;
++
++    if (IS_FEATURE_ENABLED(prAdapter->rWifiVar.ucTxStbc))
++        prVhtCap->u4VhtCapInfo |= VHT_CAP_INFO_TX_STBC;
+ 
+ 	/*set MCS map */
+-	prVhtSupportedMcsSet = &prVhtCap->rVhtSupportedMcsSet;
++    prVhtSupportedMcsSet = &prVhtCap->rVhtSupportedMcsSet;
+ 	kalMemZero((PVOID) prVhtSupportedMcsSet, sizeof(VHT_SUPPORTED_MCS_FIELD));
+ 
+ 	for (i = 0; i < 8; i++) {
+diff --git a/drivers/misc/mediatek/leds/mtk_leds_drv.c b/drivers/misc/mediatek/leds/mtk_leds_drv.c
+index b1d59ba508dd..7d1836bc349c 100644
+--- a/drivers/misc/mediatek/leds/mtk_leds_drv.c
++++ b/drivers/misc/mediatek/leds/mtk_leds_drv.c
+@@ -23,7 +23,7 @@
+ #include <linux/slab.h>
+ #include <linux/spinlock.h>
+ #include <mtk_leds_hal.h>
+-#include <mtk_leds_drv.h>
++#include "mtk_leds_drv.h"
+ #include <mt-plat/mtk_pwm.h>
+ #include "lcm_drv.h"
+ 
+diff --git a/drivers/misc/mediatek/m4u/mt2601/m4u.c b/drivers/misc/mediatek/m4u/mt2601/m4u.c
+index be4597f17791..559f2447a969 100644
+--- a/drivers/misc/mediatek/m4u/mt2601/m4u.c
++++ b/drivers/misc/mediatek/m4u/mt2601/m4u.c
+@@ -1067,12 +1067,6 @@ static long MTK_M4U_ioctl(struct file *a_pstFile,
+ 					unsigned int pa, entry;
+ 					pa = m4u_user_v2p(va + i * M4U_PAGE_SIZE);
+ 					entry = *(unsigned int *)mva_pteAddr_nonsec((mva + i * M4U_PAGE_SIZE));
+-
+-					if ((pa & (~0xfff)) != (pa & (~0xfff)))
+-					{
+-						M4UMSG("warning warning!! va=0x%x,mva=0x%x, pa=0x%x,entry=0x%x\n",
+-							   va + i * M4U_PAGE_SIZE, mva + i * M4U_PAGE_SIZE, pa, entry);
+-					}
+ 				}
+ 
+ 			}
+diff --git a/drivers/misc/mediatek/power/mt2601/charging_hw_pmic.c b/drivers/misc/mediatek/power/mt2601/charging_hw_pmic.c
+index c7daba90927f..9f18eb853f52 100644
+--- a/drivers/misc/mediatek/power/mt2601/charging_hw_pmic.c
++++ b/drivers/misc/mediatek/power/mt2601/charging_hw_pmic.c
+@@ -712,10 +712,10 @@ static kal_uint32 charging_get_charger_det_status(void *data)
+ 	   *(kal_bool *)(data) = upmu_get_rgs_chrdet();
+ #endif
+ 
+-       if (upmu_get_rgs_chrdet() == 0)
+-	   g_charger_type = CHARGER_UNKNOWN;
++    if (upmu_get_rgs_chrdet() == 0)
++       g_charger_type = CHARGER_UNKNOWN;
+ 
+-	   return status;
++	return status;
+  }
+ 
+ 
+diff --git a/drivers/misc/mediatek/pwm/Makefile b/drivers/misc/mediatek/pwm/Makefile
+index dfcca552fb6e..ec2877926f9b 100644
+--- a/drivers/misc/mediatek/pwm/Makefile
++++ b/drivers/misc/mediatek/pwm/Makefile
+@@ -16,6 +16,7 @@ ifneq ($(CONFIG_ARCH_MT2601),y)
+ obj-$(CONFIG_MTK_PWM)	+= mtk_pwm.o
+ else
+ obj-$(CONFIG_MTK_PWM)	+= mt_pwm.o
++CFLAGS_mt_pwm.o := -Wno-restrict
+ endif
+ 
+ obj-y += $(subst ",,$(CONFIG_MTK_PLATFORM))/
+diff --git a/drivers/misc/mediatek/sensorhub/CwMcuSensor/CwMcuSensor.h b/drivers/misc/mediatek/sensorhub/CwMcuSensor/CwMcuSensor.h
+index 2b49b7777b29..bcab48200810 100644
+--- a/drivers/misc/mediatek/sensorhub/CwMcuSensor/CwMcuSensor.h
++++ b/drivers/misc/mediatek/sensorhub/CwMcuSensor/CwMcuSensor.h
+@@ -25,7 +25,7 @@
+ #include <linux/iio/kfifo_buf.h>
+ #include <linux/irq_work.h>
+ #include <linux/ioctl.h>
+-#include <sensors_io.h>
++#include "sensors_io.h"
+ #include <linux/i2c.h>
+ 
+ 
+diff --git a/drivers/misc/mediatek/sensorhub/CwMcuSensor/CwMcuSensor_factory.c b/drivers/misc/mediatek/sensorhub/CwMcuSensor/CwMcuSensor_factory.c
+index a641b450bd80..16d4a4e95971 100644
+--- a/drivers/misc/mediatek/sensorhub/CwMcuSensor/CwMcuSensor_factory.c
++++ b/drivers/misc/mediatek/sensorhub/CwMcuSensor/CwMcuSensor_factory.c
+@@ -15,7 +15,7 @@
+ #include <mach/mt_typedefs.h>
+ #include <mach/mt_gpio.h>
+ #include <mach/mt_pm_ldo.h>
+-#include <sensors_io.h>
++#include "sensors_io.h"
+ #include "CwMcuSensor.h"
+ #include <cust_cwmcu.h>
+ #include "SensorSupport.h"
+diff --git a/drivers/misc/mediatek/uart/mt2601/platform_uart.c b/drivers/misc/mediatek/uart/mt2601/platform_uart.c
+index 702c437f5e70..8bf9ce36311a 100644
+--- a/drivers/misc/mediatek/uart/mt2601/platform_uart.c
++++ b/drivers/misc/mediatek/uart/mt2601/platform_uart.c
+@@ -626,11 +626,8 @@ void mtk_uart_dma_vfifo_tx_tasklet(unsigned long arg)
+     unsigned long flags;
+ 
+     spin_lock_irqsave(&vfifo->iolock, flags);
+-    if (atomic_inc_and_test(&vfifo->entry) > 1) {
+-	MSG(ERR, "tx entry!!\n");
+-	tasklet_schedule(&vfifo->dma->tasklet);
+-    } else {
+-	while (UART_READ32(VFF_LEFT_SIZE(base)) >= vfifo->trig) {
++    atomic_add_return(1, &vfifo->entry);
++    while (UART_READ32(VFF_LEFT_SIZE(base)) >= vfifo->trig) {
+ 	    /* deal with x_char first */
+ 	    if (unlikely(port->x_char)) {
+ 		MSG(INFO, "detect x_char!!\n");
+@@ -651,7 +648,6 @@ void mtk_uart_dma_vfifo_tx_tasklet(unsigned long arg)
+ 	    mtk_uart_vfifo_enable_tx_intr(uart);
+ 	    mtk_uart_tx_vfifo_flush(uart, 0);
+ 	}
+-    }
+     atomic_dec(&vfifo->entry);
+     spin_unlock_irqrestore(&vfifo->iolock, flags);
+ }
+@@ -896,13 +892,12 @@ void mtk_uart_dma_vfifo_rx_tasklet(unsigned long arg)
+ 
+     MSG(DMA, "%d, %x, %x\n", uart->read_allow(uart), UART_READ32(VFF_VALID_SIZE(vfifo->base)), vfifo->trig);
+     spin_lock_irqsave(&vfifo->iolock, flags);
+-    if (atomic_inc_and_test(&vfifo->entry) > 1) {
+-	MSG(ERR, "rx entry!!\n");
+-	tasklet_schedule(&vfifo->dma->tasklet);
+-    } else {
++
++    atomic_add_return(1, &vfifo->entry);
++
+ 	if (uart->read_allow(uart))
+ 	    mtk_uart_dma_vfifo_rx_tasklet_str(arg);
+-    }
++
+     atomic_dec(&vfifo->entry);
+     spin_unlock_irqrestore(&vfifo->iolock, flags);
+ }
+diff --git a/drivers/misc/mediatek/usb20/mt2601/usb20.c b/drivers/misc/mediatek/usb20/mt2601/usb20.c
+index b33e3b552f63..81bf7768fb2c 100644
+--- a/drivers/misc/mediatek/usb20/mt2601/usb20.c
++++ b/drivers/misc/mediatek/usb20/mt2601/usb20.c
+@@ -33,7 +33,7 @@
+ #include <mach/mt_pm_ldo.h>
+ #include <mach/mt_clkmgr.h>
+ #include <mach/emi_mpu.h>
+-#include <usb20.h>
++#include "usb20.h"
+ 
+ extern struct musb *mtk_musb;
+ static DEFINE_SEMAPHORE(power_clock_lock);
+diff --git a/drivers/misc/mediatek/usb20/mt2601/usb20_host.c b/drivers/misc/mediatek/usb20/mt2601/usb20_host.c
+index 7cc7f2431bad..35e5aeda4906 100644
+--- a/drivers/misc/mediatek/usb20/mt2601/usb20_host.c
++++ b/drivers/misc/mediatek/usb20/mt2601/usb20_host.c
+@@ -24,7 +24,7 @@
+ #include <musbhsdma.h>
+ #include <cust_gpio_usage.h>
+ #include <linux/switch.h>
+-#include <usb20.h>
++#include "usb20.h"
+ 
+ #ifdef CONFIG_USB_MTK_OTG
+ 
+-- 
+2.30.0
+
