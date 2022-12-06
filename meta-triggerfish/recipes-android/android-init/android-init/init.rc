@@ -40,17 +40,3 @@ on init
 
 service rmt_storage /vendor/bin/rmt_storage
     class core
-
-on property:ro.gps_hardware.name=brcm
-    start lhd
-    start gpsd
-
-# SensorHub (Location Hub) different lhd.conf
-service lhd /vendor/bin/lhd /vendor/etc/lhd.conf
-    class core
-    disabled
-
-# GPS use special version of gps.xml for 4774 to work with LHD
-service gpsd /vendor/bin/gpsd -c /vendor/etc/gps.xml
-    class core
-    disabled
