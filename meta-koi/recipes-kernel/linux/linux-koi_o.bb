@@ -13,6 +13,8 @@ SRC_URI = " git://android.googlesource.com/kernel/exynos;branch=android-exynos-k
     file://0001-scripts-dtc-Remove-redundant-YYLOC-global-declaratio.patch \
     file://0002-ARM-uaccess-remove-put_user-code-duplication.patch \
     file://0003-Fix-compilations-warnings.patch \
+    file://0004-Backport-mainline-4.1-Bluetooth-subsystem.patch \
+    file://0005-Backport-mainline-4.1-Bluetooth-drivers.patch \
 "
 
 SRCREV = "f684256405854c40b5ccc2d126f810cf4c29ca2f"
