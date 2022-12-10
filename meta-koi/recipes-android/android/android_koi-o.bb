@@ -33,6 +33,8 @@ do_install() {
     install -d ${D}${libdir}/pkgconfig
     install -m 0644 ${D}${includedir}/android/android-headers.pc ${D}${libdir}/pkgconfig
     rm ${D}${includedir}/android/android-headers.pc
+    cd ${D}
+    ln -s system/vendor vendor
 }
 
 # FIXME: QA Issue: Architecture did not match (40 to 164) on /work/dory-oe-linux-gnueabi/android/lollipop-r0/packages-split/android-system/system/vendor/firmware/adsp.b00 [arch]
@@ -40,6 +42,6 @@ do_package_qa() {
 }
 
 PACKAGES =+ "android-system android-headers"
-FILES:android-system = "/usr ${sysconfdir}/pulse/"
+FILES:android-system = "/usr ${sysconfdir}/pulse/ /vendor"
 FILES:android-headers = "${libdir}/pkgconfig ${includedir}/android"
 EXCLUDE_FROM_SHLIBS = "1"
