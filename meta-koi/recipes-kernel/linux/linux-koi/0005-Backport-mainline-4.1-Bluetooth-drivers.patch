@@ -1,0 +1,601 @@
+From 5c347240660e77971ddf426cd39a0239cc7ce955 Mon Sep 17 00:00:00 2001
+From: Arseniy <dodoradio@outlook.com>
+Date: Tue, 6 Dec 2022 22:25:33 +0000
+Subject: [PATCH]     Backport mainline 4.1 Bluetooth drivers
+
+    %% original patch: 0004-Backport-mainline-4.1-Bluetooth-drivers.patch
+---
+ drivers/bluetooth/hci_h4.c    | 132 +++++++++++++++++++++++++++++-----
+ drivers/bluetooth/hci_ldisc.c |  97 ++++++++++++++++++++-----
+ drivers/bluetooth/hci_uart.h  |  59 +++++++++++++--
+ drivers/bluetooth/hci_vhci.c  |  22 +++---
+ 4 files changed, 259 insertions(+), 51 deletions(-)
+
+diff --git a/drivers/bluetooth/hci_h4.c b/drivers/bluetooth/hci_h4.c
+index 66db9a803373..f7190f01e135 100644
+--- a/drivers/bluetooth/hci_h4.c
++++ b/drivers/bluetooth/hci_h4.c
+@@ -40,17 +40,14 @@
+ #include <linux/signal.h>
+ #include <linux/ioctl.h>
+ #include <linux/skbuff.h>
++#include <asm/unaligned.h>
+ 
+ #include <net/bluetooth/bluetooth.h>
+ #include <net/bluetooth/hci_core.h>
+ 
+ #include "hci_uart.h"
+ 
+-#define VERSION "1.2"
+-
+ struct h4_struct {
+-	unsigned long rx_state;
+-	unsigned long rx_count;
+ 	struct sk_buff *rx_skb;
+ 	struct sk_buff_head txq;
+ };
+@@ -117,18 +114,26 @@ static int h4_enqueue(struct hci_uart *hu, struct sk_buff *skb)
+ 	return 0;
+ }
+ 
++static const struct h4_recv_pkt h4_recv_pkts[] = {
++	{ H4_RECV_ACL,   .recv = hci_recv_frame },
++	{ H4_RECV_SCO,   .recv = hci_recv_frame },
++	{ H4_RECV_EVENT, .recv = hci_recv_frame },
++};
++
+ /* Recv data */
+-static int h4_recv(struct hci_uart *hu, void *data, int count)
++static int h4_recv(struct hci_uart *hu, const void *data, int count)
+ {
+-	int ret;
++	struct h4_struct *h4 = hu->priv;
+ 
+ 	if (!test_bit(HCI_UART_REGISTERED, &hu->flags))
+ 		return -EUNATCH;
+ 
+-	ret = hci_recv_stream_fragment(hu->hdev, data, count);
+-	if (ret < 0) {
+-		BT_ERR("Frame Reassembly Failed");
+-		return ret;
++	h4->rx_skb = h4_recv_buf(hu->hdev, h4->rx_skb, data, count,
++				 h4_recv_pkts, ARRAY_SIZE(h4_recv_pkts));
++	if (IS_ERR(h4->rx_skb)) {
++		int err = PTR_ERR(h4->rx_skb);
++		BT_ERR("%s: Frame reassembly failed (%d)", hu->hdev->name, err);
++		return err;
+ 	}
+ 
+ 	return count;
+@@ -140,8 +145,9 @@ static struct sk_buff *h4_dequeue(struct hci_uart *hu)
+ 	return skb_dequeue(&h4->txq);
+ }
+ 
+-static struct hci_uart_proto h4p = {
++static const struct hci_uart_proto h4p = {
+ 	.id		= HCI_UART_H4,
++	.name		= "H4",
+ 	.open		= h4_open,
+ 	.close		= h4_close,
+ 	.recv		= h4_recv,
+@@ -152,17 +158,105 @@ static struct hci_uart_proto h4p = {
+ 
+ int __init h4_init(void)
+ {
+-	int err = hci_uart_register_proto(&h4p);
+-
+-	if (!err)
+-		BT_INFO("HCI H4 protocol initialized");
+-	else
+-		BT_ERR("HCI H4 protocol registration failed");
+-
+-	return err;
++	return hci_uart_register_proto(&h4p);
+ }
+ 
+ int __exit h4_deinit(void)
+ {
+ 	return hci_uart_unregister_proto(&h4p);
+ }
++
++struct sk_buff *h4_recv_buf(struct hci_dev *hdev, struct sk_buff *skb,
++			    const unsigned char *buffer, int count,
++			    const struct h4_recv_pkt *pkts, int pkts_count)
++{
++	while (count) {
++		int i, len;
++
++		if (!skb) {
++			for (i = 0; i < pkts_count; i++) {
++				if (buffer[0] != (&pkts[i])->type)
++					continue;
++
++				skb = bt_skb_alloc((&pkts[i])->maxlen,
++						   GFP_ATOMIC);
++				if (!skb)
++					return ERR_PTR(-ENOMEM);
++
++				bt_cb(skb)->pkt_type = (&pkts[i])->type;
++				bt_cb(skb)->expect = (&pkts[i])->hlen;
++				break;
++			}
++
++			/* Check for invalid packet type */
++			if (!skb)
++				return ERR_PTR(-EILSEQ);
++
++			count -= 1;
++			buffer += 1;
++		}
++
++		len = min_t(uint, bt_cb(skb)->expect - skb->len, count);
++		memcpy(skb_put(skb, len), buffer, len);
++
++		count -= len;
++		buffer += len;
++
++		/* Check for partial packet */
++		if (skb->len < bt_cb(skb)->expect)
++			continue;
++
++		for (i = 0; i < pkts_count; i++) {
++			if (bt_cb(skb)->pkt_type == (&pkts[i])->type)
++				break;
++		}
++
++		if (i >= pkts_count) {
++			kfree_skb(skb);
++			return ERR_PTR(-EILSEQ);
++		}
++
++		if (skb->len == (&pkts[i])->hlen) {
++			u16 dlen;
++
++			switch ((&pkts[i])->lsize) {
++			case 0:
++				/* No variable data length */
++				(&pkts[i])->recv(hdev, skb);
++				skb = NULL;
++				break;
++			case 1:
++				/* Single octet variable length */
++				dlen = skb->data[(&pkts[i])->loff];
++				bt_cb(skb)->expect += dlen;
++
++				if (skb_tailroom(skb) < dlen) {
++					kfree_skb(skb);
++					return ERR_PTR(-EMSGSIZE);
++				}
++				break;
++			case 2:
++				/* Double octet variable length */
++				dlen = get_unaligned_le16(skb->data +
++							  (&pkts[i])->loff);
++				bt_cb(skb)->expect += dlen;
++
++				if (skb_tailroom(skb) < dlen) {
++					kfree_skb(skb);
++					return ERR_PTR(-EMSGSIZE);
++				}
++				break;
++			default:
++				/* Unsupported variable length */
++				kfree_skb(skb);
++				return ERR_PTR(-EILSEQ);
++			}
++		} else {
++			/* Complete frame */
++			(&pkts[i])->recv(hdev, skb);
++			skb = NULL;
++		}
++	}
++
++	return skb;
++}
+diff --git a/drivers/bluetooth/hci_ldisc.c b/drivers/bluetooth/hci_ldisc.c
+index dc487b5d1156..f5b964c90526 100644
+--- a/drivers/bluetooth/hci_ldisc.c
++++ b/drivers/bluetooth/hci_ldisc.c
+@@ -46,11 +46,11 @@
+ 
+ #include "hci_uart.h"
+ 
+-#define VERSION "2.2"
++#define VERSION "2.3"
+ 
+-static struct hci_uart_proto *hup[HCI_UART_MAX_PROTO];
++static const struct hci_uart_proto *hup[HCI_UART_MAX_PROTO];
+ 
+-int hci_uart_register_proto(struct hci_uart_proto *p)
++int hci_uart_register_proto(const struct hci_uart_proto *p)
+ {
+ 	if (p->id >= HCI_UART_MAX_PROTO)
+ 		return -EINVAL;
+@@ -60,10 +60,12 @@ int hci_uart_register_proto(struct hci_uart_proto *p)
+ 
+ 	hup[p->id] = p;
+ 
++	BT_INFO("HCI UART protocol %s registered", p->name);
++
+ 	return 0;
+ }
+ 
+-int hci_uart_unregister_proto(struct hci_uart_proto *p)
++int hci_uart_unregister_proto(const struct hci_uart_proto *p)
+ {
+ 	if (p->id >= HCI_UART_MAX_PROTO)
+ 		return -EINVAL;
+@@ -76,7 +78,7 @@ int hci_uart_unregister_proto(struct hci_uart_proto *p)
+ 	return 0;
+ }
+ 
+-static struct hci_uart_proto *hci_uart_get_proto(unsigned int id)
++static const struct hci_uart_proto *hci_uart_get_proto(unsigned int id)
+ {
+ 	if (id >= HCI_UART_MAX_PROTO)
+ 		return NULL;
+@@ -261,6 +263,54 @@ static int hci_uart_send_frame(struct hci_dev *hdev, struct sk_buff *skb)
+ 	return 0;
+ }
+ 
++static int hci_uart_setup(struct hci_dev *hdev)
++{
++	struct hci_uart *hu = hci_get_drvdata(hdev);
++	struct hci_rp_read_local_version *ver;
++	struct sk_buff *skb;
++
++	if (hu->proto->setup)
++		return hu->proto->setup(hu);
++
++	if (!test_bit(HCI_UART_VND_DETECT, &hu->hdev_flags))
++		return 0;
++
++	skb = __hci_cmd_sync(hdev, HCI_OP_READ_LOCAL_VERSION, 0, NULL,
++			     HCI_INIT_TIMEOUT);
++	if (IS_ERR(skb)) {
++		BT_ERR("%s: Reading local version information failed (%ld)",
++		       hdev->name, PTR_ERR(skb));
++		return 0;
++	}
++
++	if (skb->len != sizeof(*ver)) {
++		BT_ERR("%s: Event length mismatch for version information",
++		       hdev->name);
++		goto done;
++	}
++
++	ver = (struct hci_rp_read_local_version *)skb->data;
++
++	switch (le16_to_cpu(ver->manufacturer)) {
++#ifdef CONFIG_BT_HCIUART_INTEL
++	case 2:
++		hdev->set_bdaddr = btintel_set_bdaddr;
++		btintel_check_bdaddr(hdev);
++		break;
++#endif
++#ifdef CONFIG_BT_HCIUART_BCM
++	case 15:
++		hdev->set_bdaddr = btbcm_set_bdaddr;
++		btbcm_check_bdaddr(hdev);
++		break;
++#endif
++	}
++
++done:
++	kfree_skb(skb);
++	return 0;
++}
++
+ /* ------ LDISC part ------ */
+ /* hci_uart_tty_open
+  *
+@@ -316,7 +366,7 @@ static int hci_uart_tty_open(struct tty_struct *tty)
+  */
+ static void hci_uart_tty_close(struct tty_struct *tty)
+ {
+-	struct hci_uart *hu = (void *)tty->disc_data;
++	struct hci_uart *hu = tty->disc_data;
+ 	struct hci_dev *hdev;
+ 
+ 	BT_DBG("tty %p", tty);
+@@ -355,7 +405,7 @@ static void hci_uart_tty_close(struct tty_struct *tty)
+  */
+ static void hci_uart_tty_wakeup(struct tty_struct *tty)
+ {
+-	struct hci_uart *hu = (void *)tty->disc_data;
++	struct hci_uart *hu = tty->disc_data;
+ 
+ 	BT_DBG("");
+ 
+@@ -383,9 +433,10 @@ static void hci_uart_tty_wakeup(struct tty_struct *tty)
+  *
+  * Return Value:    None
+  */
+-static void hci_uart_tty_receive(struct tty_struct *tty, const u8 *data, char *flags, int count)
++static void hci_uart_tty_receive(struct tty_struct *tty, const u8 *data,
++				 char *flags, int count)
+ {
+-	struct hci_uart *hu = (void *)tty->disc_data;
++	struct hci_uart *hu = tty->disc_data;
+ 
+ 	if (!hu || tty != hu->tty)
+ 		return;
+@@ -394,7 +445,7 @@ static void hci_uart_tty_receive(struct tty_struct *tty, const u8 *data, char *f
+ 		return;
+ 
+ 	spin_lock(&hu->rx_lock);
+-	hu->proto->recv(hu, (void *) data, count);
++	hu->proto->recv(hu, data, count);
+ 
+ 	if (hu->hdev)
+ 		hu->hdev->stat.byte_rx += count;
+@@ -426,6 +477,7 @@ static int hci_uart_register_dev(struct hci_uart *hu)
+ 	hdev->close = hci_uart_close;
+ 	hdev->flush = hci_uart_flush;
+ 	hdev->send  = hci_uart_send_frame;
++	hdev->setup = hci_uart_setup;
+ 	SET_HCIDEV_DEV(hdev, hu->tty->dev);
+ 
+ 	if (test_bit(HCI_UART_RAW_DEVICE, &hu->hdev_flags))
+@@ -458,7 +510,7 @@ static int hci_uart_register_dev(struct hci_uart *hu)
+ 
+ static int hci_uart_set_proto(struct hci_uart *hu, int id)
+ {
+-	struct hci_uart_proto *p;
++	const struct hci_uart_proto *p;
+ 	int err;
+ 
+ 	p = hci_uart_get_proto(id);
+@@ -486,9 +538,10 @@ static int hci_uart_set_flags(struct hci_uart *hu, unsigned long flags)
+ 				    BIT(HCI_UART_RESET_ON_INIT) |
+ 				    BIT(HCI_UART_CREATE_AMP) |
+ 				    BIT(HCI_UART_INIT_PENDING) |
+-				    BIT(HCI_UART_EXT_CONFIG);
++				    BIT(HCI_UART_EXT_CONFIG) |
++				    BIT(HCI_UART_VND_DETECT);
+ 
+-	if ((flags & ~valid_flags))
++	if (flags & ~valid_flags)
+ 		return -EINVAL;
+ 
+ 	hu->hdev_flags = flags;
+@@ -509,10 +562,10 @@ static int hci_uart_set_flags(struct hci_uart *hu, unsigned long flags)
+  *
+  * Return Value:    Command dependent
+  */
+-static int hci_uart_tty_ioctl(struct tty_struct *tty, struct file * file,
+-					unsigned int cmd, unsigned long arg)
++static int hci_uart_tty_ioctl(struct tty_struct *tty, struct file *file,
++			      unsigned int cmd, unsigned long arg)
+ {
+-	struct hci_uart *hu = (void *)tty->disc_data;
++	struct hci_uart *hu = tty->disc_data;
+ 	int err = 0;
+ 
+ 	BT_DBG("");
+@@ -566,19 +619,19 @@ static int hci_uart_tty_ioctl(struct tty_struct *tty, struct file * file,
+  * We don't provide read/write/poll interface for user space.
+  */
+ static ssize_t hci_uart_tty_read(struct tty_struct *tty, struct file *file,
+-					unsigned char __user *buf, size_t nr)
++				 unsigned char __user *buf, size_t nr)
+ {
+ 	return 0;
+ }
+ 
+ static ssize_t hci_uart_tty_write(struct tty_struct *tty, struct file *file,
+-					const unsigned char *data, size_t count)
++				  const unsigned char *data, size_t count)
+ {
+ 	return 0;
+ }
+ 
+ static unsigned int hci_uart_tty_poll(struct tty_struct *tty,
+-					struct file *filp, poll_table *wait)
++				      struct file *filp, poll_table *wait)
+ {
+ 	return 0;
+ }
+@@ -626,6 +679,9 @@ static int __init hci_uart_init(void)
+ #ifdef CONFIG_BT_HCIUART_3WIRE
+ 	h5_init();
+ #endif
++#ifdef CONFIG_BT_HCIUART_IBS
++	ibs_init();
++#endif
+ 
+ 	return 0;
+ }
+@@ -649,6 +705,9 @@ static void __exit hci_uart_exit(void)
+ #ifdef CONFIG_BT_HCIUART_3WIRE
+ 	h5_deinit();
+ #endif
++#ifdef CONFIG_BT_HCIUART_IBS
++	ibs_deinit();
++#endif
+ 
+ 	/* Release tty registration of line discipline */
+ 	err = tty_unregister_ldisc(N_HCI);
+diff --git a/drivers/bluetooth/hci_uart.h b/drivers/bluetooth/hci_uart.h
+index 247488edcbf9..b8e7f645cf80 100644
+--- a/drivers/bluetooth/hci_uart.h
++++ b/drivers/bluetooth/hci_uart.h
+@@ -35,7 +35,7 @@
+ #define HCIUARTGETFLAGS		_IOR('U', 204, int)
+ 
+ /* UART protocols */
+-#define HCI_UART_MAX_PROTO	6
++#define HCI_UART_MAX_PROTO	8
+ 
+ #define HCI_UART_H4	0
+ #define HCI_UART_BCSP	1
+@@ -43,21 +43,26 @@
+ #define HCI_UART_H4DS	3
+ #define HCI_UART_LL	4
+ #define HCI_UART_ATH3K	5
++#define HCI_UART_INTEL	6
++#define HCI_UART_BCM	7
+ 
+ #define HCI_UART_RAW_DEVICE	0
+ #define HCI_UART_RESET_ON_INIT	1
+ #define HCI_UART_CREATE_AMP	2
+ #define HCI_UART_INIT_PENDING	3
+ #define HCI_UART_EXT_CONFIG	4
++#define HCI_UART_VND_DETECT	5
+ 
+ struct hci_uart;
+ 
+ struct hci_uart_proto {
+ 	unsigned int id;
++	const char *name;
+ 	int (*open)(struct hci_uart *hu);
+ 	int (*close)(struct hci_uart *hu);
+ 	int (*flush)(struct hci_uart *hu);
+-	int (*recv)(struct hci_uart *hu, void *data, int len);
++	int (*setup)(struct hci_uart *hu);
++	int (*recv)(struct hci_uart *hu, const void *data, int len);
+ 	int (*enqueue)(struct hci_uart *hu, struct sk_buff *skb);
+ 	struct sk_buff *(*dequeue)(struct hci_uart *hu);
+ };
+@@ -71,7 +76,7 @@ struct hci_uart {
+ 	struct work_struct	init_ready;
+ 	struct work_struct	write_work;
+ 
+-	struct hci_uart_proto	*proto;
++	const struct hci_uart_proto *proto;
+ 	void			*priv;
+ 
+ 	struct sk_buff		*tx_skb;
+@@ -87,14 +92,48 @@ struct hci_uart {
+ #define HCI_UART_SENDING	1
+ #define HCI_UART_TX_WAKEUP	2
+ 
+-int hci_uart_register_proto(struct hci_uart_proto *p);
+-int hci_uart_unregister_proto(struct hci_uart_proto *p);
++int hci_uart_register_proto(const struct hci_uart_proto *p);
++int hci_uart_unregister_proto(const struct hci_uart_proto *p);
+ int hci_uart_tx_wakeup(struct hci_uart *hu);
+ int hci_uart_init_ready(struct hci_uart *hu);
+ 
+ #ifdef CONFIG_BT_HCIUART_H4
+ int h4_init(void);
+ int h4_deinit(void);
++
++struct h4_recv_pkt {
++	u8  type;	/* Packet type */
++	u8  hlen;	/* Header length */
++	u8  loff;	/* Data length offset in header */
++	u8  lsize;	/* Data length field size */
++	u16 maxlen;	/* Max overall packet length */
++	int (*recv)(struct hci_dev *hdev, struct sk_buff *skb);
++};
++
++#define H4_RECV_ACL \
++	.type = HCI_ACLDATA_PKT, \
++	.hlen = HCI_ACL_HDR_SIZE, \
++	.loff = 2, \
++	.lsize = 2, \
++	.maxlen = HCI_MAX_FRAME_SIZE \
++
++#define H4_RECV_SCO \
++	.type = HCI_SCODATA_PKT, \
++	.hlen = HCI_SCO_HDR_SIZE, \
++	.loff = 2, \
++	.lsize = 1, \
++	.maxlen = HCI_MAX_SCO_SIZE
++
++#define H4_RECV_EVENT \
++	.type = HCI_EVENT_PKT, \
++	.hlen = HCI_EVENT_HDR_SIZE, \
++	.loff = 1, \
++	.lsize = 1, \
++	.maxlen = HCI_MAX_EVENT_SIZE
++
++struct sk_buff *h4_recv_buf(struct hci_dev *hdev, struct sk_buff *skb,
++			    const unsigned char *buffer, int count,
++			    const struct h4_recv_pkt *pkts, int pkts_count);
+ #endif
+ 
+ #ifdef CONFIG_BT_HCIUART_BCSP
+@@ -112,7 +151,17 @@ int ath_init(void);
+ int ath_deinit(void);
+ #endif
+ 
++#ifdef CONFIG_BT_HCIUART_IBS
++int ibs_init(void);
++int ibs_deinit(void);
++#endif
++
+ #ifdef CONFIG_BT_HCIUART_3WIRE
+ int h5_init(void);
+ int h5_deinit(void);
+ #endif
++
++#ifdef CONFIG_BT_HCIUART_IBS
++int ibs_init(void);
++int ibs_deinit(void);
++#endif
+diff --git a/drivers/bluetooth/hci_vhci.c b/drivers/bluetooth/hci_vhci.c
+index 6653473f2757..5bb5872ffee6 100644
+--- a/drivers/bluetooth/hci_vhci.c
++++ b/drivers/bluetooth/hci_vhci.c
+@@ -160,11 +160,13 @@ static int vhci_create_device(struct vhci_data *data, __u8 opcode)
+ }
+ 
+ static inline ssize_t vhci_get_user(struct vhci_data *data,
+-				    struct iov_iter *from)
++				    const struct iovec *iov,
++				    unsigned long count)
+ {
+-	size_t len = iov_iter_count(from);
++	size_t len = iov_length(iov, count);
+ 	struct sk_buff *skb;
+ 	__u8 pkt_type, opcode;
++	unsigned long i;
+ 	int ret;
+ 
+ 	if (len < 2 || len > HCI_MAX_FRAME_SIZE)
+@@ -174,9 +176,12 @@ static inline ssize_t vhci_get_user(struct vhci_data *data,
+ 	if (!skb)
+ 		return -ENOMEM;
+ 
+-	if (copy_from_iter(skb_put(skb, len), len, from) != len) {
+-		kfree_skb(skb);
+-		return -EFAULT;
++	for (i = 0; i < count; i++) {
++		if (copy_from_user(skb_put(skb, iov[i].iov_len),
++				   iov[i].iov_base, iov[i].iov_len)) {
++			kfree_skb(skb);
++			return -EFAULT;
++		}
+ 	}
+ 
+ 	pkt_type = *((__u8 *) skb->data);
+@@ -289,12 +294,13 @@ static ssize_t vhci_read(struct file *file,
+ 	return ret;
+ }
+ 
+-static ssize_t vhci_write(struct kiocb *iocb, struct iov_iter *from)
++static ssize_t vhci_write(struct kiocb *iocb, const struct iovec *iov,
++			  unsigned long count, loff_t pos)
+ {
+ 	struct file *file = iocb->ki_filp;
+ 	struct vhci_data *data = file->private_data;
+ 
+-	return vhci_get_user(data, from);
++	return vhci_get_user(data, iov, count);
+ }
+ 
+ static unsigned int vhci_poll(struct file *file, poll_table *wait)
+@@ -359,7 +365,7 @@ static int vhci_release(struct inode *inode, struct file *file)
+ static const struct file_operations vhci_fops = {
+ 	.owner		= THIS_MODULE,
+ 	.read		= vhci_read,
+-	.write_iter	= vhci_write,
++	.aio_write	= vhci_write,
+ 	.poll		= vhci_poll,
+ 	.open		= vhci_open,
+ 	.release	= vhci_release,
+-- 
+2.38.1
+
