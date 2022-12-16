@@ -2,9 +2,9 @@ inherit gettext
 
 SUMMARY = "Downloads the Polar M600 /system and /usr/include/android folders and installs them for libhybris"
 LICENSE = "CLOSED"
-SRC_URI = "https://dl.dropboxusercontent.com/s/ubcsdhlbv09jxxo/system-pike.tar.gz"
-SRC_URI[md5sum] = "c1d225bca2257d13724600b3edac0e44"
-SRC_URI[sha256sum] = "9c89cbbd9ececff94467912498b19b239a6b8f6a3a72927cf75d0400e391ac99"
+SRC_URI = "https://dl.dropboxusercontent.com/s/8b9t2renrxbl4gq/hybris-o-msm8909.tar.gz;name=hybris"
+SRC_URI[hybris.md5sum] = "edc1f8304b58af335a9c9ba8136bc1b8"
+SRC_URI[hybris.sha256sum] = "626bed275cfe2df2377e709498fc26d58e7883045cd13d4e2a6284220d1113b0"
 PV = "oreo"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
@@ -18,9 +18,6 @@ PROVIDES += "virtual/android-system-image"
 PROVIDES += "virtual/android-headers"
 
 do_install() {
-    install -d ${D}/system/
-    cp -r system/* ${D}/system/
-
     install -d ${D}/usr/
     cp -r usr/* ${D}/usr/
 
