@@ -38,6 +38,9 @@ do_install() {
 do_package_qa() {
 }
 
+# Allow empty main package since the -dev package depends on it
+ALLOW_EMPTY:${PN} = "1"
+
 PACKAGES =+ "android-system android-headers"
 FILES:android-system = "/system /vendor /usr"
 FILES:android-headers = "${libdir}/pkgconfig ${includedir}/android"
