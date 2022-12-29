@@ -60,3 +60,11 @@ service deamonserver /system/bin/deamonserver
 service pm-service /vendor/bin/pm-service
     class core
     oneshot
+
+service config_bt_addr /vendor/bin/btnvtool -O
+    class core
+    oneshot
+
+service config_bluetooth /system/bin/sh /system/etc/init.qcom.bt.sh "onboot"
+    class core
+    oneshot
