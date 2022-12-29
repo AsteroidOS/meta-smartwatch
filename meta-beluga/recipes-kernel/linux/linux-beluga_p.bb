@@ -8,6 +8,7 @@ LICENSE = "GPL-2.0-only"
 LIC_FILES_CHKSUM = "file://COPYING;md5=d7810fab7487fb0aad327b76f1be7cd7"
 COMPATIBLE_MACHINE = "beluga"
 
+#    file://0016-dts-msm8909w-Enable-more-GPU-clock-frequencies.patch 
 SRC_URI = " git://android.googlesource.com/kernel/msm;branch=android-msm-beluga-4.9-pie-wear-mr2;protocol=https \
     file://defconfig \
     file://img_info \
@@ -26,6 +27,7 @@ SRC_URI = " git://android.googlesource.com/kernel/msm;branch=android-msm-beluga-
     file://0013-soc-qcom-Fix-compilation.patch \
     file://0014-initramfs-Don-t-skip-initramfs.patch \
     file://0015-touchscreen-cyttsp5-Add-delay-for-wakeup-report.patch \
+    file://0016-dts-msm8909w-Enable-more-GPU-clock-frequencies.patch \
 " 
 
 SRCREV = "c9e8c2ecb9a8b9453504c12469b73a3947060a4e"
