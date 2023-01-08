@@ -1,0 +1,29 @@
+From 16588bd3bb4a32390d5f89ba66083db0b5452b43 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Darrel=20Gri=C3=ABt?= <dgriet@gmail.com>
+Date: Tue, 10 Jan 2023 22:21:55 +0100
+Subject: [PATCH] Revert "ANDROID: Bluetooth: hidp: buffer overflow in
+ hidp_process_report"
+
+This reverts commit bb076918c6ce10fb6e775cac9d11a0a7275e6ab6.
+---
+ net/bluetooth/hidp/core.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/net/bluetooth/hidp/core.c b/net/bluetooth/hidp/core.c
+index 3af082bf7c64..99624495f6c2 100644
+--- a/net/bluetooth/hidp/core.c
++++ b/net/bluetooth/hidp/core.c
+@@ -416,8 +416,8 @@ static void hidp_del_timer(struct hidp_session *session)
+ 		del_timer(&session->timer);
+ }
+ 
+-static void hidp_process_report(struct hidp_session *session, int type,
+-				const u8 *data, unsigned int len, int intr)
++static void hidp_process_report(struct hidp_session *session,
++				int type, const u8 *data, int len, int intr)
+ {
+ 	if (len > HID_MAX_BUFFER_SIZE)
+ 		len = HID_MAX_BUFFER_SIZE;
+-- 
+2.38.1
+
