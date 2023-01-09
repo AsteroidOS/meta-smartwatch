@@ -43,6 +43,10 @@ service pm-service /vendor/bin/pm-service
     class core
     oneshot
 
+service loc_launcher /vendor/bin/loc_launcher
+    setenv LD_PRELOAD /usr/libexec/hal-droid/system/lib/libselinux_stubs.so
+    class core
+
 service wcnss_service /vendor/bin/wcnss_service
     class core
     user root
