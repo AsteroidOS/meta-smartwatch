@@ -27,8 +27,8 @@ on init
 service rmt_storage /vendor/bin/rmt_storage
     class core
 
-service sensors /vendor/bin/sensors.qcom
-    class core 
+service vendor.sensors.qti /vendor/bin/sensors.qti
+    class core
     oneshot
 
 
@@ -44,4 +44,8 @@ service bt /vendor/bin/android.hardware.bluetooth@1.0-service-qti
 service wcnss_service /vendor/bin/wcnss_service
     class core
     user root
+    oneshot
+
+service vendor.sensors-hal-1-0 /vendor/bin/hw/android.hardware.sensors@1.0-service
+    class hal
     oneshot
