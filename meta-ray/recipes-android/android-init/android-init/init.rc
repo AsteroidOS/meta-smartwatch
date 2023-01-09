@@ -16,16 +16,7 @@ on init
     setprop init.svc.bluetooth running
 
     class_start core
-
-service logd /usr/libexec/hal-droid/system/bin/logd
-    class core
-    socket logd stream 0666 logd logd
-    socket logdr seqpacket 0666 logd logd
-    socket logdw dgram 0222 logd logd
-    file /proc/kmsg r
-    file /dev/kmsg w
-    user logd
-    group logd system readproc
+    class_start hal
 
 service rmt_storage /vendor/bin/rmt_storage
     class core
@@ -34,13 +25,7 @@ service sensors /vendor/bin/sensors.qcom
     class core 
     oneshot
 
-service servicemanager /usr/libexec/hal-droid/system/bin/servicemanager
-    setenv LD_PRELOAD /usr/libexec/hal-droid/system/lib/libselinux_stubs.so
-    class core
 
-service hwservicemanager /system/bin/hwservicemanager
-    setenv LD_PRELOAD /usr/libexec/hal-droid/system/lib/libselinux_stubs.so
-    class core
 
 service config_bt_addr /vendor/bin/btnvtool -O
     class core
