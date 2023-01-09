@@ -19,8 +19,6 @@ on init
 
     mkdir /data/
 
-    setprop init.svc.bluetooth running
-
     class_start core
     class_start hal
 
@@ -31,15 +29,12 @@ service vendor.sensors.qti /vendor/bin/sensors.qti
     class core
     oneshot
 
-
-
 service config_bt_addr /vendor/bin/btnvtool -O
     class core
     oneshot
 
-service bt /vendor/bin/android.hardware.bluetooth@1.0-service-qti
-    class core
-    oneshot
+service vendor.bluetooth-1-0 /vendor/bin/hw/android.hardware.bluetooth@1.0-service-qti
+    class hal
 
 service wcnss_service /vendor/bin/wcnss_service
     class core
