@@ -8,6 +8,12 @@ on init
 
     chown system root /sys/class/timed_output/vibrator/enable
 
+    chown system root /dev/hwbinder
+    chown system root /dev/vndbinder
+
+    chmod 777 /dev/hwbinder
+    chmod 777 /dev/vndbinder
+
     load_system_props
     restorecon_recursive /persist
 
