@@ -17,6 +17,7 @@ SRC_URI = " git://android.googlesource.com/kernel/msm;branch=android-msm-ray-3.1
     file://0005-Backport-mainline-4.1-Bluetooth-subsystem.patch \
     file://0006-usb-gadget-include-gadget-folder-to-fix-compilation.patch \
     file://0007-dts-msm8909w-ray-Enable-more-GPU-clock-frequencies.patch \
+    file://0008-video-msm-mdss-Update-driver-to-add-support-for-trip.patch \
 "
 
 SRCREV = "0930c407e84e167e56414c33bba64b6511b0808c"

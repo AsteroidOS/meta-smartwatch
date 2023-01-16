@@ -1,0 +1,2139 @@
+From 684e21e630349e8be48ceee7fb9c814b730d1651 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Darrel=20Gri=C3=ABt?= <dgriet@gmail.com>
+Date: Sun, 15 Jan 2023 21:51:18 +0100
+Subject: [PATCH] video: msm: mdss: Update driver to add support for triple
+ buffering.
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+This imports the video driver from catfish.
+
+Signed-off-by: Darrel Griët <dgriet@gmail.com>
+---
+ drivers/video/msm/mdss/Kconfig             |   7 +
+ drivers/video/msm/mdss/dsi_status_v2.c     |   1 -
+ drivers/video/msm/mdss/mdp3.c              |   2 +-
+ drivers/video/msm/mdss/mdp3_ctrl.c         |  89 ++++++++---
+ drivers/video/msm/mdss/mdp3_ctrl.h         |  14 +-
+ drivers/video/msm/mdss/mdp3_dma.c          |  82 ++++++----
+ drivers/video/msm/mdss/mdp3_dma.h          |  10 ++
+ drivers/video/msm/mdss/mdp3_layer.c        |  24 +--
+ drivers/video/msm/mdss/mdss_compat_utils.c | 154 ++++++++++--------
+ drivers/video/msm/mdss/mdss_dba_utils.c    |   5 +-
+ drivers/video/msm/mdss/mdss_debug.c        |  41 ++++-
+ drivers/video/msm/mdss/mdss_dsi.c          |  67 +++-----
+ drivers/video/msm/mdss/mdss_dsi.h          |  19 ---
+ drivers/video/msm/mdss/mdss_dsi_cmd.c      | 164 -------------------
+ drivers/video/msm/mdss/mdss_dsi_cmd.h      |   3 -
+ drivers/video/msm/mdss/mdss_dsi_panel.c    | 171 ++++++++++++++++----
+ drivers/video/msm/mdss/mdss_fb.c           | 174 ++++++++++++++-------
+ drivers/video/msm/mdss/mdss_mdp.c          |   4 +-
+ drivers/video/msm/mdss/mdss_mdp.h          |   3 +-
+ drivers/video/msm/mdss/mdss_mdp_ctl.c      |   6 +-
+ drivers/video/msm/mdss/mdss_mdp_intf_cmd.c |   5 +-
+ drivers/video/msm/mdss/mdss_mdp_overlay.c  |  14 +-
+ 22 files changed, 594 insertions(+), 465 deletions(-)
+
+diff --git a/drivers/video/msm/mdss/Kconfig b/drivers/video/msm/mdss/Kconfig
+index b44655e59ade..1eb31b41539e 100644
+--- a/drivers/video/msm/mdss/Kconfig
++++ b/drivers/video/msm/mdss/Kconfig
+@@ -82,3 +82,10 @@ config FB_MSM_MDSS_FRC_DEBUG
+ 	frame rate control (FRC) debugging features to: Collect video frame
+ 	statistics and check whether its output pattern matches expected
+ 	cadence.
++
++config FB_MSM_TRIPLE_BUFFER
++        depends on FB_MSM_MDSS
++        bool "Enable MDSS Triple Buffer"
++        default n
++        ---help---
++        The MDSS Triple buffer make frame buffer 3 pages instead of 2 pages.
+diff --git a/drivers/video/msm/mdss/dsi_status_v2.c b/drivers/video/msm/mdss/dsi_status_v2.c
+index 08716756c552..20a02ef74a5c 100644
+--- a/drivers/video/msm/mdss/dsi_status_v2.c
++++ b/drivers/video/msm/mdss/dsi_status_v2.c
+@@ -132,7 +132,6 @@ void mdp3_check_dsi_ctrl_status(struct work_struct *work,
+ 
+ 	mutex_lock(&mdp3_session->lock);
+ 	if (!mdp3_session->status) {
+-		mutex_unlock(&mdp3_session->lock);
+ 		pr_debug("%s: display off already\n", __func__);
+ 		mutex_unlock(&mdp3_session->lock);
+ 		return;
+diff --git a/drivers/video/msm/mdss/mdp3.c b/drivers/video/msm/mdss/mdp3.c
+index c0a0ff17734d..eaf938f99623 100644
+--- a/drivers/video/msm/mdss/mdp3.c
++++ b/drivers/video/msm/mdss/mdp3.c
+@@ -1935,7 +1935,7 @@ err_unmap:
+ 			mdss_smmu_dma_data_direction(DMA_BIDIRECTIONAL));
+ 	dma_buf_detach(data->srcp_dma_buf, data->srcp_attachment);
+ 	dma_buf_put(data->srcp_dma_buf);
+-
++	data->skip_detach = true;
+ 	if (client ==  MDP3_CLIENT_PPP || client == MDP3_CLIENT_DMA_P) {
+ 		vfree(data->tab_clone->sgl);
+ 		kfree(data->tab_clone);
+diff --git a/drivers/video/msm/mdss/mdp3_ctrl.c b/drivers/video/msm/mdss/mdp3_ctrl.c
+index 1e4f5849ae1d..3c328e4bfa12 100644
+--- a/drivers/video/msm/mdss/mdp3_ctrl.c
++++ b/drivers/video/msm/mdss/mdp3_ctrl.c
+@@ -1,4 +1,4 @@
+-/* Copyright (c) 2013-2018, The Linux Foundation. All rights reserved.
++/* Copyright (c) 2013-2019, The Linux Foundation. All rights reserved.
+  *
+  * This program is free software; you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License version 2 and
+@@ -33,7 +33,6 @@
+ #include "mdss_smmu.h"
+ #include "mdss_spi_panel.h"
+ 
+-#define VSYNC_EXPIRE_TICK	4
+ #define MEM_PROTECT_SD_CTRL	0xF
+ 
+ static void mdp3_ctrl_pan_display(struct msm_fb_data_type *mfd);
+@@ -204,7 +203,8 @@ static void mdp3_dispatch_clk_off(struct work_struct *work)
+ 		return;
+ 
+ 	mutex_lock(&session->lock);
+-	MDSS_XLOG(0x111);
++	MDSS_XLOG(0x111, atomic_read(&session->vsync_countdown),
++			session->dma->vsync_period);
+ 	if (session->vsync_enabled ||
+ 		atomic_read(&session->vsync_countdown) > 0) {
+ 		mutex_unlock(&session->lock);
+@@ -222,14 +222,14 @@ static void mdp3_dispatch_clk_off(struct work_struct *work)
+ 	if (session->intf->active) {
+ retry_dma_done:
+ 		rc = wait_for_completion_timeout(&session->dma_completion,
+-							WAIT_DMA_TIMEOUT);
+-		MDSS_XLOG(0x222);
++					dma_timeout_value(session->dma));
+ 		if (rc <= 0) {
+ 			struct mdss_panel_data *panel;
+ 
+ 			panel = session->panel;
+ 			pr_debug("cmd kickoff timed out (%d)\n", rc);
+ 			dmap_busy = session->dma->busy();
++			MDSS_XLOG(0x222, dmap_busy);
+ 			if (dmap_busy) {
+ 				if (--retry_count) {
+ 					pr_err("dmap is busy, retry %d\n",
+@@ -261,10 +261,11 @@ static void mdp3_vsync_retire_handle_vsync(void *arg)
+ 		return;
+ 	}
+ 
+-	schedule_work(&mdp3_session->retire_work);
++	queue_kthread_work(&mdp3_session->retire_worker,
++		&mdp3_session->retire_work);
+ }
+ 
+-static void mdp3_vsync_retire_signal(struct msm_fb_data_type *mfd, int val)
++void mdp3_vsync_retire_signal(struct msm_fb_data_type *mfd, int val)
+ {
+ 	struct mdp3_session_data *mdp3_session;
+ 
+@@ -278,7 +279,7 @@ static void mdp3_vsync_retire_signal(struct msm_fb_data_type *mfd, int val)
+ 	mutex_unlock(&mfd->mdp_sync_pt_data.sync_mutex);
+ }
+ 
+-static void mdp3_vsync_retire_work_handler(struct work_struct *work)
++static void mdp3_vsync_retire_work_handler(struct kthread_work *work)
+ {
+ 	struct mdp3_session_data *mdp3_session =
+ 		container_of(work, struct mdp3_session_data, retire_work);
+@@ -318,6 +319,8 @@ void vsync_count_down(void *arg)
+ 	/* We are counting down to turn off clocks */
+ 	if (atomic_read(&session->vsync_countdown) > 0) {
+ 		atomic_dec(&session->vsync_countdown);
++		MDSS_XLOG(atomic_read(&session->vsync_countdown),
++				session->dma->vsync_period);
+ 		if (atomic_read(&session->vsync_countdown) == 0)
+ 			schedule_work(&session->clk_off_work);
+ 	}
+@@ -329,6 +332,8 @@ void mdp3_ctrl_reset_countdown(struct mdp3_session_data *session,
+ 	if (mdp3_ctrl_get_intf_type(mfd) == MDP3_DMA_OUTPUT_SEL_DSI_CMD ||
+ 		mdp3_ctrl_get_intf_type(mfd) == MDP3_DMA_OUTPUT_SEL_SPI_CMD)
+ 		atomic_set(&session->vsync_countdown, VSYNC_EXPIRE_TICK);
++
++	MDSS_XLOG(atomic_read(&session->vsync_countdown));
+ }
+ 
+ static int mdp3_ctrl_vsync_enable(struct msm_fb_data_type *mfd, int enable)
+@@ -393,7 +398,7 @@ static int mdp3_ctrl_vsync_enable(struct msm_fb_data_type *mfd, int enable)
+ 	 */
+ 	if (mod_vsync_timer && (intf_type != MDP3_DMA_OUTPUT_SEL_SPI_CMD)) {
+ 		mod_timer(&mdp3_session->vsync_timer,
+-			jiffies + msecs_to_jiffies(mdp3_session->vsync_period));
++		jiffies + msecs_to_jiffies(mdp3_session->dma->vsync_period));
+ 	} else if (enable && !mdp3_session->clk_on) {
+ 		mdp3_ctrl_reset_countdown(mdp3_session, mfd);
+ 		mdp3_ctrl_clk_enable(mfd, 1);
+@@ -412,7 +417,7 @@ void mdp3_vsync_timer_func(unsigned long arg)
+ 		pr_debug("mdp3_vsync_timer_func trigger\n");
+ 		vsync_notify_handler(session);
+ 		mod_timer(&session->vsync_timer,
+-			jiffies + msecs_to_jiffies(session->vsync_period));
++			jiffies + msecs_to_jiffies(session->dma->vsync_period));
+ 	}
+ }
+ 
+@@ -473,10 +478,10 @@ static int mdp3_ctrl_async_blit_req(struct msm_fb_data_type *mfd,
+ 		(mdp3_ctrl_get_intf_type(mfd) ==
+ 			MDP3_DMA_OUTPUT_SEL_DSI_VIDEO)) {
+ 		rc = wait_for_completion_timeout(&session->secure_completion,
+-			msecs_to_jiffies(84));
+-		if (rc) {
++			dma_timeout_value(session->dma));
++		if (!rc) {
+ 			pr_err("Timed out waiting for completion of secure display\n");
+-			return rc;
++			return -EINVAL;
+ 		}
+ 	}
+ 
+@@ -971,6 +976,7 @@ static int mdp3_ctrl_on(struct msm_fb_data_type *mfd)
+ 	struct mdp3_session_data *mdp3_session;
+ 	struct mdss_panel_data *panel;
+ 	int scm_ret = 0;
++	u32 framerate = 0;
+ 
+ 	pr_debug("mdp3_ctrl_on\n");
+ 	mdp3_session = (struct mdp3_session_data *)mfd->mdp.private1;
+@@ -998,7 +1004,7 @@ static int mdp3_ctrl_on(struct msm_fb_data_type *mfd)
+ 				MDSS_EVENT_UNBLANK, NULL);
+ 		rc |= panel->event_handler(panel,
+ 				MDSS_EVENT_PANEL_ON, NULL);
+-		if (mdss_fb_is_power_on_ulp(mfd))
++		if (mdss_fb_is_power_on_lp(mfd))
+ 			rc |= mdp3_enable_panic_ctrl();
+ 			mdp3_clk_enable(0, 0);
+ 		}
+@@ -1097,7 +1103,7 @@ static int mdp3_ctrl_on(struct msm_fb_data_type *mfd)
+ 		mdp3_session->status = 1;
+ 
+ 	mdp3_ctrl_pp_resume(mfd);
+-	MDSS_XLOG(XLOG_FUNC_EXIT, __LINE__, mfd->panel_power_state);
++
+ on_error:
+ 	if (rc || (mdp3_res->idle_pc_enabled &&
+ 			(mfd->panel_info->type == MIPI_CMD_PANEL))) {
+@@ -1108,6 +1114,12 @@ on_error:
+ 		pm_runtime_put(&mdp3_res->pdev->dev);
+ 	}
+ end:
++	framerate = mdss_panel_get_framerate(mfd->panel_info,
++			FPS_RESOLUTION_HZ);
++	if (framerate != 0)
++		mdp3_session->dma->vsync_period = DIV_ROUND_UP(1000, framerate);
++
++	MDSS_XLOG(XLOG_FUNC_EXIT, __LINE__, mfd->panel_power_state, framerate);
+ 	mutex_unlock(&mdp3_session->lock);
+ 	return rc;
+ }
+@@ -1124,6 +1136,7 @@ static int mdp3_ctrl_off(struct msm_fb_data_type *mfd)
+ 	bool intf_stopped = true;
+ 	struct mdp3_session_data *mdp3_session;
+ 	struct mdss_panel_data *panel;
++	u32 framerate = 0;
+ 
+ 	pr_debug("mdp3_ctrl_off\n");
+ 	mdp3_session = (struct mdp3_session_data *)mfd->mdp.private1;
+@@ -1141,7 +1154,7 @@ static int mdp3_ctrl_off(struct msm_fb_data_type *mfd)
+ 	 */
+ 	pm_runtime_get_sync(&mdp3_res->pdev->dev);
+ 
+-	MDSS_XLOG(XLOG_FUNC_ENTRY, __LINE__, mdss_fb_is_power_on_ulp(mfd),
++	MDSS_XLOG(XLOG_FUNC_ENTRY, __LINE__, mdss_fb_is_power_on_lp(mfd),
+ 		mfd->panel_power_state);
+ 	panel = mdp3_session->panel;
+ 
+@@ -1286,9 +1299,9 @@ static int mdp3_ctrl_off(struct msm_fb_data_type *mfd)
+ 		}
+ 	}
+ 
+-	if (mdss_fb_is_power_on_ulp(mfd) &&
++	if (mdss_fb_is_power_on_lp(mfd) &&
+ 		(mfd->panel.type == MIPI_CMD_PANEL)) {
+-		pr_debug("%s: Disable MDP3 clocks in ULP\n", __func__);
++		pr_debug("%s: Disable MDP3 clocks in LP\n", __func__);
+ 		if (!mdp3_session->clk_on)
+ 			mdp3_ctrl_clk_enable(mfd, 1);
+ 		/*
+@@ -1298,7 +1311,7 @@ static int mdp3_ctrl_off(struct msm_fb_data_type *mfd)
+ 		rc = mdp3_session->dma->stop(mdp3_session->dma,
+ 					mdp3_session->intf);
+ 		if (rc)
+-			pr_warn("fail to stop the MDP3 dma in ULP\n");
++			pr_warn("fail to stop the MDP3 dma in LP\n");
+ 		/* Wait to ensure TG to turn off */
+ 		msleep(20);
+ 		/*
+@@ -1316,7 +1329,13 @@ off_error:
+ 		mdp3_session->overlay.id = MSMFB_NEW_REQUEST;
+ 		mdp3_bufq_deinit(&mdp3_session->bufq_in, client);
+ 	}
+-	MDSS_XLOG(XLOG_FUNC_EXIT, __LINE__);
++
++	framerate = mdss_panel_get_framerate(mfd->panel_info,
++			FPS_RESOLUTION_HZ);
++	if (framerate != 0)
++		mdp3_session->dma->vsync_period = DIV_ROUND_UP(1000, framerate);
++
++	MDSS_XLOG(XLOG_FUNC_EXIT, __LINE__, framerate);
+ 	mutex_unlock(&mdp3_session->lock);
+ 	/* Release the last reference to the runtime device */
+ 	pm_runtime_put(&mdp3_res->pdev->dev);
+@@ -1657,7 +1676,7 @@ static int mdp3_ctrl_display_commit_kickoff(struct msm_fb_data_type *mfd,
+ 		mutex_unlock(&mdp3_session->lock);
+ 		return -EPERM;
+ 	}
+-	MDSS_XLOG(0x111);
++	MDSS_XLOG(0x111, mdp3_session->dma->vsync_period);
+ 
+ 	if (mfd->panel.type == MIPI_CMD_PANEL || client == MDP3_CLIENT_SPI)
+ 		is_panel_type_cmd = true;
+@@ -3068,7 +3087,7 @@ int mdp3_wait_for_dma_done(struct mdp3_session_data *session)
+ 
+ 	if (session->dma_active) {
+ 		rc = wait_for_completion_timeout(&session->dma_completion,
+-			KOFF_TIMEOUT);
++			 dma_timeout_value(session->dma));
+ 		if (rc > 0) {
+ 			session->dma_active = 0;
+ 			rc = 0;
+@@ -3127,6 +3146,7 @@ static int mdp3_vsync_retire_setup(struct msm_fb_data_type *mfd)
+ 	struct mdp3_session_data *mdp3_session;
+ 	struct mdp3_notification retire_client;
+ 	char name[24];
++	struct sched_param param = { .sched_priority = 16 };
+ 
+ 	mdp3_session = (struct mdp3_session_data *)mfd->mdp.private1;
+ 
+@@ -3144,7 +3164,20 @@ static int mdp3_vsync_retire_setup(struct msm_fb_data_type *mfd)
+ 	if (mdp3_session->dma)
+ 		mdp3_session->dma->retire_client = retire_client;
+ 
+-	INIT_WORK(&mdp3_session->retire_work, mdp3_vsync_retire_work_handler);
++	init_kthread_worker(&mdp3_session->retire_worker);
++	init_kthread_work(&mdp3_session->retire_work,
++			mdp3_vsync_retire_work_handler);
++
++	mdp3_session->retire_thread = kthread_run(kthread_worker_fn,
++					&mdp3_session->retire_worker,
++					"vsync_retire_work");
++	if (IS_ERR(mdp3_session->retire_thread)) {
++		pr_err("unable to start vsync thread\n");
++		mdp3_session->retire_thread = NULL;
++		return -ENOMEM;
++	}
++
++	sched_setscheduler(mdp3_session->retire_thread, SCHED_FIFO, &param);
+ 
+ 	return 0;
+ }
+@@ -3179,7 +3212,7 @@ int mdp3_ctrl_init(struct msm_fb_data_type *mfd)
+ 	mdp3_interface->lut_update = NULL;
+ 	mdp3_interface->configure_panel = mdp3_update_panel_info;
+ 	mdp3_interface->input_event_handler = NULL;
+-	mdp3_interface->signal_retire_fence = NULL;
++	mdp3_interface->signal_retire_fence = mdp3_vsync_retire_signal;
+ 	mdp3_interface->is_twm_en = mdp3_is_twm_en;
+ 
+ 	mdp3_session = kzalloc(sizeof(struct mdp3_session_data), GFP_KERNEL);
+@@ -3218,7 +3251,7 @@ int mdp3_ctrl_init(struct msm_fb_data_type *mfd)
+ 		goto init_done;
+ 	}
+ 	mdp3_session->dma->session = mdp3_session;
+-	
++
+ 	intf_type = mdp3_ctrl_get_intf_type(mfd);
+ 	mdp3_session->intf = mdp3_get_display_intf(intf_type);
+ 	if (!mdp3_session->intf) {
+@@ -3246,7 +3279,11 @@ int mdp3_ctrl_init(struct msm_fb_data_type *mfd)
+ 	init_timer(&mdp3_session->vsync_timer);
+ 	mdp3_session->vsync_timer.function = mdp3_vsync_timer_func;
+ 	mdp3_session->vsync_timer.data = (u32)mdp3_session;
+-	mdp3_session->vsync_period = 1000 / frame_rate;
++
++	if (frame_rate != 0)
++		mdp3_session->dma->vsync_period =
++				DIV_ROUND_UP(1000, frame_rate);
++
+ 	mfd->mdp.private1 = mdp3_session;
+ 	init_completion(&mdp3_session->dma_completion);
+ 	init_completion(&mdp3_session->secure_completion);
+diff --git a/drivers/video/msm/mdss/mdp3_ctrl.h b/drivers/video/msm/mdss/mdp3_ctrl.h
+index ad6e46fe4cc8..d5a82260ef5c 100644
+--- a/drivers/video/msm/mdss/mdp3_ctrl.h
++++ b/drivers/video/msm/mdss/mdp3_ctrl.h
+@@ -1,4 +1,4 @@
+-/* Copyright (c) 2013-2014, 2016-2018 The Linux Foundation. All rights reserved.
++/* Copyright (c) 2013-2014, 2016-2019, The Linux Foundation. All rights reserved.
+  *
+  * This program is free software; you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License version 2 and
+@@ -36,6 +36,9 @@ struct mdp3_buffer_queue {
+ 	int pop_idx;
+ };
+ 
++/* struct mdp3_session_data is MDP3 fb private data */
++#define mfd_to_mdp3_data(mfd)  (mfd->mdp.private1)
++
+ struct mdp3_session_data {
+ 	struct mutex lock;
+ 	int status;
+@@ -45,7 +48,6 @@ struct mdp3_session_data {
+ 	struct msm_fb_data_type *mfd;
+ 	ktime_t vsync_time;
+ 	struct timer_list vsync_timer;
+-	int vsync_period;
+ 	struct kernfs_node *vsync_event_sd;
+ 	struct kernfs_node *bl_event_sd;
+ 	struct mdp_overlay overlay;
+@@ -58,6 +60,10 @@ struct mdp3_session_data {
+ 	struct kthread_worker worker;
+ 	struct task_struct *thread;
+ 
++	struct kthread_work retire_work;
++	struct kthread_worker retire_worker;
++	struct task_struct *retire_thread;
++
+ 	atomic_t dma_done_cnt;
+ 	int histo_status;
+ 	struct mutex histo_lock;
+@@ -83,14 +89,12 @@ struct mdp3_session_data {
+ 	/* For retire fence */
+ 	struct sw_sync_timeline *vsync_timeline;
+ 	int retire_cnt;
+-	struct work_struct retire_work;
+ 	atomic_t secure_display;
+ 	int transition_state;
+ };
+ 
+ void mdp3_bufq_deinit(struct mdp3_buffer_queue *bufq, int client);
+ int mdp3_ctrl_init(struct msm_fb_data_type *mfd);
+-void mdp3_flush_dma_done(struct mdp3_session_data *mdp3_session);
+ int mdp3_bufq_push(struct mdp3_buffer_queue *bufq,
+ 			struct mdp3_img_data *data);
+ int mdp3_ctrl_get_source_format(u32 imgType);
+@@ -98,5 +102,7 @@ int mdp3_ctrl_get_pack_pattern(u32 imgType);
+ int mdp3_ctrl_reset(struct msm_fb_data_type *mfd);
+ int mdp3_get_ion_client(struct msm_fb_data_type *mfd);
+ int config_secure_display(struct mdp3_session_data *mdp3_session);
++void mdp3_flush_dma_done(struct mdp3_session_data *mdp3_session);
++void mdp3_vsync_retire_signal(struct msm_fb_data_type *mfd, int val);
+ 
+ #endif /* MDP3_CTRL_H */
+diff --git a/drivers/video/msm/mdss/mdp3_dma.c b/drivers/video/msm/mdss/mdp3_dma.c
+index a6a5ad4f50cc..67709a711740 100644
+--- a/drivers/video/msm/mdss/mdp3_dma.c
++++ b/drivers/video/msm/mdss/mdp3_dma.c
+@@ -38,7 +38,13 @@ static void mdp3_vsync_intr_handler(int type, void *arg)
+ 	struct mdp3_notification retire_client;
+ 	unsigned int wait_for_next_vs;
+ 
++	if (!dma) {
++		pr_err("dma is null\n");
++		return;
++	}
++
+ 	pr_debug("mdp3_vsync_intr_handler\n");
++	MDSS_XLOG(0x111, dma->vsync_period);
+ 	spin_lock(&dma->dma_lock);
+ 	vsync_client = dma->vsync_client;
+ 	retire_client = dma->retire_client;
+@@ -63,6 +69,11 @@ static void mdp3_dma_done_intr_handler(int type, void *arg)
+ 	struct mdp3_dma *dma = (struct mdp3_dma *)arg;
+ 	struct mdp3_notification dma_client;
+ 
++	if (!dma) {
++		pr_err("dma is null\n");
++		return;
++	}
++
+ 	pr_debug("mdp3_dma_done_intr_handler\n");
+ 	spin_lock(&dma->dma_lock);
+ 	dma_client = dma->dma_notifier_client;
+@@ -78,6 +89,11 @@ static void mdp3_hist_done_intr_handler(int type, void *arg)
+ 	struct mdp3_dma *dma = (struct mdp3_dma *)arg;
+ 	u32 isr, mask;
+ 
++	if (!dma) {
++		pr_err("dma is null\n");
++		return;
++	}
++
+ 	isr = MDP3_REG_READ(MDP3_REG_DMA_P_HIST_INTR_STATUS);
+ 	mask = MDP3_REG_READ(MDP3_REG_DMA_P_HIST_INTR_ENABLE);
+ 	MDP3_REG_WRITE(MDP3_REG_DMA_P_HIST_INTR_CLEAR, isr);
+@@ -666,27 +682,19 @@ static int mdp3_handle_null_commit(struct mdp3_dma *dma, struct mdp3_intf *intf)
+ 	int retry_count = 2;
+ 	unsigned long flag;
+ 	int cb_type = MDP3_DMA_CALLBACK_TYPE_VSYNC;
++	u32 tpg_cfg = 0, dmap_cfg = 0;
+ 
+-	if (!dma->source_config.format && !dma->source_config.stride) {
+-		pr_debug("Null commit already handled\n");
+-		return 0;
+-	}
+-
+-	/*
+-	 * Size and stride are set to 0 to ensure that DMA pipe does not
+-	 * fetch anything whenever we get a null commit. The values will be
+-	 * reconfigured to the correct values in the next commit.
++	/* To block the fetch start to fetch block, program the TPG
++	 * with constant color so that all the transactions are blocked
++	 * during the transition from secure to non-secure and vice-versa.
+ 	 */
+ 
+-	MDP3_REG_WRITE(MDP3_REG_DMA_P_SIZE, 0);
+-	MDP3_REG_WRITE(MDP3_REG_DMA_P_IBUF_Y_STRIDE, 0);
++	tpg_cfg = MDP3_REG_READ(MDP3_REG_DSI_VIDEO_TEST_CTL);
++	tpg_cfg |= BIT(31);
++	MDP3_REG_WRITE(MDP3_REG_DSI_VIDEO_TEST_COL_VAR1, 0);
++	MDP3_REG_WRITE(MDP3_REG_DSI_VIDEO_TEST_CTL, tpg_cfg);
+ 
+ 	spin_lock_irqsave(&dma->dma_lock, flag);
+-	dma->source_config.format = 0;
+-	dma->source_config.stride = 0;
+-	mdp3_irq_disable(MDP3_INTR_LCDC_UNDERFLOW);
+-	MDP3_REG_WRITE(MDP3_REG_DSI_VIDEO_UNDERFLOW_CTL, 0x80000000);
+-
+ 	if (!intf->active) {
+ 		pr_debug("%s start interface\n", __func__);
+ 		intf->start(intf);
+@@ -702,11 +710,12 @@ static int mdp3_handle_null_commit(struct mdp3_dma *dma, struct mdp3_intf *intf)
+ 	init_completion(&dma->vsync_comp);
+ 	spin_unlock_irqrestore(&dma->dma_lock, flag);
+ 	mdp3_dma_callback_enable(dma, cb_type);
++	dma->update_src_cfg = true;
+ 
+ retry_vsync:
+ 	pr_debug("wait for vsync_comp started\n");
+ 	rc = wait_for_completion_timeout(&dma->vsync_comp,
+-			KOFF_TIMEOUT);
++			 dma_timeout_value(dma));
+ 	if (rc <= 0 && --retry_count) {
+ 		int vsync = MDP3_REG_READ(MDP3_REG_INTR_STATUS) &
+ 				(1 << MDP3_INTR_LCDC_START_OF_FRAME);
+@@ -719,6 +728,12 @@ retry_vsync:
+ 	}
+ 	pr_debug("wait for vsync_comp done\n");
+ 
++	dmap_cfg = MDP3_REG_READ(MDP3_REG_DMA_P_CONFIG);
++	if (dmap_cfg & BIT(21)) {
++		dmap_cfg &= ~BIT(21);
++		MDP3_REG_WRITE(MDP3_REG_DMA_P_CONFIG, dmap_cfg);
++	}
++
+ return rc;
+ 
+ }
+@@ -733,7 +748,7 @@ static int mdp3_wait_for_dma_comp(struct mdp3_dma *dma, struct mdp3_intf *intf)
+ 		ATRACE_BEGIN("mdp3_wait_for_dma_comp");
+ retry_dma_done:
+ 		rc = wait_for_completion_timeout(&dma->dma_comp,
+-			KOFF_TIMEOUT);
++			 dma_timeout_value(dma));
+ 		if (rc <= 0 && --retry_count) {
+ 			vsync_status = (1 << MDP3_INTR_DMA_P_DONE) &
+ 					MDP3_REG_READ(MDP3_REG_INTR_STATUS);
+@@ -759,6 +774,7 @@ static int mdp3_dmap_update(struct mdp3_dma *dma, void *buf,
+ 	int rc = 0;
+ 	int retry_count = 2;
+ 	int vsync = 0;
++	u32 tpg_cfg = 0;
+ 
+ 	ATRACE_BEGIN(__func__);
+ 	pr_debug("mdp3_dmap_update\n");
+@@ -788,6 +804,15 @@ static int mdp3_dmap_update(struct mdp3_dma *dma, void *buf,
+ 	if (dma->ccs_config.ccs_dirty)
+ 		mdp3_ccs_update(dma, true);
+ 	mutex_unlock(&dma->pp_lock);
++
++	if (dma->output_config.out_sel == MDP3_DMA_OUTPUT_SEL_DSI_VIDEO) {
++		tpg_cfg = MDP3_REG_READ(MDP3_REG_DSI_VIDEO_TEST_CTL);
++		if (tpg_cfg & BIT(31)) {
++			tpg_cfg &= ~BIT(31);
++			MDP3_REG_WRITE(MDP3_REG_DSI_VIDEO_TEST_CTL, tpg_cfg);
++		}
++	}
++
+ 	spin_lock_irqsave(&dma->dma_lock, flag);
+ 	MDP3_REG_WRITE(MDP3_REG_DMA_P_IBUF_ADDR, (u32)(buf +
+ 			dma->roi.y * dma->source_config.stride +
+@@ -814,7 +839,7 @@ static int mdp3_dmap_update(struct mdp3_dma *dma, void *buf,
+ 		ATRACE_BEGIN("mdp3_wait_for_vsync_comp");
+ retry_vsync:
+ 		rc = wait_for_completion_timeout(&dma->vsync_comp,
+-			KOFF_TIMEOUT);
++			 dma_timeout_value(dma));
+ 		if (rc <= 0 && --retry_count) {
+ 			vsync = MDP3_REG_READ(MDP3_REG_INTR_STATUS) &
+ 					(1 << MDP3_INTR_LCDC_START_OF_FRAME);
+@@ -827,9 +852,6 @@ retry_vsync:
+ 			rc = -1;
+ 		}
+ 		ATRACE_END("mdp3_wait_for_vsync_comp");
+-
+-		if (!mdp3_res->irq_ref_count[MDP3_INTR_LCDC_UNDERFLOW])
+-			mdp3_irq_enable(MDP3_INTR_LCDC_UNDERFLOW);
+ 	}
+ 	pr_debug("$%s wait for vsync_comp out\n", __func__);
+ 	ATRACE_END(__func__);
+@@ -1149,12 +1171,17 @@ static int mdp3_dma_stop(struct mdp3_dma *dma, struct mdp3_intf *intf)
+ 
+ 	/*
+ 	 * Interrupts are disabled.
+-	 * Check for blocked dma done interrupt.
+-	 * Flush items waiting for dma done interrupt.
++	 * Check for blocked dma done and vsync interrupt.
++	 * Flush items waiting for interrupts.
+ 	 */
+-	if (dma->output_config.out_sel == MDP3_DMA_OUTPUT_SEL_DSI_CMD &&
+-		atomic_read(&dma->session->dma_done_cnt))
+-		mdp3_flush_dma_done(dma->session);
++	if (dma->output_config.out_sel == MDP3_DMA_OUTPUT_SEL_DSI_CMD) {
++		if (atomic_read(&dma->session->dma_done_cnt))
++			mdp3_flush_dma_done(dma->session);
++		if (dma->session->retire_cnt) {
++			mdp3_vsync_retire_signal(dma->session->mfd,
++			dma->session->retire_cnt);
++		}
++	}
+ 
+ 	return ret;
+ }
+@@ -1311,6 +1338,7 @@ int dsi_video_config(struct mdp3_intf *intf, struct mdp3_intf_cfg *cfg)
+ 
+ 	v->underflow_color |= 0x80000000;
+ 	MDP3_REG_WRITE(MDP3_REG_DSI_VIDEO_UNDERFLOW_CTL, v->underflow_color);
++	MDP3_REG_WRITE(MDP3_REG_DSI_VIDEO_TEST_CTL, 0x70000000);
+ 
+ 	return 0;
+ }
+diff --git a/drivers/video/msm/mdss/mdp3_dma.h b/drivers/video/msm/mdss/mdp3_dma.h
+index 60b4abdb5b17..68d1309910fd 100644
+--- a/drivers/video/msm/mdss/mdp3_dma.h
++++ b/drivers/video/msm/mdss/mdp3_dma.h
+@@ -26,6 +26,7 @@
+ #define MDP_HISTOGRAM_CSC_VECTOR_MAX 0x200
+ #define MDP_HISTOGRAM_BIN_NUM	32
+ #define MDP_LUT_SIZE 256
++#define VSYNC_EXPIRE_TICK     4
+ 
+ enum {
+ 	MDP3_DMA_P,
+@@ -256,6 +257,7 @@ struct mdp3_dma {
+ 	u32 capability;
+ 	int in_use;
+ 	int available;
++	int vsync_period;
+ 
+ 	spinlock_t dma_lock;
+ 	spinlock_t histo_lock;
+@@ -391,6 +393,14 @@ struct mdp3_intf {
+ 	int (*stop)(struct mdp3_intf *intf);
+ };
+ 
++static inline unsigned long dma_timeout_value(struct mdp3_dma *dma)
++{
++	if (dma->vsync_period)
++		return msecs_to_jiffies(VSYNC_EXPIRE_TICK * dma->vsync_period);
++	else
++		return msecs_to_jiffies(84);
++}
++
+ int mdp3_dma_init(struct mdp3_dma *dma);
+ 
+ int mdp3_intf_init(struct mdp3_intf *intf);
+diff --git a/drivers/video/msm/mdss/mdp3_layer.c b/drivers/video/msm/mdss/mdp3_layer.c
+index a187b94131b8..ffa9980d8b8c 100644
+--- a/drivers/video/msm/mdss/mdp3_layer.c
++++ b/drivers/video/msm/mdss/mdp3_layer.c
+@@ -47,24 +47,28 @@ static struct sync_fence *__mdp3_create_fence(struct msm_fb_data_type *mfd,
+ 
+ 	mdp3_session = (struct mdp3_session_data *)mfd->mdp.private1;
+ 
+-	if (fence_type == MDP3_RETIRE_FENCE)
+-		snprintf(fence_name, sizeof(fence_name), "fb%d_retire",
+-			mfd->index);
+-	else
+-		snprintf(fence_name, sizeof(fence_name), "fb%d_release",
+-			mfd->index);
+-
+ 	if ((fence_type == MDP3_RETIRE_FENCE) &&
+ 		(mfd->panel.type == MIPI_CMD_PANEL)) {
+ 		if (mdp3_session->vsync_timeline) {
+ 			value = mdp3_session->vsync_timeline->value + 1 +
+ 				mdp3_session->retire_cnt++;
+-			sync_fence = mdss_fb_sync_get_fence(
+-					mdp3_session->vsync_timeline,
+-						fence_name, value);
+ 		} else {
+ 			return ERR_PTR(-EPERM);
+ 		}
++	}
++
++	if (fence_type == MDP3_RETIRE_FENCE)
++		snprintf(fence_name, sizeof(fence_name), "fb%d_retire_%d",
++			mfd->index, value);
++	else
++		snprintf(fence_name, sizeof(fence_name), "fb%d_release_%d",
++			mfd->index, value);
++
++	if ((fence_type == MDP3_RETIRE_FENCE) &&
++		(mfd->panel.type == MIPI_CMD_PANEL)) {
++			sync_fence = mdss_fb_sync_get_fence(
++					mdp3_session->vsync_timeline,
++						fence_name, value);
+ 	} else {
+ 		sync_fence = mdss_fb_sync_get_fence(sync_pt_data->timeline,
+ 			fence_name, value);
+diff --git a/drivers/video/msm/mdss/mdss_compat_utils.c b/drivers/video/msm/mdss/mdss_compat_utils.c
+index 558c2d7c1dde..b54ef434988b 100644
+--- a/drivers/video/msm/mdss/mdss_compat_utils.c
++++ b/drivers/video/msm/mdss/mdss_compat_utils.c
+@@ -1,5 +1,5 @@
+ /*
+- * Copyright (c) 2013-2017, The Linux Foundation. All rights reserved.
++ * Copyright (c) 2013-2018, The Linux Foundation. All rights reserved.
+  * Copyright (C) 1994 Martin Schaller
+  *
+  * 2001 - Documented with DocBook
+@@ -1337,10 +1337,10 @@ static int __from_user_pgc_lut_data_legacy(
+ 		return -EFAULT;
+ 
+ 	if (num_r_stages > GC_LUT_SEGMENTS || num_b_stages > GC_LUT_SEGMENTS
+-	    || num_r_stages > GC_LUT_SEGMENTS || !num_r_stages || !num_b_stages
++	    || num_g_stages > GC_LUT_SEGMENTS || !num_r_stages || !num_b_stages
+ 	    || !num_g_stages) {
+ 		pr_err("invalid number of stages r_stages %d b_stages %d g_stages %d\n",
+-		       num_r_stages, num_b_stages, num_r_stages);
++		       num_r_stages, num_b_stages, num_g_stages);
+ 		return -EFAULT;
+ 	}
+ 
+@@ -2878,26 +2878,28 @@ static int __pp_compat_alloc(struct msmfb_mdp_pp32 __user *pp32,
+ 			*pp = compat_alloc_user_space(alloc_size);
+ 			if (NULL == *pp)
+ 				return -ENOMEM;
+-			memset(*pp, 0, alloc_size);
+-
+-			(*pp)->data.lut_cfg_data.data.pgc_lut_data.r_data =
+-					(struct mdp_ar_gc_lut_data *)
+-					((unsigned long) *pp +
+-					sizeof(struct msmfb_mdp_pp));
+-			(*pp)->data.lut_cfg_data.data.pgc_lut_data.g_data =
+-					(struct mdp_ar_gc_lut_data *)
++			if (clear_user(*pp, alloc_size))
++				return -EFAULT;
++			if (put_user((struct mdp_ar_gc_lut_data *)
++				((unsigned long) *pp +
++				sizeof(struct msmfb_mdp_pp)),
++			&(*pp)->data.lut_cfg_data.data.pgc_lut_data.r_data) ||
++				put_user((struct mdp_ar_gc_lut_data *)
+ 					((unsigned long) *pp +
+ 					sizeof(struct msmfb_mdp_pp) +
+-					pgc_size);
+-			(*pp)->data.lut_cfg_data.data.pgc_lut_data.b_data =
+-					(struct mdp_ar_gc_lut_data *)
++					pgc_size),
++			&(*pp)->data.lut_cfg_data.data.pgc_lut_data.g_data) ||
++				put_user((struct mdp_ar_gc_lut_data *)
+ 					((unsigned long) *pp +
+ 					sizeof(struct msmfb_mdp_pp) +
+-					(2 * pgc_size));
+-			(*pp)->data.lut_cfg_data.data.pgc_lut_data.cfg_payload
+-					 = (void *)((unsigned long) *pp +
++					(2 * pgc_size)),
++			&(*pp)->data.lut_cfg_data.data.pgc_lut_data.b_data) ||
++				put_user((void *)((unsigned long) *pp +
+ 					sizeof(struct msmfb_mdp_pp) +
+-					(3 * pgc_size));
++					(3 * pgc_size)),
++					&(*pp)->data.lut_cfg_data.data.
++						pgc_lut_data.cfg_payload))
++				return -EFAULT;
+ 			break;
+ 		case mdp_lut_igc:
+ 			alloc_size += __pp_compat_size_igc();
+@@ -2907,10 +2909,13 @@ static int __pp_compat_alloc(struct msmfb_mdp_pp32 __user *pp32,
+ 					alloc_size);
+ 				return -ENOMEM;
+ 			}
+-			memset(*pp, 0, alloc_size);
+-			(*pp)->data.lut_cfg_data.data.igc_lut_data.cfg_payload
+-					= (void *)((unsigned long)(*pp) +
+-					   sizeof(struct msmfb_mdp_pp));
++			if (clear_user(*pp, alloc_size))
++				return -EFAULT;
++			if (put_user((void *)((unsigned long)(*pp) +
++					sizeof(struct msmfb_mdp_pp)),
++					&(*pp)->data.lut_cfg_data.data.
++						igc_lut_data.cfg_payload))
++				return -EFAULT;
+ 			break;
+ 		case mdp_lut_hist:
+ 			alloc_size += __pp_compat_size_hist_lut();
+@@ -2920,10 +2925,13 @@ static int __pp_compat_alloc(struct msmfb_mdp_pp32 __user *pp32,
+ 					alloc_size);
+ 				return -ENOMEM;
+ 			}
+-			memset(*pp, 0, alloc_size);
+-			(*pp)->data.lut_cfg_data.data.hist_lut_data.cfg_payload
+-					= (void *)((unsigned long)(*pp) +
+-					   sizeof(struct msmfb_mdp_pp));
++			if (clear_user(*pp, alloc_size))
++				return -EFAULT;
++			if (put_user((void *)((unsigned long)(*pp) +
++					sizeof(struct msmfb_mdp_pp)),
++					&(*pp)->data.lut_cfg_data.data.
++						hist_lut_data.cfg_payload))
++				return -EFAULT;
+ 			break;
+ 		default:
+ 			*pp = compat_alloc_user_space(alloc_size);
+@@ -2932,7 +2940,8 @@ static int __pp_compat_alloc(struct msmfb_mdp_pp32 __user *pp32,
+ 					alloc_size, lut_type);
+ 				return -ENOMEM;
+ 			}
+-			memset(*pp, 0, alloc_size);
++			if (clear_user(*pp, alloc_size))
++				return -EFAULT;
+ 			break;
+ 		}
+ 		break;
+@@ -2944,10 +2953,12 @@ static int __pp_compat_alloc(struct msmfb_mdp_pp32 __user *pp32,
+ 				alloc_size);
+ 			return -ENOMEM;
+ 		}
+-		memset(*pp, 0, alloc_size);
+-		(*pp)->data.pcc_cfg_data.cfg_payload =
+-				(void *)((unsigned long)(*pp) +
+-				 sizeof(struct msmfb_mdp_pp));
++		if (clear_user(*pp, alloc_size))
++			return -EFAULT;
++		if (put_user((void *)((unsigned long)(*pp) +
++				sizeof(struct msmfb_mdp_pp)),
++			&(*pp)->data.pcc_cfg_data.cfg_payload))
++			return -EFAULT;
+ 		break;
+ 	case mdp_op_gamut_cfg:
+ 		alloc_size += __pp_compat_size_gamut();
+@@ -2957,10 +2968,12 @@ static int __pp_compat_alloc(struct msmfb_mdp_pp32 __user *pp32,
+ 				alloc_size);
+ 			return -ENOMEM;
+ 		}
+-		memset(*pp, 0, alloc_size);
+-		(*pp)->data.gamut_cfg_data.cfg_payload =
+-				(void *)((unsigned long)(*pp) +
+-				 sizeof(struct msmfb_mdp_pp));
++		if (clear_user(*pp, alloc_size))
++			return -EFAULT;
++		if (put_user((void *)((unsigned long)(*pp) +
++				sizeof(struct msmfb_mdp_pp)),
++			&(*pp)->data.gamut_cfg_data.cfg_payload))
++			return -EFAULT;
+ 		break;
+ 	case mdp_op_pa_v2_cfg:
+ 		alloc_size += __pp_compat_size_pa();
+@@ -2970,16 +2983,19 @@ static int __pp_compat_alloc(struct msmfb_mdp_pp32 __user *pp32,
+ 				alloc_size);
+ 			return -ENOMEM;
+ 		}
+-		memset(*pp, 0, alloc_size);
+-		(*pp)->data.pa_v2_cfg_data.cfg_payload =
+-				(void *)((unsigned long)(*pp) +
+-				sizeof(struct msmfb_mdp_pp));
++		if (clear_user(*pp, alloc_size))
++			return -EFAULT;
++		if (put_user((void *)((unsigned long)(*pp) +
++				sizeof(struct msmfb_mdp_pp)),
++			&(*pp)->data.pa_v2_cfg_data.cfg_payload))
++			return -EFAULT;
+ 		break;
+ 	default:
+ 		*pp = compat_alloc_user_space(alloc_size);
+ 		if (NULL == *pp)
+ 			return -ENOMEM;
+-		memset(*pp, 0, alloc_size);
++		if (clear_user(*pp, alloc_size))
++			return -EFAULT;
+ 		break;
+ 	}
+ 	return 0;
+@@ -3397,7 +3413,9 @@ static int mdss_histo_compat_ioctl(struct fb_info *info, unsigned int cmd,
+ 				 sizeof(struct mdp_histogram_start_req));
+ 			return -EINVAL;
+ 		}
+-		memset(hist_req, 0, sizeof(struct mdp_histogram_start_req));
++		if (clear_user(hist_req,
++				 sizeof(struct mdp_histogram_start_req)))
++			return -EFAULT;
+ 		ret = __from_user_hist_start_req(hist_req32, hist_req);
+ 		if (ret)
+ 			goto histo_compat_err;
+@@ -3417,7 +3435,8 @@ static int mdss_histo_compat_ioctl(struct fb_info *info, unsigned int cmd,
+ 				 sizeof(struct mdp_histogram_data));
+ 			return -EINVAL;
+ 		}
+-		memset(hist, 0, sizeof(struct mdp_histogram_data));
++		if (clear_user(hist, sizeof(struct mdp_histogram_data)))
++			return -EFAULT;
+ 		ret = __from_user_hist_data(hist32, hist);
+ 		if (ret)
+ 			goto histo_compat_err;
+@@ -3920,7 +3939,7 @@ static int __to_user_mdp_overlay(struct mdp_overlay32 __user *ov32,
+ }
+ 
+ 
+-static int __from_user_mdp_overlay(struct mdp_overlay *ov,
++static int __from_user_mdp_overlay(struct mdp_overlay __user *ov,
+ 				   struct mdp_overlay32 __user *ov32)
+ {
+ 	__u32 data;
+@@ -3979,12 +3998,12 @@ static int __from_user_mdp_overlay(struct mdp_overlay *ov,
+ 	return 0;
+ }
+ 
+-static int __from_user_mdp_overlaylist(struct mdp_overlay_list *ovlist,
+-				   struct mdp_overlay_list32 *ovlist32,
++static int __from_user_mdp_overlaylist(struct mdp_overlay_list __user *ovlist,
++				   struct mdp_overlay_list32 __user *ovlist32,
+ 				   struct mdp_overlay **to_list_head)
+ {
+ 	__u32 i, ret;
+-	unsigned long data, from_list_head;
++	unsigned long data, from_list_head, num_overlays;
+ 	struct mdp_overlay32 *iter;
+ 
+ 	if (!to_list_head || !ovlist32 || !ovlist) {
+@@ -4005,11 +4024,13 @@ static int __from_user_mdp_overlaylist(struct mdp_overlay_list *ovlist,
+ 			 sizeof(ovlist32->processed_overlays)))
+ 		return -EFAULT;
+ 
+-	if (get_user(data, &ovlist32->overlay_list)) {
++	if (get_user(data, &ovlist32->overlay_list) ||
++		get_user(num_overlays, &ovlist32->num_overlays)) {
+ 		ret = -EFAULT;
+ 		goto validate_exit;
+ 	}
+-	for (i = 0; i < ovlist32->num_overlays; i++) {
++
++	for (i = 0; i < num_overlays; i++) {
+ 		if (get_user(from_list_head, (__u32 *)data + i)) {
+ 			ret = -EFAULT;
+ 			goto validate_exit;
+@@ -4022,7 +4043,8 @@ static int __from_user_mdp_overlaylist(struct mdp_overlay_list *ovlist,
+ 			goto validate_exit;
+ 		}
+ 	}
+-	ovlist->overlay_list = to_list_head;
++	if (put_user(to_list_head, &ovlist->overlay_list))
++		return -EFAULT;
+ 
+ 	return 0;
+ 
+@@ -4031,8 +4053,8 @@ validate_exit:
+ 	return -EFAULT;
+ }
+ 
+-static int __to_user_mdp_overlaylist(struct mdp_overlay_list32 *ovlist32,
+-				   struct mdp_overlay_list *ovlist,
++static int __to_user_mdp_overlaylist(struct mdp_overlay_list32 __user *ovlist32,
++				   struct mdp_overlay_list __user *ovlist,
+ 				   struct mdp_overlay **l_ptr)
+ {
+ 	__u32 i, ret;
+@@ -4105,31 +4127,33 @@ static u32 __pp_sspp_size(void)
+ 	return size;
+ }
+ 
+-static int __pp_sspp_set_offsets(struct mdp_overlay *ov)
++static int __pp_sspp_set_offsets(struct mdp_overlay __user *ov)
+ {
+ 	if (!ov) {
+ 		pr_err("invalid overlay pointer\n");
+ 		return -EFAULT;
+ 	}
+-	ov->overlay_pp_cfg.igc_cfg.cfg_payload = (void *)((unsigned long)ov +
+-				sizeof(struct mdp_overlay));
+-	ov->overlay_pp_cfg.pa_v2_cfg_data.cfg_payload =
+-		ov->overlay_pp_cfg.igc_cfg.cfg_payload +
+-		sizeof(struct mdp_igc_lut_data_v1_7);
+-	ov->overlay_pp_cfg.pcc_cfg_data.cfg_payload =
+-		ov->overlay_pp_cfg.pa_v2_cfg_data.cfg_payload +
+-		sizeof(struct mdp_pa_data_v1_7);
+-	ov->overlay_pp_cfg.hist_lut_cfg.cfg_payload =
+-		ov->overlay_pp_cfg.pcc_cfg_data.cfg_payload +
+-		sizeof(struct mdp_pcc_data_v1_7);
++	if (put_user((void *)((unsigned long)ov + sizeof(struct mdp_overlay)),
++			 &(ov->overlay_pp_cfg.igc_cfg.cfg_payload)) ||
++		put_user(ov->overlay_pp_cfg.igc_cfg.cfg_payload +
++			sizeof(struct mdp_igc_lut_data_v1_7),
++			&(ov->overlay_pp_cfg.pa_v2_cfg_data.cfg_payload)) ||
++		put_user(ov->overlay_pp_cfg.pa_v2_cfg_data.cfg_payload +
++			 sizeof(struct mdp_pa_data_v1_7),
++			&(ov->overlay_pp_cfg.pcc_cfg_data.cfg_payload)) ||
++		put_user(ov->overlay_pp_cfg.pcc_cfg_data.cfg_payload +
++			sizeof(struct mdp_pcc_data_v1_7),
++			&(ov->overlay_pp_cfg.hist_lut_cfg.cfg_payload)))
++		return -EFAULT;
+ 	return 0;
+ }
+ 
+ int mdss_compat_overlay_ioctl(struct fb_info *info, unsigned int cmd,
+ 			 unsigned long arg, struct file *file)
+ {
+-	struct mdp_overlay *ov, **layers_head;
+-	struct mdp_overlay32 *ov32;
++	struct mdp_overlay **layers_head;
++	struct mdp_overlay __user *ov;
++	struct mdp_overlay32 __user *ov32;
+ 	struct mdp_overlay_list __user *ovlist;
+ 	struct mdp_overlay_list32 __user *ovlist32;
+ 	size_t layers_refs_sz, layers_sz, prepare_sz;
+diff --git a/drivers/video/msm/mdss/mdss_dba_utils.c b/drivers/video/msm/mdss/mdss_dba_utils.c
+index 8804244765a1..3fecf12053b8 100644
+--- a/drivers/video/msm/mdss/mdss_dba_utils.c
++++ b/drivers/video/msm/mdss/mdss_dba_utils.c
+@@ -1,4 +1,4 @@
+-/* Copyright (c) 2015-2017, The Linux Foundation. All rights reserved.
++/* Copyright (c) 2015-2018, The Linux Foundation. All rights reserved.
+  *
+  * This program is free software; you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License version 2 and
+@@ -734,7 +734,6 @@ void *mdss_dba_utils_init(struct mdss_dba_utils_init_data *uid)
+ 	struct mdss_dba_utils_data *udata = NULL;
+ 	struct msm_dba_reg_info info;
+ 	struct cec_abstract_init_data cec_abst_init_data;
+-	void *cec_abst_data;
+ 	int ret = 0;
+ 
+ 	if (!uid) {
+@@ -823,7 +822,7 @@ void *mdss_dba_utils_init(struct mdss_dba_utils_init_data *uid)
+ 	udata->cec_abst_data = cec_abstract_init(&cec_abst_init_data);
+ 	if (IS_ERR_OR_NULL(udata->cec_abst_data)) {
+ 		pr_err("error initializing cec abstract module\n");
+-		ret = PTR_ERR(cec_abst_data);
++		ret = PTR_ERR(udata->cec_abst_data);
+ 		goto error;
+ 	}
+ 
+diff --git a/drivers/video/msm/mdss/mdss_debug.c b/drivers/video/msm/mdss/mdss_debug.c
+index 1d453b6b9ead..6ef469f741bd 100644
+--- a/drivers/video/msm/mdss/mdss_debug.c
++++ b/drivers/video/msm/mdss/mdss_debug.c
+@@ -1,4 +1,4 @@
+-/* Copyright (c) 2009-2017, The Linux Foundation. All rights reserved.
++/* Copyright (c) 2009-2018, The Linux Foundation. All rights reserved.
+  *
+  * This program is free software; you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License version 2 and
+@@ -418,6 +418,39 @@ static int mdss_debug_base_release(struct inode *inode, struct file *file)
+ 	return 0;
+ }
+ 
++/**
++ * mdss_debug_base_is_valid_range - verify if requested memory range is valid
++ * @off: address offset in bytes
++ * @cnt: memory size in bytes
++ * Return: true if valid; false otherwise
++ */
++static bool mdss_debug_base_is_valid_range(u32 off, u32 cnt)
++{
++	struct mdss_data_type *mdata = mdss_mdp_get_mdata();
++	struct mdss_debug_data *mdd = mdata->debug_inf.debug_data;
++	struct range_dump_node *node;
++	struct mdss_debug_base *base;
++
++	pr_debug("check offset=0x%x cnt=0x%x\n", off, cnt);
++
++	list_for_each_entry(base, &mdd->base_list, head) {
++		list_for_each_entry(node, &base->dump_list, head) {
++			pr_debug("%s: start=0x%x end=0x%x\n", node->range_name,
++			node->offset.start, node->offset.end);
++
++			if (node->offset.start <= off
++					&& off <= node->offset.end
++					&& off + cnt <= node->offset.end) {
++				pr_debug("valid range requested\n");
++				return true;
++			}
++		}
++	}
++
++	pr_err("invalid range requested\n");
++	return false;
++}
++
+ static ssize_t mdss_debug_base_offset_write(struct file *file,
+ 		    const char __user *user_buf, size_t count, loff_t *ppos)
+ {
+@@ -440,7 +473,8 @@ static ssize_t mdss_debug_base_offset_write(struct file *file,
+ 	if (off % sizeof(u32))
+ 		return -EINVAL;
+ 
+-	sscanf(buf, "%5x %x", &off, &cnt);
++	if (sscanf(buf, "%5x %x", &off, &cnt) != 2)
++		return -EFAULT;
+ 
+ 	if (off > dbg->max_offset)
+ 		return -EINVAL;
+@@ -448,6 +482,9 @@ static ssize_t mdss_debug_base_offset_write(struct file *file,
+ 	if (cnt > (dbg->max_offset - off))
+ 		cnt = dbg->max_offset - off;
+ 
++	if (!mdss_debug_base_is_valid_range(off, cnt))
++		return -EINVAL;
++
+ 	mutex_lock(&mdss_debug_lock);
+ 	dbg->off = off;
+ 	dbg->cnt = cnt;
+diff --git a/drivers/video/msm/mdss/mdss_dsi.c b/drivers/video/msm/mdss/mdss_dsi.c
+index 6eef7461b51d..0534d11b0a53 100644
+--- a/drivers/video/msm/mdss/mdss_dsi.c
++++ b/drivers/video/msm/mdss/mdss_dsi.c
+@@ -37,9 +37,6 @@
+ #define XO_CLK_RATE	19200000
+ #define CMDLINE_DSI_CTL_NUM_STRING_LEN 2
+ 
+-int is_recovery = BOOTMODE_NORMAL;
+-static bool is_enable_regulator = false;
+-
+ /* Master structure to hold all the information about the DSI/panel */
+ static struct mdss_dsi_data *mdss_dsi_res;
+ 
+@@ -298,6 +295,13 @@ static int mdss_dsi_panel_power_off(struct mdss_panel_data *pdata)
+ 	if (mdss_dsi_pinctrl_set_state(ctrl_pdata, false))
+ 		pr_debug("reset disable: pinctrl not enabled\n");
+ 
++	ret = msm_dss_enable_vreg(
++		ctrl_pdata->panel_power_data.vreg_config,
++		ctrl_pdata->panel_power_data.num_vreg, 0);
++	if (ret)
++		pr_err("%s: failed to disable vregs for %s\n",
++			__func__, __mdss_dsi_pm_name(DSI_PANEL_PM));
++
+ end:
+ 	return ret;
+ }
+@@ -314,16 +318,13 @@ static int mdss_dsi_panel_power_on(struct mdss_panel_data *pdata)
+ 	ctrl_pdata = container_of(pdata, struct mdss_dsi_ctrl_pdata,
+ 				panel_data);
+ 
+-	if (is_enable_regulator == false) {
+-		ret = msm_dss_enable_vreg(
+-			ctrl_pdata->panel_power_data.vreg_config,
+-			ctrl_pdata->panel_power_data.num_vreg, 1);
+-		if (ret) {
+-			pr_err("%s: failed to enable vregs for %s\n",
+-				__func__, __mdss_dsi_pm_name(DSI_PANEL_PM));
+-			return ret;
+-		}
+-		is_enable_regulator = true;
++	ret = msm_dss_enable_vreg(
++		ctrl_pdata->panel_power_data.vreg_config,
++		ctrl_pdata->panel_power_data.num_vreg, 1);
++	if (ret) {
++		pr_err("%s: failed to enable vregs for %s\n",
++			__func__, __mdss_dsi_pm_name(DSI_PANEL_PM));
++		return ret;
+ 	}
+ 
+ 	/*
+@@ -1628,6 +1629,11 @@ static int mdss_dsi_unblank(struct mdss_panel_data *pdata)
+ 		}
+ 	}
+ 
++	if ((pdata->panel_info.type == MIPI_CMD_PANEL) &&
++		mipi->vsync_enable && mipi->hw_vsync_mode) {
++		mdss_dsi_set_tear_on(ctrl_pdata);
++	}
++
+ 	ctrl_pdata->ctrl_state |= CTRL_STATE_PANEL_INIT;
+ 
+ error:
+@@ -1689,9 +1695,15 @@ static int mdss_dsi_blank(struct mdss_panel_data *pdata, int power_state)
+ 			ctrl_pdata->switch_mode(pdata, SWITCH_TO_VIDEO_MODE);
+ 		} else if (pdata->panel_info.type == MIPI_VIDEO_PANEL) {
+ 			ctrl_pdata->switch_mode(pdata, SWITCH_TO_CMD_MODE);
++			mdss_dsi_set_tear_off(ctrl_pdata);
+ 		}
+ 	}
+ 
++	if ((pdata->panel_info.type == MIPI_CMD_PANEL) &&
++		mipi->vsync_enable && mipi->hw_vsync_mode) {
++		mdss_dsi_set_tear_off(ctrl_pdata);
++	}
++
+ 	if (ctrl_pdata->ctrl_state & CTRL_STATE_PANEL_INIT) {
+ 		if (!pdata->panel_info.dynamic_switch_pending) {
+ 			ATRACE_BEGIN("dsi_panel_off");
+@@ -4088,20 +4100,6 @@ static int mdss_dsi_parse_gpio_params(struct platform_device *ctrl_pdev,
+ 		pdata->panel_en_gpio = ctrl_pdata->disp_en_gpio;
+ 	}
+ 
+-	ctrl_pdata->disp_avdden_gpio = of_get_named_gpio(ctrl_pdev->dev.of_node,
+-		"qcom,platform-avdden-gpio", 0);
+-
+-	if (!gpio_is_valid(ctrl_pdata->disp_avdden_gpio))
+-		pr_err("%s:%d, AVDDEN gpio not specified\n",
+-						__func__, __LINE__);
+-
+-	ctrl_pdata->tp_reset_gpio = of_get_named_gpio(ctrl_pdev->dev.of_node,
+-		"qcom,platform-tpreset-gpio", 0);
+-
+-	if (!gpio_is_valid(ctrl_pdata->tp_reset_gpio))
+-		pr_err("%s:%d, TP reset gpio not specified\n",
+-						__func__, __LINE__);
+-
+ 	ctrl_pdata->disp_te_gpio = of_get_named_gpio(ctrl_pdev->dev.of_node,
+ 		"qcom,platform-te-gpio", 0);
+ 
+@@ -4167,21 +4165,6 @@ static void mdss_dsi_set_prim_panel(struct mdss_dsi_ctrl_pdata *ctrl_pdata)
+ 	}
+ }
+ 
+-static int __init get_bootmode_cmdline(char *buf)
+-{
+-	int bootmode_num = 0;
+-
+-	bootmode_num = simple_strtol(buf, NULL, 10);
+-
+-	if (bootmode_num == 1){
+-		is_recovery = BOOTMODE_RECOVERY;
+-	}
+-
+-	return 0;
+-}
+-
+-early_param("IsRecovery", get_bootmode_cmdline);
+-
+ int dsi_panel_device_register(struct platform_device *ctrl_pdev,
+ 	struct device_node *pan_node, struct mdss_dsi_ctrl_pdata *ctrl_pdata)
+ {
+diff --git a/drivers/video/msm/mdss/mdss_dsi.h b/drivers/video/msm/mdss/mdss_dsi.h
+index 763bad26f395..6d6757ff592e 100644
+--- a/drivers/video/msm/mdss/mdss_dsi.h
++++ b/drivers/video/msm/mdss/mdss_dsi.h
+@@ -136,11 +136,6 @@ enum dsi_pm_type {
+ 	DSI_MAX_PM
+ };
+ 
+-enum {
+-	BOOTMODE_NORMAL,
+-	BOOTMODE_RECOVERY,
+-};
+-
+ /*
+  * DSI controller states.
+  *	CTRL_STATE_UNKNOWN - Unknown state of DSI controller.
+@@ -232,8 +227,6 @@ extern struct device dsi_dev;
+ extern u32 dsi_irq;
+ extern struct mdss_dsi_ctrl_pdata *ctrl_list[];
+ 
+-extern int is_recovery;
+-
+ enum {
+ 	DSI_CTRL_0,
+ 	DSI_CTRL_1,
+@@ -436,8 +429,6 @@ struct mdss_dsi_ctrl_pdata {
+ 	int panel_mode;
+ 	int irq_cnt;
+ 	int disp_te_gpio;
+-	int disp_avdden_gpio;
+-	int tp_reset_gpio;
+ 	int rst_gpio;
+ 	int disp_en_gpio;
+ 	int bklt_en_gpio;
+@@ -484,9 +475,6 @@ struct mdss_dsi_ctrl_pdata {
+ 	struct dsi_panel_cmds status_cmds;
+ 	struct dsi_panel_cmds idle_on_cmds; /* for lp mode */
+ 	struct dsi_panel_cmds idle_off_cmds;
+-	struct dsi_panel_cmds hbm0_on_cmds;
+-	struct dsi_panel_cmds hbm1_on_cmds;
+-	struct dsi_panel_cmds hbm_off_cmds;
+ 	u32 *status_valid_params;
+ 	u32 *status_cmds_rlen;
+ 	u32 *status_value;
+@@ -569,7 +557,6 @@ struct mdss_dsi_ctrl_pdata {
+ 	bool update_phy_timing; /* flag to recalculate PHY timings */
+ 
+ 	bool phy_power_off;
+-	struct delayed_work idle_work;
+ };
+ 
+ struct dsi_status_data {
+@@ -689,12 +676,6 @@ void mdss_dsi_set_reg(struct mdss_dsi_ctrl_pdata *ctrl, int off,
+ int mdss_dsi_phy_pll_reset_status(struct mdss_dsi_ctrl_pdata *ctrl);
+ int mdss_dsi_panel_power_ctrl(struct mdss_panel_data *pdata, int power_state);
+ 
+-void mdss_dsi_cmds_send(struct mdss_dsi_ctrl_pdata *ctrl,
+-		struct dsi_panel_cmds *pcmds, u32 flags);
+-
+-int mdss_dsi_raydium_cmd_read(struct mdss_dsi_ctrl_pdata *ctrl, char page,
+-		char addr, void (*fxn)(int), char *rbuf, int len);
+-
+ static inline const char *__mdss_dsi_pm_name(enum dsi_pm_type module)
+ {
+ 	switch (module) {
+diff --git a/drivers/video/msm/mdss/mdss_dsi_cmd.c b/drivers/video/msm/mdss/mdss_dsi_cmd.c
+index 2fb62e72fc91..d07b504ff302 100644
+--- a/drivers/video/msm/mdss/mdss_dsi_cmd.c
++++ b/drivers/video/msm/mdss/mdss_dsi_cmd.c
+@@ -721,31 +721,6 @@ void mdss_dsi_set_tear_off(struct mdss_dsi_ctrl_pdata *ctrl)
+ 	mdss_dsi_cmdlist_put(ctrl, &cmdreq);
+ }
+ 
+-static char switch_page[2] = {0xFE, 0x00};
+-static struct dsi_cmd_desc dsi_switch_page_cmd = {
+-	{DTYPE_DCS_WRITE1, 1, 0, 0, 0, sizeof(switch_page)}, switch_page};
+-
+-void mdss_dsi_switch_page(struct mdss_dsi_ctrl_pdata *ctrl, char page)
+-{
+-    struct dcs_cmd_req cmdreq;
+-    struct mdss_panel_info *pinfo;
+-
+-    pinfo = &(ctrl->panel_data.panel_info);
+-    if (pinfo->dcs_cmd_by_left && ctrl->ndx != DSI_CTRL_LEFT)
+-        return;
+-
+-    switch_page[1] = page;
+-
+-    memset(&cmdreq, 0, sizeof(cmdreq));
+-    cmdreq.cmds = &dsi_switch_page_cmd;
+-    cmdreq.cmds_cnt = 1;
+-    cmdreq.flags = CMD_REQ_COMMIT;
+-    cmdreq.rlen = 0;
+-    cmdreq.cb = NULL;
+-
+-    mdss_dsi_cmdlist_put(ctrl, &cmdreq);
+-}
+-
+ /*
+  * mdss_dsi_cmd_get: ctrl->cmd_mutex acquired by caller
+  */
+@@ -815,142 +790,3 @@ int mdss_dsi_cmdlist_put(struct mdss_dsi_ctrl_pdata *ctrl,
+ 	return ret;
+ }
+ 
+-void mdss_dsi_cmds_send(struct mdss_dsi_ctrl_pdata *ctrl,
+-		struct dsi_panel_cmds *pcmds, u32 flags)
+-{
+-    struct dcs_cmd_req cmdreq;
+-    struct mdss_panel_info *pinfo;
+-
+-    pinfo = &(ctrl->panel_data.panel_info);
+-    if (pinfo->dcs_cmd_by_left) {
+-        if (ctrl->ndx != DSI_CTRL_LEFT)
+-            return;
+-    }
+-
+-    memset(&cmdreq, 0, sizeof(cmdreq));
+-    cmdreq.cmds = pcmds->cmds;
+-    cmdreq.cmds_cnt = pcmds->cmd_cnt;
+-    cmdreq.flags = flags;
+-
+-    if (pcmds->link_state == DSI_LP_MODE)
+-        cmdreq.flags  |= CMD_REQ_LP_MODE;
+-    else if (pcmds->link_state == DSI_HS_MODE)
+-        cmdreq.flags |= CMD_REQ_HS_MODE;
+-
+-    cmdreq.rlen = 0;
+-    cmdreq.cb = NULL;
+-
+-    mdss_dsi_cmdlist_put(ctrl, &cmdreq);
+-}
+-
+-static char _dcs_cmd[2] = {0x00, 0x00};
+-static struct dsi_cmd_desc _dcs_read_cmd = {
+-	{DTYPE_DCS_READ, 1, 0, 1, 5, sizeof(_dcs_cmd)}, _dcs_cmd};
+-
+-int mdss_dsi_raydium_cmd_read(struct mdss_dsi_ctrl_pdata *ctrl, char page,
+-		char addr, void (*fxn)(int), char *rbuf, int len)
+-{
+-    struct dcs_cmd_req cmdreq;
+-    struct mdss_panel_info *pinfo;
+-
+-    pinfo = &(ctrl->panel_data.panel_info);
+-    if (pinfo->dcs_cmd_by_left) {
+-        if (ctrl->ndx != DSI_CTRL_LEFT)
+-        return -EINVAL;
+-    }
+-
+-    //switch to the correct page prior to reading
+-    mdss_dsi_switch_page(ctrl, page);
+-
+-    _dcs_cmd[0] = addr;
+-    memset(&cmdreq, 0, sizeof(cmdreq));
+-    cmdreq.cmds = &_dcs_read_cmd;
+-    cmdreq.cmds_cnt = 1;
+-    cmdreq.flags = CMD_REQ_RX | CMD_REQ_COMMIT;
+-    cmdreq.rlen = len;
+-    cmdreq.rbuf = rbuf;
+-    cmdreq.cb = fxn; /* call back */
+-    /*
+-     * blocked here, until call back called
+-     */
+-
+-    return mdss_dsi_cmdlist_put(ctrl, &cmdreq);
+-}
+-
+-static char read_back_param[] = {0x00};
+-void mdss_dsi_brightness_boost_on(struct mdss_dsi_ctrl_pdata *ctrl)
+-{
+-    struct dsi_panel_cmds *hbm_on_cmds;
+-
+-    char *rx_buf;
+-
+-    rx_buf = kzalloc(1, GFP_KERNEL);
+-    if(!rx_buf)
+-    {
+-        pr_err("kzalloc fail\n");
+-        kfree(rx_buf);
+-
+-        return;
+-    }
+-
+-    mdss_dsi_raydium_cmd_read(ctrl, 0x01, 0x19, NULL, read_back_param, 1);
+-    pr_info("%s: read_back_param[0] = 0x%02x\n", __func__, read_back_param[0]);
+-
+-    mdss_dsi_raydium_cmd_read(ctrl, 0x00, 0xDC, NULL, rx_buf, 1);
+-    pr_info("%s: rx_buf[0] = 0x%02x\n", __func__, rx_buf[0]);
+-
+-    switch(rx_buf[0])
+-    {
+-        case 0x00:
+-        {
+-            hbm_on_cmds = &ctrl->hbm0_on_cmds;
+-            break;
+-        }
+-
+-        case 0x01:
+-        {
+-            hbm_on_cmds = &ctrl->hbm1_on_cmds;
+-            break;
+-        }
+-
+-        case 0x02:
+-        {
+-            hbm_on_cmds = &ctrl->hbm1_on_cmds;
+-            break;
+-        }
+-
+-        default:
+-            break;
+-    }
+-
+-    if(hbm_on_cmds->cmd_cnt)
+-    {
+-        mdss_dsi_cmds_send(ctrl, hbm_on_cmds, CMD_REQ_COMMIT);
+-
+-        pr_info("%s: boost on!\n", __func__);
+-    }
+-
+-    kfree(rx_buf);
+-
+-    return;
+-}
+-
+-void mdss_dsi_brightness_boost_off(struct mdss_dsi_ctrl_pdata *ctrl)
+-{
+-    struct dsi_panel_cmds *hbm_off_cmds;
+-
+-    pr_info("%s: read_back_param[0] = 0x%02x\n", __func__, read_back_param[0]);
+-
+-    //write back to HBM off command flow
+-    hbm_off_cmds = &ctrl->hbm_off_cmds;
+-    hbm_off_cmds->cmds[12].payload[1] = read_back_param[0];
+-
+-    if(hbm_off_cmds->cmd_cnt)
+-    {
+-        mdss_dsi_cmds_send(ctrl, hbm_off_cmds, CMD_REQ_COMMIT);
+-
+-        pr_info("%s: boost off!\n", __func__);
+-    }
+-
+-    return;
+-}
+diff --git a/drivers/video/msm/mdss/mdss_dsi_cmd.h b/drivers/video/msm/mdss/mdss_dsi_cmd.h
+index 40a1edadab4b..79c54229b752 100644
+--- a/drivers/video/msm/mdss/mdss_dsi_cmd.h
++++ b/drivers/video/msm/mdss/mdss_dsi_cmd.h
+@@ -132,9 +132,6 @@ int mdss_dsi_short_read2_resp(struct dsi_buf *rp);
+ int mdss_dsi_long_read_resp(struct dsi_buf *rp);
+ void mdss_dsi_set_tear_on(struct mdss_dsi_ctrl_pdata *ctrl);
+ void mdss_dsi_set_tear_off(struct mdss_dsi_ctrl_pdata *ctrl);
+-void mdss_dsi_switch_page(struct mdss_dsi_ctrl_pdata *ctrl, char page);
+-void mdss_dsi_brightness_boost_on(struct mdss_dsi_ctrl_pdata *ctrl);
+-void mdss_dsi_brightness_boost_off(struct mdss_dsi_ctrl_pdata *ctrl);
+ struct dcs_cmd_req *mdss_dsi_cmdlist_get(struct mdss_dsi_ctrl_pdata *ctrl,
+ 				int from_mdp);
+ int mdss_dsi_cmdlist_put(struct mdss_dsi_ctrl_pdata *ctrl,
+diff --git a/drivers/video/msm/mdss/mdss_dsi_panel.c b/drivers/video/msm/mdss/mdss_dsi_panel.c
+index 2a98bbad08dc..6fad2fbd42fa 100644
+--- a/drivers/video/msm/mdss/mdss_dsi_panel.c
++++ b/drivers/video/msm/mdss/mdss_dsi_panel.c
+@@ -241,23 +241,6 @@ static void mdss_dsi_panel_bklt_dcs(struct mdss_dsi_ctrl_pdata *ctrl, int level)
+ 	mdss_dsi_cmdlist_put(ctrl, &cmdreq);
+ }
+ 
+-void mdss_dsi_idle_work(struct work_struct *work)
+-{
+-	struct mdss_dsi_ctrl_pdata *ctrl = NULL;
+-	struct delayed_work *dw = to_delayed_work(work);
+-
+-	ctrl = container_of(dw, struct mdss_dsi_ctrl_pdata, idle_work);
+-	if (!ctrl) {
+-		pr_err("%s: invalid ctrl data\n", __func__);
+-		return;
+-	}
+-
+-	pr_info("%s: start to send idle command\n", __func__);
+-	mdss_dsi_panel_cmds_send(ctrl, &ctrl->idle_on_cmds,
+-			CMD_REQ_COMMIT);
+-
+-}
+-
+ static void mdss_dsi_panel_set_idle_mode(struct mdss_panel_data *pdata,
+ 							bool enable)
+ {
+@@ -279,12 +262,12 @@ static void mdss_dsi_panel_set_idle_mode(struct mdss_panel_data *pdata,
+ 	MDSS_XLOG(ctrl->idle, enable);
+ 	if (enable) {
+ 		if (ctrl->idle_on_cmds.cmd_cnt) {
+-			schedule_delayed_work(&ctrl->idle_work, msecs_to_jiffies(100));
++			mdss_dsi_panel_cmds_send(ctrl, &ctrl->idle_on_cmds,
++					CMD_REQ_COMMIT);
+ 			ctrl->idle = true;
+ 			pr_debug("Idle on\n");
+ 		}
+ 	} else {
+-		cancel_delayed_work_sync(&ctrl->idle_work);
+ 		if (ctrl->idle_off_cmds.cmd_cnt) {
+ 			mdss_dsi_panel_cmds_send(ctrl, &ctrl->idle_off_cmds,
+ 					CMD_REQ_COMMIT);
+@@ -308,11 +291,62 @@ static bool mdss_dsi_panel_get_idle_mode(struct mdss_panel_data *pdata)
+ 	return ctrl->idle;
+ }
+ 
++static int mdss_dsi_request_gpios(struct mdss_dsi_ctrl_pdata *ctrl_pdata)
++{
++	int rc = 0;
++
++	if (gpio_is_valid(ctrl_pdata->disp_en_gpio)) {
++		rc = gpio_request(ctrl_pdata->disp_en_gpio,
++						"disp_enable");
++		if (rc) {
++			pr_err("request disp_en gpio failed, rc=%d\n",
++				       rc);
++			goto disp_en_gpio_err;
++		}
++	}
++	rc = gpio_request(ctrl_pdata->rst_gpio, "disp_rst_n");
++	if (rc) {
++		pr_err("request reset gpio failed, rc=%d\n",
++			rc);
++		goto rst_gpio_err;
++	}
++
++	if (gpio_is_valid(ctrl_pdata->bklt_en_gpio)) {
++		rc = gpio_request(ctrl_pdata->bklt_en_gpio,
++						"bklt_enable");
++		if (rc) {
++			pr_err("request bklt gpio failed, rc=%d\n",
++				       rc);
++			goto bklt_en_gpio_err;
++		}
++	}
++	if (gpio_is_valid(ctrl_pdata->mode_gpio)) {
++		rc = gpio_request(ctrl_pdata->mode_gpio, "panel_mode");
++		if (rc) {
++			pr_err("request panel mode gpio failed,rc=%d\n",
++								rc);
++			goto mode_gpio_err;
++		}
++	}
++	return rc;
++
++mode_gpio_err:
++	if (gpio_is_valid(ctrl_pdata->bklt_en_gpio))
++		gpio_free(ctrl_pdata->bklt_en_gpio);
++bklt_en_gpio_err:
++	gpio_free(ctrl_pdata->rst_gpio);
++rst_gpio_err:
++	if (gpio_is_valid(ctrl_pdata->disp_en_gpio))
++		gpio_free(ctrl_pdata->disp_en_gpio);
++disp_en_gpio_err:
++	return rc;
++}
++
+ int mdss_dsi_panel_reset(struct mdss_panel_data *pdata, int enable)
+ {
+ 	struct mdss_dsi_ctrl_pdata *ctrl_pdata = NULL;
+ 	struct mdss_panel_info *pinfo = NULL;
+-	int rc = 0;
++	int i, rc = 0;
+ 
+ 	if (pdata == NULL) {
+ 		pr_err("%s: Invalid input data\n", __func__);
+@@ -372,7 +406,91 @@ int mdss_dsi_panel_reset(struct mdss_panel_data *pdata, int enable)
+ 		return rc;
+ 	}
+ 
+-	pr_info("%s: enable = %d\n", __func__, enable);
++	pr_debug("%s: enable = %d\n", __func__, enable);
++
++	if (enable) {
++		rc = mdss_dsi_request_gpios(ctrl_pdata);
++		if (rc) {
++			pr_err("gpio request failed\n");
++			return rc;
++		}
++		if (!pinfo->cont_splash_enabled) {
++			if (gpio_is_valid(ctrl_pdata->disp_en_gpio)) {
++				rc = gpio_direction_output(
++					ctrl_pdata->disp_en_gpio, 1);
++				if (rc) {
++					pr_err("%s: unable to set dir for en gpio\n",
++						__func__);
++					goto exit;
++				}
++				gpio_set_value((ctrl_pdata->disp_en_gpio), 1);
++				usleep_range(100, 110);
++			}
++
++			if (pdata->panel_info.rst_seq_len) {
++				rc = gpio_direction_output(ctrl_pdata->rst_gpio,
++					pdata->panel_info.rst_seq[0]);
++				if (rc) {
++					pr_err("%s: unable to set dir for rst gpio\n",
++						__func__);
++					goto exit;
++				}
++			}
++
++			for (i = 0; i < pdata->panel_info.rst_seq_len; ++i) {
++				gpio_set_value((ctrl_pdata->rst_gpio),
++					pdata->panel_info.rst_seq[i]);
++				if (pdata->panel_info.rst_seq[++i])
++					usleep_range(pinfo->rst_seq[i] * 1000, pinfo->rst_seq[i] * 1000);
++			}
++
++			if (gpio_is_valid(ctrl_pdata->bklt_en_gpio)) {
++				rc = gpio_direction_output(
++					ctrl_pdata->bklt_en_gpio, 1);
++				if (rc) {
++					pr_err("%s: unable to set dir for bklt gpio\n",
++						__func__);
++					goto exit;
++				}
++			}
++		}
++
++		if (gpio_is_valid(ctrl_pdata->mode_gpio)) {
++			bool out = false;
++
++			if (pinfo->mode_gpio_state == MODE_GPIO_HIGH)
++				out = true;
++			else if (pinfo->mode_gpio_state == MODE_GPIO_LOW)
++				out = false;
++
++			rc = gpio_direction_output(ctrl_pdata->mode_gpio, out);
++			if (rc) {
++				pr_err("%s: unable to set dir for mode gpio\n",
++					__func__);
++				goto exit;
++			}
++		}
++		if (ctrl_pdata->ctrl_state & CTRL_STATE_PANEL_INIT) {
++			pr_debug("%s: Panel Not properly turned OFF\n",
++						__func__);
++			ctrl_pdata->ctrl_state &= ~CTRL_STATE_PANEL_INIT;
++			pr_debug("%s: Reset panel done\n", __func__);
++		}
++	} else {
++		if (gpio_is_valid(ctrl_pdata->bklt_en_gpio)) {
++			gpio_set_value((ctrl_pdata->bklt_en_gpio), 0);
++			gpio_free(ctrl_pdata->bklt_en_gpio);
++		}
++		if (gpio_is_valid(ctrl_pdata->disp_en_gpio)) {
++			gpio_set_value((ctrl_pdata->disp_en_gpio), 0);
++			usleep_range(100, 110);
++			gpio_free(ctrl_pdata->disp_en_gpio);
++		}
++		gpio_set_value((ctrl_pdata->rst_gpio), 0);
++		gpio_free(ctrl_pdata->rst_gpio);
++		if (gpio_is_valid(ctrl_pdata->mode_gpio))
++			gpio_free(ctrl_pdata->mode_gpio);
++	}
+ 
+ exit:
+ 	return rc;
+@@ -2328,7 +2446,7 @@ static int mdss_dsi_panel_timing_from_dt(struct device_node *np,
+ 	return 0;
+ }
+ 
+-static int mdss_dsi_panel_config_res_properties(struct device_node *np,
++static int  mdss_dsi_panel_config_res_properties(struct device_node *np,
+ 		struct dsi_panel_timing *pt,
+ 		struct mdss_panel_data *panel_data,
+ 		bool default_timing)
+@@ -2692,13 +2810,6 @@ static int mdss_panel_parse_dt(struct device_node *np,
+ 		"qcom,mdss-dsi-idle-off-command",
+ 		"qcom,mdss-dsi-idle-off-command-state");
+ 
+-	mdss_dsi_parse_dcs_cmds(np, &ctrl_pdata->hbm0_on_cmds,
+-		"qcom,mdss-dsi-hbm0-on-command", NULL);
+-	mdss_dsi_parse_dcs_cmds(np, &ctrl_pdata->hbm1_on_cmds,
+-		"qcom,mdss-dsi-hbm1-on-command", NULL);
+-	mdss_dsi_parse_dcs_cmds(np, &ctrl_pdata->hbm_off_cmds,
+-		"qcom,mdss-dsi-hbm-off-command", NULL);
+-
+ 	rc = of_property_read_u32(np, "qcom,mdss-dsi-idle-fps", &tmp);
+ 	pinfo->mipi.frame_rate_idle = (!rc ? tmp : 60);
+ 
+@@ -2773,7 +2884,5 @@ int mdss_dsi_panel_init(struct device_node *node,
+ 			mdss_dsi_panel_apply_display_setting;
+ 	ctrl_pdata->switch_mode = mdss_dsi_panel_switch_mode;
+ 	ctrl_pdata->panel_data.get_idle = mdss_dsi_panel_get_idle_mode;
+-
+-	INIT_DELAYED_WORK(&ctrl_pdata->idle_work, mdss_dsi_idle_work);
+ 	return 0;
+ }
+diff --git a/drivers/video/msm/mdss/mdss_fb.c b/drivers/video/msm/mdss/mdss_fb.c
+index 4d6be1e72588..181b80f52449 100644
+--- a/drivers/video/msm/mdss/mdss_fb.c
++++ b/drivers/video/msm/mdss/mdss_fb.c
+@@ -85,6 +85,8 @@
+ 
+ static struct fb_info *fbi_list[MAX_FBI_LIST];
+ static int fbi_list_index;
++static int lcd_loadswitch_flag;
++static int panel_reg_addr = 0x0a;
+ 
+ static u32 mdss_fb_pseudo_palette[16] = {
+ 	0x00000000, 0xffffffff, 0xffffffff, 0xffffffff,
+@@ -95,8 +97,6 @@ static u32 mdss_fb_pseudo_palette[16] = {
+ 
+ static struct msm_mdp_interface *mdp_instance;
+ 
+-static bool g_boost_mode = 0;
+-
+ static int mdss_fb_register(struct msm_fb_data_type *mfd);
+ static int mdss_fb_open(struct fb_info *info, int user);
+ static int mdss_fb_release(struct fb_info *info, int user);
+@@ -889,65 +889,79 @@ static ssize_t mdss_fb_get_persist_mode(struct device *dev,
+ 	return ret;
+ }
+ 
+-static ssize_t mdss_fb_get_boost_mode(struct device *dev,
+-    struct device_attribute *attr, char *buf)
++static ssize_t msm_fb_lcd_loadswitch_off(struct device *dev,
++		struct device_attribute *attr, const char *buf, size_t len)
+ {
+-    int ret;
+ 
+-    ret = scnprintf(buf, PAGE_SIZE, "boost = %d\n", g_boost_mode);
++	gpio_direction_output(75, 0);
++	lcd_loadswitch_flag = 1;
+ 
+-    return ret;
++	return len;
+ }
+ 
+-static ssize_t mdss_fb_set_boost_mode(struct device *dev,
+-    struct device_attribute *attr, const char *buf, size_t count)
++static ssize_t msm_fb_panel_set_addr(struct device *dev,
++		struct device_attribute *attr, const char *buf, size_t len)
+ {
+-    int rc = 0;
+-    int boost_mode = 0;
++	int rc = 0;
+ 
+-    struct fb_info *fbi = dev_get_drvdata(dev);
+-    struct msm_fb_data_type *mfd = fbi->par;
++	pr_debug("%s %d: buf = %s\n", __func__, __LINE__, buf);
++	rc = kstrtoint(buf, 0, &panel_reg_addr);
++	if (rc) {
++		pr_err("kstrtoint failed. rc=%d, buf = %s\n", rc, buf);
++		return rc;
++	}
++	pr_debug("set panel_reg_addr to %d\n", panel_reg_addr);
++	return len;
++}
+ 
+-    struct mdss_panel_data *pdata;
+-    struct mdss_dsi_ctrl_pdata *ctrl = NULL;
++static ssize_t msm_fb_panel_get_addr(struct device *dev,
++		struct device_attribute *attr, char *buf)
++{
++	int rc = 0;
+ 
+-    pdata = dev_get_platdata(&mfd->pdev->dev);
+-    if(!pdata)
+-    {
+-        pr_err("no panel connected!\n");
+-        return -EINVAL;
+-    }
++	pr_debug("panel_reg_addr 0x%x\n", panel_reg_addr);
++	rc = scnprintf(buf, PAGE_SIZE, "0x%02x\n", panel_reg_addr);
++	return rc;
++}
+ 
+-    ctrl = container_of(pdata, struct mdss_dsi_ctrl_pdata, panel_data);
++static ssize_t msm_fb_panel_read_reg(struct device *dev,
++		struct device_attribute *attr, char *buf)
++{
++	struct fb_info *fbi = dev_get_drvdata(dev);
++	struct msm_fb_data_type *mfd = (struct msm_fb_data_type *)fbi->par;
++	struct mdss_panel_data *pdata;
++	struct mdss_panel_info *pinfo;
++	int ret;
++	struct mdss_dsi_ctrl_pdata *ctrl_pdata = NULL;
++	char *rx_buf = NULL;
+ 
+-    rc = kstrtoint(buf, 10, &boost_mode);
+-    if(rc)
+-    {
+-        pr_err("kstrtoint failed. rc=%d\n", rc);
+-        return rc;
+-    }
++	pdata = dev_get_platdata(&mfd->pdev->dev);
++	if (!pdata) {
++		pr_err("no panel connected!\n");
++		return -EINVAL;
++	}
++	pinfo = &pdata->panel_info;
++	ctrl_pdata = container_of(pdata, struct mdss_dsi_ctrl_pdata,
++				panel_data);
+ 
+-    if(mfd->panel_info->type !=  MIPI_CMD_PANEL)
+-    {
+-        pr_err("support for command mode panel only\n");
+-    }
+-    else
+-    {
+-        if(boost_mode != 0)
+-        {
+-            mdss_dsi_brightness_boost_on(ctrl);
+-            g_boost_mode = 1;
+-        }
+-        else
+-        {
+-            mdss_dsi_brightness_boost_off(ctrl);
+-            g_boost_mode = 0;
+-        }
+-    }
++	rx_buf = kzalloc(2, GFP_KERNEL);
++	if (!rx_buf)
++		return -ENOMEM;
+ 
+-    return count;
++	pr_debug("panel_reg_addr = 0x%x\n",  panel_reg_addr);
++	mdss_dsi_panel_cmd_read(ctrl_pdata, panel_reg_addr, 0x00, NULL,
++			rx_buf, 1);
++	ret = scnprintf(buf, PAGE_SIZE, "0x%02x\n", rx_buf[0]);
++	kfree(rx_buf);
++	return ret;
+ }
+ 
++static DEVICE_ATTR(msm_fb_lcd_loadswitch, S_IRUGO | S_IWUSR, NULL,
++					msm_fb_lcd_loadswitch_off);
++static DEVICE_ATTR(msm_fb_panel_addr, S_IRUGO | S_IWUSR, msm_fb_panel_get_addr,
++					msm_fb_panel_set_addr);
++static DEVICE_ATTR(msm_fb_panel_reg, S_IRUGO , msm_fb_panel_read_reg,
++					NULL);
+ static DEVICE_ATTR(msm_fb_type, S_IRUGO, mdss_fb_get_type, NULL);
+ static DEVICE_ATTR(msm_fb_split, S_IRUGO | S_IWUSR, mdss_fb_show_split,
+ 					mdss_fb_store_split);
+@@ -968,9 +982,10 @@ static DEVICE_ATTR(measured_fps, S_IRUGO | S_IWUSR | S_IWGRP,
+ 	mdss_fb_get_fps_info, NULL);
+ static DEVICE_ATTR(msm_fb_persist_mode, S_IRUGO | S_IWUSR,
+ 	mdss_fb_get_persist_mode, mdss_fb_change_persist_mode);
+-static DEVICE_ATTR(msm_fb_boost_mode, S_IRUGO | S_IWUSR,
+-	mdss_fb_get_boost_mode, mdss_fb_set_boost_mode);
+ static struct attribute *mdss_fb_attrs[] = {
++	&dev_attr_msm_fb_lcd_loadswitch.attr,
++	&dev_attr_msm_fb_panel_addr.attr,
++	&dev_attr_msm_fb_panel_reg.attr,
+ 	&dev_attr_msm_fb_type.attr,
+ 	&dev_attr_msm_fb_split.attr,
+ 	&dev_attr_show_blank_event.attr,
+@@ -983,7 +998,6 @@ static struct attribute *mdss_fb_attrs[] = {
+ 	&dev_attr_msm_fb_dfps_mode.attr,
+ 	&dev_attr_measured_fps.attr,
+ 	&dev_attr_msm_fb_persist_mode.attr,
+-	&dev_attr_msm_fb_boost_mode.attr,
+ 	NULL,
+ };
+ 
+@@ -1879,6 +1893,20 @@ static void mdss_panel_validate_debugfs_info(struct msm_fb_data_type *mfd)
+ 	}
+ }
+ 
++static void mdss_fb_signal_retire_fence(struct msm_fb_data_type *mfd)
++{
++#ifdef TARGET_HW_MDSS_MDP3
++	struct mdp3_session_data *mdp3_session = mfd_to_mdp3_data(mfd);
++	int retire_cnt = mdp3_session->retire_cnt;
++#else
++	struct mdss_overlay_private *mdp5_data = mfd_to_mdp5_data(mfd);
++	int retire_cnt = mdp5_data->retire_cnt;
++#endif
++
++	if (mfd->mdp.signal_retire_fence)
++		mfd->mdp.signal_retire_fence(mfd, retire_cnt);
++}
++
+ static int mdss_fb_blank_blank(struct msm_fb_data_type *mfd,
+ 	int req_power_state)
+ {
+@@ -1926,10 +1954,13 @@ static int mdss_fb_blank_blank(struct msm_fb_data_type *mfd,
+ 	mfd->panel_power_state = req_power_state;
+ 
+ 	ret = mfd->mdp.off_fnc(mfd);
+-	if (ret)
++	if (ret) {
+ 		mfd->panel_power_state = cur_power_state;
+-	else if (!mdss_panel_is_power_on_interactive(req_power_state))
++	} else if (!mdss_panel_is_power_on_interactive(req_power_state)) {
+ 		mdss_fb_release_fences(mfd);
++		if (mfd->panel.type == MIPI_CMD_PANEL)
++			mdss_fb_signal_retire_fence(mfd);
++	}
+ 	mfd->op_enable = true;
+ 	complete(&mfd->power_off_comp);
+ 
+@@ -2078,6 +2109,9 @@ static int mdss_fb_blank_sub(int blank_mode, struct fb_info *info,
+ 
+ 	switch (blank_mode) {
+ 	case FB_BLANK_UNBLANK:
++		if (!lcd_loadswitch_flag)
++			if (gpio_direction_output(75, 1))
++				pr_err("%s:gpio75 set error\n", __func__);
+ 		pr_debug("unblank called. cur pwr state=%d\n", cur_power_state);
+ 		ret = mdss_fb_blank_unblank(mfd);
+ 		break;
+@@ -2095,6 +2129,10 @@ static int mdss_fb_blank_sub(int blank_mode, struct fb_info *info,
+ 		req_power_state = MDSS_PANEL_POWER_LP1;
+ 		pr_debug(" power mode requested\n");
+ 
++		if (!lcd_loadswitch_flag)
++			if (gpio_direction_output(75, 1))
++				pr_err("%s:gpio75 set error\n", __func__);
++
+ 		/*
+ 		 * If low power mode is requested when panel is already off,
+ 		 * then first unblank the panel before entering low power mode
+@@ -2114,6 +2152,9 @@ static int mdss_fb_blank_sub(int blank_mode, struct fb_info *info,
+ 		req_power_state = MDSS_PANEL_POWER_OFF;
+ 		pr_debug("blank powerdown called\n");
+ 		ret = mdss_fb_blank_blank(mfd, req_power_state);
++		if (gpio_direction_output(75, 0)) {
++			pr_err("%s: invalid gpio_direction_output\n", __func__);
++		}
+ 		break;
+ 	}
+ 
+@@ -3114,8 +3155,10 @@ static void mdss_fb_release_fences(struct msm_fb_data_type *mfd)
+ 
+ static void mdss_fb_release_kickoff(struct msm_fb_data_type *mfd)
+ {
+-	atomic_set(&mfd->kickoff_pending, 0);
+-	wake_up_all(&mfd->kickoff_wait_q);
++	if (mfd->wait_for_kickoff) {
++		atomic_set(&mfd->kickoff_pending, 0);
++		wake_up_all(&mfd->kickoff_wait_q);
++	}
+ }
+ 
+ /**
+@@ -3752,9 +3795,8 @@ skip_commit:
+ 	if (IS_ERR_VALUE(ret) || !sync_pt_data->flushed) {
+ 		mdss_fb_release_kickoff(mfd);
+ 		mdss_fb_signal_timeline(sync_pt_data);
+-		if ((mfd->panel.type == MIPI_CMD_PANEL) &&
+-			(mfd->mdp.signal_retire_fence))
+-			mfd->mdp.signal_retire_fence(mfd, 1);
++		if (mfd->panel.type == MIPI_CMD_PANEL)
++			mdss_fb_signal_retire_fence(mfd);
+ 	}
+ 
+ 	if (dynamic_dsi_switch) {
+@@ -5124,6 +5166,26 @@ EXPORT_SYMBOL(mdss_fb_get_phys_info);
+ int __init mdss_fb_init(void)
+ {
+ 	int rc = -ENODEV;
++	long gpio = 75;
++	struct gpio_desc *desc;
++	int status;
++
++	desc = gpio_to_desc(gpio);
++	if (!desc) {
++		pr_warn("%s: invalid gpio_todesc \n", __func__);
++	}
++	status = gpio_request(gpio, "spigpio75");
++	if (status) {
++		pr_warn("%s: invalid gpio_request\n", __func__);
++	}
++	status = gpiod_export(desc, true);
++	if (status) {
++		pr_warn("%s: invalid GPIO %ld\n", __func__, gpio);
++	}
++	status = gpio_direction_output(75, 1);
++	if (status) {
++		pr_warn("%s: invalid gpio_direction_output\n", __func__);
++	}
+ 
+ 	if (fb_get_options("msmfb", NULL))
+ 		return rc;
+diff --git a/drivers/video/msm/mdss/mdss_mdp.c b/drivers/video/msm/mdss/mdss_mdp.c
+index 53d133ce78ca..1e1e5a1c64ef 100644
+--- a/drivers/video/msm/mdss/mdss_mdp.c
++++ b/drivers/video/msm/mdss/mdss_mdp.c
+@@ -782,7 +782,7 @@ void mdss_mdp_irq_clear(struct mdss_data_type *mdata,
+ 
+ int mdss_mdp_irq_enable(u32 intr_type, u32 intf_num)
+ {
+-	int irq_idx, idx;
++	int irq_idx = 0;
+ 	unsigned long irq_flags;
+ 	int ret = 0;
+ 	struct mdss_data_type *mdata = mdss_mdp_get_mdata();
+@@ -801,7 +801,7 @@ int mdss_mdp_irq_enable(u32 intr_type, u32 intf_num)
+ 	spin_lock_irqsave(&mdp_lock, irq_flags);
+ 	if (mdata->mdp_irq_mask[irq.reg_idx] & irq.irq_mask) {
+ 		pr_warn("MDSS MDP IRQ-0x%x is already set, mask=%x\n",
+-				irq.irq_mask, mdata->mdp_irq_mask[idx]);
++				irq.irq_mask, mdata->mdp_irq_mask[irq.reg_idx]);
+ 		ret = -EBUSY;
+ 	} else {
+ 		pr_debug("MDP IRQ mask old=%x new=%x\n",
+diff --git a/drivers/video/msm/mdss/mdss_mdp.h b/drivers/video/msm/mdss/mdss_mdp.h
+index 90d0f7575b55..e12c072e8c3b 100644
+--- a/drivers/video/msm/mdss/mdss_mdp.h
++++ b/drivers/video/msm/mdss/mdss_mdp.h
+@@ -1,5 +1,5 @@
+ /*
+- * Copyright (c) 2012-2017, The Linux Foundation. All rights reserved.
++ * Copyright (c) 2012-2018, The Linux Foundation. All rights reserved.
+  *
+  * This program is free software; you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License version 2 and
+@@ -964,6 +964,7 @@ struct mdss_mdp_writeback_arg {
+ struct mdss_mdp_wfd;
+ 
+ struct mdss_overlay_private {
++	bool vsync_en;
+ 	ktime_t vsync_time;
+ 	ktime_t lineptr_time;
+ 	struct kernfs_node *vsync_event_sd;
+diff --git a/drivers/video/msm/mdss/mdss_mdp_ctl.c b/drivers/video/msm/mdss/mdss_mdp_ctl.c
+index e9f5252d5a81..01d06f278579 100644
+--- a/drivers/video/msm/mdss/mdss_mdp_ctl.c
++++ b/drivers/video/msm/mdss/mdss_mdp_ctl.c
+@@ -76,13 +76,15 @@ static inline u64 fudge_factor(u64 val, u32 numer, u32 denom)
+ 	u64 result = val;
+ 
+ 	if (val) {
+-		u64 temp = -1UL;
++		u64 temp = U64_MAX;
+ 
+ 		do_div(temp, val);
+ 		if (temp > numer) {
+ 			/* no overflow, so we can do the operation*/
+ 			result = (val * (u64)numer);
+ 			do_div(result, denom);
++		} else {
++			pr_warn("Overflow, skip fudge factor\n");
+ 		}
+ 	}
+ 	return result;
+@@ -933,7 +935,7 @@ static u32 mdss_mdp_calc_prefill_line_time(struct mdss_mdp_ctl *ctl,
+ {
+ 	u32 prefill_us = 0;
+ 	u32 prefill_amortized = 0;
+-	struct mdss_data_type *mdata;
++	struct mdss_data_type *mdata = mdss_mdp_get_mdata();
+ 	struct mdss_mdp_mixer *mixer;
+ 	struct mdss_panel_info *pinfo;
+ 	u32 fps, v_total;
+diff --git a/drivers/video/msm/mdss/mdss_mdp_intf_cmd.c b/drivers/video/msm/mdss/mdss_mdp_intf_cmd.c
+index 3188f6a2be9f..b47986d85465 100644
+--- a/drivers/video/msm/mdss/mdss_mdp_intf_cmd.c
++++ b/drivers/video/msm/mdss/mdss_mdp_intf_cmd.c
+@@ -1,4 +1,4 @@
+-/* Copyright (c) 2013-2017, The Linux Foundation. All rights reserved.
++/* Copyright (c) 2013-2018, The Linux Foundation. All rights reserved.
+  *
+  * This program is free software; you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License version 2 and
+@@ -1965,9 +1965,6 @@ static int mdss_mdp_cmd_wait4pingpong(struct mdss_mdp_ctl *ctl, void *arg)
+ 			mdss_fb_report_panel_dead(ctl->mfd);
+ 		} else if (ctx->pp_timeout_report_cnt == 0) {
+ 			MDSS_XLOG(0xbad);
+-			MDSS_XLOG_TOUT_HANDLER("mdp", "dsi0_ctrl", "dsi0_phy",
+-				"dsi1_ctrl", "dsi1_phy", "vbif", "vbif_nrt",
+-				"dbg_bus", "vbif_dbg_bus", "panic");
+ 		} else if (ctx->pp_timeout_report_cnt == MAX_RECOVERY_TRIALS) {
+ 			MDSS_XLOG(0xbad2);
+ 			MDSS_XLOG_TOUT_HANDLER("mdp", "dsi0_ctrl", "dsi0_phy",
+diff --git a/drivers/video/msm/mdss/mdss_mdp_overlay.c b/drivers/video/msm/mdss/mdss_mdp_overlay.c
+index 800f3cd1df79..821521d9da5e 100644
+--- a/drivers/video/msm/mdss/mdss_mdp_overlay.c
++++ b/drivers/video/msm/mdss/mdss_mdp_overlay.c
+@@ -1755,7 +1755,7 @@ end:
+ 
+ int mdss_mode_switch(struct msm_fb_data_type *mfd, u32 mode)
+ {
+-	struct mdss_rect l_roi, r_roi;
++	struct mdss_rect l_roi  = {0}, r_roi = {0};
+ 	struct mdss_mdp_ctl *ctl = mfd_to_ctl(mfd);
+ 	struct mdss_overlay_private *mdp5_data = mfd_to_mdp5_data(mfd);
+ 	struct mdss_mdp_ctl *sctl;
+@@ -3622,12 +3622,14 @@ int mdss_mdp_overlay_vsync_ctrl(struct msm_fb_data_type *mfd, int en)
+ 		goto end;
+ 	}
+ 
++	mdp5_data->vsync_en = en;
++
+ 	if (!ctl->panel_data->panel_info.cont_splash_enabled
+ 		&& (!mdss_mdp_ctl_is_power_on(ctl) ||
+ 		mdss_panel_is_power_on_ulp(ctl->power_state))) {
+ 		pr_debug("fb%d vsync pending first update en=%d, ctl power state:%d\n",
+ 				mfd->index, en, ctl->power_state);
+-		rc = -EPERM;
++		rc = 0;
+ 		goto end;
+ 	}
+ 
+@@ -5947,6 +5949,13 @@ static int mdss_mdp_overlay_on(struct msm_fb_data_type *mfd)
+ 	}
+ 
+ panel_on:
++	if (mdp5_data->vsync_en) {
++		pr_info("reenabling vsync for fb%d\n", mfd->index);
++		mdss_mdp_clk_ctrl(MDP_BLOCK_POWER_ON);
++		rc = ctl->ops.add_vsync_handler(ctl, &ctl->vsync_handler);
++		mdss_mdp_clk_ctrl(MDP_BLOCK_POWER_OFF);
++	}
++
+ 	if (IS_ERR_VALUE(rc)) {
+ 		pr_err("Failed to turn on fb%d\n", mfd->index);
+ 		mdss_mdp_overlay_off(mfd);
+@@ -6722,6 +6731,7 @@ int mdss_mdp_overlay_init(struct msm_fb_data_type *mfd)
+ 		}
+ 	}
+ 	mfd->mdp_sync_pt_data.async_wait_fences = true;
++	mdp5_data->vsync_en = false;
+ 
+ 	pm_runtime_set_suspended(&mfd->pdev->dev);
+ 	pm_runtime_enable(&mfd->pdev->dev);
+-- 
+2.39.0
+
