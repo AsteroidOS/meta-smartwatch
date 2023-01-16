@@ -16,6 +16,7 @@ SRC_URI = " git://android.googlesource.com/kernel/msm;branch=android-msm-firefis
     file://0003-touchscreen-raydium-Add-delay-for-wakeup-report.patch \
     file://0004-Revert-ANDROID-Bluetooth-hidp-buffer-overflow-in-hid.patch \
     file://0005-Backport-mainline-4.1-Bluetooth-subsystem.patch \
+    file://0007-dts-msm8909w-firefish-Enable-more-GPU-clock-frequenc.patch \
 "
 
 SRCREV = "98f3799a0627218e5fe51bf5b0f6f407dcd09d12"
