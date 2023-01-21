@@ -1,0 +1,64 @@
+From d3d0f2384d01ce8a47f68a135360e2ecd2d353a5 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Darrel=20Gri=C3=ABt?= <dgriet@gmail.com>
+Date: Fri, 20 Jan 2023 21:49:46 +0100
+Subject: [PATCH 1/2] Revert "Enable Nitrous BT power management driver for
+ Dory."
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+This reverts commit 9e8428e7643f8e5304baa8d721cec019758c1ca3.
+
+Signed-off-by: Darrel Griët <dgriet@gmail.com>
+---
+ .../dts/apq8026-dory/apq8026-dory-bt.dtsi     | 20 +++++++++++--------
+ drivers/bluetooth/Makefile                    |  2 +-
+ 2 files changed, 13 insertions(+), 9 deletions(-)
+
+diff --git a/arch/arm/boot/dts/apq8026-dory/apq8026-dory-bt.dtsi b/arch/arm/boot/dts/apq8026-dory/apq8026-dory-bt.dtsi
+index 7ffeb842747..5c58995d9a9 100644
+--- a/arch/arm/boot/dts/apq8026-dory/apq8026-dory-bt.dtsi
++++ b/arch/arm/boot/dts/apq8026-dory/apq8026-dory-bt.dtsi
+@@ -43,17 +43,21 @@
+ 		qcom,msm-obs;
+ 	};
+ 
+-	bt_nitrous {
+-		compatible = "goog,nitrous";
+-		uart-port = <99>;
+-		power-gpio = <&msmgpio 45 0>;
+-		reset-gpio = <&msmgpio 20 0>;
++	bt_rfkill {
++		compatible = "lge,bluetooth_rfkill";
++		gpio-bt-reset = <&msmgpio 20 0>;
++		gpio-bt-on = <&msmgpio 45 0>;
++	};
++
++
++	/* To register BT wake-up devices for BT sleep */
++	bt_sleep {
++		compatible = "lge,bcm_bluesleep";
+ 		host-wake-gpio = <&msmgpio 48 0>;
+-		host-wake-polarity = <0>;
+-		dev-wake-gpio = <&msmgpio 47 0>;
+-		dev-wake-polarity = <0>;
++		ext-wake-gpio = <&msmgpio 47 0>;
+ 		interrupt-parent = <&msmgpio>;
+ 		interrupts = <48 0>;
+ 		interrupt-names = "host_wake";
++		tx-timer-interval = <1>;
+ 	};
+ };
+diff --git a/drivers/bluetooth/Makefile b/drivers/bluetooth/Makefile
+index 6aa29032aa7..310da841a24 100644
+--- a/drivers/bluetooth/Makefile
++++ b/drivers/bluetooth/Makefile
+@@ -31,4 +31,4 @@ hci_uart-$(CONFIG_BT_HCIUART_LL)	+= hci_ll.o
+ hci_uart-$(CONFIG_BT_HCIUART_ATH3K)	+= hci_ath.o
+ hci_uart-$(CONFIG_BT_HCIUART_3WIRE)	+= hci_h5.o
+ hci_uart-objs				:= $(hci_uart-y)
+-obj-$(CONFIG_MSM_BT_SLEEP)		+= nitrous.o
++obj-$(CONFIG_MSM_BT_SLEEP)		+= bluesleep.o
+-- 
+2.39.1
+
