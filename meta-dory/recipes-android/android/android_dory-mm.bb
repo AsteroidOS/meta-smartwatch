@@ -2,10 +2,14 @@ inherit gettext
 
 SUMMARY = "Downloads the LG G Watch /system and /usr/include/android folders and installs them for libhybris"
 LICENSE = "CLOSED"
-SRC_URI = "https://dl.dropboxusercontent.com/s/cqvt6d3hkd651ku/system-dory.tar.gz"
-SRC_URI[md5sum] = "05b1545b6d4013af5e035f6d0a663873"
-SRC_URI[sha256sum] = "1b8a03a234ad0c3c84c399759b913435f27352a26b62474a4fe64c8e7fe19e65"
-PV = "lollipop"
+SRC_URI = "https://dl.dropboxusercontent.com/s/j3lbzk349k2qtn6/hybris-m-msm8226.tar.gz;name=hybris \
+    https://dl.dropboxusercontent.com/s/pny53u172fyheh4/system-dory-m.tar.gz;name=system \
+"
+SRC_URI[hybris.md5sum] = "e211970b9d541844916dc2e8a70cca2e"
+SRC_URI[hybris.sha256sum] = "baf4b938ab554b0e9941c8f011b2c87a47a9fb0fda64de556ca336479f50fc9f"
+SRC_URI[system.md5sum] = "5069fb9da1f987c113ea626d45e294eb"
+SRC_URI[system.sha256sum] = "b9b5759af1c9bd73fddddaa61f2339a08796a06fa343d2d2ffde7234af83b8fc"
+PV = "marshmallow"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 INHIBIT_PACKAGE_STRIP = "1"
@@ -20,6 +24,9 @@ PROVIDES += "virtual/android-headers"
 do_install() {
     install -d ${D}/system/
     cp -r system/* ${D}/system/
+
+    install -d ${D}/usr/
+    cp -r usr/* ${D}/usr/
 
     install -d ${D}${includedir}/android
     cp -r include/* ${D}${includedir}/android/
@@ -36,5 +43,6 @@ do_package_qa() {
 }
 
 PACKAGES =+ "android-system android-headers"
-FILES:android-system = "/system /vendor"
+FILES:android-system = "/system /vendor /usr"
 FILES:android-headers = "${libdir}/pkgconfig ${includedir}/android"
+EXCLUDE_FROM_SHLIBS = "1"
