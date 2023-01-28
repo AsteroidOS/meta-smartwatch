@@ -37,7 +37,7 @@ FILES=$(find meta-$DST/ -name "*$SRC*")
 
 for f in $FILES
 do
-    echo mv "$f" "${f/$SRC/$DST}"
+    mv "$f" "${f/$SRC/$DST}"
 done
 
 find meta-$DST/ -type f -exec sed -i "s/"$SRC"/$DST/g" {} \;
