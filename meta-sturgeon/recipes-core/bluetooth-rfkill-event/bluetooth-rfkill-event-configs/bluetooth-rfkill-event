@@ -1,0 +1,1 @@
+OPTIONS="-r brcm_Bluetooth_rfkill -c /usr/share/bluetooth-rfkill-event/bcm4343.conf"
