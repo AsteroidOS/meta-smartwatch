@@ -1,0 +1,1 @@
+FILESEXTRAPATHS:prepend:triggerfish := "${THISDIR}/asteroid-launcher-configs:"
