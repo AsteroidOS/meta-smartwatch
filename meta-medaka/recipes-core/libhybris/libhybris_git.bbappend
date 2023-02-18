@@ -1,1 +1,3 @@
-SRCREV:medaka = "8883e9aca7de870a4a93b31e82cfc600c51cef5d"
+SRCREV:medaka = "a53eb0e292dd9528cf3825fec1d6ddb2cd4a8461"
+
+EXTRA_OECONF:medaka = "--enable-arch=arm64"
