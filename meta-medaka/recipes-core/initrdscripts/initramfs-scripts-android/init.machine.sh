@@ -4,7 +4,7 @@ BOOT_DIR=$1
 
 # Manually mount the system partition as it contains the boot image (ramdisk) as well as the system data (under /system/system).
 mkdir -m 0777 $BOOT_DIR/boot
-mount -t auto -o ro /dev/mmcblk0p36 $BOOT_DIR/boot
+mount -t auto -o ro /dev/mmcblk0p2 $BOOT_DIR/boot
 
 # Allow Android binaries to load libraries from /usr/libexec/ (for example /usr/libexec/hal-droid/system/lib/libselinux_stubs.so)
 mount --bind /ld.config.28.txt $BOOT_DIR/boot/system/etc/ld.config.28.txt
@@ -23,8 +23,8 @@ if [ ! -e $BOOT_DIR/etc/asteroid/machine.conf ] ; then
     # Correct properties as /system/ may not exist.
     serial="$(cat /proc/cmdline | sed 's/.*androidboot.serialno=//' | sed 's/ .*//')"
     echo $serial > /sys/kernel/config/usb_gadget/g1/strings/0x409/serialnumber
-    echo OPPO > /sys/kernel/config/usb_gadget/g1/strings/0x409/manufacturer
-    echo OPPO Watch > /sys/kernel/config/usb_gadget/g1/strings/0x409/product
+    echo CASIO > /sys/kernel/config/usb_gadget/g1/strings/0x409/manufacturer
+    echo WSD-F21hr > /sys/kernel/config/usb_gadget/g1/strings/0x409/product
 
     /usr/bin/adbd
 fi
