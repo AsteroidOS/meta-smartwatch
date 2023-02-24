@@ -5,16 +5,7 @@ on init
     symlink /dev/fb0 /dev/graphics/fb0
     setprop sys.hwc.gpu_perf_mode 1
 
-    write /sys/class/leds/vibrator/trigger "transient"
-    chown system root /sys/class/leds/vibrator/trigger
-    chown system root /sys/class/leds/vibrator/activate
-    chown system root /sys/class/leds/vibrator/brightness
-    chown system root /sys/class/leds/vibrator/duration
-    chown system root /sys/class/leds/vibrator/state
-    chown system root /sys/class/timed_output/vibrator/enable
-
     load_system_props
-    restorecon_recursive /persist
 
     # Needed to allow the launcher to talk to the hwbinder.
     chown system root /dev/hwbinder
@@ -23,7 +14,15 @@ on init
     chmod 777 /dev/hwbinder
     chmod 777 /dev/vndbinder
 
+    chown system root /dev/MultiSensors_CD_01
+    chmod 777 /dev/MultiSensors_CD_01
+
     mkdir /data/
 
     class_start core
     class_start hal
+
+service vendor.sensors-hal-1-0 /vendor/bin/hw/android.hardware.sensors@1.0-service
+    class hal
+    oneshot
+
