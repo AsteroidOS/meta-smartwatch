@@ -22,7 +22,11 @@ on init
     class_start core
     class_start hal
 
-service vendor.sensors-hal-1-0 /vendor/bin/hw/android.hardware.sensors@1.0-service
+service vendor.bluetooth-1-0 /vendor/bin/hw/android.hardware.bluetooth@1.0-service
+    class hal
+    oneshot
+
+service vendor.sensors-1-0 /vendor/bin/hw/android.hardware.sensors@1.0-service
     class hal
     oneshot
 
