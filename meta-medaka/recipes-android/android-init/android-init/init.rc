@@ -14,6 +14,9 @@ on init
     chmod 777 /dev/hwbinder
     chmod 777 /dev/vndbinder
 
+    chown system root /sys/class/timed_output/vibrator/enable
+    chmod 777 /sys/class/timed_output/vibrator/enable
+
     chown system root /dev/MultiSensors_CD_01
     chmod 777 /dev/MultiSensors_CD_01
 
@@ -22,11 +25,11 @@ on init
     class_start core
     class_start hal
 
-service vendor.bluetooth-1-0 /vendor/bin/hw/android.hardware.bluetooth@1.0-service
+service vendor.sensors-hal-1-0 /vendor/bin/hw/android.hardware.bluetooth@1.0-service
     class hal
     oneshot
 
-service vendor.sensors-1-0 /vendor/bin/hw/android.hardware.sensors@1.0-service
+service vendor.bluetooth-1-0 /vendor/bin/hw/android.hardware.sensors@1.0-service
     class hal
     oneshot
 
