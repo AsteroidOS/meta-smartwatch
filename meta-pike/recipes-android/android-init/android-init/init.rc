@@ -2,6 +2,9 @@ on init
     load_system_props
     setprop ro.board.platform mt2601
     chown system root /sys/class/timed_output/vibrator/enable
+    mkdir /data/ 0770 root root
+    mkdir /data/gps_mnl/ 0770 root root
+
     class_start core
 
 service logd /usr/libexec/hal-droid/system/bin/logd
@@ -26,5 +29,9 @@ service wmtLoader /vendor/bin/wmt_loader
     oneshot
 
 service nvram_daemon /vendor/bin/nvram_daemon
+    class core
+    oneshot
+
+service mnld /vendor/bin/mnld
     class core
     oneshot
