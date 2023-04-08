@@ -1,0 +1,22 @@
+From fcc2c46f6cc8d4fdbce6895b72ff8dc86d6b0b66 Mon Sep 17 00:00:00 2001
+From: MagneFire <dgriet@gmail.com>
+Date: Thu, 10 Feb 2022 21:15:00 +0100
+Subject: [PATCH] gpu: Compilation fix.
+
+---
+ drivers/gpu/msm/Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/gpu/msm/Makefile b/drivers/gpu/msm/Makefile
+index 005822672101..0e48fcf040bb 100644
+--- a/drivers/gpu/msm/Makefile
++++ b/drivers/gpu/msm/Makefile
+@@ -1,4 +1,4 @@
+-ccflags-y := -Iinclude/linux
++ccflags-y := -Iinclude/linux -Iinclude/uapi/drm -Iinclude/drm -Idrivers/gpu/msm
+ 
+ msm_kgsl_core-y = \
+ 	kgsl.o \
+-- 
+2.35.1
+

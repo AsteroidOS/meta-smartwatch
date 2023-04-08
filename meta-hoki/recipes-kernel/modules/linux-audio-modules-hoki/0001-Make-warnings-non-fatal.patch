@@ -1,0 +1,171 @@
+From 64fc7c9df40fc17c27f8041b8cb81488af886738 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Darrel=20Gri=C3=ABt?= <dgriet@gmail.com>
+Date: Thu, 29 Dec 2022 13:01:53 +0100
+Subject: [PATCH] Make warnings non-fatal.
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: Darrel Griët <dgriet@gmail.com>
+---
+ asoc/Kbuild                   | 1 -
+ asoc/codecs/Kbuild            | 1 -
+ asoc/codecs/msm_bg/Kbuild     | 1 -
+ asoc/codecs/msm_sdw/Kbuild    | 1 -
+ asoc/codecs/sdm660_cdc/Kbuild | 1 -
+ asoc/codecs/tfa98xx/Kbuild    | 1 -
+ asoc/codecs/tfa98xx/Makefile  | 1 -
+ asoc/codecs/wcd934x/Kbuild    | 1 -
+ dsp/Kbuild                    | 1 -
+ dsp/codecs/Kbuild             | 1 -
+ ipc/Kbuild                    | 1 -
+ soc/Kbuild                    | 1 -
+ 12 files changed, 12 deletions(-)
+
+diff --git a/asoc/Kbuild b/asoc/Kbuild
+index 6f3f38b..aff792a 100755
+--- a/asoc/Kbuild
++++ b/asoc/Kbuild
+@@ -187,7 +187,6 @@ CDEFINES +=	-DANI_LITTLE_BYTE_ENDIAN \
+ 		-DANI_OS_TYPE_ANDROID=6 \
+ 		-DPTT_SOCK_SVC_ENABLE \
+ 		-Wall\
+-		-Werror\
+ 		-D__linux__
+ 
+ KBUILD_CPPFLAGS += $(CDEFINES)
+diff --git a/asoc/codecs/Kbuild b/asoc/codecs/Kbuild
+index 6b533db..0dc86b8 100755
+--- a/asoc/codecs/Kbuild
++++ b/asoc/codecs/Kbuild
+@@ -164,7 +164,6 @@ CDEFINES +=	-DANI_LITTLE_BYTE_ENDIAN \
+ 		-DANI_OS_TYPE_ANDROID=6 \
+ 		-DPTT_SOCK_SVC_ENABLE \
+ 		-Wall\
+-		-Werror\
+ 		-D__linux__
+ 
+ KBUILD_CPPFLAGS += $(CDEFINES)
+diff --git a/asoc/codecs/msm_bg/Kbuild b/asoc/codecs/msm_bg/Kbuild
+index da5736e..9ee9d70 100755
+--- a/asoc/codecs/msm_bg/Kbuild
++++ b/asoc/codecs/msm_bg/Kbuild
+@@ -64,7 +64,6 @@ CDEFINES +=	-DANI_LITTLE_BYTE_ENDIAN \
+ 		-DANI_OS_TYPE_ANDROID=6 \
+ 		-DPTT_SOCK_SVC_ENABLE \
+ 		-Wall\
+-		-Werror\
+ 		-D__linux__
+ 
+ KBUILD_CPPFLAGS += $(CDEFINES)
+diff --git a/asoc/codecs/msm_sdw/Kbuild b/asoc/codecs/msm_sdw/Kbuild
+index d083f05..f2ab63c 100755
+--- a/asoc/codecs/msm_sdw/Kbuild
++++ b/asoc/codecs/msm_sdw/Kbuild
+@@ -91,7 +91,6 @@ CDEFINES +=	-DANI_LITTLE_BYTE_ENDIAN \
+ 		-DANI_OS_TYPE_ANDROID=6 \
+ 		-DPTT_SOCK_SVC_ENABLE \
+ 		-Wall\
+-		-Werror\
+ 		-D__linux__
+ 
+ KBUILD_CPPFLAGS += $(CDEFINES)
+diff --git a/asoc/codecs/sdm660_cdc/Kbuild b/asoc/codecs/sdm660_cdc/Kbuild
+index 85b9a62..211b803 100755
+--- a/asoc/codecs/sdm660_cdc/Kbuild
++++ b/asoc/codecs/sdm660_cdc/Kbuild
+@@ -103,7 +103,6 @@ CDEFINES +=	-DANI_LITTLE_BYTE_ENDIAN \
+ 		-DANI_OS_TYPE_ANDROID=6 \
+ 		-DPTT_SOCK_SVC_ENABLE \
+ 		-Wall\
+-		-Werror\
+ 		-D__linux__
+ 
+ KBUILD_CPPFLAGS += $(CDEFINES)
+diff --git a/asoc/codecs/tfa98xx/Kbuild b/asoc/codecs/tfa98xx/Kbuild
+index bf3a2b8..3860c27 100755
+--- a/asoc/codecs/tfa98xx/Kbuild
++++ b/asoc/codecs/tfa98xx/Kbuild
+@@ -95,7 +95,6 @@ CDEFINES +=	-DANI_LITTLE_BYTE_ENDIAN \
+ 		-DANI_OS_TYPE_ANDROID=6 \
+ 		-DPTT_SOCK_SVC_ENABLE \
+ 		-Wall\
+-		-Werror\
+ 		-D__linux__
+ 
+ KBUILD_CPPFLAGS += $(CDEFINES)
+diff --git a/asoc/codecs/tfa98xx/Makefile b/asoc/codecs/tfa98xx/Makefile
+index 605f444..2c810e3 100755
+--- a/asoc/codecs/tfa98xx/Makefile
++++ b/asoc/codecs/tfa98xx/Makefile
+@@ -15,7 +15,6 @@
+ EXTRA_CFLAGS += -DTFA98XX_GIT_VERSIONS=\"v6.6.2\"
+ 
+ EXTRA_CFLAGS += -I$(src)/inc
+-EXTRA_CFLAGS += -Werror
+ 
+ obj-y := snd-soc-tfa98xx.o
+ 
+diff --git a/asoc/codecs/wcd934x/Kbuild b/asoc/codecs/wcd934x/Kbuild
+index 25785d7..15c7406 100644
+--- a/asoc/codecs/wcd934x/Kbuild
++++ b/asoc/codecs/wcd934x/Kbuild
+@@ -77,7 +77,6 @@ CDEFINES +=	-DANI_LITTLE_BYTE_ENDIAN \
+ 		-DANI_OS_TYPE_ANDROID=6 \
+ 		-DPTT_SOCK_SVC_ENABLE \
+ 		-Wall\
+-		-Werror\
+ 		-D__linux__
+ 
+ KBUILD_CPPFLAGS += $(CDEFINES)
+diff --git a/dsp/Kbuild b/dsp/Kbuild
+index dcfead3..aab84ef 100755
+--- a/dsp/Kbuild
++++ b/dsp/Kbuild
+@@ -126,7 +126,6 @@ CDEFINES +=	-DANI_LITTLE_BYTE_ENDIAN \
+ 		-DANI_OS_TYPE_ANDROID=6 \
+ 		-DPTT_SOCK_SVC_ENABLE \
+ 		-Wall\
+-		-Werror\
+ 		-D__linux__
+ 
+ KBUILD_CPPFLAGS += $(CDEFINES)
+diff --git a/dsp/codecs/Kbuild b/dsp/codecs/Kbuild
+index 21368e0..a156062 100755
+--- a/dsp/codecs/Kbuild
++++ b/dsp/codecs/Kbuild
+@@ -117,7 +117,6 @@ CDEFINES +=	-DANI_LITTLE_BYTE_ENDIAN \
+ 		-DANI_OS_TYPE_ANDROID=6 \
+ 		-DPTT_SOCK_SVC_ENABLE \
+ 		-Wall\
+-		-Werror\
+ 		-D__linux__
+ 
+ KBUILD_CPPFLAGS += $(CDEFINES)
+diff --git a/ipc/Kbuild b/ipc/Kbuild
+index 82e68db..b4a0f98 100755
+--- a/ipc/Kbuild
++++ b/ipc/Kbuild
+@@ -146,7 +146,6 @@ CDEFINES +=	-DANI_LITTLE_BYTE_ENDIAN \
+ 		-DANI_OS_TYPE_ANDROID=6 \
+ 		-DPTT_SOCK_SVC_ENABLE \
+ 		-Wall\
+-		-Werror\
+ 		-D__linux__
+ 
+ KBUILD_CPPFLAGS += $(CDEFINES)
+diff --git a/soc/Kbuild b/soc/Kbuild
+index 3cdd7ce..b5d62ba 100755
+--- a/soc/Kbuild
++++ b/soc/Kbuild
+@@ -107,7 +107,6 @@ CDEFINES +=	-DANI_LITTLE_BYTE_ENDIAN \
+ 		-DANI_OS_TYPE_ANDROID=6 \
+ 		-DPTT_SOCK_SVC_ENABLE \
+ 		-Wall\
+-		-Werror\
+ 		-D__linux__
+ 
+ KBUILD_CPPFLAGS += $(CDEFINES)
+-- 
+2.39.0
+

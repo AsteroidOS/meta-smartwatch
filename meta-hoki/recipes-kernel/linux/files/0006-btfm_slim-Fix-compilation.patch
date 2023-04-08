@@ -1,0 +1,75 @@
+From 11eaa1916495485b855daad0e08c3c9facd163b7 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Darrel=20Gri=C3=ABt?= <dgriet@gmail.com>
+Date: Thu, 10 Feb 2022 20:40:59 +0100
+Subject: [PATCH] btfm_slim: Fix compilation.
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: Darrel Griët <dgriet@gmail.com>
+---
+ drivers/bluetooth/btfm_slim.c         | 4 ++--
+ drivers/bluetooth/btfm_slim_codec.c   | 2 +-
+ drivers/bluetooth/btfm_slim_wcn3990.c | 4 ++--
+ drivers/bluetooth/btfm_slim_wcn3990.h | 2 +-
+ 4 files changed, 6 insertions(+), 6 deletions(-)
+
+diff --git a/drivers/bluetooth/btfm_slim.c b/drivers/bluetooth/btfm_slim.c
+index 92ea0135d363..baab63ae4be4 100644
+--- a/drivers/bluetooth/btfm_slim.c
++++ b/drivers/bluetooth/btfm_slim.c
+@@ -23,8 +23,8 @@
+ #include <sound/soc.h>
+ #include <sound/soc-dapm.h>
+ #include <sound/tlv.h>
+-#include <btfm_slim.h>
+-#include <btfm_slim_wcn3990.h>
++#include "btfm_slim.h"
++#include "btfm_slim_wcn3990.h"
+ #include <linux/bluetooth-power.h>
+ 
+ int btfm_slim_write(struct btfmslim *btfmslim,
+diff --git a/drivers/bluetooth/btfm_slim_codec.c b/drivers/bluetooth/btfm_slim_codec.c
+index 4c6986a536eb..35c1c74fb84a 100644
+--- a/drivers/bluetooth/btfm_slim_codec.c
++++ b/drivers/bluetooth/btfm_slim_codec.c
+@@ -24,7 +24,7 @@
+ #include <sound/soc.h>
+ #include <sound/soc-dapm.h>
+ #include <sound/tlv.h>
+-#include <btfm_slim.h>
++#include "btfm_slim.h"
+ 
+ static int bt_soc_enable_status;
+ int btfm_feedback_ch_setting;
+diff --git a/drivers/bluetooth/btfm_slim_wcn3990.c b/drivers/bluetooth/btfm_slim_wcn3990.c
+index 661518935086..511c0b64385b 100644
+--- a/drivers/bluetooth/btfm_slim_wcn3990.c
++++ b/drivers/bluetooth/btfm_slim_wcn3990.c
+@@ -10,8 +10,8 @@
+  * GNU General Public License for more details.
+  */
+ #include <linux/slimbus/slimbus.h>
+-#include <btfm_slim.h>
+-#include <btfm_slim_wcn3990.h>
++#include "btfm_slim.h"
++#include "btfm_slim_wcn3990.h"
+ 
+ /* WCN3990 Port assignment */
+ struct btfmslim_ch wcn3990_rxport[] = {
+diff --git a/drivers/bluetooth/btfm_slim_wcn3990.h b/drivers/bluetooth/btfm_slim_wcn3990.h
+index b2723ff96103..f26600714e1e 100644
+--- a/drivers/bluetooth/btfm_slim_wcn3990.h
++++ b/drivers/bluetooth/btfm_slim_wcn3990.h
+@@ -12,7 +12,7 @@
+ #ifndef BTFM_SLIM_WCN3990_H
+ #define BTFM_SLIM_WCN3990_H
+ //#ifdef CONFIG_BTFM_SLIM_WCN3990
+-#include <btfm_slim.h>
++#include "btfm_slim.h"
+ 
+ /* Registers Address */
+ #define CHRK_SB_COMP_TEST			0x00000000
+-- 
+2.35.1
+

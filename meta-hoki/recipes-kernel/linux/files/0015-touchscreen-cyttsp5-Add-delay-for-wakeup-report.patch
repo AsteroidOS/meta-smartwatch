@@ -1,0 +1,48 @@
+From 6dae7f224e43cb3e7ab920346010759c76b3d71a Mon Sep 17 00:00:00 2001
+From: MagneFire <dgriet@gmail.com>
+Date: Sat, 23 Apr 2022 18:50:48 +0200
+Subject: [PATCH] touchscreen: cyttsp5: Add delay for wakeup report. AsteroidOS
+ requires the user to keep pressing the screen for ~200ms to wake the screen.
+ However, the method used here simply sends a quick event, which doesn't work
+ in our implementation. To solve this we simply need to make sure the the
+ finger is held down for atleast 200ms, this is done by emulating a 300ms
+ touch.
+
+---
+ .../input/touchscreen/cyttsp5/cyttsp5_mt_common.c   | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)
+
+diff --git a/drivers/input/touchscreen/cyttsp5/cyttsp5_mt_common.c b/drivers/input/touchscreen/cyttsp5/cyttsp5_mt_common.c
+index 2d156a015436..365c41b8bdf7 100755
+--- a/drivers/input/touchscreen/cyttsp5/cyttsp5_mt_common.c
++++ b/drivers/input/touchscreen/cyttsp5/cyttsp5_mt_common.c
+@@ -27,6 +27,7 @@
+  */
+ 
+ #include "cyttsp5_regs.h"
++#include <linux/input/mt.h>
+ 
+ #define CYTTSP5_MT_NAME "cyttsp5_mt"
+ 
+@@ -438,6 +439,18 @@ static int cyttsp5_mt_wake_attention(struct device *dev)
+ 
+ 	mutex_lock(&md->mt_lock);
+ #ifdef CONFIG_OPPO
++	input_mt_report_slot_state(md->input, MT_TOOL_FINGER, 1);
++	input_report_key(md->input, BTN_TOUCH, CY_BTN_PRESSED);
++	input_report_key(md->input, BTN_TOOL_FINGER, CY_BTN_PRESSED);
++	input_report_key(md->input, BTN_TOOL_PEN, CY_BTN_RELEASED);
++	input_report_abs(md->input, ABS_MT_POSITION_X, 100);
++	input_report_abs(md->input, ABS_MT_POSITION_Y, 100);
++	input_sync(md->input);
++	msleep(300);
++	input_report_key(md->input, BTN_TOUCH, CY_BTN_RELEASED);
++	input_report_key(md->input, BTN_TOOL_FINGER, CY_BTN_RELEASED);
++	input_report_key(md->input, BTN_TOOL_PEN, CY_BTN_RELEASED);
++	input_sync(md->input);
+ 	input_report_key(md->input, KEY_WAKEUP, 1);
+ 	input_report_key(md->input, KEY_WAKEUP, 0);
+ 	input_sync(md->input);
+-- 
+2.35.1
+

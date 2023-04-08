@@ -1,0 +1,18 @@
+#!/bin/sh
+
+# Disable three cores
+echo 0        > /sys/module/lpm_levels/parameters/sleep_disabled
+echo 0        > /sys/devices/system/cpu/cpu1/online
+echo 0        > /sys/devices/system/cpu/cpu2/online
+echo 0        > /sys/devices/system/cpu/cpu3/online
+
+# Allow the GPU to switch frequencies.
+echo 307200000   > /sys/class/kgsl/kgsl-3d0/devfreq/max_freq
+echo 19200000    > /sys/class/kgsl/kgsl-3d0/devfreq/min_freq
+echo msm-adreno-tz > /sys/class/kgsl/kgsl-3d0/devfreq/governor
+
+# CPU IDLE Low Power Mode config
+echo 1 > /sys/module/lpm_levels/system/cpu0/pc/suspend_enabled
+echo 1 > /sys/module/lpm_levels/system/cpu0/standalone_pc/suspend_enabled
+echo 1 > /sys/module/lpm_levels/system/cpu0/standalone_pc/idle_enabled
+echo 1 > /sys/module/lpm_levels/system/cpu0/pc/idle_enabled

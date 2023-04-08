@@ -1,0 +1,34 @@
+From a1374782768a629a250db451aad6ae87f16791b1 Mon Sep 17 00:00:00 2001
+From: MagneFire <dgriet@gmail.com>
+Date: Sat, 12 Feb 2022 22:21:30 +0100
+Subject: [PATCH] oppo: Fix compilation.
+
+Signed-off-by: MagneFire <dgriet@gmail.com>
+---
+ drivers/oppo/Makefile         | 1 +
+ drivers/oppo/dap_swd/Makefile | 1 +
+ 2 files changed, 2 insertions(+)
+
+diff --git a/drivers/oppo/Makefile b/drivers/oppo/Makefile
+index e3290e98e6f4..137a136ce9de 100755
+--- a/drivers/oppo/Makefile
++++ b/drivers/oppo/Makefile
+@@ -1,6 +1,7 @@
+ #
+ # Makefile for oppo's custom devices
+ #
++ccflags-y	+= -Idrivers/oppo/
+ 
+ obj-$(CONFIG_OPPO) += oppo.o
+ obj-$(CONFIG_OPPO_COMMON_SOFT)	+= oppo_project.o
+diff --git a/drivers/oppo/dap_swd/Makefile b/drivers/oppo/dap_swd/Makefile
+index 6db5d8fe8678..e19adce364f4 100755
+--- a/drivers/oppo/dap_swd/Makefile
++++ b/drivers/oppo/dap_swd/Makefile
+@@ -1,2 +1,3 @@
++ccflags-y	+= -Idrivers/oppo/dap_swd/
+ 
+ obj-y +=   dap_swd.o
+-- 
+2.35.1
+

@@ -1,0 +1,65 @@
+From 8126f561293f17b5590e4f535079aae64e72c8c6 Mon Sep 17 00:00:00 2001
+From: MagneFire <dgriet@gmail.com>
+Date: Thu, 10 Feb 2022 21:20:00 +0100
+Subject: [PATCH] vl53l0x: Fix compilation.
+
+---
+ drivers/input/misc/vl53l0x/inc/vl53l0x_platform.h     | 6 +++---
+ drivers/input/misc/vl53l0x/src/vl53l0x_i2c_platform.c | 4 ++--
+ drivers/input/misc/vl53l0x/src/vl53l0x_port_i2c.c     | 6 +++---
+ 3 files changed, 8 insertions(+), 8 deletions(-)
+
+diff --git a/drivers/input/misc/vl53l0x/inc/vl53l0x_platform.h b/drivers/input/misc/vl53l0x/inc/vl53l0x_platform.h
+index d896fe800f8b..11b274007aff 100644
+--- a/drivers/input/misc/vl53l0x/inc/vl53l0x_platform.h
++++ b/drivers/input/misc/vl53l0x/inc/vl53l0x_platform.h
+@@ -23,9 +23,9 @@
+ #include "vl53l0x_def.h"
+ #include "vl53l0x_platform_log.h"
+ 
+-#include "stmvl53l0x-i2c.h"
+-#include "stmvl53l0x-cci.h"
+-#include "stmvl53l0x.h"
++#include "../stmvl53l0x-i2c.h"
++#include "../stmvl53l0x-cci.h"
++#include "../stmvl53l0x.h"
+ 
+ /**
+  * @file vl53l0x_platform.h
+diff --git a/drivers/input/misc/vl53l0x/src/vl53l0x_i2c_platform.c b/drivers/input/misc/vl53l0x/src/vl53l0x_i2c_platform.c
+index edc4b5c8c3ef..3aca4e08507c 100644
+--- a/drivers/input/misc/vl53l0x/src/vl53l0x_i2c_platform.c
++++ b/drivers/input/misc/vl53l0x/src/vl53l0x_i2c_platform.c
+@@ -26,8 +26,8 @@
+ #include <linux/i2c.h>
+ #include <linux/module.h>
+ #include <linux/delay.h>
+-#include "stmvl53l0x-i2c.h"
+-#include "stmvl53l0x-cci.h"
++#include "../stmvl53l0x-i2c.h"
++#include "../stmvl53l0x-cci.h"
+ 
+ #include "vl53l0x_platform.h"
+ #include "vl53l0x_i2c_platform.h"
+diff --git a/drivers/input/misc/vl53l0x/src/vl53l0x_port_i2c.c b/drivers/input/misc/vl53l0x/src/vl53l0x_port_i2c.c
+index 9e14f7915b16..c8938aeb300f 100644
+--- a/drivers/input/misc/vl53l0x/src/vl53l0x_port_i2c.c
++++ b/drivers/input/misc/vl53l0x/src/vl53l0x_port_i2c.c
+@@ -18,11 +18,11 @@
+ 
+ #include <linux/i2c.h>
+ #include <linux/module.h>
+-#include "stmvl53l0x-i2c.h"
+-#include "stmvl53l0x-cci.h"
++#include "../stmvl53l0x-i2c.h"
++#include "../stmvl53l0x-cci.h"
+ #include "vl53l0x_platform.h"
+ #include "vl53l0x_i2c_platform.h"
+-#include "stmvl53l0x.h"
++#include "../stmvl53l0x.h"
+ 
+ #define I2C_M_WR			0x00
+ #define STATUS_OK			0x00
+-- 
+2.35.1
+
