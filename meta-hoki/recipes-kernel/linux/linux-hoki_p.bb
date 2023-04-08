@@ -15,6 +15,7 @@ SRC_URI = " git://github.com/fossil-engineering/kernel-msm-fossil-cw;branch=foss
     file://0002-mmc-Fix-embedded_sdio_data-duplicate-definition.patch \
     file://0003-video-fbdev-msm-Provide-mdss_dsi_switch_page.patch \
     file://0004-usb-hcd-Handle-when-host-mode-isn-t-available.patch \
+    file://0005-initramfs-Don-t-skip-initramfs.patch \
 " 
 
 SRCREV = "c0b4c201f2d5a641defe19958a9b4c16f40d866b"

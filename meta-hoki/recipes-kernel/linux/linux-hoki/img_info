@@ -3,10 +3,10 @@ ramdisk=%%RAMDISK%%
 page_size=2048
 kernel_size=14309960
 ramdisk_size=699687
-base_addr=0x00000000
+base_addr=0x80000000
 kernel_offset=0x00008000
 ramdisk_offset=0x02000000
 tags_offset=0x01e00000
-cmd_line='androidboot.hardware=hoki console=ttyHSL0,115200,n8 androidboot.selinux=permissive androidboot.console=ttyHSL0 msm_rtb.filter=0x237 ehci-hcd.park=3 lpm_levels.sleep_disabled=1 earlycon=msm_hsl_uart,0x78af000 buildvariant=user audit=0'
+cmd_line='console=ttyMSM0,115200,n8 androidboot.console=ttyMSM0 androidboot.hardware=hoki user_debug=30 msm_rtb.filter=0x237 ehci-hcd.park=3 androidboot.bootdevice=7824900.sdhci lpm_levels.sleep_disabled=1 earlycon=msm_serial_dm,0x78b0000 vmalloc=300M androidboot.usbconfigfs=true loop.max_part=7 androidboot.memcg=true cgroup.memory=nokmem,nosocket buildvariant=user audit=0'
 board="hoki"
 format=gzip
