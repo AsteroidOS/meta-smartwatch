@@ -5,3 +5,4 @@ tmpfs                /run                 tmpfs      mode=0755,nodev,nosuid,stri
 tmpfs                /var/volatile        tmpfs      defaults              0  0
 /dev/mmcblk0p34      /persist             auto       defaults              0  0
 /dev/mmcblk0p2       /vendor/bt_firmware  auto       ro,shortname=lower    0  0
+/dev/mmcblk0p1       /vendor/firmware_mnt auto       ro,shortname=lower    0  0
