@@ -1,4 +1,10 @@
 on init
+    write /sys/bus/msm_subsys/devices/subsys0/restart_level "RELATED"
+    write /sys/bus/msm_subsys/devices/subsys1/restart_level "RELATED"
+    write /sys/bus/msm_subsys/devices/subsys2/restart_level "RELATED"
+    write /sys/bus/msm_subsys/devices/subsys3/restart_level "RELATED"
+    write /sys/bus/msm_subsys/devices/subsys4/restart_level "RELATED"
+
     # Required to fix some symbolic links in wcnss firmware files.
     mkdir /mnt/vendor/
     symlink /persist /mnt/vendor/persist
