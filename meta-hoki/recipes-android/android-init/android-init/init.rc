@@ -3,10 +3,6 @@ on init
     mkdir /mnt/vendor/
     symlink /persist /mnt/vendor/persist
 
-    write /dev/wcnss_wlan 1
-
-    exec -- /sbin/modprobe -a audio_apr audio_wglink audio_bg_glink audio_q6_notifier audio_adsp_loader audio_q6 audio_usf audio_pinctrl_wcd audio_swr audio_wcd_core audio_swr_ctrl audio_platform audio_hdmi audio_stub audio_digital_cdc audio_wcd9xxx audio_mbhc audio_wcd_cpe audio_machine_msm8909 audio_machine_msm8909_bg audio_tfa98xx
-    write /sys/kernel/boot_adsp/boot 1
 
     mkdir /dev/graphics/
     symlink /dev/fb0 /dev/graphics/fb0
@@ -40,31 +36,4 @@ service rmt_storage /vendor/bin/rmt_storage
 
 service vendor.bluetooth-1-0 /vendor/bin/hw/android.hardware.bluetooth@1.0-service-qti
     class hal
-    oneshot
-
-service vendor.sensors-hal-1-0 /vendor/bin/hw/android.hardware.sensors@1.0-service
-    class hal
-    oneshot
-
-service gnss_service_becurx /vendor/bin/hw/android.hardware.gnss@1.0-service.cxd5603
-    class hal
-    oneshot
-
-service nfc_hal_service /vendor/bin/hw/android.hardware.nfc@1.1-service
-    class hal
-
-service deamonserver /system/bin/deamonserver
-    class core
-    oneshot
-
-service pm-service /vendor/bin/pm-service
-    class core
-    oneshot
-
-service config_bt_addr /vendor/bin/btnvtool -O
-    class core
-    oneshot
-
-service config_bluetooth /system/bin/sh /system/etc/init.qcom.bt.sh "onboot"
-    class core
     oneshot
