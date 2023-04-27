@@ -28,6 +28,10 @@ on init
 
     mkdir /data/
 
+    # Start critical services first.
+    start servicemanager
+    start hwservicemanager
+    start vndservicemanager
     class_start core
     class_start hal
 
