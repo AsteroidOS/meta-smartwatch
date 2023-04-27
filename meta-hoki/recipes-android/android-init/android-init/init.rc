@@ -3,6 +3,10 @@ on init
     mkdir /mnt/vendor/
     symlink /persist /mnt/vendor/persist
 
+    mkdir /data/
+    mkdir /data/vendor/
+    mkdir /data/vendor/ssrdump/
+    mkdir /data/vendor/bgdaemon/
 
     mkdir /dev/graphics/
     symlink /dev/fb0 /dev/graphics/fb0
@@ -25,6 +29,8 @@ on init
 
     chmod 777 /dev/hwbinder
     chmod 777 /dev/vndbinder
+    chmod 777 /dev/mdss_rotator
+    chmod 777 /sys/devices/platform/soc/soc:qcom,bg-rsb/enable
 
     mkdir /data/
 
@@ -35,9 +41,18 @@ on init
     class_start core
     class_start hal
 
-service rmt_storage /vendor/bin/rmt_storage
+service vendor.rmt_storage /vendor/bin/rmt_storage
     class core
 
 service vendor.bluetooth-1-0 /vendor/bin/hw/android.hardware.bluetooth@1.0-service-qti
     class hal
     oneshot
+
+service vendor.per_mgr /vendor/bin/pm-service
+    class core
+
+service sidekickgraphics-hal-1-2 /vendor/bin/hw/vendor.qti.hardware.sidekickgraphics@1.2-service
+    class hal
+
+on property:sys.boot_completed=1
+    exec -- /vendor/bin/init.rsb.sh
