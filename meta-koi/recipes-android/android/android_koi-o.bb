@@ -19,10 +19,6 @@ PROVIDES += "virtual/android-system-image"
 PROVIDES += "virtual/android-headers"
 
 do_install() {
-    # The stock audio policy contains invalid entries that cause the droid module to fail.
-    install -d ${D}${sysconfdir}/pulse
-    install -m 0644 ${WORKDIR}/audio_policy.conf ${D}${sysconfdir}/pulse/
-
     install -d ${D}/usr/
     cp -r usr/* ${D}/usr/
 
@@ -41,6 +37,6 @@ do_package_qa() {
 }
 
 PACKAGES =+ "android-system android-headers"
-FILES:android-system = "/usr ${sysconfdir}/pulse/ /vendor"
+FILES:android-system = "/usr /vendor"
 FILES:android-headers = "${libdir}/pkgconfig ${includedir}/android"
 EXCLUDE_FROM_SHLIBS = "1"
