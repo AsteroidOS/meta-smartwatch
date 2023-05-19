@@ -26,6 +26,9 @@ on init
     chmod 444 /sys/devices/sop716/position
     chmod 666 /sys/devices/sop716/self_test
 
+    write /sys/module/bcmdhd/parameters/kickstart 1
+    write /sys/module/bcmdhd/parameters/nvram_path /vendor/etc/wifi/bcmdhd.cal
+
     load_system_props
     restorecon_recursive /persist
 
