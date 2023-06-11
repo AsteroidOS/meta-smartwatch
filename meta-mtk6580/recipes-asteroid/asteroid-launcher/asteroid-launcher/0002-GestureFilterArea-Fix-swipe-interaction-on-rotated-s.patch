@@ -1,16 +1,16 @@
-From 0c57cd1ae48c4aaddc27cf5684595fd7d35a121e Mon Sep 17 00:00:00 2001
+From a42df4e6f8f6391c48e53269646964ccfd617009 Mon Sep 17 00:00:00 2001
 From: Florent Revest <revestflo@gmail.com>
 Date: Wed, 26 Jul 2017 22:27:37 +0100
 Subject: [PATCH] GestureFilterArea: Fix swipe interaction on rotated screens
 
 ---
- gesturefilterarea.cpp | 6 +++---
+ src/gesturefilterarea.cpp | 6 +++---
  1 file changed, 3 insertions(+), 3 deletions(-)
 
-diff --git a/gesturefilterarea.cpp b/gesturefilterarea.cpp
-index 88bbd87..8bb547f 100644
---- a/gesturefilterarea.cpp
-+++ b/gesturefilterarea.cpp
+diff --git a/src/gesturefilterarea.cpp b/src/gesturefilterarea.cpp
+index fb6162f..5e95f2c 100644
+--- a/src/gesturefilterarea.cpp
++++ b/src/gesturefilterarea.cpp
 @@ -94,8 +94,8 @@ void GestureFilterArea::mouseMoveEvent(QMouseEvent *event) {
      }
      m_counter++;
@@ -20,9 +20,9 @@ index 88bbd87..8bb547f 100644
 +    m_velocityX = (m_velocityX*(m_counter-1) + -((event->windowPos().x()-m_prevPos.x()))/m_counter);
 +    m_velocityY = (m_velocityY*(m_counter-1) + -((event->windowPos().y()-m_prevPos.y()))/m_counter);
      if(m_tracing) {
-         if(m_velocityX > m_threshold) {
-             m_tracing = false;
-@@ -137,7 +137,7 @@ void GestureFilterArea::mouseMoveEvent(QMouseEvent *event) {
+         if (abs(m_velocityX) > abs(m_velocityY)) {
+             if(m_velocityX > m_threshold) {
+@@ -141,7 +141,7 @@ void GestureFilterArea::mouseMoveEvent(QMouseEvent *event) {
          else
              delta = event->windowPos().y() - m_prevPos.y();
  
