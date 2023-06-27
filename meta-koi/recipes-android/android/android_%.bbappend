@@ -3,4 +3,4 @@ do_install:append:koi() {
     ln -s system/vendor vendor
 }
 
-FILES:android-system:append:koi = "/vendor"
+FILES:android-system:append:koi = " /vendor"
