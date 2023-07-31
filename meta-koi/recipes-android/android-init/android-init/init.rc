@@ -3,6 +3,9 @@ on init
     symlink /dev/fb0 /dev/graphics/fb0
     chown system root /sys/class/timed_output/vibrator/enable
 
+    chown system root /dev/MultiSensors_CD_01
+    chmod 666 /dev/MultiSensors_CD_01
+
     mkdir /data/
 
     class_start core
