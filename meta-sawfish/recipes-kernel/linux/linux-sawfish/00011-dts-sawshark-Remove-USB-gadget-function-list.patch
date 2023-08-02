@@ -1,0 +1,30 @@
+From 533a411336f16ec60c61ced0b5ef11a58aabebb6 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Darrel=20Gri=C3=ABt?= <dgriet@gmail.com>
+Date: Wed, 2 Aug 2023 22:44:12 +0200
+Subject: [PATCH] dts: sawshark: Remove USB gadget function list.
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Instead use the default list provided by the android gadget driver.
+
+Signed-off-by: Darrel Griët <dgriet@gmail.com>
+---
+ arch/arm/boot/dts/apq8009w-sawshark/apq8009w-common.dtsi | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/arch/arm/boot/dts/apq8009w-sawshark/apq8009w-common.dtsi b/arch/arm/boot/dts/apq8009w-sawshark/apq8009w-common.dtsi
+index d68d98761aa..8d6aa1e63b9 100755
+--- a/arch/arm/boot/dts/apq8009w-sawshark/apq8009w-common.dtsi
++++ b/arch/arm/boot/dts/apq8009w-sawshark/apq8009w-common.dtsi
+@@ -32,7 +32,6 @@
+ 
+ 	android_usb@086000c8 {
+ 		compatible = "qcom,android-usb";
+-		qcom,supported-func = "ffs","diag","serial","mtp","rmnet";
+ 	};
+ };
+ 
+-- 
+2.41.0
+
