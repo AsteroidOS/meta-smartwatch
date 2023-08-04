@@ -52,3 +52,8 @@ service logcat /system/bin/logcat -f /dev/kmsg
 service servicemanager /usr/libexec/hal-droid/system/bin/servicemanager
     setenv LD_PRELOAD /usr/libexec/hal-droid/system/lib/libselinux_stubs.so
     class core
+
+service wcnss_service /vendor/bin/wcnss_service
+    class core
+    user root
+    oneshot
