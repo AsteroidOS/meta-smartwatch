@@ -2,10 +2,9 @@ inherit gettext
 
 SUMMARY = "Downloads the TicWatch C2+ system folders and installs them for libhybris"
 LICENSE = "CLOSED"
-
-SRC_URI = "https://dl.dropboxusercontent.com/s/t9kde7nfcqlo1br/Sensors-Skipjack.tar.gz"
-SRC_URI[md5sum] = "5be9e5a44de5ae229f3af131810c0578"
-SRC_URI[sha256sum] = "a0437c7313e0c7e1a1839567b5b21c420fe5c496422f65b38cccc18c81020b8c"
+SRC_URI = "https://dl.dropboxusercontent.com/scl/fi/40t4h39rzn4b4o7inc67g/system-skipjack.tar.gz?rlkey=s1pexo5gg82l0jt9tk34mdhgw&dl=0;downloadfilename=system-skipjack.tar.gz"
+SRC_URI[md5sum] = "fc4c198e3b6c3594bb53a411c38a81d3"
+SRC_URI[sha256sum] = "3d0a4a902680f3226dc67263477642a2c674dd5ced41545182416ee5103d456d"
 PV = "pie"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
