@@ -34,6 +34,4 @@ do_install:append() {
     rm -rf ${D}/usr/src/usr/
 }
 
-BOOT_PARTITION = "/dev/mmcblk0p29"
-
 inherit mkboot old-kernel-gcc-hdrs
