@@ -42,7 +42,6 @@ do_install:append() {
     rm -rf ${D}/usr/src/usr/
 }
 
-BOOT_PARTITION = "/dev/mmcblk0p29"
 MKBOOTIMG_ARGS = "--base 0x82000000"
 
 inherit mkbootimg old-kernel-gcc-hdrs
