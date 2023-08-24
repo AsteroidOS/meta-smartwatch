@@ -1,0 +1,60 @@
+From ea83edfdb2095056fccd486790ddc744e4b5244d Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Darrel=20Gri=C3=ABt?= <dgriet@gmail.com>
+Date: Wed, 11 Jan 2023 22:47:16 +0100
+Subject: [PATCH] dts: msm8909w-firefish: Enable more GPU clock frequencies.
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: Darrel Griët <dgriet@gmail.com>
+---
+ .../msm8909w-firefish-gpu.dtsi                | 26 +++++++++++++++----
+ 1 file changed, 21 insertions(+), 5 deletions(-)
+
+diff --git a/arch/arm/boot/dts/msm8909w-firefish/msm8909w-firefish-gpu.dtsi b/arch/arm/boot/dts/msm8909w-firefish/msm8909w-firefish-gpu.dtsi
+index ff2806d9bcd6..8a126fda3b69 100755
+--- a/arch/arm/boot/dts/msm8909w-firefish/msm8909w-firefish-gpu.dtsi
++++ b/arch/arm/boot/dts/msm8909w-firefish/msm8909w-firefish-gpu.dtsi
+@@ -43,7 +43,7 @@
+ 
+ 		qcom,gpu-pwrlevel@0 {
+ 			reg = <0>;
+-			qcom,gpu-freq = <200000000>;
++			qcom,gpu-freq = <19200000>;
+ 			qcom,bus-freq = <1>;
+ 			qcom,bus-min = <1>;
+ 			qcom,bus-max = <1>;
+@@ -51,10 +51,26 @@
+ 
+ 		qcom,gpu-pwrlevel@1 {
+ 			reg = <1>;
+-			qcom,gpu-freq = <19200000>;
+-			qcom,bus-freq = <0>;
+-			qcom,bus-min = <0>;
+-			qcom,bus-max = <0>;
++			qcom,gpu-freq = <200000000>;
++			qcom,bus-freq = <1>;
++			qcom,bus-min = <1>;
++			qcom,bus-max = <1>;
++		};
++
++		qcom,gpu-pwrlevel@2 {
++			reg = <2>;
++			qcom,gpu-freq = <307200000>;
++			qcom,bus-freq = <1>;
++			qcom,bus-min = <1>;
++			qcom,bus-max = <1>;
++		};
++
++		qcom,gpu-pwrlevel@3 {
++			reg = <3>;
++			qcom,gpu-freq = <456000000>;
++			qcom,bus-freq = <1>;
++			qcom,bus-min = <1>;
++			qcom,bus-max = <1>;
+ 		};
+ 
+ 	};
+-- 
+2.38.1
+

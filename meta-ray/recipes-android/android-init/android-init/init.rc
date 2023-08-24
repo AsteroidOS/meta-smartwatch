@@ -8,49 +8,50 @@ on init
 
     chown system root /sys/class/timed_output/vibrator/enable
 
+    chown system root /dev/hwbinder
+    chown system root /dev/vndbinder
+
+    chmod 777 /dev/hwbinder
+    chmod 777 /dev/vndbinder
+
     load_system_props
     restorecon_recursive /persist
 
     mkdir /data/
 
-    setprop init.svc.bluetooth running
-
     class_start core
-
-service logd /usr/libexec/hal-droid/system/bin/logd
-    class core
-    socket logd stream 0666 logd logd
-    socket logdr seqpacket 0666 logd logd
-    socket logdw dgram 0222 logd logd
-    file /proc/kmsg r
-    file /dev/kmsg w
-    user logd
-    group logd system readproc
+    class_start hal
 
 service rmt_storage /vendor/bin/rmt_storage
     class core
 
-service sensors /vendor/bin/sensors.qcom
-    class core 
+service vendor.sensors.qti /vendor/bin/sensors.qti
+    class core
     oneshot
-
-service servicemanager /usr/libexec/hal-droid/system/bin/servicemanager
-    setenv LD_PRELOAD /usr/libexec/hal-droid/system/lib/libselinux_stubs.so
-    class core
-
-service hwservicemanager /system/bin/hwservicemanager
-    setenv LD_PRELOAD /usr/libexec/hal-droid/system/lib/libselinux_stubs.so
-    class core
 
 service config_bt_addr /vendor/bin/btnvtool -O
     class core
     oneshot
 
-service bt /vendor/bin/android.hardware.bluetooth@1.0-service-qti
+service vendor.bluetooth-1-0 /vendor/bin/hw/android.hardware.bluetooth@1.0-service-qti
+    class hal
+
+service nfc_hal_service /vendor/bin/hw/android.hardware.nfc@1.1-service
+    class hal
+
+service pm-service /vendor/bin/pm-service
     class core
     oneshot
+
+service loc_launcher /vendor/bin/loc_launcher
+    setenv LD_PRELOAD /usr/libexec/hal-droid/system/lib/libselinux_stubs.so
+    class core
 
 service wcnss_service /vendor/bin/wcnss_service
     class core
     user root
+    oneshot
+
+service vendor.sensors-hal-1-0 /vendor/bin/hw/android.hardware.sensors@1.0-service
+    class hal
     oneshot
