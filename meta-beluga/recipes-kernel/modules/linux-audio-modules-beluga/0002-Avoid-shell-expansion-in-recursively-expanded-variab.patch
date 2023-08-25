@@ -1,0 +1,25 @@
+From 7bcf29c0177330f64af7eeca32fefb0502ceeefe Mon Sep 17 00:00:00 2001
+From: Philip Russell <argosphil@murena.io>
+Date: Fri, 25 Aug 2023 12:26:10 +0000
+Subject: [PATCH] Avoid shell expansion in recursively-expanded variable
+
+GNU Make changed the behavior of that particular (avoidable and problematic)
+construct. Eagerly expanding the timestamp fixes the build on Mickledore.
+---
+ ipc/Kbuild | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/ipc/Kbuild b/ipc/Kbuild
+index b4a0f985..721526bd 100755
+--- a/ipc/Kbuild
++++ b/ipc/Kbuild
+@@ -224,4 +224,5 @@ obj-$(CONFIG_WCD_DSP_GLINK) += audio_wglink.o
+ audio_wglink-y := $(WDSP_GLINK)
+ 
+ # inject some build related information
+-CDEFINES += -DBUILD_TIMESTAMP=\"$(shell date -u +'%Y-%m-%dT%H:%M:%SZ')\"
++TIMESTAMP := $(shell date -u +'%Y-%m-%dT%H:%M:%SZ')
++CDEFINES += -DBUILD_TIMESTAMP=\"$(TIMESTAMP)\"
+-- 
+2.41.0
+
