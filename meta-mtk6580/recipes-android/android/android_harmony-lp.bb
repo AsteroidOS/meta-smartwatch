@@ -19,10 +19,6 @@ do_install() {
     install -d ${D}/system/
     cp -r system/* ${D}/system/
 
-    install -d ${D}/usr/
-    rm -r usr/include/droidmedia/
-    cp -r usr/* ${D}/usr/
-
     install -d ${D}${includedir}/android
     cp -r include/* ${D}${includedir}/android/
 
@@ -42,6 +38,6 @@ do_package_qa() {
 }
 
 PACKAGES =+ "android-system android-headers"
-FILES:android-system = "/system /vendor /usr /etc/firmware"
+FILES:android-system = "/system /vendor /etc/firmware"
 FILES:android-headers = "${libdir}/pkgconfig ${includedir}/android"
 EXCLUDE_FROM_SHLIBS = "1"
