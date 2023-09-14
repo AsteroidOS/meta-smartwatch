@@ -1,0 +1,29 @@
+From c3a4162f813f85d957a5ec500aab7489e3818c2a Mon Sep 17 00:00:00 2001
+From: Philip Russell <argosphil@murena.io>
+Date: Tue, 12 Sep 2023 19:46:46 +0000
+Subject: [PATCH] remove reinit class, which isn't removed properly
+
+---
+ aw882xx.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/aw882xx.c b/aw882xx.c
+index 9c3881e..10ac935 100644
+--- a/aw882xx.c
++++ b/aw882xx.c
+@@ -2520,10 +2520,12 @@ static int aw882xx_i2c_probe(struct i2c_client *i2c,
+ 		return ret;
+ 	}
+ 
++#if 0
+ 	/*create reinit class*/
+ 	ret = aw882xx_reinit_class_init(aw882xx);
+ 	if (ret)
+ 		return ret;
++#endif
+ 
+ 	/*create attr*/
+ 	ret = sysfs_create_group(&i2c->dev.kobj, &aw882xx_attribute_group);
+-- 
+2.41.0
+
