@@ -1,0 +1,36 @@
+From c56171f16b530ab03b93dfabc6be2d51ff3063d1 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Darrel=20Gri=C3=ABt?= <dgriet@gmail.com>
+Date: Sat, 8 Apr 2023 17:19:25 +0200
+Subject: [PATCH] mmc: Fix embedded_sdio_data duplicate definition.
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: Darrel Griët <dgriet@gmail.com>
+---
+ include/linux/mmc/host.h | 9 ---------
+ 1 file changed, 9 deletions(-)
+
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 328e78d9281b..3c009f4a55ff 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -677,15 +677,6 @@ struct mmc_host {
+ 	void *crypto_DO_NOT_USE[7];
+ #endif /* CONFIG_MMC_CRYPTO */
+ 
+-#ifdef CONFIG_MMC_EMBEDDED_SDIO
+-	struct {
+-		struct sdio_cis			*cis;
+-		struct sdio_cccr		*cccr;
+-		struct sdio_embedded_func	*funcs;
+-		int				num_funcs;
+-	} embedded_sdio_data;
+-#endif
+-
+ 	bool sdr104_wa;
+ 
+ 	/*
+-- 
+2.40.0
+

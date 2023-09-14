@@ -1,0 +1,32 @@
+From d4fb39c4405700faf93c542f56200bd5378a9b04 Mon Sep 17 00:00:00 2001
+From: Philip Russell <argosphil@murena.io>
+Date: Sun, 3 Sep 2023 16:12:08 +0000
+Subject: [PATCH 3/3] remove tracepoints
+
+---
+ drivers/gpu/msm/Makefile | 2 --
+ 1 file changed, 2 deletions(-)
+
+diff --git a/drivers/gpu/msm/Makefile b/drivers/gpu/msm/Makefile
+index 005822672101..f331d03aef20 100644
+--- a/drivers/gpu/msm/Makefile
++++ b/drivers/gpu/msm/Makefile
+@@ -2,7 +2,6 @@ ccflags-y := -Iinclude/linux
+ 
+ msm_kgsl_core-y = \
+ 	kgsl.o \
+-	kgsl_trace.o \
+ 	kgsl_drawobj.o \
+ 	kgsl_ioctl.o \
+ 	kgsl_sharedmem.o \
+@@ -27,7 +26,6 @@ msm_adreno-y += \
+ 	adreno_dispatch.o \
+ 	adreno_snapshot.o \
+ 	adreno_coresight.o \
+-	adreno_trace.o \
+ 	adreno_a3xx.o \
+ 	adreno_a4xx.o \
+ 	adreno_a5xx.o \
+-- 
+2.41.0
+

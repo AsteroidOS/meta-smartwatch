@@ -1,0 +1,25 @@
+From 73454050c203480d56087da34919670323d8905e Mon Sep 17 00:00:00 2001
+From: Philip Russell <argosphil@murena.io>
+Date: Mon, 4 Sep 2023 18:18:53 +0000
+Subject: [PATCH] pinconf-generic: work around buggy device tree
+
+---
+ drivers/pinctrl/pinconf-generic.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/drivers/pinctrl/pinconf-generic.c b/drivers/pinctrl/pinconf-generic.c
+index 0c914acef0b0..006a9761dbd9 100644
+--- a/drivers/pinctrl/pinconf-generic.c
++++ b/drivers/pinctrl/pinconf-generic.c
+@@ -321,6 +321,8 @@ int pinconf_generic_dt_subnode_to_map(struct pinctrl_dev *pctldev,
+ 		function = NULL;
+ 	}
+ 
++	if (function && strcmp(function, "gpio133") == 0)
++		function = "gpio";
+ 	ret = pinconf_generic_parse_dt_config(np, pctldev, &configs,
+ 					      &num_configs);
+ 	if (ret < 0) {
+-- 
+2.41.0
+
