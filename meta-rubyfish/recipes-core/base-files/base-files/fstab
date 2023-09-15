@@ -4,4 +4,5 @@ devpts               /dev/pts             devpts     mode=0620,gid=5       0  0
 tmpfs                /run                 tmpfs      mode=0755,nodev,nosuid,strictatime 0  0
 tmpfs                /var/volatile        tmpfs      defaults              0  0
 /dev/mmcblk0p38      /persist             auto       defaults              0  0
-/dev/mmcblk0p1       /vendor/firmware_mnt vfat      ro 0 0
+/dev/mmcblk0p1       /vendor/firmware_mnt vfat       ro 0 0
+/vendor		     /android-root/vendor auto	     bind
