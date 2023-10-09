@@ -1,0 +1,56 @@
+From d4cee5cd8f9f9b18be074fa8b6e3a6b10bca7c05 Mon Sep 17 00:00:00 2001
+From: Ed Beroset <beroset@ieee.org>
+Date: Sat, 7 Oct 2023 11:42:34 -0400
+Subject: [PATCH] Fix alignment of struct members
+
+With newer versions (>9) of gcc, the compiler correctly warns that
+"taking address of packed member of 'struct diag_mempool_t' may result
+in an unaligned pointer value [-Waddress-of-packed-member]."
+
+A similar warning comes up for dci_pkt_req_entry_t.
+
+This removes the __packed attribute from both structs to address that
+problem.
+
+Signed-off-by: Ed Beroset <beroset@ieee.org>
+
+---
+ drivers/char/diag/diag_dci.h | 4 ++--
+ drivers/char/diag/diagmem.h  | 2 +-
+ 2 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/char/diag/diag_dci.h b/drivers/char/diag/diag_dci.h
+index a9e2d35cc50a..bf988c5fff23 100644
+--- a/drivers/char/diag/diag_dci.h
++++ b/drivers/char/diag/diag_dci.h
+@@ -95,7 +95,7 @@ struct dci_pkt_req_entry_t {
+ 	int uid;
+ 	int tag;
+ 	struct list_head track;
+-} __packed;
++};
+ 
+ struct diag_dci_reg_tbl_t {
+ 	int client_id;
+@@ -164,7 +164,7 @@ struct diag_dci_health_stats_proc {
+ 	int client_id;
+ 	struct diag_dci_health_stats health;
+ 	int proc;
+-} __packed;
++};
+ 
+ struct diag_dci_peripherals_t {
+ 	int proc;
+diff --git a/drivers/char/diag/diagmem.h b/drivers/char/diag/diagmem.h
+index d097a3799e9a..77ef3003559e 100644
+--- a/drivers/char/diag/diagmem.h
++++ b/drivers/char/diag/diagmem.h
+@@ -50,7 +50,7 @@ struct diag_mempool_t {
+ 	unsigned int poolsize;
+ 	int count;
+ 	spinlock_t lock;
+-} __packed;
++};
+ 
+ extern struct diag_mempool_t diag_mempools[NUM_MEMORY_POOLS];
+ 

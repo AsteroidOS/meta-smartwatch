@@ -1,0 +1,28 @@
+From 0a8b03d82f56395807bad2af3da8d518a6272ccb Mon Sep 17 00:00:00 2001
+From: Ed Beroset <beroset@ieee.org>
+Date: Fri, 6 Oct 2023 12:08:29 -0400
+Subject: [PATCH] Restore bluetooth_6lowpan to Makefile
+
+I'm not sure why or how this was removed, but it's required for using
+6lowpan over Bluetooth.
+
+Signed-off-by: Ed Beroset <beroset@ieee.org>
+
+---
+ net/bluetooth/Makefile | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/net/bluetooth/Makefile b/net/bluetooth/Makefile
+index c85a6afc6fe1..9a8ea232d28f 100644
+--- a/net/bluetooth/Makefile
++++ b/net/bluetooth/Makefile
+@@ -7,6 +7,9 @@ obj-$(CONFIG_BT_RFCOMM)	+= rfcomm/
+ obj-$(CONFIG_BT_BNEP)	+= bnep/
+ obj-$(CONFIG_BT_CMTP)	+= cmtp/
+ obj-$(CONFIG_BT_HIDP)	+= hidp/
++obj-$(CONFIG_BT_6LOWPAN) += bluetooth_6lowpan.o
++
++bluetooth_6lowpan-y := 6lowpan.o
+ 
+ bluetooth-y := af_bluetooth.o hci_core.o hci_conn.o hci_event.o mgmt.o \
+ 	hci_sock.o hci_sysfs.o l2cap_core.o l2cap_sock.o smp.o sco.o lib.o \
