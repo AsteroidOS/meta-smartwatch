@@ -1,0 +1,54 @@
+From 55ecda47a54e4b3e5484912b414fbd1c7236ac0c Mon Sep 17 00:00:00 2001
+From: Russell King <rmk+kernel@arm.linux.org.uk>
+Date: Fri, 8 Aug 2014 10:56:34 +0100
+Subject: [PATCH 2/2] ARM: wire up getrandom syscall
+
+Add the new getrandom syscall for ARM.
+
+Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
+---
+ arch/arm/include/asm/unistd.h      | 2 +-
+ arch/arm/include/uapi/asm/unistd.h | 1 +
+ arch/arm/kernel/calls.S            | 1 +
+ 3 files changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/arch/arm/include/asm/unistd.h b/arch/arm/include/asm/unistd.h
+index acabef1a75d..fb77fcd2690 100644
+--- a/arch/arm/include/asm/unistd.h
++++ b/arch/arm/include/asm/unistd.h
+@@ -15,7 +15,7 @@
+ 
+ #include <uapi/asm/unistd.h>
+ 
+-#define __NR_syscalls  (384)
++#define __NR_syscalls  (388)
+ #define __ARM_NR_cmpxchg		(__ARM_NR_BASE+0x00fff0)
+ 
+ #define __ARCH_WANT_STAT64
+diff --git a/arch/arm/include/uapi/asm/unistd.h b/arch/arm/include/uapi/asm/unistd.h
+index 17407c92c0d..cda92524216 100644
+--- a/arch/arm/include/uapi/asm/unistd.h
++++ b/arch/arm/include/uapi/asm/unistd.h
+@@ -412,6 +412,7 @@
+ #define __NR_renameat2			(__NR_SYSCALL_BASE+382)
+ */
+ #define __NR_seccomp			(__NR_SYSCALL_BASE+383)
++#define __NR_getrandom			(__NR_SYSCALL_BASE+384)
+ 
+ /*
+  * This may need to be greater than __NR_last_syscall+1 in order to
+diff --git a/arch/arm/kernel/calls.S b/arch/arm/kernel/calls.S
+index 725f844926e..3aec9455af8 100644
+--- a/arch/arm/kernel/calls.S
++++ b/arch/arm/kernel/calls.S
+@@ -393,6 +393,7 @@
+ 		CALL(sys_ni_syscall)		/* reserved sys_sched_getattr */
+ 		CALL(sys_ni_syscall)		/* reserved sys_renameat2     */
+ 		CALL(sys_seccomp)
++		CALL(sys_getrandom)
+ 
+ #ifndef syscalls_counted
+ .equ syscalls_padding, ((NR_syscalls + 3) & ~3) - NR_syscalls
+-- 
+2.42.0
+
