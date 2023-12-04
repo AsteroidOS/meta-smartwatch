@@ -21,6 +21,8 @@ SRC_URI = " git://android.googlesource.com/kernel/msm;branch=android-msm-sturgeo
     file://0008-tap-to-wake-fix.patch \
     file://0009-bluesleep-Use-kernel-s-HCI-events-instead-of-proc-bl.patch \
     file://0010-synaptics_i2c_rmi4-Adds-a-wakelock-when-the-screen-i.patch \
+    file://0011-random-introduce-getrandom-2-system-call.patch \
+    file://0012-ARM-wire-up-getrandom-syscall.patch \
 "
 
 SRCREV = "97abcf5b24684a46530ffc8a4748dd7ae6c2e65a"
