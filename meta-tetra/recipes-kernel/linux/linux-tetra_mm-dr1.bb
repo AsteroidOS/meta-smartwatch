@@ -25,7 +25,10 @@ SRC_URI = "git://android.googlesource.com/kernel/bcm;branch=android-bcm-tetra-3.
     file://0008-Integrate-hci_brcm-and-bcm_bzhw-to-the-backported-BT.patch \
     file://0009-ARM-uaccess-remove-put_user-code-duplication.patch \
     file://0010-give-up-on-gcc-ilog2-constant-optimizations.patch \
-    file://0011-broadcom-modem-rpc-Disable-logs-which-cause-a-compil.patch"
+    file://0011-broadcom-modem-rpc-Disable-logs-which-cause-a-compil.patch \
+    file://0012-random-introduce-getrandom-2-system-call.patch \
+    file://0013-ARM-wire-up-getrandom-syscall.patch \
+"
 SRCREV = "0de8b342797a4074625055e77d37d5367d8ff285"
 LINUX_VERSION ?= "3.10"
 PV = "${LINUX_VERSION}+marshmallow"
