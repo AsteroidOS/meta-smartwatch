@@ -10,12 +10,14 @@ COMPATIBLE_MACHINE = "lenok"
 
 SRC_URI = "git://android.googlesource.com/kernel/msm;branch=android-msm-lenok-3.10-marshmallow-mr1-wear-release;protocol=https \
            file://0001-scripts-dtc-Remove-redundant-YYLOC-global-declaratio.patch \
-	   file://0002-arm-LLVMLinux-use-static-inline-in-ARM-ftrace.h.patch \
+           file://0002-arm-LLVMLinux-use-static-inline-in-ARM-ftrace.h.patch \
            file://0003-Backport-mainline-4.1-Bluetooth-subsystem.patch \
            file://0004-Revert-nitrous-commits.patch \
            file://0005-bluesleep-Use-kernel-s-HCI-events-instead-of-proc-bl.patch \
            file://0006-include-update-log2-header-from-the-Linux-kernel.patch \
            file://0007-ARM-uaccess-remove-put_user-code-duplication.patch \
+           file://0008-random-introduce-getrandom-2-system-call.patch \
+           file://0009-ARM-wire-up-getrandom-syscall.patch \
            file://defconfig \
            file://img_info \
            "
