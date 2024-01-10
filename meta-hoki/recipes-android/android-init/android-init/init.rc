@@ -5,6 +5,12 @@ on init
     write /sys/bus/msm_subsys/devices/subsys3/restart_level "RELATED"
     write /sys/bus/msm_subsys/devices/subsys4/restart_level "RELATED"
 
+    exec -- /sbin/modprobe -a audio_apr audio_adsp_loader audio_q6_notifier audio_q6 audio_usf audio_native audio_pinctrl_wcd audio_swr audio_platform audio_swr_ctrl audio_mbhc audio_stub audio_machine
+
+    write /sys/kernel/boot_adsp/boot 1
+    write /sys/kernel/boot_cdsp/boot 1
+    write /sys/kernel/boot_slpi/boot 1
+
     # Required to fix some symbolic links in wcnss firmware files.
     mkdir /mnt/vendor/
     symlink /persist /mnt/vendor/persist
