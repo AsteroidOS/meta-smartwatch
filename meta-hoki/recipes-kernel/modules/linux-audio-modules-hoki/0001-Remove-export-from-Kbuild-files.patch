@@ -1,0 +1,801 @@
+From 2b9ef7dd384fccd17d04d6a8bc62e0534516ff2e Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Darrel=20Gri=C3=ABt?= <dgriet@gmail.com>
+Date: Tue, 9 Jan 2024 22:13:31 +0100
+Subject: [PATCH] Remove export from Kbuild files.
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Fixes possible host contamination.
+
+Co-authored-by: Philip Russell <argosphil@murena.io>
+Signed-off-by: Darrel Griët <dgriet@gmail.com>
+---
+ asoc/Kbuild                   | 28 ++++++++++++++--------------
+ asoc/codecs/Kbuild            | 26 +++++++++++++-------------
+ asoc/codecs/aqt1000/Kbuild    |  6 +++---
+ asoc/codecs/bolero/Kbuild     |  6 +++---
+ asoc/codecs/csra66x0/Kbuild   |  2 +-
+ asoc/codecs/ep92/Kbuild       |  2 +-
+ asoc/codecs/msm_sdw/Kbuild    |  8 ++++----
+ asoc/codecs/sdm660_cdc/Kbuild |  8 ++++----
+ asoc/codecs/wcd934x/Kbuild    | 16 ++++++++--------
+ asoc/codecs/wcd9360/Kbuild    |  4 ++--
+ asoc/codecs/wcd937x/Kbuild    |  4 ++--
+ dsp/Kbuild                    | 28 ++++++++++++++--------------
+ dsp/codecs/Kbuild             | 22 +++++++++++-----------
+ ipc/Kbuild                    | 28 ++++++++++++++--------------
+ soc/Kbuild                    | 28 ++++++++++++++--------------
+ 15 files changed, 108 insertions(+), 108 deletions(-)
+
+diff --git a/asoc/Kbuild b/asoc/Kbuild
+index 9c519c6..32d747d 100644
+--- a/asoc/Kbuild
++++ b/asoc/Kbuild
+@@ -16,75 +16,75 @@ endif
+ ifeq ($(KERNEL_BUILD), 0)
+ 	ifeq ($(CONFIG_ARCH_SDM845), y)
+ 		include $(AUDIO_ROOT)/config/sdm845auto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/sdm845autoconf.h
+ 	endif
+ 	ifeq ($(CONFIG_ARCH_SDM670), y)
+ 		include $(AUDIO_ROOT)/config/sdm670auto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/sdm670autoconf.h
+ 	endif
+ 	ifeq ($(CONFIG_ARCH_SDM450), y)
+ 		include $(AUDIO_ROOT)/config/sdm670auto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/sdm670autoconf.h
+ 	endif
+ 	ifeq ($(CONFIG_ARCH_SM8150), y)
+ 		ifdef CONFIG_SND_SOC_SA8155
+ 			include $(AUDIO_ROOT)/config/sa8155auto.conf
+-			export
++
+ 			INCS    +=  -include $(AUDIO_ROOT)/config/sa8155autoconf.h
+ 		else
+ 			include $(AUDIO_ROOT)/config/sm8150auto.conf
+-			export
++
+ 			INCS    +=  -include $(AUDIO_ROOT)/config/sm8150autoconf.h
+ 		endif
+ 	endif
+ 	ifeq ($(CONFIG_ARCH_SM6150), y)
+ 		ifdef CONFIG_SND_SOC_SA6155
+ 			include $(AUDIO_ROOT)/config/sa6155auto.conf
+-			export
++
+ 			INCS    +=  -include $(AUDIO_ROOT)/config/sa6155autoconf.h
+ 		else
+ 			include $(AUDIO_ROOT)/config/sm6150auto.conf
+-			export
++
+ 			INCS    +=  -include $(AUDIO_ROOT)/config/sm6150autoconf.h
+ 		endif
+ 	endif
+ 	ifeq ($(CONFIG_ARCH_TRINKET), y)
+ 		include $(AUDIO_ROOT)/config/trinketauto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/trinketautoconf.h
+ 	endif
+ 	ifeq ($(CONFIG_ARCH_SDMSHRIKE), y)
+ 		ifdef CONFIG_SND_SOC_SA8155
+ 			include $(AUDIO_ROOT)/config/sa8155auto.conf
+-			export
++
+ 			INCS    +=  -include $(AUDIO_ROOT)/config/sa8155autoconf.h
+ 		else
+ 			include $(AUDIO_ROOT)/config/sm8150auto.conf
+-			export
++
+ 			INCS    +=  -include $(AUDIO_ROOT)/config/sm8150autoconf.h
+ 		endif
+ 	endif
+ 	ifeq ($(CONFIG_ARCH_QCS405), y)
+ 		include $(AUDIO_ROOT)/config/qcs405auto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/qcs405autoconf.h
+ 	endif
+ 	ifeq ($(CONFIG_ARCH_SDXPRAIRIE), y)
+ 		include $(AUDIO_ROOT)/config/sdxprairieauto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/sdxprairieautoconf.h
+ 	endif
+ 	ifeq ($(CONFIG_QTI_GVM), y)
+ 		include $(AUDIO_ROOT)/config/gvmauto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/gvmautoconf.h
+ 	endif
+ 	ifeq ($(CONFIG_ARCH_SDM429W), y)
+ 		include $(AUDIO_ROOT)/config/sdm450auto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/sdm450autoconf.h
+ 	endif
+ endif
+diff --git a/asoc/codecs/Kbuild b/asoc/codecs/Kbuild
+index 827f5b7..a0255dd 100644
+--- a/asoc/codecs/Kbuild
++++ b/asoc/codecs/Kbuild
+@@ -16,69 +16,69 @@ endif
+ ifeq ($(KERNEL_BUILD), 0)
+ 	ifeq ($(CONFIG_ARCH_SDM845), y)
+ 		include $(AUDIO_ROOT)/config/sdm845auto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/sdm845autoconf.h
+ 	endif
+ 	ifeq ($(CONFIG_ARCH_SDM670), y)
+ 		include $(AUDIO_ROOT)/config/sdm670auto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/sdm670autoconf.h
+ 	endif
+ 	ifeq ($(CONFIG_ARCH_SDM450), y)
+ 		include $(AUDIO_ROOT)/config/sdm670auto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/sdm670autoconf.h
+ 	endif
+ 	ifeq ($(CONFIG_ARCH_SM8150), y)
+ 		ifdef CONFIG_SND_SOC_SA8155
+ 			include $(AUDIO_ROOT)/config/sa8155auto.conf
+-			export
++
+ 			INCS    +=  -include $(AUDIO_ROOT)/config/sa8155autoconf.h
+ 		else
+ 			include $(AUDIO_ROOT)/config/sm8150auto.conf
+-			export
++
+ 			INCS    +=  -include $(AUDIO_ROOT)/config/sm8150autoconf.h
+ 		endif
+ 	endif
+ 	ifeq ($(CONFIG_ARCH_SM6150), y)
+ 		ifdef CONFIG_SND_SOC_SA6155
+ 			include $(AUDIO_ROOT)/config/sa6155auto.conf
+-			export
++
+ 			INCS    +=  -include $(AUDIO_ROOT)/config/sa6155autoconf.h
+ 		else
+ 			include $(AUDIO_ROOT)/config/sm6150auto.conf
+-			export
++
+ 			INCS    +=  -include $(AUDIO_ROOT)/config/sm6150autoconf.h
+ 		endif
+ 	endif
+ 	ifeq ($(CONFIG_ARCH_TRINKET), y)
+ 		include $(AUDIO_ROOT)/config/trinketauto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/trinketautoconf.h
+ 	endif
+ 	ifeq ($(CONFIG_ARCH_SDMSHRIKE), y)
+ 		include $(AUDIO_ROOT)/config/sm8150auto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/sm8150autoconf.h
+ 	endif
+ 	ifeq ($(CONFIG_ARCH_QCS405), y)
+ 		include $(AUDIO_ROOT)/config/qcs405auto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/qcs405autoconf.h
+ 	endif
+ 	ifeq ($(CONFIG_ARCH_SDXPRAIRIE), y)
+ 		include $(AUDIO_ROOT)/config/sdxprairieauto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/sdxprairieautoconf.h
+ 	endif
+ 	ifeq ($(CONFIG_QTI_GVM), y)
+ 		include $(AUDIO_ROOT)/config/gvmauto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/gvmautoconf.h
+ 	endif
+ 	ifeq ($(CONFIG_ARCH_SDM429W), y)
+ 		include $(AUDIO_ROOT)/config/sdm450auto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/sdm450autoconf.h
+ 	endif
+ endif
+diff --git a/asoc/codecs/aqt1000/Kbuild b/asoc/codecs/aqt1000/Kbuild
+index ccf9ff0..69b530f 100644
+--- a/asoc/codecs/aqt1000/Kbuild
++++ b/asoc/codecs/aqt1000/Kbuild
+@@ -19,19 +19,19 @@ ifeq ($(KERNEL_BUILD), 0)
+ 
+ 	ifeq ($(CONFIG_ARCH_SDM670), y)
+ 		include $(AUDIO_ROOT)/config/sdm670auto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/sdm670autoconf.h
+ 	endif
+ 
+ 	ifeq ($(CONFIG_ARCH_SM8150), y)
+ 		include $(AUDIO_ROOT)/config/sm8150auto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/sm8150autoconf.h
+ 	endif
+ 
+ 	ifeq ($(CONFIG_ARCH_SDMSHRIKE), y)
+ 		include $(AUDIO_ROOT)/config/sm8150auto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/sm8150autoconf.h
+ 	endif
+ endif
+diff --git a/asoc/codecs/bolero/Kbuild b/asoc/codecs/bolero/Kbuild
+index 8e3a26d..ebd8ccf 100644
+--- a/asoc/codecs/bolero/Kbuild
++++ b/asoc/codecs/bolero/Kbuild
+@@ -18,17 +18,17 @@ endif
+ ifeq ($(KERNEL_BUILD), 0)
+ 	ifeq ($(CONFIG_ARCH_SM6150), y)
+ 		include $(AUDIO_ROOT)/config/sm6150auto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/sm6150autoconf.h
+ 	endif
+ 	ifeq ($(CONFIG_ARCH_TRINKET), y)
+ 		include $(AUDIO_ROOT)/config/trinketauto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/trinketautoconf.h
+ 	endif
+ 	ifeq ($(CONFIG_ARCH_QCS405), y)
+ 		include $(AUDIO_ROOT)/config/qcs405auto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/qcs405autoconf.h
+ 	endif
+ endif
+diff --git a/asoc/codecs/csra66x0/Kbuild b/asoc/codecs/csra66x0/Kbuild
+index ef2f14e..190ee69 100644
+--- a/asoc/codecs/csra66x0/Kbuild
++++ b/asoc/codecs/csra66x0/Kbuild
+@@ -17,7 +17,7 @@ endif
+ ifeq ($(KERNEL_BUILD), 0)
+ 	ifeq ($(CONFIG_ARCH_QCS405), y)
+ 		include $(AUDIO_ROOT)/config/qcs405auto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/qcs405autoconf.h
+ 	endif
+ endif
+diff --git a/asoc/codecs/ep92/Kbuild b/asoc/codecs/ep92/Kbuild
+index dd6afe2..46e7850 100644
+--- a/asoc/codecs/ep92/Kbuild
++++ b/asoc/codecs/ep92/Kbuild
+@@ -18,7 +18,7 @@ endif
+ ifeq ($(KERNEL_BUILD), 0)
+ 	ifeq ($(CONFIG_ARCH_QCS405), y)
+ 		include $(AUDIO_ROOT)/config/qcs405auto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/qcs405autoconf.h
+ 	endif
+ endif
+diff --git a/asoc/codecs/msm_sdw/Kbuild b/asoc/codecs/msm_sdw/Kbuild
+index 2d238e4..40a3485 100644
+--- a/asoc/codecs/msm_sdw/Kbuild
++++ b/asoc/codecs/msm_sdw/Kbuild
+@@ -17,22 +17,22 @@ endif
+ ifeq ($(KERNEL_BUILD), 0)
+ 	ifeq ($(CONFIG_ARCH_SDM845), y)
+ 		include $(AUDIO_ROOT)/config/sdm845auto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/sdm845autoconf.h
+ 	endif
+ 	ifeq ($(CONFIG_ARCH_SDM670), y)
+ 		include $(AUDIO_ROOT)/config/sdm670auto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/sdm670autoconf.h
+ 	endif
+ 	ifeq ($(CONFIG_ARCH_SDM450), y)
+ 		include $(AUDIO_ROOT)/config/sdm670auto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/sdm670autoconf.h
+ 	endif
+ 	ifeq ($(CONFIG_ARCH_SDM429W), y)
+ 		include $(AUDIO_ROOT)/config/sdm450auto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/sdm450autoconf.h
+ 	endif
+ endif
+diff --git a/asoc/codecs/sdm660_cdc/Kbuild b/asoc/codecs/sdm660_cdc/Kbuild
+index 9f9bba9..d58cfd9 100644
+--- a/asoc/codecs/sdm660_cdc/Kbuild
++++ b/asoc/codecs/sdm660_cdc/Kbuild
+@@ -17,22 +17,22 @@ endif
+ ifeq ($(KERNEL_BUILD), 0)
+ 	ifeq ($(CONFIG_ARCH_SDM845), y)
+ 		include $(AUDIO_ROOT)/config/sdm845auto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/sdm845autoconf.h
+ 	endif
+ 	ifeq ($(CONFIG_ARCH_SDM670), y)
+ 		include $(AUDIO_ROOT)/config/sdm670auto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/sdm670autoconf.h
+ 	endif
+ 	ifeq ($(CONFIG_ARCH_SDM450), y)
+ 		include $(AUDIO_ROOT)/config/sdm670auto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/sdm670autoconf.h
+ 	endif
+ 	ifeq ($(CONFIG_ARCH_SDM429W), y)
+ 		include $(AUDIO_ROOT)/config/sdm450auto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/sdm450autoconf.h
+ 	endif
+ endif
+diff --git a/asoc/codecs/wcd934x/Kbuild b/asoc/codecs/wcd934x/Kbuild
+index 95747a8..e4bbddb 100644
+--- a/asoc/codecs/wcd934x/Kbuild
++++ b/asoc/codecs/wcd934x/Kbuild
+@@ -18,42 +18,42 @@ endif
+ ifeq ($(KERNEL_BUILD), 0)
+ 	ifeq ($(CONFIG_ARCH_SDM845), y)
+ 		include $(AUDIO_ROOT)/config/sdm845auto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/sdm845autoconf.h
+ 	endif
+ 	ifeq ($(CONFIG_ARCH_SDM670), y)
+ 		include $(AUDIO_ROOT)/config/sdm670auto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/sdm670autoconf.h
+ 	endif
+ 	ifeq ($(CONFIG_ARCH_SDM450), y)
+ 		include $(AUDIO_ROOT)/config/sdm670auto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/sdm670autoconf.h
+ 	endif
+ 	ifeq ($(CONFIG_ARCH_SM6150), y)
+ 		include $(AUDIO_ROOT)/config/sm6150auto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/sm6150autoconf.h
+ 	endif
+ 	ifeq ($(CONFIG_ARCH_TRINKET), y)
+ 		include $(AUDIO_ROOT)/config/trinketauto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/trinketautoconf.h
+ 	endif
+ 	ifeq ($(CONFIG_ARCH_SM8150), y)
+ 		include $(AUDIO_ROOT)/config/sm8150auto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/sm8150autoconf.h
+ 	endif
+ 	ifeq ($(CONFIG_ARCH_SDMSHRIKE), y)
+ 		include $(AUDIO_ROOT)/config/sm8150auto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/sm8150autoconf.h
+ 	endif
+ 	ifeq ($(CONFIG_ARCH_SDXPRAIRIE), y)
+ 		include $(AUDIO_ROOT)/config/sdxprairieauto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/sdxprairieautoconf.h
+ 	endif
+ endif
+diff --git a/asoc/codecs/wcd9360/Kbuild b/asoc/codecs/wcd9360/Kbuild
+index e997916..9b9a411 100644
+--- a/asoc/codecs/wcd9360/Kbuild
++++ b/asoc/codecs/wcd9360/Kbuild
+@@ -18,13 +18,13 @@ endif
+ ifeq ($(KERNEL_BUILD), 0)
+ 	ifeq ($(CONFIG_ARCH_SM8150), y)
+ 		include $(AUDIO_ROOT)/config/sm8150auto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/sm8150autoconf.h
+ 	endif
+ 
+ 	ifeq ($(CONFIG_ARCH_SDMSHRIKE), y)
+ 		include $(AUDIO_ROOT)/config/sm8150auto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/sm8150autoconf.h
+ 	endif
+ endif
+diff --git a/asoc/codecs/wcd937x/Kbuild b/asoc/codecs/wcd937x/Kbuild
+index 9648542..f99cda0 100644
+--- a/asoc/codecs/wcd937x/Kbuild
++++ b/asoc/codecs/wcd937x/Kbuild
+@@ -18,12 +18,12 @@ endif
+ ifeq ($(KERNEL_BUILD), 0)
+ 	ifeq ($(CONFIG_ARCH_SM6150), y)
+ 		include $(AUDIO_ROOT)/config/sm6150auto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/sm6150autoconf.h
+ 	endif
+ 	ifeq ($(CONFIG_ARCH_TRINKET), y)
+ 		include $(AUDIO_ROOT)/config/trinketauto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/trinketautoconf.h
+ 	endif
+ endif
+diff --git a/dsp/Kbuild b/dsp/Kbuild
+index dec3631..950bba5 100644
+--- a/dsp/Kbuild
++++ b/dsp/Kbuild
+@@ -16,75 +16,75 @@ endif
+ ifeq ($(KERNEL_BUILD), 0)
+ 	ifeq ($(CONFIG_ARCH_SDM845), y)
+ 		include $(AUDIO_ROOT)/config/sdm845auto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/sdm845autoconf.h
+ 	endif
+ 	ifeq ($(CONFIG_ARCH_SDM670), y)
+ 		include $(AUDIO_ROOT)/config/sdm670auto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/sdm670autoconf.h
+ 	endif
+ 	ifeq ($(CONFIG_ARCH_SDM450), y)
+ 		include $(AUDIO_ROOT)/config/sdm670auto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/sdm670autoconf.h
+ 	endif
+ 	ifeq ($(CONFIG_ARCH_SM6150), y)
+ 		ifdef CONFIG_SND_SOC_SA6155
+ 			include $(AUDIO_ROOT)/config/sa6155auto.conf
+-			export
++
+ 			INCS    +=  -include $(AUDIO_ROOT)/config/sa6155autoconf.h
+ 		else
+ 			include $(AUDIO_ROOT)/config/sm6150auto.conf
+-			export
++
+ 			INCS    +=  -include $(AUDIO_ROOT)/config/sm6150autoconf.h
+ 		endif
+ 	endif
+ 	ifeq ($(CONFIG_ARCH_TRINKET), y)
+ 		include $(AUDIO_ROOT)/config/trinketauto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/trinketautoconf.h
+ 	endif
+ 	ifeq ($(CONFIG_ARCH_SM8150), y)
+ 		ifdef CONFIG_SND_SOC_SA8155
+ 			include $(AUDIO_ROOT)/config/sa8155auto.conf
+-			export
++
+ 			INCS    +=  -include $(AUDIO_ROOT)/config/sa8155autoconf.h
+ 		else
+ 			include $(AUDIO_ROOT)/config/sm8150auto.conf
+-			export
++
+ 			INCS    +=  -include $(AUDIO_ROOT)/config/sm8150autoconf.h
+ 		endif
+ 	endif
+ 	ifeq ($(CONFIG_ARCH_SDMSHRIKE), y)
+ 		ifdef CONFIG_SND_SOC_SA8155
+ 			include $(AUDIO_ROOT)/config/sa8155auto.conf
+-			export
++
+ 			INCS    +=  -include $(AUDIO_ROOT)/config/sa8155autoconf.h
+ 		else
+ 			include $(AUDIO_ROOT)/config/sm8150auto.conf
+-			export
++
+ 			INCS    +=  -include $(AUDIO_ROOT)/config/sm8150autoconf.h
+ 		endif
+ 	endif
+ 	ifeq ($(CONFIG_ARCH_QCS405), y)
+ 		include $(AUDIO_ROOT)/config/qcs405auto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/qcs405autoconf.h
+ 	endif
+ 	ifeq ($(CONFIG_ARCH_SDXPRAIRIE), y)
+ 		include $(AUDIO_ROOT)/config/sdxprairieauto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/sdxprairieautoconf.h
+ 	endif
+ 	ifeq ($(CONFIG_QTI_GVM), y)
+ 		include $(AUDIO_ROOT)/config/gvmauto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/gvmautoconf.h
+ 	endif
+ 	ifeq ($(CONFIG_ARCH_SDM429W), y)
+ 		include $(AUDIO_ROOT)/config/sdm450auto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/sdm450autoconf.h
+ 	endif
+ endif
+diff --git a/dsp/codecs/Kbuild b/dsp/codecs/Kbuild
+index a0337e7..32366f2 100644
+--- a/dsp/codecs/Kbuild
++++ b/dsp/codecs/Kbuild
+@@ -16,58 +16,58 @@ endif
+ ifeq ($(KERNEL_BUILD), 0)
+ 	ifeq ($(CONFIG_ARCH_SDM845), y)
+ 		include $(AUDIO_ROOT)/config/sdm845auto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/sdm845autoconf.h
+ 
+ 	endif
+ 	ifeq ($(CONFIG_ARCH_SDM670), y)
+ 		include $(AUDIO_ROOT)/config/sdm670auto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/sdm670autoconf.h
+ 	endif
+ 	ifeq ($(CONFIG_ARCH_SDM450), y)
+ 		include $(AUDIO_ROOT)/config/sdm670auto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/sdm670autoconf.h
+ 	endif
+ 	ifeq ($(CONFIG_ARCH_SM6150), y)
+ 		include $(AUDIO_ROOT)/config/sm6150auto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/sm6150autoconf.h
+ 	endif
+ 	ifeq ($(CONFIG_ARCH_TRINKET), y)
+ 		include $(AUDIO_ROOT)/config/trinketauto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/trinketautoconf.h
+ 	endif
+ 	ifeq ($(CONFIG_ARCH_SM8150), y)
+ 		include $(AUDIO_ROOT)/config/sm8150auto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/sm8150autoconf.h
+ 	endif
+ 	ifeq ($(CONFIG_ARCH_SDMSHRIKE), y)
+ 		include $(AUDIO_ROOT)/config/sm8150auto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/sm8150autoconf.h
+ 	endif
+ 	ifeq ($(CONFIG_ARCH_QCS405), y)
+ 		include $(AUDIO_ROOT)/config/qcs405auto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/qcs405autoconf.h
+ 	endif
+ 	ifeq ($(CONFIG_ARCH_SDXPRAIRIE), y)
+ 		include $(AUDIO_ROOT)/config/sdxprairieauto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/sdxprairieautoconf.h
+ 	endif
+ 	ifeq ($(CONFIG_QTI_GVM), y)
+ 		include $(AUDIO_ROOT)/config/gvmauto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/gvmautoconf.h
+ 	endif
+ 	ifeq ($(CONFIG_ARCH_SDM429W), y)
+ 		include $(AUDIO_ROOT)/config/sdm450auto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/sdm450autoconf.h
+ 	endif
+ endif
+diff --git a/ipc/Kbuild b/ipc/Kbuild
+index 85f7da3..436fbaa 100644
+--- a/ipc/Kbuild
++++ b/ipc/Kbuild
+@@ -17,75 +17,75 @@ endif
+ ifeq ($(KERNEL_BUILD), 0)
+ 	ifeq ($(CONFIG_ARCH_SDM845), y)
+ 		include $(AUDIO_ROOT)/config/sdm845auto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/sdm845autoconf.h
+ 	endif
+ 	ifeq ($(CONFIG_ARCH_SDM670), y)
+ 		include $(AUDIO_ROOT)/config/sdm670auto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/sdm670autoconf.h
+ 	endif
+ 	ifeq ($(CONFIG_ARCH_SDM450), y)
+ 		include $(AUDIO_ROOT)/config/sdm670auto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/sdm670autoconf.h
+ 	endif
+         ifeq ($(CONFIG_ARCH_SM6150), y)
+ 		ifdef CONFIG_SND_SOC_SA6155
+ 			include $(AUDIO_ROOT)/config/sa6155auto.conf
+-			export
++
+ 			INCS    +=  -include $(AUDIO_ROOT)/config/sa6155autoconf.h
+ 		else
+ 			include $(AUDIO_ROOT)/config/sm6150auto.conf
+-			export
++
+ 			INCS    +=  -include $(AUDIO_ROOT)/config/sm6150autoconf.h
+ 		endif
+         endif
+         ifeq ($(CONFIG_ARCH_TRINKET), y)
+                 include $(AUDIO_ROOT)/config/trinketauto.conf
+-                export
++
+                 INCS    +=  -include $(AUDIO_ROOT)/config/trinketautoconf.h
+         endif
+ 	ifeq ($(CONFIG_ARCH_SM8150), y)
+ 		ifdef CONFIG_SND_SOC_SA8155
+ 			include $(AUDIO_ROOT)/config/sa8155auto.conf
+-			export
++
+ 			INCS    +=  -include $(AUDIO_ROOT)/config/sa8155autoconf.h
+ 		else
+ 			include $(AUDIO_ROOT)/config/sm8150auto.conf
+-			export
++
+ 			INCS    +=  -include $(AUDIO_ROOT)/config/sm8150autoconf.h
+ 		endif
+ 	endif
+ 	ifeq ($(CONFIG_ARCH_QCS405), y)
+ 		include $(AUDIO_ROOT)/config/qcs405auto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/qcs405autoconf.h
+ 	endif
+ 	ifeq ($(CONFIG_ARCH_SDMSHRIKE), y)
+ 		ifdef CONFIG_SND_SOC_SA8155
+ 			include $(AUDIO_ROOT)/config/sa8155auto.conf
+-			export
++
+ 			INCS    +=  -include $(AUDIO_ROOT)/config/sa8155autoconf.h
+ 		else
+ 			include $(AUDIO_ROOT)/config/sm8150auto.conf
+-			export
++
+ 			INCS    +=  -include $(AUDIO_ROOT)/config/sm8150autoconf.h
+ 		endif
+ 	endif
+ 	ifeq ($(CONFIG_ARCH_SDXPRAIRIE), y)
+ 		include $(AUDIO_ROOT)/config/sdxprairieauto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/sdxprairieautoconf.h
+ 	endif
+ 	ifeq ($(CONFIG_QTI_GVM), y)
+ 		include $(AUDIO_ROOT)/config/gvmauto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/gvmautoconf.h
+ 	endif
+ 	ifeq ($(CONFIG_ARCH_SDM429W), y)
+ 		include $(AUDIO_ROOT)/config/sdm450auto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/sdm450autoconf.h
+ 	endif
+ endif
+diff --git a/soc/Kbuild b/soc/Kbuild
+index 87faacd..aef236f 100644
+--- a/soc/Kbuild
++++ b/soc/Kbuild
+@@ -16,75 +16,75 @@ endif
+ ifeq ($(KERNEL_BUILD), 0)
+ 	ifeq ($(CONFIG_ARCH_SDM845), y)
+ 		include $(AUDIO_ROOT)/config/sdm845auto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/sdm845autoconf.h
+ 	endif
+ 	ifeq ($(CONFIG_ARCH_SDM670), y)
+ 		include $(AUDIO_ROOT)/config/sdm670auto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/sdm670autoconf.h
+ 	endif
+ 	ifeq ($(CONFIG_ARCH_SDM450), y)
+ 		include $(AUDIO_ROOT)/config/sdm670auto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/sdm670autoconf.h
+ 	endif
+ 	ifeq ($(CONFIG_ARCH_SM8150), y)
+ 		ifdef CONFIG_SND_SOC_SA8155
+ 			include $(AUDIO_ROOT)/config/sa8155auto.conf
+-			export
++
+ 			INCS    +=  -include $(AUDIO_ROOT)/config/sa8155autoconf.h
+ 		else
+ 			include $(AUDIO_ROOT)/config/sm8150auto.conf
+-			export
++
+ 			INCS    +=  -include $(AUDIO_ROOT)/config/sm8150autoconf.h
+ 		endif
+ 	endif
+ 	ifeq ($(CONFIG_ARCH_SM6150), y)
+ 		ifdef CONFIG_SND_SOC_SA6155
+ 			include $(AUDIO_ROOT)/config/sa6155auto.conf
+-			export
++
+ 			INCS    +=  -include $(AUDIO_ROOT)/config/sa6155autoconf.h
+ 		else
+ 			include $(AUDIO_ROOT)/config/sm6150auto.conf
+-			export
++
+ 			INCS    +=  -include $(AUDIO_ROOT)/config/sm6150autoconf.h
+ 		endif
+ 	endif
+ 	ifeq ($(CONFIG_ARCH_TRINKET), y)
+ 		include $(AUDIO_ROOT)/config/trinketauto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/trinketautoconf.h
+ 	endif
+ 	ifeq ($(CONFIG_ARCH_SDMSHRIKE), y)
+ 		ifdef CONFIG_SND_SOC_SA8155
+ 			include $(AUDIO_ROOT)/config/sa8155auto.conf
+-			export
++
+ 			INCS    +=  -include $(AUDIO_ROOT)/config/sa8155autoconf.h
+ 		else
+ 			include $(AUDIO_ROOT)/config/sm8150auto.conf
+-			export
++
+ 			INCS    +=  -include $(AUDIO_ROOT)/config/sm8150autoconf.h
+ 		endif
+ 	endif
+ 	ifeq ($(CONFIG_ARCH_QCS405), y)
+ 		include $(AUDIO_ROOT)/config/qcs405auto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/qcs405autoconf.h
+ 	endif
+ 	ifeq ($(CONFIG_ARCH_SDXPRAIRIE), y)
+ 		include $(AUDIO_ROOT)/config/sdxprairieauto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/sdxprairieautoconf.h
+ 	endif
+ 	ifeq ($(CONFIG_QTI_GVM), y)
+ 		include $(AUDIO_ROOT)/config/gvmauto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/gvmautoconf.h
+ 	endif
+ 	ifeq ($(CONFIG_ARCH_SDM429W), y)
+ 		include $(AUDIO_ROOT)/config/sdm450auto.conf
+-		export
++
+ 		INCS    +=  -include $(AUDIO_ROOT)/config/sdm450autoconf.h
+ 	endif
+ endif

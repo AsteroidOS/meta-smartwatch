@@ -1,0 +1,131 @@
+From bdb7ef31494468c6ed98ede80d31704e7e143d56 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Darrel=20Gri=C3=ABt?= <dgriet@gmail.com>
+Date: Wed, 10 Jan 2024 21:58:07 +0100
+Subject: [PATCH] Import beluga makefile.
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Uses a known working makefile for kernel modules but adjusts it to fit the needs for hoki.
+
+Signed-off-by: Darrel Griët <dgriet@gmail.com>
+---
+ Makefile | 105 +++++++++++++++++++++++--------------------------------
+ 1 file changed, 44 insertions(+), 61 deletions(-)
+
+diff --git a/Makefile b/Makefile
+index b135f46..dc8069f 100644
+--- a/Makefile
++++ b/Makefile
+@@ -1,67 +1,50 @@
+-# auto-detect subdirs
+-ifeq ($(CONFIG_ARCH_SDM845), y)
+-include $(srctree)/techpack/audio/config/sdm845auto.conf
+-export
+-endif
+-ifeq ($(CONFIG_ARCH_SDM670), y)
+-include $(srctree)/techpack/audio/config/sdm670auto_static.conf
+-export
+-endif
+-ifeq ($(CONFIG_ARCH_SDXPOORWILLS), y)
+-include $(srctree)/techpack/audio/config/sdxpoorwillsauto.conf
+-export
+-endif
+-ifeq ($(CONFIG_ARCH_SM8150), y)
+-include $(srctree)/techpack/audio/config/sm8150auto.conf
+-export
+-endif
+-ifeq ($(CONFIG_ARCH_SDMSHRIKE), y)
+-include $(srctree)/techpack/audio/config/sm8150auto.conf
+-export
+-endif
++AUDIO_ROOT=$(PWD)
++UAPI_OUT=$(PWD)
++HEADER_INSTALL_DIR=$(KERNEL_SRC)/scripts
++KERNEL_BINARY_DIR=$(KERNEL_SRC)/../kernel-build-artifacts
+ 
+-ifeq ($(CONFIG_ARCH_SDM429W), y)
+-include $(srctree)/techpack/audio/config/sdm450auto.conf
+-export
+-endif
++KBUILD_OPTIONS := AUDIO_ROOT=$(PWD)
++KBUILD_OPTIONS += MODNAME=audio
++KBUILD_OPTIONS += UAPI_OUT=$(PWD)
+ 
+-# Use USERINCLUDE when you must reference the UAPI directories only.
+-USERINCLUDE     += \
+-                -I$(srctree)/techpack/audio/include/uapi \
++AUDIO_KERNEL_HEADERS_PATH1 =  $(shell ls ./include/uapi/linux/*.h)
++AUDIO_KERNEL_HEADERS_PATH2 =  $(shell ls ./include/uapi/linux/mfd/wcd9xxx/*.h)
++AUDIO_KERNEL_HEADERS_PATH3 =  $(shell ls ./include/uapi/sound/*.h)
+ 
+-# Use LINUXINCLUDE when you must reference the include/ directory.
+-# Needed to be compatible with the O= option
+-LINUXINCLUDE    += \
+-                -I$(srctree)/techpack/audio/include/uapi \
+-                -I$(srctree)/techpack/audio/include
++obj-m := ipc/
++obj-m += dsp/
+ 
+-ifeq ($(CONFIG_ARCH_SDM845), y)
+-LINUXINCLUDE    += \
+-                -include $(srctree)/techpack/audio/config/sdm845autoconf.h
+-endif
+-ifeq ($(CONFIG_ARCH_SDM670), y)
+-LINUXINCLUDE    += \
+-                -include $(srctree)/techpack/audio/config/sdm670autoconf.h
+-endif
+-ifeq ($(CONFIG_ARCH_SDXPOORWILLS), y)
+-LINUXINCLUDE    += \
+-                -include $(srctree)/techpack/audio/config/sdxpoorwillsautoconf.h
+-endif
+-ifeq ($(CONFIG_ARCH_SM8150), y)
+-LINUXINCLUDE    += \
+-                -include $(srctree)/techpack/audio/config/sm8150autoconf.h
+-endif
+-ifeq ($(CONFIG_ARCH_SDMSHRIKE), y)
+-LINUXINCLUDE    += \
+-                -include $(srctree)/techpack/audio/config/sm8150autoconf.h
+-endif
++obj-m += dsp/codecs/
+ 
+-ifeq ($(CONFIG_ARCH_SDM429W), y)
+-LINUXINCLUDE    += \
+-                -include $(srctree)/techpack/audio/config/sdm450autoconf.h
+-endif
++obj-m += soc/
++obj-m += asoc/
++obj-m += asoc/codecs/
+ 
+-obj-y += soc/
+-obj-y += dsp/
+-obj-y += ipc/
+-obj-y += asoc/
++all:
++	$(shell rm -fr $(shell pwd)/soc/core.h)
++	$(shell ln -s $(KERNEL_SRC)/drivers/pinctrl/core.h $(shell pwd)/soc/core.h)
++	$(shell rm -fr $(shell pwd)/include/soc/internal.h)
++	$(shell ln -s $(KERNEL_SRC)/drivers/base/regmap/internal.h $(shell pwd)/include/soc/internal.h)
++	$(shell rm -fr $(shell pwd)/soc/pinctrl-utils.h)
++	$(shell ln -s $(KERNEL_SRC)/drivers/pinctrl/pinctrl-utils.h $(shell pwd)/soc/pinctrl-utils.h)
++	$(shell mkdir $(shell pwd)/linux)
++	$(shell mkdir $(shell pwd)/sound)
++	$(shell mkdir $(shell pwd)/linux/mfd)
++	$(shell mkdir $(shell pwd)/linux/mfd/wcd9xxx)
++	$(shell cd $(KERNEL_BINARY_DIR) && $(KERNEL_SRC)/scripts/headers_install.sh $(UAPI_OUT)/linux/ $(AUDIO_ROOT)/include/uapi/linux/ $(notdir $(AUDIO_KERNEL_HEADERS_PATH1)))
++	$(shell cd $(KERNEL_BINARY_DIR) && $(KERNEL_SRC)/scripts/headers_install.sh $(UAPI_OUT)/linux/mfd/wcd9xxx/ $(AUDIO_ROOT)/include/uapi/linux/mfd/wcd9xxx/ $(notdir $(AUDIO_KERNEL_HEADERS_PATH2)))
++	$(shell cd $(KERNEL_BINARY_DIR) && $(KERNEL_SRC)/scripts/headers_install.sh $(UAPI_OUT)/sound/ $(AUDIO_ROOT)/include/uapi/sound/ $(notdir $(AUDIO_KERNEL_HEADERS_PATH3)))
++	$(shell mkdir $(KERNEL_BINARY_DIR)/usr/include/sound)
++	$(shell mkdir $(KERNEL_BINARY_DIR)/usr/include/linux/mfd)
++	$(shell mkdir $(KERNEL_BINARY_DIR)/usr/include/linux/mfd/wcd9xxx)
++	$(shell cd $(KERNEL_BINARY_DIR) && $(KERNEL_SRC)/scripts/headers_install.sh $(KERNEL_BINARY_DIR)/usr/include/linux/ $(AUDIO_ROOT)/include/uapi/linux/ $(notdir $(AUDIO_KERNEL_HEADERS_PATH1)))
++	$(shell cd $(KERNEL_BINARY_DIR) && $(KERNEL_SRC)/scripts/headers_install.sh $(KERNEL_BINARY_DIR)/usr/include/linux/mfd/wcd9xxx/ $(AUDIO_ROOT)/include/uapi/linux/mfd/wcd9xxx/ $(notdir $(AUDIO_KERNEL_HEADERS_PATH2)))
++	$(shell cd $(KERNEL_BINARY_DIR) && $(KERNEL_SRC)/scripts/headers_install.sh $(KERNEL_BINARY_DIR)/usr/include/sound/ $(AUDIO_ROOT)/include/uapi/sound/ $(notdir $(AUDIO_KERNEL_HEADERS_PATH3)))
++	$(MAKE) -C $(KERNEL_SRC) M=$(shell pwd) modules $(KBUILD_OPTIONS)
++
++modules_install:
++	$(MAKE) INSTALL_MOD_STRIP=1 -C $(KERNEL_SRC) M=$(shell pwd) modules_install
++
++clean:
++	rm -f *.o *.ko *.mod.c *.mod.o *~ .*.cmd Module.symvers
++	rm -rf .tmp_versions

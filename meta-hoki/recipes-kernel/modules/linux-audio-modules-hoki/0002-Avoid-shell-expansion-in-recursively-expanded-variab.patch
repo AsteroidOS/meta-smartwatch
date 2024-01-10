@@ -1,0 +1,196 @@
+From ad6fbf187ffa4f25004e5fcb4afe2cfc3e0c8b2e Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Darrel=20Gri=C3=ABt?= <dgriet@gmail.com>
+Date: Tue, 9 Jan 2024 22:29:27 +0100
+Subject: [PATCH] Avoid shell expansion in recursively-expanded variable.
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+GNU Make changed the behavior of that particular (avoidable and problematic) construct.
+Eagerly expanding the timestamp fixes the build on Mickledore.
+
+Co-authored-by: Philip Russell <argosphil@murena.io>
+Signed-off-by: Darrel Griët <dgriet@gmail.com>
+---
+ asoc/Kbuild                   | 3 ++-
+ asoc/codecs/Kbuild            | 3 ++-
+ asoc/codecs/aqt1000/Kbuild    | 3 ++-
+ asoc/codecs/bolero/Kbuild     | 3 ++-
+ asoc/codecs/csra66x0/Kbuild   | 3 ++-
+ asoc/codecs/ep92/Kbuild       | 3 ++-
+ asoc/codecs/msm_sdw/Kbuild    | 3 ++-
+ asoc/codecs/sdm660_cdc/Kbuild | 3 ++-
+ asoc/codecs/wcd934x/Kbuild    | 3 ++-
+ asoc/codecs/wcd9360/Kbuild    | 3 ++-
+ asoc/codecs/wcd937x/Kbuild    | 3 ++-
+ dsp/Kbuild                    | 3 ++-
+ dsp/codecs/Kbuild             | 3 ++-
+ ipc/Kbuild                    | 3 ++-
+ soc/Kbuild                    | 3 ++-
+ 15 files changed, 30 insertions(+), 15 deletions(-)
+
+diff --git a/asoc/Kbuild b/asoc/Kbuild
+index 32d747d..9beb346 100644
+--- a/asoc/Kbuild
++++ b/asoc/Kbuild
+@@ -306,4 +306,5 @@ obj-$(CONFIG_SND_SOC_MACHINE_SDXPRAIRIE) += machine_dlkm.o
+ machine_dlkm-y := $(MACHINE_OBJS)
+ 
+ # inject some build related information
+-DEFINES += -DBUILD_TIMESTAMP=\"$(shell date -u +'%Y-%m-%dT%H:%M:%SZ')\"
++TIMESTAMP := $(shell date -u +'%Y-%m-%dT%H:%M:%SZ')
++CDEFINES += -DBUILD_TIMESTAMP=\"$(TIMESTAMP)\"
+diff --git a/asoc/codecs/Kbuild b/asoc/codecs/Kbuild
+index a0255dd..5bd1d98 100644
+--- a/asoc/codecs/Kbuild
++++ b/asoc/codecs/Kbuild
+@@ -274,4 +274,5 @@ obj-$(CONFIG_SND_SOC_MSM_HDMI_CODEC_RX) += hdmi_dlkm.o
+ hdmi_dlkm-y := $(HDMICODEC_OBJS)
+ 
+ # inject some build related information
+-DEFINES += -DBUILD_TIMESTAMP=\"$(shell date -u +'%Y-%m-%dT%H:%M:%SZ')\"
++TIMESTAMP := $(shell date -u +'%Y-%m-%dT%H:%M:%SZ')
++CDEFINES += -DBUILD_TIMESTAMP=\"$(TIMESTAMP)\"
+diff --git a/asoc/codecs/aqt1000/Kbuild b/asoc/codecs/aqt1000/Kbuild
+index 69b530f..7748545 100644
+--- a/asoc/codecs/aqt1000/Kbuild
++++ b/asoc/codecs/aqt1000/Kbuild
+@@ -126,4 +126,5 @@ obj-$(CONFIG_SND_SOC_AQT1000) += aqt1000_cdc_dlkm.o
+ aqt1000_cdc_dlkm-y := $(AQT1000_CDC_OBJS)
+ 
+ # inject some build related information
+-DEFINES += -DBUILD_TIMESTAMP=\"$(shell date -u +'%Y-%m-%dT%H:%M:%SZ')\"
++TIMESTAMP := $(shell date -u +'%Y-%m-%dT%H:%M:%SZ')
++CDEFINES += -DBUILD_TIMESTAMP=\"$(TIMESTAMP)\"
+diff --git a/asoc/codecs/bolero/Kbuild b/asoc/codecs/bolero/Kbuild
+index ebd8ccf..b6e3a85 100644
+--- a/asoc/codecs/bolero/Kbuild
++++ b/asoc/codecs/bolero/Kbuild
+@@ -150,4 +150,5 @@ obj-$(CONFIG_RX_MACRO) += rx_macro_dlkm.o
+ rx_macro_dlkm-y := $(RX_OBJS)
+ 
+ # inject some build related information
+-DEFINES += -DBUILD_TIMESTAMP=\"$(shell date -u +'%Y-%m-%dT%H:%M:%SZ')\"
++TIMESTAMP := $(shell date -u +'%Y-%m-%dT%H:%M:%SZ')
++CDEFINES += -DBUILD_TIMESTAMP=\"$(TIMESTAMP)\"
+diff --git a/asoc/codecs/csra66x0/Kbuild b/asoc/codecs/csra66x0/Kbuild
+index 190ee69..633073a 100644
+--- a/asoc/codecs/csra66x0/Kbuild
++++ b/asoc/codecs/csra66x0/Kbuild
+@@ -111,4 +111,5 @@ obj-$(CONFIG_SND_SOC_CSRA66X0) += csra66x0_dlkm.o
+ csra66x0_dlkm-y := $(CSRA66X0_OBJS)
+ 
+ # inject some build related information
+-DEFINES += -DBUILD_TIMESTAMP=\"$(shell date -u +'%Y-%m-%dT%H:%M:%SZ')\"
++TIMESTAMP := $(shell date -u +'%Y-%m-%dT%H:%M:%SZ')
++CDEFINES += -DBUILD_TIMESTAMP=\"$(TIMESTAMP)\"
+diff --git a/asoc/codecs/ep92/Kbuild b/asoc/codecs/ep92/Kbuild
+index 46e7850..2899975 100644
+--- a/asoc/codecs/ep92/Kbuild
++++ b/asoc/codecs/ep92/Kbuild
+@@ -112,4 +112,5 @@ obj-$(CONFIG_SND_SOC_EP92) += ep92_dlkm.o
+ ep92_dlkm-y := $(EP92_OBJS)
+ 
+ # inject some build related information
+-DEFINES += -DBUILD_TIMESTAMP=\"$(shell date -u +'%Y-%m-%dT%H:%M:%SZ')\"
++TIMESTAMP := $(shell date -u +'%Y-%m-%dT%H:%M:%SZ')
++CDEFINES += -DBUILD_TIMESTAMP=\"$(TIMESTAMP)\"
+diff --git a/asoc/codecs/msm_sdw/Kbuild b/asoc/codecs/msm_sdw/Kbuild
+index 40a3485..c5fcdc2 100644
+--- a/asoc/codecs/msm_sdw/Kbuild
++++ b/asoc/codecs/msm_sdw/Kbuild
+@@ -126,4 +126,5 @@ obj-$(CONFIG_SND_SOC_MSM_SDW) += msm_sdw_dlkm.o
+ msm_sdw_dlkm-y := $(MSM_SDW_OBJS)
+ 
+ # inject some build related information
+-DEFINES += -DBUILD_TIMESTAMP=\"$(shell date -u +'%Y-%m-%dT%H:%M:%SZ')\"
++TIMESTAMP := $(shell date -u +'%Y-%m-%dT%H:%M:%SZ')
++CDEFINES += -DBUILD_TIMESTAMP=\"$(TIMESTAMP)\"
+diff --git a/asoc/codecs/sdm660_cdc/Kbuild b/asoc/codecs/sdm660_cdc/Kbuild
+index d58cfd9..6dfc6b8 100644
+--- a/asoc/codecs/sdm660_cdc/Kbuild
++++ b/asoc/codecs/sdm660_cdc/Kbuild
+@@ -141,4 +141,5 @@ obj-$(CONFIG_SND_SOC_DIGITAL_CDC_LEGACY) += audio_digital_cdc.o
+ audio_digital_cdc-y := $(DIGITAL_CDC_OBJS)
+ 
+ # inject some build related information
+-DEFINES += -DBUILD_TIMESTAMP=\"$(shell date -u +'%Y-%m-%dT%H:%M:%SZ')\"
++TIMESTAMP := $(shell date -u +'%Y-%m-%dT%H:%M:%SZ')
++CDEFINES += -DBUILD_TIMESTAMP=\"$(TIMESTAMP)\"
+diff --git a/asoc/codecs/wcd934x/Kbuild b/asoc/codecs/wcd934x/Kbuild
+index e4bbddb..a5423f2 100644
+--- a/asoc/codecs/wcd934x/Kbuild
++++ b/asoc/codecs/wcd934x/Kbuild
+@@ -147,4 +147,5 @@ obj-$(CONFIG_SND_SOC_WCD934X) += wcd934x_dlkm.o
+ wcd934x_dlkm-y := $(WCD934X_OBJS)
+ 
+ # inject some build related information
+-DEFINES += -DBUILD_TIMESTAMP=\"$(shell date -u +'%Y-%m-%dT%H:%M:%SZ')\"
++TIMESTAMP := $(shell date -u +'%Y-%m-%dT%H:%M:%SZ')
++CDEFINES += -DBUILD_TIMESTAMP=\"$(TIMESTAMP)\"
+diff --git a/asoc/codecs/wcd9360/Kbuild b/asoc/codecs/wcd9360/Kbuild
+index 9b9a411..eaa1851 100644
+--- a/asoc/codecs/wcd9360/Kbuild
++++ b/asoc/codecs/wcd9360/Kbuild
+@@ -116,4 +116,5 @@ obj-$(CONFIG_SND_SOC_WCD9360) += wcd9360_dlkm.o
+ wcd9360_dlkm-y := $(WCD9360_OBJS)
+ 
+ # inject some build related information
+-DEFINES += -DBUILD_TIMESTAMP=\"$(shell date -u +'%Y-%m-%dT%H:%M:%SZ')\"
++TIMESTAMP := $(shell date -u +'%Y-%m-%dT%H:%M:%SZ')
++CDEFINES += -DBUILD_TIMESTAMP=\"$(TIMESTAMP)\"
+diff --git a/asoc/codecs/wcd937x/Kbuild b/asoc/codecs/wcd937x/Kbuild
+index f99cda0..31ed43f 100644
+--- a/asoc/codecs/wcd937x/Kbuild
++++ b/asoc/codecs/wcd937x/Kbuild
+@@ -124,4 +124,5 @@ obj-$(CONFIG_SND_SOC_WCD937X_SLAVE) += wcd937x_slave_dlkm.o
+ wcd937x_slave_dlkm-y := $(WCD937X_SLAVE_OBJS)
+ 
+ # inject some build related information
+-DEFINES += -DBUILD_TIMESTAMP=\"$(shell date -u +'%Y-%m-%dT%H:%M:%SZ')\"
++TIMESTAMP := $(shell date -u +'%Y-%m-%dT%H:%M:%SZ')
++CDEFINES += -DBUILD_TIMESTAMP=\"$(TIMESTAMP)\"
+diff --git a/dsp/Kbuild b/dsp/Kbuild
+index 950bba5..650c7be 100644
+--- a/dsp/Kbuild
++++ b/dsp/Kbuild
+@@ -272,4 +272,5 @@ obj-$(CONFIG_MSM_QDSP6_NOTIFIER) += audio_q6_notifier.o
+ audio_q6_notifier-y := $(QDSP6_NOTIFIER_OBJS)
+ 
+ # inject some build related information
+-DEFINES += -DBUILD_TIMESTAMP=\"$(shell date -u +'%Y-%m-%dT%H:%M:%SZ')\"
++TIMESTAMP := $(shell date -u +'%Y-%m-%dT%H:%M:%SZ')
++CDEFINES += -DBUILD_TIMESTAMP=\"$(TIMESTAMP)\"
+diff --git a/dsp/codecs/Kbuild b/dsp/codecs/Kbuild
+index 32366f2..a49c476 100644
+--- a/dsp/codecs/Kbuild
++++ b/dsp/codecs/Kbuild
+@@ -179,4 +179,5 @@ obj-$(CONFIG_MSM_QDSP6V2_CODECS) += audio_native.o
+ audio_native-y := $(NATIVE_OBJS)
+ 
+ # inject some build related information
+-DEFINES += -DBUILD_TIMESTAMP=\"$(shell date -u +'%Y-%m-%dT%H:%M:%SZ')\"
++TIMESTAMP := $(shell date -u +'%Y-%m-%dT%H:%M:%SZ')
++CDEFINES += -DBUILD_TIMESTAMP=\"$(TIMESTAMP)\"
+diff --git a/ipc/Kbuild b/ipc/Kbuild
+index 436fbaa..e329f09 100644
+--- a/ipc/Kbuild
++++ b/ipc/Kbuild
+@@ -202,4 +202,5 @@ obj-$(CONFIG_WCD_DSP_GLINK) += wglink_dlkm.o
+ wglink_dlkm-y := $(WDSP_GLINK)
+ 
+ # inject some build related information
+-CDEFINES += -DBUILD_TIMESTAMP=\"$(shell date -u +'%Y-%m-%dT%H:%M:%SZ')\"
++CTIMESTAMP := $(shell date -u +'%Y-%m-%dT%H:%M:%SZ')
++CDEFINES += -DBUILD_TIMESTAMP=\"$(TIMESTAMP)\"
+diff --git a/soc/Kbuild b/soc/Kbuild
+index aef236f..4b268d5 100644
+--- a/soc/Kbuild
++++ b/soc/Kbuild
+@@ -215,4 +215,5 @@ obj-$(CONFIG_WCD_SPI_AC) += wcd_spi_acc_ctl_dlkm.o
+ wcd_spi_acc_ctl_dlkm-y := $(WCD_SPI_ACC_CTL_OBJS)
+ 
+ # inject some build related information
+-DEFINES += -DBUILD_TIMESTAMP=\"$(shell date -u +'%Y-%m-%dT%H:%M:%SZ')\"
++TIMESTAMP := $(shell date -u +'%Y-%m-%dT%H:%M:%SZ')
++CDEFINES += -DBUILD_TIMESTAMP=\"$(TIMESTAMP)\"

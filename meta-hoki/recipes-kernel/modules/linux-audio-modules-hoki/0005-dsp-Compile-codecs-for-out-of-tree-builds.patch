@@ -1,0 +1,28 @@
+From 3ad3f67492cd49f7a35174bde51377018a72c2bd Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Darrel=20Gri=C3=ABt?= <dgriet@gmail.com>
+Date: Wed, 10 Jan 2024 22:01:15 +0100
+Subject: [PATCH] dsp: Compile codecs for out-of-tree builds.
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: Darrel Griët <dgriet@gmail.com>
+---
+ dsp/Kbuild | 4 +---
+ 1 file changed, 1 insertion(+), 3 deletions(-)
+
+diff --git a/dsp/Kbuild b/dsp/Kbuild
+index 08d32b2..4571e50 100644
+--- a/dsp/Kbuild
++++ b/dsp/Kbuild
+@@ -244,9 +244,7 @@ ifeq ($(KERNEL_BUILD), 0)
+ 
+ endif
+ 
+-ifeq ($(KERNEL_BUILD), 1)
+-	obj-y += codecs/
+-endif
++obj-y += codecs/
+ 
+ ifeq ($(CONFIG_SND_SOC_GCOV), y)
+ GCOV_PROFILE := y
