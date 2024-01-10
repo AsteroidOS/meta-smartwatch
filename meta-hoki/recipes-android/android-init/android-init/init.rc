@@ -63,8 +63,28 @@ service vendor.bluetooth-1-0 /vendor/bin/hw/android.hardware.bluetooth@1.0-servi
 service vendor.per_mgr /vendor/bin/pm-service
     class core
 
+on property:init.svc.vendor.per_mgr=running
+    start vendor.per_proxy
+
+service vendor.per_proxy /system/vendor/bin/pm-proxy
+    class core
+    disabled
+
 service sidekickgraphics-hal-1-2 /vendor/bin/hw/vendor.qti.hardware.sidekickgraphics@1.2-service
     class hal
+
+service vendor.sensors-hal-1-0 /vendor/bin/hw/android.hardware.sensors@1.0-service
+    class hal
+    oneshot
+
+service vendor.sensors.qti /vendor/bin/sensors.qti
+    class core
+
+service adsprpcd /system/vendor/bin/adsprpcd
+    class core
+
+service adsprpcd_sensorspd /system/vendor/bin/adsprpcd sensorspd
+    class core
 
 on property:sys.boot_completed=1
     exec -- /vendor/bin/init.rsb.sh
