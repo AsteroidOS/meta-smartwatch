@@ -1,0 +1,77 @@
+From 9e86dee81292384b1aa46b1e6a9969209ada6975 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Darrel=20Gri=C3=ABt?= <dgriet@gmail.com>
+Date: Wed, 10 Jan 2024 22:00:57 +0100
+Subject: [PATCH] Ignore compilation warnings.
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: Darrel Griët <dgriet@gmail.com>
+---
+ asoc/Kbuild        | 1 -
+ asoc/codecs/Kbuild | 1 -
+ dsp/Kbuild         | 1 -
+ dsp/codecs/Kbuild  | 1 -
+ soc/Kbuild         | 1 -
+ 5 files changed, 5 deletions(-)
+
+diff --git a/asoc/Kbuild b/asoc/Kbuild
+index 9beb346..e9737f9 100644
+--- a/asoc/Kbuild
++++ b/asoc/Kbuild
+@@ -229,7 +229,6 @@ CDEFINES +=	-DANI_LITTLE_BYTE_ENDIAN \
+ 		-DANI_OS_TYPE_ANDROID=6 \
+ 		-DPTT_SOCK_SVC_ENABLE \
+ 		-Wall\
+-		-Werror\
+ 		-D__linux__
+ 
+ KBUILD_CPPFLAGS += $(CDEFINES)
+diff --git a/asoc/codecs/Kbuild b/asoc/codecs/Kbuild
+index 5bd1d98..ef8323c 100644
+--- a/asoc/codecs/Kbuild
++++ b/asoc/codecs/Kbuild
+@@ -200,7 +200,6 @@ CDEFINES +=	-DANI_LITTLE_BYTE_ENDIAN \
+ 		-DANI_OS_TYPE_ANDROID=6 \
+ 		-DPTT_SOCK_SVC_ENABLE \
+ 		-Wall\
+-		-Werror\
+ 		-D__linux__
+ 
+ KBUILD_CPPFLAGS += $(CDEFINES)
+diff --git a/dsp/Kbuild b/dsp/Kbuild
+index 650c7be..08d32b2 100644
+--- a/dsp/Kbuild
++++ b/dsp/Kbuild
+@@ -207,7 +207,6 @@ CDEFINES +=	-DANI_LITTLE_BYTE_ENDIAN \
+ 		-DANI_OS_TYPE_ANDROID=6 \
+ 		-DPTT_SOCK_SVC_ENABLE \
+ 		-Wall\
+-		-Werror\
+ 		-D__linux__
+ 
+ KBUILD_CPPFLAGS += $(CDEFINES)
+diff --git a/dsp/codecs/Kbuild b/dsp/codecs/Kbuild
+index a49c476..d00f6ca 100644
+--- a/dsp/codecs/Kbuild
++++ b/dsp/codecs/Kbuild
+@@ -142,7 +142,6 @@ CDEFINES +=	-DANI_LITTLE_BYTE_ENDIAN \
+ 		-DANI_OS_TYPE_ANDROID=6 \
+ 		-DPTT_SOCK_SVC_ENABLE \
+ 		-Wall\
+-		-Werror\
+ 		-D__linux__
+ 
+ KBUILD_CPPFLAGS += $(CDEFINES)
+diff --git a/soc/Kbuild b/soc/Kbuild
+index 4b268d5..9df7ed3 100644
+--- a/soc/Kbuild
++++ b/soc/Kbuild
+@@ -164,7 +164,6 @@ CDEFINES +=	-DANI_LITTLE_BYTE_ENDIAN \
+ 		-DANI_OS_TYPE_ANDROID=6 \
+ 		-DPTT_SOCK_SVC_ENABLE \
+ 		-Wall\
+-		-Werror\
+ 		-D__linux__
+ 
+ KBUILD_CPPFLAGS += $(CDEFINES)
