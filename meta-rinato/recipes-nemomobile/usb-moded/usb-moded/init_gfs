@@ -1,0 +1,38 @@
+#!/bin/sh
+
+# TODO: Actually set unique serial
+#serial="$(cat /proc/cmdline | sed 's/.*androidboot.serialno=//' | sed 's/ .*//')"
+serial="1234"
+
+mkdir -p /config
+mount -t configfs none /config
+mkdir -p /config/usb_gadget/g1
+
+echo 0x0e8d > /config/usb_gadget/g1/idVendor
+echo 0x0010 > /config/usb_gadget/g1/idProduct
+
+mkdir /config/usb_gadget/g1/strings/0x409
+echo $serial > /config/usb_gadget/g1/strings/0x409/serialnumber
+echo AsteroidOS > /config/usb_gadget/g1/strings/0x409/manufacturer
+hostname > /config/usb_gadget/g1/strings/0x409/product
+
+mkdir -p /config/usb_gadget/g1/configs/b.1/strings/0x409
+mkdir -p /config/usb_gadget/g1/functions/
+
+# Everything below is a horrible hack to actually skip usb-moded (!) and
+# statically configure the usb gadget interface to a rndis with static IP.
+# This is bad. If you read this, you should be horrified and try to fix it.
+
+mkdir /config/usb_gadget/g1/functions/rndis.usb0
+mkdir /config/usb_gadget/g1/configs/c.1
+mkdir /config/usb_gadget/g1/configs/c.1/strings/0x409
+echo "rndis" > /config/usb_gadget/g1/configs/c.1/strings/0x409/configuration
+
+ln -s /config/usb_gadget/g1/functions/rndis.usb0 /config/usb_gadget/g1/configs/c.1
+echo "$(ls /sys/class/udc)" > /config/usb_gadget/g1/UDC
+
+ifconfig usb0 192.168.2.15
+
+while true; do
+    sleep 1
+done
