@@ -14,9 +14,9 @@ SRC_URI = " \
     git://git@github.com/casept/linux-samsung-smartwatch.git;protocol=https;branch=rinato \
     file://defconfig \
 "
-SRC_URI[sha256sum] = "f6d1699d47fe8c91390c87acf3ffd744ae83e078286c721a4354b191f52a91df"
+SRC_URI[sha256sum] = "ffdfff9d47fe8c91390c87acf3fff744ae83e078286c721a4354b191f52a91df"
 
-SRCREV = "f3f0d721b742dbe7002b75370cd0038aa2b70c79"
+SRCREV = "d35f7c44230930186cf401d7ac009ac3ca80c422"
 
 LINUX_VERSION ?= "next"
 KERNEL_VERSION_SANITY_SKIP="1"
