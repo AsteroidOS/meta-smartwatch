@@ -1,0 +1,38 @@
+From 72ba11ab1f06cd77ce6a7ede2c695d9a23f19ab4 Mon Sep 17 00:00:00 2001
+From: Philip Russell <argosphil@murena.io>
+Date: Tue, 12 Sep 2023 20:15:11 +0000
+Subject: [PATCH] disable interrupts
+
+---
+ aw882xx.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/aw882xx.c b/aw882xx.c
+index 9c3881e..ac670f6 100644
+--- a/aw882xx.c
++++ b/aw882xx.c
+@@ -2511,7 +2511,7 @@ static int aw882xx_i2c_probe(struct i2c_client *i2c,
+ 		return ret;
+ 
+ 	/*aw882xx irq*/
+-	aw882xx_interrupt_init(aw882xx);
++	// aw882xx_interrupt_init(aw882xx);
+ 
+ 	/*codec register*/
+ 	ret = aw_componet_codec_register(aw882xx);
+@@ -2520,10 +2520,12 @@ static int aw882xx_i2c_probe(struct i2c_client *i2c,
+ 		return ret;
+ 	}
+ 
++#if 0
+ 	/*create reinit class*/
+ 	ret = aw882xx_reinit_class_init(aw882xx);
+ 	if (ret)
+ 		return ret;
++#endif
+ 
+ 	/*create attr*/
+ 	ret = sysfs_create_group(&i2c->dev.kobj, &aw882xx_attribute_group);
+-- 
+2.41.0
+
