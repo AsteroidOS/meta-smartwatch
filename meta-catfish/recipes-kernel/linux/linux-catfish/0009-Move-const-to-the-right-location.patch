@@ -1,0 +1,28 @@
+From d5ef82215b6e08ec806ce9be4e3852fbae4370d5 Mon Sep 17 00:00:00 2001
+From: Ed Beroset <beroset@ieee.org>
+Date: Fri, 6 Oct 2023 21:04:29 -0400
+Subject: [PATCH] Move const to the right location
+
+This fixes a small bug in the code in which a duplicate const
+declaration was apparently intended to be a const pointer to a const
+location.
+
+Signed-off-by: Ed Beroset <beroset@ieee.org>
+
+---
+ include/linux/msm_mhi.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/include/linux/msm_mhi.h b/include/linux/msm_mhi.h
+index 08dc3a23abfa..a5ffa23a32d0 100644
+--- a/include/linux/msm_mhi.h
++++ b/include/linux/msm_mhi.h
+@@ -107,7 +107,7 @@ struct mhi_cb_info {
+ 
+ struct mhi_client_info_t {
+ 	enum MHI_CLIENT_CHANNEL chan;
+-	const struct device const *dev;
++	const struct device * const dev;
+ 	const char *node_name;
+ 	void (*mhi_client_cb)(struct mhi_cb_info *);
+ 	bool pre_allocate;

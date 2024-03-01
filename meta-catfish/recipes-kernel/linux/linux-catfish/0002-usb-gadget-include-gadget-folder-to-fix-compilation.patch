@@ -1,4 +1,4 @@
-From 2627bcd9bdfb2769f20a64c88931839ae4284bac Mon Sep 17 00:00:00 2001
+From d39d6394e0137c1002ce9b523cfc1f71cc7d4061 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Darrel=20Gri=C3=ABt?= <dgriet@gmail.com>
 Date: Tue, 17 May 2022 22:20:45 +0200
 Subject: [PATCH] usb: gadget: include gadget folder to fix compilation.

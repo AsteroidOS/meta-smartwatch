@@ -1,0 +1,31 @@
+From 0798c68764dbfa7e0536e660736e6ee0733201f6 Mon Sep 17 00:00:00 2001
+From: Ed Beroset <beroset@ieee.org>
+Date: Fri, 6 Oct 2023 11:59:35 -0400
+Subject: [PATCH] Add missing BT_6LOWPAN option to bluetooth Kconfig
+
+This adds the BT_6LOWPAN option back in.  It may have been deleted by
+accident.
+
+Signed-off-by: Ed Beroset <beroset@ieee.org>
+
+---
+ net/bluetooth/Kconfig | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/net/bluetooth/Kconfig b/net/bluetooth/Kconfig
+index 81f837f6d934..b8c794b87523 100644
+--- a/net/bluetooth/Kconfig
++++ b/net/bluetooth/Kconfig
+@@ -58,6 +58,12 @@ config BT_LE
+ 	depends on BT
+ 	default y
+ 
++config BT_6LOWPAN
++	tristate "Bluetooth 6LoWPAN support"
++	depends on BT_LE && 6LOWPAN
++	help
++	  IPv6 compression over Bluetooth Low Energy.
++
+ config BT_SELFTEST
+ 	bool "Bluetooth self testing support"
+ 	depends on BT && DEBUG_KERNEL

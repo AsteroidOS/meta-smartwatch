@@ -1,0 +1,81 @@
+From c6d3a6f4364f63cf981a1a26f35df14164fcdaf3 Mon Sep 17 00:00:00 2001
+From: Ed Beroset <beroset@ieee.org>
+Date: Mon, 9 Oct 2023 23:40:02 -0400
+Subject: [PATCH] catfish: export symbols needed by 6lowpan
+
+This adds some symbol exports that are needed by the bluetooth_6lowpan
+module.
+
+Signed-off-by: Ed Beroset <beroset@ieee.org>
+---
+ net/bluetooth/l2cap_core.c | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/net/bluetooth/l2cap_core.c b/net/bluetooth/l2cap_core.c
+index eda4304b5dde..fe20526e1259 100644
+--- a/net/bluetooth/l2cap_core.c
++++ b/net/bluetooth/l2cap_core.c
+@@ -213,6 +213,7 @@ done:
+ 	write_unlock(&chan_list_lock);
+ 	return err;
+ }
++EXPORT_SYMBOL(l2cap_add_psm);
+ 
+ int l2cap_add_scid(struct l2cap_chan *chan,  __u16 scid)
+ {
+@@ -452,6 +453,7 @@ struct l2cap_chan *l2cap_chan_create(void)
+ 
+ 	return chan;
+ }
++EXPORT_SYMBOL(l2cap_chan_create);
+ 
+ static void l2cap_chan_destroy(struct kref *kref)
+ {
+@@ -479,6 +481,7 @@ void l2cap_chan_put(struct l2cap_chan *c)
+ 
+ 	kref_put(&c->kref, l2cap_chan_destroy);
+ }
++EXPORT_SYMBOL(l2cap_chan_put);
+ 
+ void l2cap_chan_set_defaults(struct l2cap_chan *chan)
+ {
+@@ -497,6 +500,7 @@ void l2cap_chan_set_defaults(struct l2cap_chan *chan)
+ 
+ 	set_bit(FLAG_FORCE_ACTIVE, &chan->flags);
+ }
++EXPORT_SYMBOL(l2cap_chan_set_defaults);
+ 
+ static void l2cap_le_flowctl_init(struct l2cap_chan *chan)
+ {
+@@ -638,6 +642,7 @@ void l2cap_chan_del(struct l2cap_chan *chan, int err)
+ 
+ 	return;
+ }
++EXPORT_SYMBOL(l2cap_chan_del);
+ 
+ static void l2cap_conn_update_id_addr(struct work_struct *work)
+ {
+@@ -743,6 +748,7 @@ void l2cap_chan_close(struct l2cap_chan *chan, int reason)
+ 		break;
+ 	}
+ }
++EXPORT_SYMBOL(l2cap_chan_close);
+ 
+ static inline u8 l2cap_get_auth_type(struct l2cap_chan *chan)
+ {
+@@ -2544,6 +2550,7 @@ int l2cap_chan_send(struct l2cap_chan *chan, struct msghdr *msg, size_t len)
+ 
+ 	return err;
+ }
++EXPORT_SYMBOL(l2cap_chan_send);
+ 
+ static void l2cap_send_srej(struct l2cap_chan *chan, u16 txseq)
+ {
+@@ -7179,6 +7186,7 @@ done:
+ 	hci_dev_put(hdev);
+ 	return err;
+ }
++EXPORT_SYMBOL(l2cap_chan_connect);
+ 
+ /* ---- L2CAP interface with lower layer (HCI) ---- */
+ 
