@@ -1,4 +1,4 @@
-From a79befbbde55d81301c459702e654d6b714c064c Mon Sep 17 00:00:00 2001
+From 47059bf004d00ff4cbfaa3b29511b936413ca1a0 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Darrel=20Gri=C3=ABt?= <dgriet@gmail.com>
 Date: Sun, 4 Sep 2022 17:08:45 +0200
 Subject: [PATCH] Backport mainline 4.1 Bluetooth subsystem
@@ -7,6 +7,7 @@ Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 
 Signed-off-by: Darrel Griët <dgriet@gmail.com>
+
 ---
  drivers/bluetooth/hci_h4.c        |  140 +-
  drivers/bluetooth/hci_ldisc.c     |  134 +-
@@ -31112,6 +31113,3 @@ index 86a683a8b491..6cf872563ea7 100644
 +#endif
 +
  #endif /* __SMP_H */
--- 
-2.36.1
-

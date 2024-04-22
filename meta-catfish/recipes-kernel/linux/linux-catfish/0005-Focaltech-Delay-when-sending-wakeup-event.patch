@@ -1,4 +1,4 @@
-From c199fcff42cbc559de3418d3348e6841867c94ce Mon Sep 17 00:00:00 2001
+From 20558045bef883b7fb1a5f695669ba04b28dabf8 Mon Sep 17 00:00:00 2001
 From: MagneFire <IDaNLContact@gmail.com>
 Date: Sun, 28 Nov 2021 21:29:31 +0100
 Subject: [PATCH] Focaltech: Delay when sending wakeup event.
