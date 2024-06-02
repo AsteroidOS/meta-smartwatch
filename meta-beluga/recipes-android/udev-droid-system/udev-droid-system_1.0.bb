@@ -8,6 +8,6 @@ S = "${WORKDIR}"
 B = "${S}"
 
 do_install:append() {
-    install -d ${D}/lib/udev/rules.d
-    install -m 644 ${WORKDIR}/998-droid-system.rules ${D}/lib/udev/rules.d/
+    install -d ${D}${nonarch_base_libdir}/udev/rules.d
+    install -m 644 ${WORKDIR}/998-droid-system.rules ${D}${nonarch_base_libdir}/udev/rules.d/
 }
