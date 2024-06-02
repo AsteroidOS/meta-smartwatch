@@ -1,4 +1,4 @@
-From 87800a42079d40e1e6117a7f8568b094ade5f4f3 Mon Sep 17 00:00:00 2001
+From 2e985dfd77fa9147b74f67f61cdf927397bac0e5 Mon Sep 17 00:00:00 2001
 From: Lrs121 <lrs@lrsservers.net>
 Date: Wed, 29 Jun 2016 12:35:40 -0700
 Subject: [PATCH] Makefile patch fixes ASUS_SW_VER error

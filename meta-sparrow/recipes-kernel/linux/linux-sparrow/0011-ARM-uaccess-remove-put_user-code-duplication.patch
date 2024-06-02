@@ -1,4 +1,4 @@
-From a52b5fe8ad9100c4e2bbf7442a31773015255814 Mon Sep 17 00:00:00 2001
+From 0d458ac0672ef6678bec2c40c0e12848e603e4ab Mon Sep 17 00:00:00 2001
 From: Aussell King <rmk+kernel@arm.linux.org.uk>
 Date: Sun, 2 Dec 2018 19:34:23 +0100
 Subject: [PATCH] ARM: uaccess: remove put_user() code duplication

@@ -1,4 +1,4 @@
-From 4c445b05a2ee37d6eac857cdc3bcada5e220be6c Mon Sep 17 00:00:00 2001
+From 3f24463f00d5a92cce043f1619b28dac8d46dbb6 Mon Sep 17 00:00:00 2001
 From: Lrs121 <lrs@lrsservers.net>
 Date: Thu, 30 Jun 2016 12:09:06 -0700
 Subject: [PATCH] Add files needed for device_trace.h

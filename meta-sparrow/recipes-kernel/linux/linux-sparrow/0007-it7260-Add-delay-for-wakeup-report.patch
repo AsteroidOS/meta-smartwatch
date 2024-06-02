@@ -1,4 +1,4 @@
-From 45f7702ec9af6a715070368b536965b82e171548 Mon Sep 17 00:00:00 2001
+From e5263972b1bf78140df37b47c0b71928129515b1 Mon Sep 17 00:00:00 2001
 From: MagneFire <IDaNLContact@gmail.com>
 Date: Wed, 29 Dec 2021 22:29:38 +0100
 Subject: [PATCH] it7260: Add delay for wakeup report. AsteroidOS requires the
@@ -12,10 +12,10 @@ Subject: [PATCH] it7260: Add delay for wakeup report. AsteroidOS requires the
  1 file changed, 1 insertion(+)
 
 diff --git a/drivers/input/touchscreen/it7260_ts_i2c.c b/drivers/input/touchscreen/it7260_ts_i2c.c
-index f498b2de8fa..61288b4bbfc 100644
+index a45eb7137e0d..77a0302f5ff0 100644
 --- a/drivers/input/touchscreen/it7260_ts_i2c.c
 +++ b/drivers/input/touchscreen/it7260_ts_i2c.c
-@@ -1566,6 +1566,7 @@ static void readTouchDataPoint_Ambient(void)
+@@ -1560,6 +1560,7 @@ static void readTouchDataPoint_Ambient(void)
  					input_report_abs(gl_ts->touch_dev, ABS_MT_POSITION_X, AMB_x1);
  					input_report_abs(gl_ts->touch_dev, ABS_MT_POSITION_Y, AMB_y1);
  					input_sync(gl_ts->touch_dev);
@@ -23,6 +23,3 @@ index f498b2de8fa..61288b4bbfc 100644
  					input_mt_slot(gl_ts->touch_dev,0);
  					input_mt_report_slot_state(gl_ts->touch_dev, MT_TOOL_FINGER, false);
  					input_sync(gl_ts->touch_dev);
--- 
-2.33.1
-

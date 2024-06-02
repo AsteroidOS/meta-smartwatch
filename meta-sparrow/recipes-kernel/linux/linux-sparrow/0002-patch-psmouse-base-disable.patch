@@ -1,4 +1,4 @@
-From 6150867c0c0f9917c3bd2b3d8bfd0aa822a2d0f4 Mon Sep 17 00:00:00 2001
+From 223ed48feb9b861c47c9a949b5d77767b493111c Mon Sep 17 00:00:00 2001
 From: Florent Revest <revestflo@gmail.com>
 Date: Fri, 1 Jul 2016 23:22:27 +0200
 Subject: [PATCH] psmouse-base: disable references to lifebook_detect which
