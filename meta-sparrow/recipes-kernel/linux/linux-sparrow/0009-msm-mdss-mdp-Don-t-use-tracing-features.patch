@@ -1,4 +1,4 @@
-From 9256ff6945d469ffd728eb05f3cd810bf51e97a6 Mon Sep 17 00:00:00 2001
+From ae5dcddb840abc1991bef60f78810346f21260cb Mon Sep 17 00:00:00 2001
 From: Florent Revest <revestflo@gmail.com>
 Date: Mon, 16 Jan 2017 15:09:57 +0100
 Subject: [PATCH] msm-mdss-mdp: Don't use tracing features

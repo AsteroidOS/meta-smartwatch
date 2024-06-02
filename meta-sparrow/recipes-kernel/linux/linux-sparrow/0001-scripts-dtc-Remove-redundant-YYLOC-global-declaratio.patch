@@ -1,4 +1,4 @@
-From 40dbadddef50a52e2393b76e66af10ae94cd6687 Mon Sep 17 00:00:00 2001
+From 9e6f260ae81993c8bf8761c47ccbcd3fc6532e87 Mon Sep 17 00:00:00 2001
 From: Dirk Mueller <dmueller@suse.com>
 Date: Tue, 14 Jan 2020 18:53:41 +0100
 Subject: [PATCH] scripts/dtc: Remove redundant YYLOC global declaration

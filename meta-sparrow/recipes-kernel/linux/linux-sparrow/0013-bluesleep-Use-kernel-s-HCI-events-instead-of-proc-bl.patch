@@ -1,4 +1,4 @@
-From 53b142f6d430143df6e20ed58fb4e9957d6003f4 Mon Sep 17 00:00:00 2001
+From d7377e48f262ded3eef2ed77e3f6cfffd211ec9d Mon Sep 17 00:00:00 2001
 From: Florent Revest <revestflo@gmail.com>
 Date: Tue, 14 Feb 2017 16:53:03 +0100
 Subject: [PATCH] bluesleep: Use kernel's HCI events instead of

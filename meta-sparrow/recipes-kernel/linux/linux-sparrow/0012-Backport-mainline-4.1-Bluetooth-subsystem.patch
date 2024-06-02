@@ -1,4 +1,4 @@
-From 2b90b19c9946e3ccdace692979bce227709b8c7b Mon Sep 17 00:00:00 2001
+From 13912004e3f7d1d32b3121452e304f9a40bc7c86 Mon Sep 17 00:00:00 2001
 From: Florent Revest <revestflo@gmail.com>
 Date: Sun, 18 Sep 2016 11:37:50 +0200
 Subject: [PATCH] Backport mainline 4.1 Bluetooth subsystem
