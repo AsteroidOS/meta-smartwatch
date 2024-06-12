@@ -16,20 +16,20 @@ SRCREV = "fe84f346a9337b5ad4a474895e1a62c52aad7f36"
 PV = "master"
 S = "${WORKDIR}/git"
 
-FILES:${PN} += " /lib/firmware "
+FILES:${PN} += " /usr/lib/firmware "
 
 do_install() {
-        install -m 0755 -d ${D}/lib/firmware/
+        install -m 0755 -d ${D}/usr/lib/firmware/
         # Touch screen
-        install -m 0755 -d ${D}/lib/firmware/tsp_melfas/w/
-        install -m 0644 ${S}/rinato/tsp_melfas/w/* ${D}/lib/firmware/tsp_melfas/w/
+        install -m 0755 -d ${D}/usr/lib/firmware/tsp_melfas/w/
+        install -m 0644 ${S}/rinato/tsp_melfas/w/* ${D}/usr/lib/firmware/tsp_melfas/w/
         # BT / Wi-Fi
-        install -m 0755 -d ${D}/lib/firmware/brcm/
-        cp ${S}/rinato/brcm/bcm4334W.hcd ${D}/lib/firmware/brcm/BCM.hcd
-        cp ${S}/rinato/brcm/brcmfmac43342-sdio.bin ${D}/lib/firmware/brcm/brcmfmac43342-sdio.samsung,rinato.bin
-        cp ${S}/rinato/brcm/brcmfmac43342-sdio.txt ${D}/lib/firmware/brcm/brcmfmac43342-sdio.txt
+        install -m 0755 -d ${D}/usr/lib/firmware/brcm/
+        cp ${S}/rinato/brcm/bcm4334W.hcd ${D}/usr/lib/firmware/brcm/BCM.hcd
+        cp ${S}/rinato/brcm/brcmfmac43342-sdio.bin ${D}/usr/lib/firmware/brcm/brcmfmac43342-sdio.samsung,rinato.bin
+        cp ${S}/rinato/brcm/brcmfmac43342-sdio.txt ${D}/usr/lib/firmware/brcm/brcmfmac43342-sdio.txt
         # Misc. accelerators / codecs
-        install -m 0644 ${S}/rinato/s5p* ${D}/lib/firmware/
+        install -m 0644 ${S}/rinato/s5p* ${D}/usr/lib/firmware/
         # Sensor hub
-        install -m 0644 ${S}/rinato/ssp* ${D}/lib/firmware/
+        install -m 0644 ${S}/rinato/ssp* ${D}/usr/lib/firmware/
 }
