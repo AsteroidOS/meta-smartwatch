@@ -17,6 +17,7 @@ SRC_URI = "git://android.googlesource.com/kernel/msm;branch=android-msm-bass-3.1
     file://0006-ARM-uaccess-remove-put_user-code-duplication.patch \
     file://0007-random-introduce-getrandom-2-system-call.patch \
     file://0008-ARM-wire-up-getrandom-syscall.patch \
+    file://0009-ARM-8933-1-replace-Sun-Solaris-style-flag-on-section.patch \
     file://defconfig \
     file://img_info "
 SRCREV = "4bcdb1888f288bff5bed803dc79ee6a9121d71c7"
