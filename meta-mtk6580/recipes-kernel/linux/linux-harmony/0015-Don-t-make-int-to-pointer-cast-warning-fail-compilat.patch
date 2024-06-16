@@ -1,0 +1,26 @@
+From fa55d589eecb270c144087848a239d92f82a4fef Mon Sep 17 00:00:00 2001
+From: casept <davids.paskevics@gmail.com>
+Date: Sun, 16 Jun 2024 03:33:02 +0200
+Subject: [PATCH] Don't make int-to-pointer-cast warning fail compilation
+
+Newer compilers seem to detect this in spots older ones
+didn't, causing build failures. As the risk of introducing
+bugs is probably greater with an incorrect fix than letting
+it be, simply disable the warning.
+---
+ Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Makefile b/Makefile
+index 97a78af6..9fc0039c 100644
+--- a/Makefile
++++ b/Makefile
+@@ -374,7 +374,7 @@ KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
+ 		   -Werror-implicit-function-declaration \
+ 		   -Wno-format-security \
+ 		   -fno-delete-null-pointer-checks \
+-		   -Werror=format -Werror=int-to-pointer-cast -Werror=pointer-to-int-cast
++		   -Werror=format -Werror=pointer-to-int-cast
+ 
+ KBUILD_AFLAGS_KERNEL :=
+ KBUILD_CFLAGS_KERNEL :=
