@@ -16,6 +16,7 @@ SRC_URI = " git://android.googlesource.com/kernel/msm;branch=android-msm-ray-3.1
     file://0003-touchscreen-raydium-Add-delay-for-wakeup-report.patch \
     file://0004-Backport-mainline-4.1-Bluetooth-subsystem.patch \
     file://0005-video-mdp3-Continue-when-the-overlay-wasn-t-released.patch \
+    file://0006-ARM-8933-1-replace-Sun-Solaris-style-flag-on-section.patch \
 "
 
 SRCREV = "ceb81fda35a733c904776eaaabd72dddf1e603c9"
