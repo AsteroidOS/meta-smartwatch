@@ -12,7 +12,9 @@ SRC_URI = "git://android.googlesource.com/kernel/msm;branch=android-msm-swift-3.
     file://defconfig \
     file://img_info \
     file://0001-scripts-dtc-Remove-redundant-YYLOC-global-declaratio.patch \
-    file://0003-ARM-uaccess-remove-put_user-code-duplication.patch"
+    file://0003-ARM-uaccess-remove-put_user-code-duplication.patch \
+    file://0004-ARM-8933-1-replace-Sun-Solaris-style-flag-on-section.patch \
+    "
 SRCREV = "2f958570bcf7457da4827dc8da5ff3195d447cb3"
 LINUX_VERSION ?= "3.18"
 PV = "${LINUX_VERSION}+marshmallow"
