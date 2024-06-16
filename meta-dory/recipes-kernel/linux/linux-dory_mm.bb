@@ -20,6 +20,7 @@ SRC_URI = "git://android.googlesource.com/kernel/msm;branch=android-msm-dory-3.1
     file://0007-ARM-uaccess-remove-put_user-code-duplication.patch \
     file://0008-random-introduce-getrandom-2-system-call.patch \
     file://0009-ARM-wire-up-getrandom-syscall.patch \
+    file://0010-ARM-8933-1-replace-Sun-Solaris-style-flag-on-section.patch \
 "
 SRCREV = "6924014484d3406e3d2da384efc20e40e8a5ae80"
 LINUX_VERSION ?= "3.10"
