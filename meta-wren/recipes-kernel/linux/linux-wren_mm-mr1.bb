@@ -30,6 +30,7 @@ SRC_URI = "git://android.googlesource.com/kernel/msm;branch=android-msm-wren-3.1
     file://0019-Use-normal-touch-handling-all-the-time.patch \
     file://0020-Disable-isTouchLocked.patch \
     file://0021-ARM-uaccess-remove-put_user-code-duplication.patch \
+    file://0022-ARM-8933-1-replace-Sun-Solaris-style-flag-on-section.patch \
     file://defconfig \
     file://img_info "
 SRCREV = "00f21f748f01888888909f9f58280f5a363cd5f9"
