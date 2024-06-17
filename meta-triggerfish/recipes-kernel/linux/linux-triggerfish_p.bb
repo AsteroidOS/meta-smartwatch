@@ -18,6 +18,7 @@ SRC_URI = "git://android.googlesource.com/kernel/msm;branch=android-msm-triggerf
            file://0001-Add-Fossil-device-tree-files.patch \
            file://0002-scripts-dtc-Remove-redundant-YYLOC-global-declaratio.patch \
            file://0003-Force-triggerfish-DTB-to-build.patch \
+           file://0004-ARM-8933-1-replace-Sun-Solaris-style-flag-on-section.patch \
            "
 
 SRCREV = "82824770e036a1e7576a299bc37b52d633d62675"
