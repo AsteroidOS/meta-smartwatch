@@ -18,6 +18,7 @@ SRC_URI = "git://android.googlesource.com/kernel/msm;branch=android-msm-lenok-3.
            file://0007-ARM-uaccess-remove-put_user-code-duplication.patch \
            file://0008-random-introduce-getrandom-2-system-call.patch \
            file://0009-ARM-wire-up-getrandom-syscall.patch \
+           file://0010-ARM-8933-1-replace-Sun-Solaris-style-flag-on-section.patch \
            file://defconfig \
            file://img_info \
            "
