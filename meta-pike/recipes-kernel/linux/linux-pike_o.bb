@@ -17,6 +17,7 @@ SRC_URI = "git://android.googlesource.com/kernel/mediatek;branch=android-mediate
     file://0003-ARM-uaccess-remove-put_user-code-duplication.patch \
     file://0004-random-introduce-getrandom-2-system-call.patch \
     file://0005-ARM-wire-up-getrandom-syscall.patch \
+    file://0006-ARM-8933-1-replace-Sun-Solaris-style-flag-on-section.patch \
     file://defconfig \
     file://img_info"
 SRCREV = "5f7ba64dbb0f566149f5190db8c229da623a54bb"
