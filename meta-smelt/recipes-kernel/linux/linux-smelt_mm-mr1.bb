@@ -22,6 +22,7 @@ SRC_URI = " git://android.googlesource.com/kernel/msm;branch=android-msm-smelt-3
     file://0009-mdss_mdp_pipe-Don-t-allocate-first-RGB-pipe.patch \
     file://0010-random-introduce-getrandom-2-system-call.patch \
     file://0011-ARM-wire-up-getrandom-syscall.patch \
+    file://0012-ARM-8933-1-replace-Sun-Solaris-style-flag-on-section.patch \
 "
 
 SRCREV = "49608c8bfc75360f7ac54f539ce326b90034bc9d"
