@@ -28,6 +28,7 @@ SRC_URI = "git://android.googlesource.com/kernel/bcm;branch=android-bcm-tetra-3.
     file://0011-broadcom-modem-rpc-Disable-logs-which-cause-a-compil.patch \
     file://0012-random-introduce-getrandom-2-system-call.patch \
     file://0013-ARM-wire-up-getrandom-syscall.patch \
+    file://0014-ARM-8933-1-replace-Sun-Solaris-style-flag-on-section.patch \
 "
 SRCREV = "0de8b342797a4074625055e77d37d5367d8ff285"
 LINUX_VERSION ?= "3.10"
