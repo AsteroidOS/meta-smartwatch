@@ -9,8 +9,7 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=d7810fab7487fb0aad327b76f1be7cd7"
 COMPATIBLE_MACHINE = "mooneye"
 
 # Use an older version of gcc (gcc >= 9 doesn't boot.)
-DEPENDS:remove = "virtual/${TARGET_PREFIX}gcc"
-DEPENDS += "virtual/${TARGET_PREFIX}gcc8"
+inherit kernel-gcc8
 
 SRC_URI = "git://android.googlesource.com/kernel/mediatek;branch=android-mediatek-mooneye-4.4-oreo-wear-dr;protocol=https \
     file://0001-Fix-various-drivers-compilation-with-a-recent-GCC.patch \
