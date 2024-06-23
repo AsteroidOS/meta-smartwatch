@@ -73,6 +73,9 @@ service vendor.per_proxy /system/vendor/bin/pm-proxy
 service sidekickgraphics-hal-1-2 /vendor/bin/hw/vendor.qti.hardware.sidekickgraphics@1.2-service
     class hal
 
+service nfc_hal_service /vendor/bin/hw/android.hardware.nfc@1.1-service
+    class hal
+
 service vendor.sensors-hal-1-0 /vendor/bin/hw/android.hardware.sensors@1.0-service
     class hal
     oneshot
