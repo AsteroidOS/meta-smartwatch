@@ -8,7 +8,9 @@ LICENSE = "GPL-2.0-only"
 LIC_FILES_CHKSUM = "file://COPYING;md5=d7810fab7487fb0aad327b76f1be7cd7"
 COMPATIBLE_MACHINE = "beluga"
 
-#    file://0016-dts-msm8909w-Enable-more-GPU-clock-frequencies.patch 
+# Use an older version of gcc (gcc >= 13 doesn't boot.)
+inherit kernel-gcc8
+
 SRC_URI = " git://android.googlesource.com/kernel/msm;branch=android-msm-beluga-4.9-pie-wear-mr2;protocol=https \
     file://defconfig \
     file://img_info \
