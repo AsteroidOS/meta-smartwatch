@@ -8,6 +8,9 @@ LICENSE = "GPL-2.0-only"
 LIC_FILES_CHKSUM = "file://COPYING;md5=d7810fab7487fb0aad327b76f1be7cd7"
 COMPATIBLE_MACHINE = "hoki"
 
+# Use an older version of gcc (gcc >= 13 doesn't boot.)
+inherit kernel-gcc8
+
 SRC_URI = "git://github.com/fossil-engineering/kernel-msm-fossil-cw;branch=fossil-android-msm-hoki-lw1.2-4.14;protocol=https \
            file://defconfig \
            file://img_info \
