@@ -14,7 +14,7 @@ PACKAGE_ARCH = "${MACHINE_ARCH}"
 
 do_install:append() {
     install -d ${D}/etc/systemd/system/timers.target.wants/
-    ln -s /usr/lib/systemd/system/hands-timesync.timer ${D}/etc/systemd/system/timers.target.wants/hands-timesync.timer
+    ln -s ${systemd_system_unitdir}/hands-timesync.timer ${D}/etc/systemd/system/timers.target.wants/hands-timesync.timer
 }
 
-FILES:${PN} += "/usr/lib/systemd/system/ /etc/systemd/"
+FILES:${PN} += "${systemd_system_unitdir} /etc/systemd/"
