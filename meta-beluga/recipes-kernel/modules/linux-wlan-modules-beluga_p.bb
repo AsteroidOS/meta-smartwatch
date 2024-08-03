@@ -23,6 +23,6 @@ SYSTEMD_PACKAGES = "${PN}"
 SYSTEMD_SERVICE:${PN} = "wlan-module-load.service"
 
 do_install:append() {
-    install -d ${D}/lib/systemd/system/
-    cp ${WORKDIR}/wlan-module-load.service ${D}/lib/systemd/system/
+    install -d ${D}${systemd_system_unitdir}
+    install -m 644 -D ${WORKDIR}/wlan-module-load.service ${D}${systemd_system_unitdir}/wlan-module-load.service
 }
