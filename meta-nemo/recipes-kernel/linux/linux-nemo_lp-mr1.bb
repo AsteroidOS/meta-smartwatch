@@ -13,6 +13,7 @@ SRC_URI = "git://android.googlesource.com/kernel/msm;branch=android-msm-nemo-3.1
     file://0002-static-inline-in-ARM-ftrace.h.patch;striplevel=1 \
     file://0003-ARM-uaccess-remove-put_user-code-duplication.patch \
     file://0004-ARM-8933-1-replace-Sun-Solaris-style-flag-on-section.patch \
+    file://0005-vfs-allow-umount-to-handle-mountpoints-without-reval.patch \
     file://defconfig \
     file://img_info "
 SRCREV = "504f3357f3ef296bf5ccbfe05df2025fa41eb354"
