@@ -23,6 +23,7 @@ SRC_URI = " git://android.googlesource.com/kernel/msm;branch=android-msm-smelt-3
     file://0010-random-introduce-getrandom-2-system-call.patch \
     file://0011-ARM-wire-up-getrandom-syscall.patch \
     file://0012-ARM-8933-1-replace-Sun-Solaris-style-flag-on-section.patch \
+    file://0013-vfs-allow-umount-to-handle-mountpoints-without-reval.patch \
 "
 
 SRCREV = "49608c8bfc75360f7ac54f539ce326b90034bc9d"
