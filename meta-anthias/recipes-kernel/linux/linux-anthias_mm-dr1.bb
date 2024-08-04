@@ -24,6 +24,7 @@ SRC_URI = "git://android.googlesource.com/kernel/msm;branch=android-msm-anthias-
            file://0011-random-introduce-getrandom-2-system-call.patch \
            file://0012-ARM-wire-up-getrandom-syscall.patch \
            file://0013-ARM-8933-1-replace-Sun-Solaris-style-flag-on-section.patch \
+           file://0014-vfs-allow-umount-to-handle-mountpoints-without-reval.patch \
            "
 SRCREV = "5d054632429188226b8c1e1e545475c89ad4c582"
 LINUX_VERSION ?= "3.10"
