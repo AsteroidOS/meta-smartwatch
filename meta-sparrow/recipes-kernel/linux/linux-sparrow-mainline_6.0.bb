@@ -11,6 +11,7 @@ COMPATIBLE_MACHINE = "sparrow"
 DEPENDS += "rsync-native"
 
 SRC_URI = "git://github.com/z3ntu/linux;branch=qcom-msm8226-6.0.y-dsi;protocol=https \
+    file://0001-ata-ahci-fix-enum-constants-for-gcc-13.patch \
     file://defconfig \
     file://img_info "
 SRCREV = "70abf059e2b6984116e2e4fd3894fa91a829e248"
