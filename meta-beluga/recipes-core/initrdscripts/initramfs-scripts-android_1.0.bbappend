@@ -4,8 +4,8 @@ SRC_URI:append:beluga = " file://init.machine.sh \
     file://ld.config.28.txt"
 
 do_install:append:beluga() {
-    install -m 0755 ${WORKDIR}/init.machine.sh ${D}/init.machine
-    install -m 0755 ${WORKDIR}/ld.config.28.txt ${D}/ld.config.28.txt
+    install -m 0755 ${UNPACKDIR}/init.machine.sh ${D}/init.machine
+    install -m 0755 ${UNPACKDIR}/ld.config.28.txt ${D}/ld.config.28.txt
 }
 
 RDEPENDS:${PN}:append:beluga = " msm-fb-refresher"
