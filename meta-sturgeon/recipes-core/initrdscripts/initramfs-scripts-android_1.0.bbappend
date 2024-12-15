@@ -4,7 +4,7 @@ COMPATIBLE_MACHINE:sturgeon = "sturgeon"
 SRC_URI:append:sturgeon = " file://init.machine.sh"
 
 do_install:append:sturgeon() {
-    install -m 0755 ${WORKDIR}/init.machine.sh ${D}/init.machine
+    install -m 0755 ${UNPACKDIR}/init.machine.sh ${D}/init.machine
 }
 
 FILES:${PN} += "/init.machine"

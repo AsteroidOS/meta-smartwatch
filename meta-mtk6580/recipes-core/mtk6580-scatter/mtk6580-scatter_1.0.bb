@@ -5,7 +5,8 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/PD;md5=b3597d12946881e13cb3b548
 FILESEXTRAPATHS:prepend := "${THISDIR}/${PN}:"
 SRC_URI = "file://MT6580_AsteroidOS_scatter.txt"
 
-S = "${WORKDIR}"
+S = "${WORKDIR}/sources"
+UNPACKDIR = "${S}"
 
 inherit deploy kernel-artifact-names
 

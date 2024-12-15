@@ -11,12 +11,13 @@ PACKAGE_ARCH = "${MACHINE_ARCH}"
 INHIBIT_PACKAGE_STRIP = "1"
 COMPATIBLE_MACHINE = "catfish"
 INSANE_SKIP:${PN} = "already-stripped"
-S = "${WORKDIR}"
+S = "${WORKDIR}/sources"
+UNPACKDIR = "${S}"
 B = "${S}"
 
 do_install() {
     install -d ${D}/usr/libexec/hal-droid/system/lib/
-    install -m 644 ${WORKDIR}/libmcutool.so ${D}/usr/libexec/hal-droid/system/lib/
+    install -m 644 ${UNPACKDIR}/libmcutool.so ${D}/usr/libexec/hal-droid/system/lib/
 }
 
 # FIXME: QA Issue: Architecture did not match (40 to 164) on /work/dory-oe-linux-gnueabi/android/lollipop-r0/packages-split/android-system/system/vendor/firmware/adsp.b00 [arch]

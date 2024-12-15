@@ -4,8 +4,8 @@ SRC_URI:append:mooneye = " file://nonplat_property_contexts \
     file://plat_property_contexts"
 
 do_install:append:mooneye() {
-    install -m 0644 ${WORKDIR}/nonplat* ${D}/
-    install -m 0644 ${WORKDIR}/plat* ${D}/
+    install -m 0644 ${UNPACKDIR}/nonplat* ${D}/
+    install -m 0644 ${UNPACKDIR}/plat* ${D}/
 }
 
 FILES:${PN} += "/nonplat* /plat*"
