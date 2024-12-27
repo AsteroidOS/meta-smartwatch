@@ -21,6 +21,16 @@ startadbd() {
 
 # wait for the middle button to be pressed, and if it is,
 # kill the calling process group with SIGUSR1
+# The format of these events is documented here:
+# https://github.com/torvalds/linux/blob/master/include/uapi/linux/input.h#L28-L47
+# u32 - tv_sec
+# u32 - tv_usec
+# u16 - type
+# u16 - code
+# s32 - value 
+# On this watch the middle button has a type of 0x74
+# and the bottom button is 0x10a
+# The top button is encoded in a different event.
 waitmidbutton() {
     fmtstring='1/4 "%d." 1/4 "%d\t" 1/2 "%2x\t" 1/2 "%2x\t" 1/4 "%u\n"'
     result=$(hexdump -n16 -e "${fmtstring}" /dev/input/event0 | cut -f3 -)
