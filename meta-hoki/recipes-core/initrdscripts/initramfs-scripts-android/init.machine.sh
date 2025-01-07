@@ -27,7 +27,7 @@ startadbd() {
 # u32 - tv_usec
 # u16 - type
 # u16 - code
-# s32 - value 
+# s32 - value
 # On this watch the middle button has a type of 0x74
 # and the bottom button is 0x10a
 # The top button is encoded in a different event.
@@ -42,9 +42,9 @@ waitmidbutton() {
 if [ ! -e $BOOT_DIR/etc/asteroid/machine.conf ] ; then
     startadbd
 else
-# wait for either 5 seconds or for the user to hit the middle button
+# wait for either 1 second or for the user to hit the middle button
 # If the timout expires, the watch boots normally; otherwise it starts ADB daemon
     trap "startadbd" SIGUSR1
     waitmidbutton $$ &
-    sleep 5
+    sleep 1
 fi
