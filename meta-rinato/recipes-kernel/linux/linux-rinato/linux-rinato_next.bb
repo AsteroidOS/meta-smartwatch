@@ -8,11 +8,11 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=6bc538ed5bd9a7fc9398086aedcd7e46"
 COMPATIBLE_MACHINE = "rinato"
 
 SRC_URI = " \
-    git://git@github.com/casept/linux-samsung-smartwatch.git;protocol=https;branch=rinato \
+    git://git@github.com/casept/linux-samsung-smartwatch.git;protocol=https;branch=samsung-smartwatch \
 "
 SRC_URI[sha256sum] = "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
 
-SRCREV = "a9ed2839f8a3a80112c581af2ef6603e7cd7bff3"
+SRCREV = "bf245d6426986d0b24e1d8d2a671726c2f994862"
 
 LINUX_VERSION ?= "next"
 KERNEL_VERSION_SANITY_SKIP="1"
