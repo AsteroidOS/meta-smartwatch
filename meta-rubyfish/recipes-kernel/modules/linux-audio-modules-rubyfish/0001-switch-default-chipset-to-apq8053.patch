@@ -1,0 +1,25 @@
+From 5dcd85ecab11d2267eccea985b69c6fa7715d080 Mon Sep 17 00:00:00 2001
+From: Philip Russell <argosphil@murena.io>
+Date: Wed, 13 Sep 2023 06:51:08 +0000
+Subject: [PATCH] switch default chipset to apq8053
+
+---
+ Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Makefile b/Makefile
+index 8b6dc876..8fa4d481 100755
+--- a/Makefile
++++ b/Makefile
+@@ -5,7 +5,7 @@ KBUILD_OPTIONS += MODNAME?=audio
+ KBUILD_OPTIONS += HEADER_INSTALL_DIR=$(KERNEL_SRC)/scripts
+ KBUILD_OPTIONS += UAPI_OUT=$(PWD)
+ 
+-TARGET_SUPPORT := apq8009
++TARGET_SUPPORT := apq8053
+ 
+ ifeq ($(TARGET_SUPPORT), $(filter $(TARGET_SUPPORT), sdm670 qcs605))
+ KBUILD_OPTIONS += CONFIG_ARCH_SDM670=y
+-- 
+2.41.0
+

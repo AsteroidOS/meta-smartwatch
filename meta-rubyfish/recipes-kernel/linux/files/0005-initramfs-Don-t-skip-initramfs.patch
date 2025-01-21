@@ -1,0 +1,25 @@
+From 719ae887caf99550c5361aa4ac544ede1303f40d Mon Sep 17 00:00:00 2001
+From: MagneFire <dgriet@gmail.com>
+Date: Tue, 26 Apr 2022 22:10:42 +0200
+Subject: [PATCH] initramfs: Don't skip initramfs.
+
+---
+ init/initramfs.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/init/initramfs.c b/init/initramfs.c
+index bf3af10c500a..f022ba0faba3 100644
+--- a/init/initramfs.c
++++ b/init/initramfs.c
+@@ -613,7 +613,7 @@ static int __init skip_initramfs_param(char *str)
+ {
+ 	if (*str)
+ 		return 0;
+-	do_skip_initramfs = 1;
++	//do_skip_initramfs = 1;
+ 	return 1;
+ }
+ __setup("skip_initramfs", skip_initramfs_param);
+-- 
+2.35.1
+
