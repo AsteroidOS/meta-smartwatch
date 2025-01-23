@@ -3,6 +3,7 @@ From: Florent Revest <revestflo@gmail.com>
 Date: Fri, 10 Feb 2017 19:55:17 +0100
 Subject: [PATCH] msm-mdss-mdp: Don't use tracing features
 
+Upstream-Status: Inappropriate
 ---
  drivers/video/msm/mdss/mdss_mdp.c            |  3 ---
  drivers/video/msm/mdss/mdss_mdp_ctl.c        | 28 ----------------------------

@@ -25,6 +25,7 @@ cc1: all warnings being treated as errors
 which means the declaration is completely redundant and can just be
 dropped.
 
+Upstream-Status: Inappropriate
 Signed-off-by: Dirk Mueller <dmueller@suse.com>
 Signed-off-by: David Gibson <david@gibson.dropbear.id.au>
 [robh: cherry-pick from upstream]

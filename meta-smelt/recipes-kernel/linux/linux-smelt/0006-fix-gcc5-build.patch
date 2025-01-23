@@ -2,6 +2,7 @@ From 05dc6a46ebf9bc84c80725415d6c9d9b7cd0e950 Mon Sep 17 00:00:00 2001
 From: Ben Cordero <bencord0@condi.me>
 Date: Tue, 27 Dec 2016 12:08:52 +0000
 
+Upstream-Status: Inappropriate
 ---
  arch/arm/include/asm/ftrace.h    | 2 +-
  arch/arm/kernel/return_address.c | 5 -----

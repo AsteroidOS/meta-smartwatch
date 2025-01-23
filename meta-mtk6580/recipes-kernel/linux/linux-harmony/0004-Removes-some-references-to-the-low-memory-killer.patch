@@ -3,6 +3,7 @@ From: Florent Revest <revestflo@gmail.com>
 Date: Tue, 27 Jun 2017 13:44:03 +0200
 Subject: [PATCH 03/11] Removes some references to the low memory killer
 
+Upstream-Status: Inappropriate
 ---
  drivers/misc/mediatek/mlog/mlog_logger.c | 3 ++-
  mm/vmscan.c                              | 3 +--

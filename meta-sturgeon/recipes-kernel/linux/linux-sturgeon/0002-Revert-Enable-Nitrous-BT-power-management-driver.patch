@@ -4,6 +4,7 @@ Date: Wed, 25 Dec 2019 14:52:42 +0100
 Subject: [PATCH] Revert "Enable Nitrous BT power management driver."
 
 This reverts commit 4a3675d38d3b51976551983cd748fdbca63cb302.
+Upstream-Status: Inappropriate
 ---
  .../apq8026-sturgeon-bcm.dtsi                 | 23 +++++++++++--------
  arch/arm/mach-msm/Makefile                    |  2 +-

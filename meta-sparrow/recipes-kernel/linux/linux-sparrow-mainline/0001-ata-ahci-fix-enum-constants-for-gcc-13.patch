@@ -34,6 +34,7 @@ Cc: linux-ide@vger.kernel.org
 Cc: Damien Le Moal <damien.lemoal@opensource.wdc.com>
 Cc: stable@vger.kernel.org
 Cc: Randy Dunlap <rdunlap@infradead.org>
+Upstream-Status: Inappropriate
 Signed-off-by: Arnd Bergmann <arnd@arndb.de>
 Tested-by: Luis Machado <luis.machado@arm.com>
 Signed-off-by: Damien Le Moal <damien.lemoal@opensource.wdc.com>

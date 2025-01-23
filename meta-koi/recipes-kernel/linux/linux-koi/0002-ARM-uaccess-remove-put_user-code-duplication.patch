@@ -11,6 +11,7 @@ code which selected the implementation based upon the pointer size, and
 declared the local variable to hold the value to be put are common to
 both implementations.
 
+Upstream-Status: Inappropriate
 Signed-off-by: Darrel Griët <dgriet@gmail.com>
 ---
  arch/arm/include/asm/uaccess.h | 105 +++++++++++++++------------------

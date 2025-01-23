@@ -3,6 +3,7 @@ From: Daniel Landau <daniel@landau.fi>
 Date: Sat, 11 Mar 2017 10:37:08 +0200
 Subject: [PATCH] Use normal touch handling all the time
 
+Upstream-Status: Inappropriate
 ---
  drivers/input/touchscreen/it7260_ts_i2c.c | 6 ++++--
  1 file changed, 4 insertions(+), 2 deletions(-)

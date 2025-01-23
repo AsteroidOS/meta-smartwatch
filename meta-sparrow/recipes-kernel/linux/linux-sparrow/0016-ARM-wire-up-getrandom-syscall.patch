@@ -5,6 +5,7 @@ Subject: [PATCH] ARM: wire up getrandom syscall
 
 Add the new getrandom syscall for ARM.
 
+Upstream-Status: Inappropriate
 Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
 
 ---

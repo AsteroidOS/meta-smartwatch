@@ -3,6 +3,7 @@ From: Florent Revest <revestflo@gmail.com>
 Date: Mon, 18 Apr 2016 00:45:27 +0200
 Subject: [PATCH] Bluetooth: fixes a poorly done patch
 
+Upstream-Status: Inappropriate
 ---
  drivers/bluetooth/hci_ldisc.c |  2 +-
  drivers/bluetooth/hci_uart.h  |  4 +++-

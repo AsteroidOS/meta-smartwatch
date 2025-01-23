@@ -6,6 +6,7 @@ Subject: [PATCH 1/2] Remove the code duplication between put_user() and
  pointer size, and declared the local variable to hold the value to be put are
  common to both implementations.
 
+Upstream-Status: Inappropriate
 ---
  arch/arm/include/asm/uaccess.h | 129 ++++++++++++++++++++-------------
  1 file changed, 77 insertions(+), 52 deletions(-)

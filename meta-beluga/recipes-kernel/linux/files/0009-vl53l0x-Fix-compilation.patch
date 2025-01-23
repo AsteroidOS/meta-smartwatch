@@ -3,6 +3,7 @@ From: MagneFire <dgriet@gmail.com>
 Date: Thu, 10 Feb 2022 21:20:00 +0100
 Subject: [PATCH] vl53l0x: Fix compilation.
 
+Upstream-Status: Inappropriate
 ---
  drivers/input/misc/vl53l0x/inc/vl53l0x_platform.h     | 6 +++---
  drivers/input/misc/vl53l0x/src/vl53l0x_i2c_platform.c | 4 ++--

@@ -5,6 +5,7 @@ Subject: [PATCH] bluesleep: Use kernel's HCI events instead of
 
  /proc/bluetooth/sleep/ write to interface with BlueZ instead of Bluedroid
 
+Upstream-Status: Inappropriate
 ---
  drivers/BCM_LPM/bluesleep.c   | 28 ++++++++++++++++++++++++++++
  drivers/bluetooth/hci_ldisc.c |  4 ++++

@@ -4,6 +4,7 @@ Date: Tue, 16 May 2017 13:30:20 +0200
 Subject: [PATCH] msm_pwm_vibrator: Convert timed_output APIs to ff_memless
  input APIs
 
+Upstream-Status: Inappropriate
 ---
  drivers/input/ff-memless.c      |   2 +-
  drivers/misc/Kconfig            |   2 +-

@@ -4,6 +4,7 @@ Date: Tue, 16 Feb 2021 23:13:45 +0100
 Subject: [PATCH 3/4] bluetooth: Import Bluesleep driver. Import stock
  Bluesleep driver from sturgeon.
 
+Upstream-Status: Inappropriate
 ---
  arch/arm/mach-msm/Makefile    |   2 +-
  drivers/bluetooth/bluesleep.c | 859 ++++++++++++++++++++++++++++++++++

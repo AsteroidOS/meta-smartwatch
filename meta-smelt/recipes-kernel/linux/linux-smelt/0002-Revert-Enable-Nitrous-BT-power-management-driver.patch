@@ -5,6 +5,7 @@ Subject: [PATCH] Revert "Enable Nitrous BT power management driver."
 
 This reverts commit 8a347296e3c1b394d890fa28de06ea9c2b17d55f.
 
+Upstream-Status: Inappropriate
 ---
  arch/arm/boot/dts/apq8026-smelt-common.dtsi | 22 +++++++++++++--------
  drivers/bluetooth/Makefile                  |  3 ++-
