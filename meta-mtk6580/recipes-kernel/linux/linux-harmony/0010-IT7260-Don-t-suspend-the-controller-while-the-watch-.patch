@@ -4,6 +4,7 @@ Date: Thu, 31 Aug 2017 14:45:49 +0100
 Subject: [PATCH 09/11] IT7260: Don't suspend the controller while the watch is
  asleep to leverage the tap to unlock feature
 
+Upstream-Status: Inappropriate
 ---
  .../mediatek/it7250/IT7260_driver.c           | 201 +-----------------
  1 file changed, 2 insertions(+), 199 deletions(-)

@@ -11,6 +11,7 @@ drivers/video/fbdev/msm/auo/auo_hbm.c: In function 'auo_dsi_cmd_read':
 drivers/video/fbdev/msm/auo/auo_hbm.c:196:9: error: implicit declaration of function 'mdss_dsi_switch_page'; did you mean 'mdss_dsi_set_reg'? [-Werror=implicit-function-declaration]
   196 |         mdss_dsi_switch_page(ctrl, page);
 
+Upstream-Status: Inappropriate
 Signed-off-by: Darrel Griët <dgriet@gmail.com>
 ---
  drivers/video/fbdev/msm/auo/auo_hbm.c | 24 ++++++++++++++++++++++++

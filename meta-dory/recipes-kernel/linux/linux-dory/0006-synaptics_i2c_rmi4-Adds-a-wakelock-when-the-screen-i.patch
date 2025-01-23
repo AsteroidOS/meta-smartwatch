@@ -6,6 +6,7 @@ Subject: [PATCH] synaptics_i2c_rmi4: Adds a wakelock when the screen is
  would take >10 seconds before working because the watch would get back to
  sleep as soon as the IRQ would be received
 
+Upstream-Status: Inappropriate
 ---
  drivers/input/touchscreen/synaptics_i2c_rmi4.c | 10 ++++++++++
  drivers/input/touchscreen/synaptics_i2c_rmi4.h |  2 ++

@@ -5,6 +5,7 @@ Subject: [PATCH] Add files needed for device_trace.h
 
 Tons of missing files break build
 
+Upstream-Status: Inappropriate
 ---
  include/trace/mdss_mdp.h       | 908 +++++++++++++++++++++++++++++++++
  include/trace/mdss_mdp_trace.h | 255 +++++++++

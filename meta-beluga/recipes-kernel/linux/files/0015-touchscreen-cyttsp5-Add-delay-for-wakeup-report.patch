@@ -8,6 +8,7 @@ Subject: [PATCH] touchscreen: cyttsp5: Add delay for wakeup report. AsteroidOS
  finger is held down for atleast 200ms, this is done by emulating a 300ms
  touch.
 
+Upstream-Status: Inappropriate
 ---
  .../input/touchscreen/cyttsp5/cyttsp5_mt_common.c   | 13 +++++++++++++
  1 file changed, 13 insertions(+)

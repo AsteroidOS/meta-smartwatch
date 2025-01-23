@@ -3,6 +3,7 @@ From: MagneFire <dgriet@gmail.com>
 Date: Sun, 3 Apr 2022 00:27:44 +0200
 Subject: [PATCH] Backport mainline 4.1 Bluetooth drivers
 
+Upstream-Status: Inappropriate
 ---
  drivers/bluetooth/hci_h4.c    | 140 +++++++++++++++++++++++++------
  drivers/bluetooth/hci_ldisc.c | 150 ++++++++++++++++++++--------------

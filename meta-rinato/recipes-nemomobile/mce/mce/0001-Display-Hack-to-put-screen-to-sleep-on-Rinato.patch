@@ -3,6 +3,7 @@ From: casept <davids.paskevics@gmail.com>
 Date: Wed, 5 Feb 2025 19:18:54 +0000
 Subject: [PATCH] Display: Hack to put screen to sleep on Rinato
 
+Upstream-Status: Inappropriate
 ---
  mce-fbdev.c | 5 +++++
  1 file changed, 5 insertions(+)

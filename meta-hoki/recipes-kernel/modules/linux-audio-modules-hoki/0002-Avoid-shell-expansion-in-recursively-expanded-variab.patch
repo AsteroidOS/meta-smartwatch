@@ -10,6 +10,7 @@ GNU Make changed the behavior of that particular (avoidable and problematic) con
 Eagerly expanding the timestamp fixes the build on Mickledore.
 
 Co-authored-by: Philip Russell <argosphil@murena.io>
+Upstream-Status: Inappropriate
 Signed-off-by: Darrel Griët <dgriet@gmail.com>
 ---
  asoc/Kbuild                   | 3 ++-

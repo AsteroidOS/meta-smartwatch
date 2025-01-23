@@ -7,6 +7,7 @@ The HCI_OP_GET_MWS_TRANSPORT_CONFIG command isn't properly handled by
 the BT chip and causes our BT initialization to fail. To workaround
 this we're not sending this command for now as MWS isn't used anywhere
 yet.
+Upstream-Status: Inappropriate
 ---
  net/bluetooth/hci_core.c | 7 +++++++
  1 file changed, 7 insertions(+)

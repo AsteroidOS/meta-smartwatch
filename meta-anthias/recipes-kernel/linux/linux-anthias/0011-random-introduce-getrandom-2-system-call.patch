@@ -138,6 +138,7 @@ NOTES
 	is that it can block, and the increased complexity required to
 	deal with partially fulfilled getrandom(2) requests.
 
+Upstream-Status: Inappropriate
 Signed-off-by: Theodore Ts'o <tytso@mit.edu>
 Reviewed-by: Zach Brown <zab@zabbo.net>
 ---

@@ -8,6 +8,7 @@ Content-Transfer-Encoding: 8bit
 
 Uses a known working makefile for kernel modules but adjusts it to fit the needs for hoki.
 
+Upstream-Status: Inappropriate
 Signed-off-by: Darrel Griët <dgriet@gmail.com>
 ---
  Makefile | 105 +++++++++++++++++++++++--------------------------------

@@ -2,6 +2,7 @@ From 9ffe32a58f6c16f5030bbf1c5f525b241eb0fded Mon Sep 17 00:00:00 2001
 From: MagneFire <IDaNLContact@gmail.com>
 Date: Sat, 6 Jun 2020 22:34:51 +0200
 
+Upstream-Status: Inappropriate
 ---
  drivers/input/mouse/lifebook.h | 2 +-
  drivers/input/mouse/sentelic.h | 2 +-

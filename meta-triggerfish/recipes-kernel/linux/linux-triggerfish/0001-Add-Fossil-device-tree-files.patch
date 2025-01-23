@@ -4,6 +4,7 @@ Date: Wed, 9 Nov 2022 22:34:41 +0000
 Subject: [PATCH 1/2] Add Fossil device tree files from
  https://android.googlesource.com/kernel/msm-extra/config/+/refs/heads/android-msm-sole-4.9-pie-wear-mr1/8x09/
 
+Upstream-Status: Inappropriate
 ---
  arch/arm/boot/dts/fossil/8x09/Makefile        |  16 +
  .../dts/fossil/8x09/apq8009w-darter/Makefile  |   6 +

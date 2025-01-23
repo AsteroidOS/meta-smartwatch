@@ -5,6 +5,7 @@ Subject: [PATCH] Avoid shell expansion in recursively-expanded variable
 
 GNU Make changed the behavior of that particular (avoidable and problematic)
 construct. Eagerly expanding the timestamp fixes the build on Mickledore.
+Upstream-Status: Inappropriate
 ---
  asoc/Kbuild                   | 3 ++-
  asoc/codecs/Kbuild            | 3 ++-

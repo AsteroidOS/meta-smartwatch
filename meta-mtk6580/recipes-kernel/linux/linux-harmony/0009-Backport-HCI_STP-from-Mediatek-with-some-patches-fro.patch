@@ -4,6 +4,7 @@ Date: Thu, 27 Jul 2017 23:06:07 +0100
 Subject: [PATCH 08/11] Backport HCI_STP from Mediatek with some patches from
  Canonical
 
+Upstream-Status: Inappropriate
 ---
  backports/drivers/bluetooth/Kconfig           |    9 +
  backports/drivers/bluetooth/Makefile          |    8 +

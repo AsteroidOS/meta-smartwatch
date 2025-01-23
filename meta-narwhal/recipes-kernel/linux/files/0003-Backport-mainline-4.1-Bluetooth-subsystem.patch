@@ -3,6 +3,7 @@ From: MagneFire <dgriet@gmail.com>
 Date: Sun, 3 Apr 2022 00:18:34 +0200
 Subject: [PATCH] Backport mainline 4.1 Bluetooth subsystem
 
+Upstream-Status: Inappropriate
 ---
  include/linux/skbuff.h            |    5 +
  include/net/bluetooth/a2mp.h      |  150 +

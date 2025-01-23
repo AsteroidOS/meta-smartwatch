@@ -3,6 +3,7 @@ From: Florent Revest <revestflo@gmail.com>
 Date: Thu, 2 Mar 2017 12:54:42 +0100
 Subject: [PATCH] Use Bluesleep instead of Nitrous for BT power management
 
+Upstream-Status: Inappropriate
 ---
  .../devicetree/bindings/bluetooth/nitrous.txt      |  44 --
  arch/arm/boot/dts/qcom/WI500Q_EVB2_msm8226.dtsi    |  20 +-

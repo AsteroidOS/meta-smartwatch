@@ -8,6 +8,7 @@ Content-Transfer-Encoding: 8bit
 
 Instead use the default list provided by the android gadget driver.
 
+Upstream-Status: Inappropriate
 Signed-off-by: Darrel Griët <dgriet@gmail.com>
 ---
  arch/arm/boot/dts/apq8009w-sawshark/apq8009w-common.dtsi | 1 -

@@ -5,6 +5,7 @@ Subject: [PATCH] Revert "Add wake_peer hook to MSM HS UART driver."
 
 This reverts commit 4f3251a5db771bbed039b2ac27030d38b53c473c.
 
+Upstream-Status: Inappropriate
 ---
  drivers/tty/serial/msm_serial_hs.c          | 23 ++++++-----------------
  include/linux/platform_data/msm_serial_hs.h |  3 ---

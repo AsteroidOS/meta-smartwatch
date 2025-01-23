@@ -3,6 +3,7 @@ From: Florent Revest <revestflo@gmail.com>
 Date: Sat, 8 Jul 2017 11:28:05 +0100
 Subject: [PATCH] Application: Rotate screen for harmony
 
+Upstream-Status: Inappropriate
 ---
  src/controls/qml/Application.qml | 2 ++
  1 file changed, 2 insertions(+)

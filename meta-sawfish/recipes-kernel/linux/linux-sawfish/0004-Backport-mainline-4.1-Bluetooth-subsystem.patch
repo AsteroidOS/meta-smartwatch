@@ -3,6 +3,7 @@ From: MagneFire <IDaNLContact@gmail.com>
 Date: Tue, 16 Feb 2021 20:39:25 +0100
 Subject: [PATCH 1/4] Backport mainline 4.1 Bluetooth subsystem
 
+Upstream-Status: Inappropriate
 ---
  .gitignore                        |    1 +
  drivers/bluetooth/Kconfig         |   41 +

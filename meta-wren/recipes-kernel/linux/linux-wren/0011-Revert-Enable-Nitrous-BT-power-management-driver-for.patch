@@ -6,6 +6,7 @@ Subject: [PATCH] Revert "Enable Nitrous BT power management driver for both
 
 This reverts commit fd660c7daa1356bed24d26f97b667e76d64d7689.
 
+Upstream-Status: Inappropriate
 ---
  arch/arm/boot/dts/qcom/sparrow_er_105_msm8226.dtsi | 10 ----
  arch/arm/boot/dts/qcom/sparrow_er_msm8226.dtsi     | 10 ----

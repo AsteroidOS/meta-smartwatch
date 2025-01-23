@@ -13,6 +13,7 @@ arm-oe-linux-gnueabi-ld.bfd: /usr/src/debug/linux-hoki/4.14+pie-r0/git/drivers/u
 arm-oe-linux-gnueabi-ld.bfd: drivers/usb/phy/phy-msm-usb.o: in function `msm_otg_resume':
 /usr/src/debug/linux-hoki/4.14+pie-r0/git/drivers/usb/phy/phy-msm-usb.c:1839: undefined reference to `usb_hcd_resume_root_hub'
 
+Upstream-Status: Inappropriate
 Signed-off-by: Darrel Griët <dgriet@gmail.com>
 ---
  include/linux/usb/hcd.h | 10 ++++++++++

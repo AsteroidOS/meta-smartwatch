@@ -3,6 +3,7 @@ From: Florent Revest <revestflo@gmail.com>
 Date: Tue, 17 Oct 2017 19:21:51 +0200
 Subject: [PATCH] Adapt to what tetra's hwcomposer expects
 
+Upstream-Status: Inappropriate
 ---
  hwcomposer/hwcomposer_backend_v11.cpp | 14 +++++++-------
  1 file changed, 7 insertions(+), 7 deletions(-)

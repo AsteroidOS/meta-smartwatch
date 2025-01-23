@@ -4,6 +4,7 @@ Date: Sat, 26 Aug 2023 19:56:48 +0200
 Subject: [PATCH] Remove export from Kbuild files.
 
 Fix possible host contamination.
+Upstream-Status: Inappropriate
 ---
  asoc/Kbuild                   | 14 +++++++-------
  asoc/codecs/Kbuild            | 12 ++++++------

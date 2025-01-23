@@ -6,6 +6,7 @@ Subject: [PATCH] Remove unecessary include to axc_PM8226Charger.h
 Include to charger/axc_PM8226Charger.h breaks build
 removing file fixes build
 
+Upstream-Status: Inappropriate
 ---
  drivers/power/qpnp-charger.c | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)

@@ -9,6 +9,7 @@ Content-Transfer-Encoding: 8bit
 Fixes possible host contamination.
 
 Co-authored-by: Philip Russell <argosphil@murena.io>
+Upstream-Status: Inappropriate
 Signed-off-by: Darrel Griët <dgriet@gmail.com>
 ---
  asoc/Kbuild                   | 28 ++++++++++++++--------------

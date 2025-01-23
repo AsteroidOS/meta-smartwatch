@@ -3,6 +3,7 @@ From: Florent Revest <revestflo@gmail.com>
 Date: Thu, 2 May 2019 00:28:46 +0200
 Subject: [PATCH] Fix various drivers compilation with a recent GCC
 
+Upstream-Status: Inappropriate
 ---
  Makefile                                      |  4 ++-
  drivers/input/touchscreen/mediatek/Makefile   |  2 ++

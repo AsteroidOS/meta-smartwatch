@@ -20,6 +20,7 @@ Link: https://reviews.llvm.org/D69296
 Acked-by: Nicolas Pitre <nico@fluxnic.net>
 Reviewed-by: Ard Biesheuvel <ardb@kernel.org>
 Reviewed-by: Stefan Agner <stefan@agner.ch>
+Upstream-Status: Inappropriate
 Signed-off-by: Nick Desaulniers <ndesaulniers@google.com>
 Suggested-by: Fangrui Song <maskray@google.com>
 Suggested-by: Jian Cai <jiancai@google.com>

@@ -7,6 +7,7 @@ Newer compilers seem to detect this in spots older ones
 didn't, causing build failures. As the risk of introducing
 bugs is probably greater with an incorrect fix than letting
 it be, simply disable the warning.
+Upstream-Status: Inappropriate
 ---
  Makefile | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)

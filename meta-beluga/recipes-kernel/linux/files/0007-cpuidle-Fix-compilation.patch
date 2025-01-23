@@ -3,6 +3,7 @@ From: MagneFire <dgriet@gmail.com>
 Date: Thu, 10 Feb 2022 20:55:54 +0100
 Subject: [PATCH] cpuidle: Fix compilation.
 
+Upstream-Status: Inappropriate
 ---
  drivers/cpuidle/lpm-workarounds.c | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
