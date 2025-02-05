@@ -1,0 +1,25 @@
+From 03a851f83c801a44c2c51420f8172104674c9732 Mon Sep 17 00:00:00 2001
+From: casept <davids.paskevics@gmail.com>
+Date: Wed, 5 Feb 2025 19:18:54 +0000
+Subject: [PATCH] Display: Hack to put screen to sleep on Rinato
+
+---
+ mce-fbdev.c | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/mce-fbdev.c b/mce-fbdev.c
+index 6212a91..b53b295 100644
+--- a/mce-fbdev.c
++++ b/mce-fbdev.c
+@@ -262,6 +262,11 @@ void mce_fbdev_set_power(bool power_on)
+ {
+     mce_log(LL_DEBUG, "fbdev power %s", power_on ? "up" : (mce_fbdev_power_vsync_suspend ? "ambient" : "down"));
+ 
++    if(power_on) {
++        system("echo 0 > /sys/class/backlight/s6e63j0x03/bl_power");
++    } else {
++        system("echo 4 > /sys/class/backlight/s6e63j0x03/bl_power");
++    }
+     if( mce_fbdev_handle != -1 ) {
+         int value;
+         if (power_on) {
