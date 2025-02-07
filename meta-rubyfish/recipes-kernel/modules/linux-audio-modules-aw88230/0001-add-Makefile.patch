@@ -1,0 +1,38 @@
+From abe611a9d2e9083da9a099047323a2d45b746cfe Mon Sep 17 00:00:00 2001
+From: Philip Russell <argosphil@murena.io>
+Date: Mon, 11 Sep 2023 19:19:28 +0000
+Subject: [PATCH] add Makefile
+
+---
+ Makefile | 19 +++++++++++++++++++
+ 1 file changed, 19 insertions(+)
+ create mode 100755 Makefile
+
+diff --git a/Makefile b/Makefile
+new file mode 100755
+index 0000000..a2a88ef
+--- /dev/null
++++ b/Makefile
+@@ -0,0 +1,19 @@
++default: all
++
++KBUILD_OPTIONS := AUDIO_ROOT=$(shell cd $(KERNEL_SRC); readlink -e $(M))
++KBUILD_OPTIONS += MODNAME?=audio
++KBUILD_OPTIONS += HEADER_INSTALL_DIR=$(KERNEL_SRC)/scripts
++KBUILD_OPTIONS += UAPI_OUT=$(PWD)
++
++obj-m += audio_aw882xx.o
++audio_aw882xx-y := aw882xx.o aw882xx_bin_parse.o aw882xx_calib.o aw882xx_device.o aw882xx_dsp.o aw882xx_init.o aw882xx_monitor.o aw882xx_spin.o
++
++all:
++	$(MAKE) -C $(KERNEL_SRC) M=$(M) modules $(KBUILD_OPTIONS)
++
++modules_install:
++	$(MAKE) INSTALL_MOD_STRIP=1 M=$(M) -C $(KERNEL_SRC) modules_install
++
++clean::
++	rm -f *.o *.ko *.mod.c *.mod.o *~ .*.cmd Module.symvers
++	rm -rf .tmp_versions
+-- 
+2.41.0
+
