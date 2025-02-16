@@ -9,5 +9,5 @@ do_install:append:beluga() {
 }
 
 RDEPENDS:${PN}:append:beluga = " msm-fb-refresher"
-FILES:${PN}:append:beluga = " /ld.config.28.txt"
+FILES:${PN}:append:beluga = " /ld.config.28.txt /init.machine"
 
