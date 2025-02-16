@@ -7,4 +7,4 @@ do_install:append:sawfish() {
     install -m 0755 ${UNPACKDIR}/init.machine.sh ${D}/init.machine
 }
 
-FILES:${PN} += "/init.machine"
+FILES:${PN}:append:sawfish = " /init.machine"
