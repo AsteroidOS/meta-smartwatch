@@ -1,0 +1,56 @@
+From 87df9b6cc66724c624a02eb85fd03b8a9fcc2e4d Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Darrel=20Gri=C3=ABt?= <dgriet@gmail.com>
+Date: Sat, 8 Apr 2023 18:09:20 +0200
+Subject: [PATCH] video: fbdev: msm: Provide mdss_dsi_switch_page.
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+This fixes:
+drivers/video/fbdev/msm/auo/auo_hbm.c: In function 'auo_dsi_cmd_read':
+drivers/video/fbdev/msm/auo/auo_hbm.c:196:9: error: implicit declaration of function 'mdss_dsi_switch_page'; did you mean 'mdss_dsi_set_reg'? [-Werror=implicit-function-declaration]
+  196 |         mdss_dsi_switch_page(ctrl, page);
+
+Signed-off-by: Darrel Griët <dgriet@gmail.com>
+---
+ drivers/video/fbdev/msm/auo/auo_hbm.c | 24 ++++++++++++++++++++++++
+ 1 file changed, 24 insertions(+)
+
+diff --git a/drivers/video/fbdev/msm/auo/auo_hbm.c b/drivers/video/fbdev/msm/auo/auo_hbm.c
+index 58681a0cf8d8..f477201b029b 100644
+--- a/drivers/video/fbdev/msm/auo/auo_hbm.c
++++ b/drivers/video/fbdev/msm/auo/auo_hbm.c
+@@ -173,6 +173,30 @@ static void mdss_dsi_brightness_boost_off(struct mdss_dsi_ctrl_pdata *ctrl)
+ 	}
+ }
+ 
++static char switch_page[2] = {0xFE, 0x00};
++static struct dsi_cmd_desc dsi_switch_page_cmd = {
++	{DTYPE_DCS_WRITE1, 1, 0, 0, 0, sizeof(switch_page)}, switch_page};
++
++void mdss_dsi_switch_page(struct mdss_dsi_ctrl_pdata *ctrl, char page)
++{
++    struct dcs_cmd_req cmdreq;
++    struct mdss_panel_info *pinfo;
++
++    pinfo = &(ctrl->panel_data.panel_info);
++    if (pinfo->dcs_cmd_by_left && ctrl->ndx != DSI_CTRL_LEFT)
++        return;
++
++    switch_page[1] = page;
++
++    memset(&cmdreq, 0, sizeof(cmdreq));
++    cmdreq.cmds = &dsi_switch_page_cmd;
++    cmdreq.cmds_cnt = 1;
++    cmdreq.flags = CMD_REQ_COMMIT;
++    cmdreq.rlen = 0;
++    cmdreq.cb = NULL;
++
++    mdss_dsi_cmdlist_put(ctrl, &cmdreq);
++}
+ 
+ #if !( defined(CONFIG_TOUCHSCREEN_RAYDIUM_U128BLX01_CHIPSET) || \
+ 	defined(CONFIG_TOUCHSCREEN_RAYDIUM_U128BLA03_CHIPSET))
+-- 
+2.40.0
+
