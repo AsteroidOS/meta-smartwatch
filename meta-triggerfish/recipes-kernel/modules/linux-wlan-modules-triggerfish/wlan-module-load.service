@@ -1,0 +1,12 @@
+[Unit]
+Description=Setup wifi firmware and load the wlan kernel module
+After=local-fs.target
+
+[Service]
+Type=oneshot
+ExecStart=-/bin/sh -c "/bin/echo > /dev/wcnss_wlan"
+ExecStart=/sbin/modprobe wlan
+ExecStart=/sbin/rfkill unblock wlan
+
+[Install]
+WantedBy=basic.target
