@@ -1,0 +1,19 @@
+#!/bin/sh
+
+# TODO: Parse serial from the legacy cmdline provided by the bootloader
+serial="1234"
+
+# configfs is actually already mounted under /sys/kernel/config, but usb-moded expects it to be here.
+mkdir -p /config
+mount -t configfs none /config
+mkdir -p /config/usb_gadget/g1
+
+echo 0x0e8d >/config/usb_gadget/g1/idVendor
+echo 0x0010 >/config/usb_gadget/g1/idProduct
+
+mkdir /config/usb_gadget/g1/strings/0x409
+echo $serial >/config/usb_gadget/g1/strings/0x409/serialnumber
+echo AsteroidOS >/config/usb_gadget/g1/strings/0x409/manufacturer
+hostname >/config/usb_gadget/g1/strings/0x409/product
+
+
