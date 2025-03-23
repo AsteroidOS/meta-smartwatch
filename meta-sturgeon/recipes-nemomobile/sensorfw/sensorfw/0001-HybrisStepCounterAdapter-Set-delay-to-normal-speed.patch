@@ -1,22 +1,30 @@
-From 693017120d17ea51792749fcca3a915ccb34c076 Mon Sep 17 00:00:00 2001
+From 97e40721aa7820303c89b6cea1efc2914944d358 Mon Sep 17 00:00:00 2001
 From: MagneFire <IDaNLContact@gmail.com>
 Date: Tue, 1 Dec 2020 20:24:52 +0100
-Subject: [PATCH] HybrisStepCounterAdapter: Set delay to normal speed. Fixes
- the stepcounter on at least sturgeon.
+Subject: [PATCH] HybrisStepCounterAdapter: Set delay to normal speed.
+ Fixes the stepcounter on at least sturgeon.
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 
+Signed-off-by: Darrel Griët <dgriet@gmail.com>
 ---
- adaptors/hybrisstepcounteradaptor/hybrisstepcounteradaptor.cpp | 1 +
- 1 file changed, 1 insertion(+)
+ adaptors/hybrisstepcounteradaptor/hybrisstepcounteradaptor.cpp | 2 ++
+ 1 file changed, 2 insertions(+)
 
 diff --git a/adaptors/hybrisstepcounteradaptor/hybrisstepcounteradaptor.cpp b/adaptors/hybrisstepcounteradaptor/hybrisstepcounteradaptor.cpp
-index f77b290..6fea7e9 100644
+index 7176ada..2d025cb 100644
 --- a/adaptors/hybrisstepcounteradaptor/hybrisstepcounteradaptor.cpp
 +++ b/adaptors/hybrisstepcounteradaptor/hybrisstepcounteradaptor.cpp
-@@ -49,6 +49,7 @@ HybrisStepCounterAdaptor::~HybrisStepCounterAdaptor()
+@@ -49,6 +49,8 @@ HybrisStepCounterAdaptor::~HybrisStepCounterAdaptor()
  
  bool HybrisStepCounterAdaptor::startSensor()
  {
-+    setDefaultInterval(200);
++    unsigned int interval_us = 200 * 1000;
++    setDefaultInterval(interval_us);
      if (!(HybrisAdaptor::startSensor()))
          return false;
      if (isRunning() && !powerStatePath.isEmpty())
+-- 
+2.49.0
+
