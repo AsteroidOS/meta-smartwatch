@@ -21,7 +21,7 @@ B = "${S}"
 # Just do it by hand, to be 1000% sure the right config is used here.
 # Tried to do it with kernel-yocto.bbclass magic, ended up wasting 5 hours debugging.
 do_configure() {
-		make ARCH=arm rinato_debug_defconfig
+        make ARCH=arm rinato_debug_defconfig
 }
 
 # S-Boot is too old for dtree support, have to use concatenated device tree
