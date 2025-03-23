@@ -4,12 +4,7 @@ HOMEPAGE = "https://github.com/casept/linux-samsung-smartwatch-firmware"
 LICENSE = "CLOSED"
 COMPATIBLE_MACHINE = "rinato"
 
-SRC_URI = " git://git@github.com/casept/linux-samsung-smartwatch-firmware.git;protocol=https;branch=master \
-    file://fake-copying"
-
-# For random firmware files extracted from wherever, the licensing is of course unclear.
-# Just create an empty file and checksum that to make yocto shut up.
-LIC_FILES_CHKSUM = "file://fake-copying;md5=d41d8cd98f00b204e9800998ecf8427e"
+SRC_URI = " git://git@github.com/casept/linux-samsung-smartwatch-firmware.git;protocol=https;branch=master "
 
 SRC_URI[sha256sum] = "fffffffl33857fl2fa0318a1fac1e788941015bf39894a255b8323c5138037c6"
 SRCREV = "fe84f346a9337b5ad4a474895e1a62c52aad7f36"
