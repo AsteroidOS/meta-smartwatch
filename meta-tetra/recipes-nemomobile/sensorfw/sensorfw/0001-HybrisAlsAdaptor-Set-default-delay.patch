@@ -1,26 +1,31 @@
-From 27b0f7cbd6b704d480ee4e5adb44b585012bc204 Mon Sep 17 00:00:00 2001
+From 35d8fbbc1f0f20b29be62ea22526773439af242f Mon Sep 17 00:00:00 2001
 From: MagneFire <IDaNLContact@gmail.com>
 Date: Mon, 26 Oct 2020 21:20:24 +0100
 Subject: [PATCH] HybrisAlsAdaptor: Set default delay. Fixes excessive lags on
  tetra.
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 
+Signed-off-by: Darrel Griët <dgriet@gmail.com>
 ---
- adaptors/hybrisalsadaptor/hybrisalsadaptor.cpp | 2 ++
- 1 file changed, 2 insertions(+)
+ adaptors/hybrisalsadaptor/hybrisalsadaptor.cpp | 3 +++
+ 1 file changed, 3 insertions(+)
 
 diff --git a/adaptors/hybrisalsadaptor/hybrisalsadaptor.cpp b/adaptors/hybrisalsadaptor/hybrisalsadaptor.cpp
-index c1c3f24..4736d1b 100644
+index 5ed7143..a0577d1 100644
 --- a/adaptors/hybrisalsadaptor/hybrisalsadaptor.cpp
 +++ b/adaptors/hybrisalsadaptor/hybrisalsadaptor.cpp
-@@ -42,6 +42,8 @@ HybrisAlsAdaptor::HybrisAlsAdaptor(const QString& id) :
-     	sensordLogW() << "Path does not exists: " << powerStatePath;
+@@ -41,6 +41,9 @@ HybrisAlsAdaptor::HybrisAlsAdaptor(const QString& id) :
+         sensordLogW() << NodeBase::id() << "Path does not exists: " << powerStatePath;
      	powerStatePath.clear();
      }
 +    // Set default delay.
-+    setInterval(200, 0);
++    unsigned int interval_us = 200 * 1000;
++    setInterval(0, interval_us);
  }
  
  HybrisAlsAdaptor::~HybrisAlsAdaptor()
 -- 
-2.29.0
+2.49.0
 
