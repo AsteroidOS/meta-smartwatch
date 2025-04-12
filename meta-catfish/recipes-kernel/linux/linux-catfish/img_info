@@ -7,6 +7,6 @@ base_addr=0x00000000
 kernel_offset=0x00008000
 ramdisk_offset=0x02000000
 tags_offset=0x01e00000
-cmd_line='androidboot.hardware=catfish console=null androidboot.selinux=permissive androidboot.console=null msm_rtb.filter=0x237 ehci-hcd.park=3 lpm_levels.sleep_disabled=1 earlycon=msm_hsl_uart,0x78af000 buildvariant=user audit=0'
+cmd_line='androidboot.hardware=catfish console=null androidboot.selinux=permissive androidboot.console=null msm_rtb.filter=0x237 ehci-hcd.park=3 lpm_levels.sleep_disabled=1 earlycon=msm_hsl_uart,0x78af000 buildvariant=user audit=0 SYSTEMD_CGROUP_ENABLE_LEGACY_FORCE=1'
 board="catfish"
 format=gzip
