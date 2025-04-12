@@ -39,6 +39,9 @@ do_configure:prepend() {
 
 do_install:append() {
     rm -rf ${D}/usr/src/usr/
+
+    # The ..install.cmd contains references to TMPDIR
+    find ${D}/usr/src/ -name ..install.cmd | xargs rm -f
 }
 
 inherit mkboot old-kernel-gcc-hdrs
