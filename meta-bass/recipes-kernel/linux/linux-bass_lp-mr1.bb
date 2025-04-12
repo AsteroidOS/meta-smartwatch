@@ -27,6 +27,10 @@ PV = "${LINUX_VERSION}+lollipop"
 S = "${WORKDIR}/git"
 B = "${S}"
 
+do_configure:prepend() {
+    install -m 644 -D ${UNPACKDIR}/defconfig ${WORKDIR}/defconfig
+}
+
 do_install:append() {
     rm -rf ${D}/usr/src/usr/
 }
