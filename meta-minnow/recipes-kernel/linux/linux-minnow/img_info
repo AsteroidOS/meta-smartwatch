@@ -7,6 +7,6 @@ base_addr=0x00000000
 kernel_offset=0x00008000
 ramdisk_offset=0x01000000
 tags_offset=0x01e00000
-cmd_line='rootwait init=/init utags.blkdev=/dev/mmcblk0p7 omapfb.vram=0:1200K androidboot.hardware=minnow selinux=0'
+cmd_line='rootwait init=/init utags.blkdev=/dev/mmcblk0p7 omapfb.vram=0:1200K androidboot.hardware=minnow selinux=0 SYSTEMD_CGROUP_ENABLE_LEGACY_FORCE=1'
 board="minnow"
 format=gzip
