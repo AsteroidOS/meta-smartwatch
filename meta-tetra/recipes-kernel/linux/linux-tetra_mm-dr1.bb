@@ -37,6 +37,8 @@ S = "${WORKDIR}/git"
 B = "${S}"
 
 do_configure:prepend() {
+    install -m 644 -D ${UNPACKDIR}/defconfig ${WORKDIR}/defconfig
+
     # This Kbuild is wanted by do_install
     mkdir -p ${S}/include/uapi/linux/broadcom
     touch ${S}/include/uapi/linux/broadcom/Kbuild

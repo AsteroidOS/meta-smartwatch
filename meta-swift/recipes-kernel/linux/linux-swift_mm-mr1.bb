@@ -22,6 +22,8 @@ S = "${WORKDIR}/git"
 B = "${S}"
 
 do_configure:prepend() {
+    install -m 644 -D ${UNPACKDIR}/defconfig ${WORKDIR}/defconfig
+
     sed -i "s/ASUS_SW_VER/\"aos1\"/" ${S}/kernel/asusevtlog.c
 }
 
