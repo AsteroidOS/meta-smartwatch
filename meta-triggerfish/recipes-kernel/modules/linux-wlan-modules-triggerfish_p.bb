@@ -13,7 +13,7 @@ PV = "${LINUX_VERSION}+pie"
 S = "${WORKDIR}/git"
 B = "${S}"
 
-DEPENDS = "virtual/kernel virtual/${TARGET_PREFIX}gcc"
+DEPENDS = "virtual/kernel virtual/cross-cc"
 
 EXTRA_OEMAKE = " KERNEL_SRC="${STAGING_KERNEL_DIR}" M="${S}""
 
