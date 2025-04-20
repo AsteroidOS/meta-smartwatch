@@ -1,0 +1,33 @@
+From 20add88d4c76e61cc7d49fb7c836d69dd5731333 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Darrel=20Gri=C3=ABt?= <dgriet@gmail.com>
+Date: Sun, 20 Apr 2025 20:09:35 +0200
+Subject: [PATCH] make: Don't fail on pointer, int, return issues
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Upstream-Status: Inappropriate
+
+Signed-off-by: Darrel Griët <dgriet@gmail.com>
+---
+ Makefile | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/Makefile b/Makefile
+index 631d7148..ac91e1ef 100644
+--- a/Makefile
++++ b/Makefile
+@@ -373,6 +373,10 @@ KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
+ 		   -fno-strict-aliasing -fno-common \
+ 		   -Werror-implicit-function-declaration \
+ 		   -Wno-format-security \
++		   -Wno-incompatible-pointer-types \
++		   -Wno-implicit-int \
++		   -Wno-int-conversion \
++		   -Wno-return-mismatch \
+ 		   -fno-delete-null-pointer-checks \
+ 		   -Werror=format -Werror=pointer-to-int-cast
+ 
+-- 
+2.49.0
+
