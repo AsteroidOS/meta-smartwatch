@@ -4,6 +4,7 @@ Date: Fri, 10 Nov 2017 19:36:29 +0100
 Subject: [PATCH 2/2] Integrate hci_brcm and bcm_bzhw to the backported BT
  subsystem
 
+Upstream-Status: Inappropriate
 ---
  backports/drivers/bluetooth/Kconfig     |  12 +
  backports/drivers/bluetooth/Makefile    |   3 +

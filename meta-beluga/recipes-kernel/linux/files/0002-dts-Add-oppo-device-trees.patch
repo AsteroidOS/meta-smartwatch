@@ -3,6 +3,7 @@ From: MagneFire <dgriet@gmail.com>
 Date: Sat, 12 Feb 2022 22:06:15 +0100
 Subject: [PATCH] dts: Add oppo device trees.
 
+Upstream-Status: Inappropriate
 ---
  arch/arm/boot/dts/oppo/Makefile               |   9 +
  .../dsi-panel-everdisplay-320x360-cmd.dtsi    | 101 ++

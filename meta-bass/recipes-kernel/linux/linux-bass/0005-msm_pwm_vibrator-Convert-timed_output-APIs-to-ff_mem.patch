@@ -4,6 +4,7 @@ Date: Sun, 14 May 2017 15:53:26 +0200
 Subject: [PATCH] msm_pwm_vibrator: Convert timed_output APIs to ff_memless
  input APIs
 
+Upstream-Status: Inappropriate
 ---
  arch/arm/configs/bass_defconfig               |   4 +-
  drivers/input/ff-memless.c                    |   2 +-

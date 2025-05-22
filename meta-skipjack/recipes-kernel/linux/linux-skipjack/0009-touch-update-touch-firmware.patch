@@ -7,6 +7,7 @@ fix higher power consumption when touch panel filled with water
 0x99:version 0x8
 
 Change-Id: I88011b9aea6390064549cc68f51bffbcdc8baf9c
+Upstream-Status: Inappropriate
 Signed-off-by: james_hsiao <james_hsiao@compal.com>
 ---
  ...Sakura_FZW7_3267_0x99_V0x08_20181108_app.i | 2949 +++++++++++++++++

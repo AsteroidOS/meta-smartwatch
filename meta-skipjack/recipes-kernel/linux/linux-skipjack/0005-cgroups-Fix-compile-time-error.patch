@@ -18,6 +18,7 @@ void mem_cgroup_end_page_stat(struct mem_cgroup *memcg, bool *locked,
 
 CRs-Fixed: 988758
 Change-Id: Ic996cff7ccd5c2487bc76184922da012e70265ba
+Upstream-Status: Inappropriate
 Signed-off-by: Kishore Srivenkata Ganesh Bolisetty <bsrivenk@codeaurora.org>
 Signed-off-by: Vinayak Menon <vinmenon@codeaurora.org>
 ---

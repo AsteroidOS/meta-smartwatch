@@ -8,6 +8,7 @@ and inserts them in line
 
 Credit to XDA User T10NAZ
 
+Upstream-Status: Inappropriate
 ---
  drivers/hwmon/qpnp-adc-common.c | 95 +++++++++++++++++++++++++++++++++++++++++
  1 file changed, 95 insertions(+)

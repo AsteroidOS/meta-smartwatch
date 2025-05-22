@@ -3,6 +3,7 @@ From: MagneFire <dgriet@gmail.com>
 Date: Sun, 8 May 2022 18:37:06 +0200
 Subject: [PATCH] dtcat: Port to Python 3.
 
+Upstream-Status: Inappropriate
 ---
  scripts/dtcat.py | 8 ++++----
  1 file changed, 4 insertions(+), 4 deletions(-)

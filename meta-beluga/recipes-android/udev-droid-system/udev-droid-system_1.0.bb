@@ -4,10 +4,11 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/GPL-3.0-only;md5=c79ff39f19dfec
 
 SRC_URI = "file://998-droid-system.rules"
 
-S = "${WORKDIR}"
+S = "${WORKDIR}/sources"
+UNPACKDIR = "${S}"
 B = "${S}"
 
 do_install:append() {
     install -d ${D}${nonarch_base_libdir}/udev/rules.d
-    install -m 644 ${WORKDIR}/998-droid-system.rules ${D}${nonarch_base_libdir}/udev/rules.d/
+    install -m 644 ${UNPACKDIR}/998-droid-system.rules ${D}${nonarch_base_libdir}/udev/rules.d/
 }

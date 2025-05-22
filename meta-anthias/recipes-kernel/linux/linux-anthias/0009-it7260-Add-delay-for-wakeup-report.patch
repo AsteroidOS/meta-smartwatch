@@ -7,6 +7,7 @@ Subject: [PATCH] it7260: Add delay for wakeup report. AsteroidOS requires the
  implementation. To solve this we simply need to make sure the the finger is
  held down for at least 200ms, this is done by emulating a 300ms touch.
 
+Upstream-Status: Inappropriate
 ---
  drivers/input/touchscreen/it7260_ts_i2c.c | 1 +
  1 file changed, 1 insertion(+)

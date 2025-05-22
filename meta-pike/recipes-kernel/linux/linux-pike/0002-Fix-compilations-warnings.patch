@@ -3,6 +3,7 @@ From: Arseniy <dodoradio@outlook.com>
 Date: Sat, 3 Dec 2022 10:20:24 +0000
 Subject: [PATCH 2/2] Fix compilations warnings.
 
+Upstream-Status: Inappropriate
 ---
  Makefile | 1 -
  1 file changed, 1 deletion(-)

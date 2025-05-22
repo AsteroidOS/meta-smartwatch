@@ -4,6 +4,7 @@ Date: Sun, 27 Jan 2019 14:15:33 +0100
 Subject: [PATCH] broadcom-modem-rpc: Disable logs which cause a compilation
  error
 
+Upstream-Status: Inappropriate
 ---
  .../char/broadcom/modem/rpc/rpc_CIB/arpc/src/rpc_api.c    | 8 ++++++++
  drivers/char/broadcom/modem/rpc/rpc_CIB/public/xdr.h      | 3 +--

@@ -4,6 +4,7 @@ Date: Fri, 11 Nov 2022 19:49:25 +0000
 Subject: [PATCH 3/3] Force triggerfish DTB to build defconfig is unreliable
  with the option that's meant to enable this - this is a blunt fix that works
 
+Upstream-Status: Inappropriate
 ---
  arch/arm/boot/dts/fossil/8x09/Makefile | 13 ++-----------
  1 file changed, 2 insertions(+), 11 deletions(-)

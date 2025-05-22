@@ -7,6 +7,6 @@ base_addr=0x00000000
 kernel_offset=0x00008000
 ramdisk_offset=0x02000000
 tags_offset=0x01e00000
-cmd_line='console=ttyHSL0,115200,n8 androidboot.console=ttyHSL0 androidboot.hardware=anthias user_debug=31 maxcpus=4 msm_rtb.filter=0x3F androidboot.emmc=true androidboot.serialno=F9NZCY000803364 androidboot.bootloader=ANTHIAS1531 HW_ID=WI500Q_SR2  SB=Y SKU_ID=0 CPU_RV=108040e1 SBL_INFO=1015-0010-USR  quiet bootdbguart=y androidboot.baseband=apq mdss_mdp.panel=1:dsi:0:qcom,mdss_dsi_rm69032_320_cmd'
+cmd_line='console=ttyHSL0,115200,n8 androidboot.console=ttyHSL0 androidboot.hardware=anthias user_debug=31 maxcpus=4 msm_rtb.filter=0x3F androidboot.emmc=true androidboot.serialno=F9NZCY000803364 androidboot.bootloader=ANTHIAS1531 HW_ID=WI500Q_SR2  SB=Y SKU_ID=0 CPU_RV=108040e1 SBL_INFO=1015-0010-USR  quiet bootdbguart=y androidboot.baseband=apq mdss_mdp.panel=1:dsi:0:qcom,mdss_dsi_rm69032_320_cmd SYSTEMD_CGROUP_ENABLE_LEGACY_FORCE=1'
 board="anthias"
 format=gzip

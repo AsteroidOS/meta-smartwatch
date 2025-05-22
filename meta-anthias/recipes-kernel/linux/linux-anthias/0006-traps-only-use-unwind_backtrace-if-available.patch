@@ -3,6 +3,7 @@ From: Florent Revest <revestflo@gmail.com>
 Date: Fri, 10 Feb 2017 21:33:22 +0100
 Subject: [PATCH] traps: only use unwind_backtrace if available
 
+Upstream-Status: Inappropriate
 ---
  arch/arm/kernel/traps.c | 2 ++
  1 file changed, 2 insertions(+)

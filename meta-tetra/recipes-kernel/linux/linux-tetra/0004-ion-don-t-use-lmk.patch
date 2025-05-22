@@ -3,6 +3,7 @@ From: Florent Revest <revestflo@gmail.com>
 Date: Mon, 18 Apr 2016 00:46:31 +0200
 Subject: [PATCH] ion: don't use lmk
 
+Upstream-Status: Inappropriate
 ---
  drivers/gpu/ion/ion_system_heap.c | 2 --
  1 file changed, 2 deletions(-)

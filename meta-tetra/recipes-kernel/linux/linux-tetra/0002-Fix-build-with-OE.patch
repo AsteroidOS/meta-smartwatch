@@ -3,6 +3,7 @@ From: Florent Revest <revestflo@gmail.com>
 Date: Thu, 17 Mar 2016 17:07:23 +0100
 Subject: [PATCH] Fix build with OE
 
+Upstream-Status: Inappropriate
 ---
  arch/arm/include/asm/ftrace.h    | 2 +-
  arch/arm/kernel/return_address.c | 2 ++

@@ -3,6 +3,7 @@ From: MagneFire <IDaNLContact@gmail.com>
 Date: Sun, 28 Nov 2021 21:29:31 +0100
 Subject: [PATCH] Focaltech: Delay when sending wakeup event.
 
+Upstream-Status: Inappropriate
 ---
  .../focaltech_touch/focaltech_core.c          | 21 +++++++++++++++++--
  1 file changed, 19 insertions(+), 2 deletions(-)

@@ -5,6 +5,7 @@ Subject: [PATCH 11/11] Disable new gcc 7.1.1 warnings
 
 We can't call this a hack if Linus does the same... Right?
 https://lore.kernel.org/patchwork/patch/814178/
+Upstream-Status: Inappropriate
 ---
  Makefile | 4 ++++
  1 file changed, 4 insertions(+)

@@ -20,6 +20,10 @@ PV = "${LINUX_VERSION}"
 S = "${WORKDIR}/git"
 B = "${S}"
 
+do_configure:prepend() {
+    install -m 644 -D ${UNPACKDIR}/defconfig ${WORKDIR}/defconfig
+}
+
 # The boot.img needs to embed in its "kernel" section the concatenation of the zImage with the device tree blob
 KERNEL_OUTPUT = "${KERNEL_OUTPUT_DIR}/${KERNEL_IMAGETYPE}-dtb"
 do_deploy:append() {

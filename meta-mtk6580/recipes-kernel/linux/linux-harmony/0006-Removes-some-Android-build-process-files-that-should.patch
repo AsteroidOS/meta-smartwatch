@@ -4,6 +4,7 @@ Date: Fri, 7 Jul 2017 23:11:13 +0100
 Subject: [PATCH 05/11] Removes some Android build process files that shouldn't
  be used
 
+Upstream-Status: Inappropriate
 ---
  Android.mk                              | 139 ---------------
  CleanSpec.mk                            |   2 -

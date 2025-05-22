@@ -8,6 +8,7 @@ Subject: [PATCH] touchscreen: belugadium: Add delay for wakeup report. AsteroidO
  finger is held down for atleast 200ms, this is done by emulating a 300ms
  touch.
 
+Upstream-Status: Inappropriate
 ---
  drivers/input/touchscreen/belugadium_i2c_ts.c | 9 ++++++++-
  1 file changed, 8 insertions(+), 1 deletion(-)

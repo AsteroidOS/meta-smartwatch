@@ -4,6 +4,7 @@ Date: Wed, 25 Dec 2019 14:53:13 +0100
 Subject: [PATCH] Revert "Add Nitrous driver for BT power management."
 
 This reverts commit 7804a4c22d7370483c30f99b870cc9c70c299c72.
+Upstream-Status: Inappropriate
 ---
  .../devicetree/bindings/bluetooth/nitrous.txt |  44 --
  drivers/bluetooth/nitrous.c                   | 569 ------------------

@@ -3,6 +3,7 @@ From: Florent Revest <revestflo@gmail.com>
 Date: Fri, 30 Jun 2017 22:45:57 +0200
 Subject: [PATCH 04/11] Reduce kernel verbosity
 
+Upstream-Status: Inappropriate
 ---
  arch/arm/kernel/devtree.c                     |   1 -
  arch/arm/kernel/smp.c                         |  10 -

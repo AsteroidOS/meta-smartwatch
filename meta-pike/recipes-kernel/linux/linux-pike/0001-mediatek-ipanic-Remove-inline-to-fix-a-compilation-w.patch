@@ -11,6 +11,7 @@ Fixes:
 drivers/misc/mediatek/aee/ipanic/ipanic_rom.c:283:34: warning: 'ipanic_memory_buffer' is static but used in inline function 'ipanic_mem_write' which is not static
   283 |         return ipanic_next_write(ipanic_memory_buffer, &mem_info, off, len, encrypt);
 
+Upstream-Status: Inappropriate
 Signed-off-by: Darrel Griët <dgriet@gmail.com>
 ---
  drivers/misc/mediatek/aee/ipanic/ipanic_rom.c | 2 +-

@@ -8,6 +8,7 @@ Subject: [PATCH] Bluetooth: Fix incorrect gpio definition in device tree and
  host_wake_irq, to solve this use the gpio_to_irq() function also used by the
  Nitrous driver.
 
+Upstream-Status: Inappropriate
 ---
  arch/arm/boot/dts/apq8009w-sawshark/apq8009w-bt.dtsi | 6 ++++--
  drivers/bluetooth/bluesleep.c                        | 6 ++++--

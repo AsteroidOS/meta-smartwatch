@@ -8,6 +8,7 @@ which does not natively exist so lets create it
 
 Credits to T10NAZ
 
+Upstream-Status: Inappropriate
 ---
  include/trace/devfreq_trace.h | 44 +++++++++++++++++++++++++++++++++++++++++++
  1 file changed, 44 insertions(+)

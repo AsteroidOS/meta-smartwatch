@@ -5,6 +5,7 @@ Subject: [PATCH 3/4] Revert nitrous commits
 
 This commit reverts a bunch of Nitrous-adding commits as Asteroid uses
 bluesleep instead.
+Upstream-Status: Inappropriate
 ---
  .../arm/boot/dts/apq8026-bass/apq8026-bass-bt.dtsi | 28 +++++++++--------
  .../boot/dts/apq8026-lenok/apq8026-lenok-bt.dtsi   | 18 ++++++-----

@@ -1,3 +1,4 @@
+Upstream-Status: Inappropriate
 diff --git a/drivers/bluetooth/bluesleep.c b/drivers/bluetooth/bluesleep.c
 index 9879fd20fcf..d8cb38fc9f4 100644
 --- a/drivers/bluetooth/bluesleep.c

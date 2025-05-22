@@ -3,6 +3,7 @@ From: Florent Revest <revestflo@gmail.com>
 Date: Sat, 8 Jul 2017 14:12:06 +0100
 Subject: [PATCH] Rotate screen for harmony
 
+Upstream-Status: Inappropriate
 ---
  src/compositor/lipstickcompositor.cpp | 2 ++
  1 file changed, 2 insertions(+)

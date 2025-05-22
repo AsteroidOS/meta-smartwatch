@@ -4,6 +4,7 @@ Date: Sat, 22 Jul 2017 00:37:37 +0100
 Subject: [PATCH 06/11] mtk_vibrator: Convert timed_output APIs to ff_memless
  input APIs
 
+Upstream-Status: Inappropriate
 ---
  drivers/input/ff-memless.c                    |   2 +-
  drivers/input/touchscreen/mediatek/tpd.h      |   1 -

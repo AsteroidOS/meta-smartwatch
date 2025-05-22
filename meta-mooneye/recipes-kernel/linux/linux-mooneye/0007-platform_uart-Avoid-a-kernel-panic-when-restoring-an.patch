@@ -4,6 +4,7 @@ Date: Sat, 20 Jul 2019 17:36:07 +0200
 Subject: [PATCH] platform_uart: Avoid a kernel panic when restoring an unused
  uart
 
+Upstream-Status: Inappropriate
 ---
  .../misc/mediatek/uart/mt2601/platform_uart.c | 62 ++++++++++---------
  1 file changed, 32 insertions(+), 30 deletions(-)

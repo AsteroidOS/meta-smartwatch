@@ -3,6 +3,7 @@ From: MagneFire <dgriet@gmail.com>
 Date: Thu, 10 Feb 2022 21:38:25 +0100
 Subject: [PATCH] ipa_v2: Fix compilation.
 
+Upstream-Status: Inappropriate
 ---
  drivers/platform/msm/ipa/ipa_v2/Makefile | 2 ++
  1 file changed, 2 insertions(+)

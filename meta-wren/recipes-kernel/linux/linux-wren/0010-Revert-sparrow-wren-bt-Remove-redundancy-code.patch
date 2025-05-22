@@ -5,6 +5,7 @@ Subject: [PATCH] Revert "sparrow/wren:bt: Remove redundancy code."
 
 This reverts commit d0ea3d498bfbfc89b89d2bc2b97f7a50ba25d6c4.
 
+Upstream-Status: Inappropriate
 ---
  arch/arm/boot/dts/qcom/sparrow_er_105_msm8226.dtsi  | 7 +++++++
  arch/arm/boot/dts/qcom/sparrow_er_msm8226.dtsi      | 7 +++++++

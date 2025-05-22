@@ -4,6 +4,7 @@ Date: Tue, 27 Jun 2017 13:41:24 +0200
 Subject: [PATCH 01/11] printk: Expose mt_enable_uart and mt_disable_uart for
  mt_printk_ctrl
 
+Upstream-Status: Inappropriate
 ---
  kernel/printk.c | 4 ++--
  1 file changed, 2 insertions(+), 2 deletions(-)

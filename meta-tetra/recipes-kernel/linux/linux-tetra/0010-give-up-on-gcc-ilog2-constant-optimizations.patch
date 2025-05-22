@@ -40,6 +40,7 @@ Reported-by: Laura Abbott <labbott@redhat.com>
 Cc: John Stultz <john.stultz@linaro.org>,
 Cc: Thomas Gleixner <tglx@linutronix.de>
 Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Upstream-Status: Inappropriate
 Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
 ---
  include/linux/log2.h | 13 ++-----------

@@ -5,6 +5,7 @@ Subject: [PATCH 2/2] java_sony_brooks_020: Use the bcm-bzhw driver instead of
  bcm-bt-lpm which is adapted to the HCI stack used by BlueZ instead of the
  "userial" API used by libbt-vendor in Bluedroid
 
+Upstream-Status: Inappropriate
 ---
  arch/arm/boot/dts/java_sony_brooks_020.dts | 10 +++++-----
  1 file changed, 5 insertions(+), 5 deletions(-)

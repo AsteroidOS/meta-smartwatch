@@ -13,7 +13,8 @@ PACKAGE_ARCH = "${MACHINE_ARCH}"
 INHIBIT_PACKAGE_STRIP = "1"
 COMPATIBLE_MACHINE = "sawfish"
 INSANE_SKIP:${PN} = "already-stripped"
-S = "${WORKDIR}"
+S = "${WORKDIR}/sources"
+UNPACKDIR = "${S}"
 B = "${S}"
 
 PROVIDES += "virtual/android-system-image"
@@ -22,7 +23,7 @@ PROVIDES += "virtual/android-headers"
 do_install() {
     # Allow pulseaudio to control I2C devices, for speaker.
     install -d ${D}${sysconfdir}/udev/rules.d
-    install -m 0644 ${WORKDIR}/60-i2c.rules ${D}${sysconfdir}/udev/rules.d/
+    install -m 0644 ${UNPACKDIR}/60-i2c.rules ${D}${sysconfdir}/udev/rules.d/
 
     install -d ${D}/system/
     cp -r system/* ${D}/system/

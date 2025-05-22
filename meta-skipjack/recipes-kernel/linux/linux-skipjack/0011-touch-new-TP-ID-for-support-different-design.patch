@@ -8,6 +8,7 @@ Add one more TP ID to support different design and corresponding firmware as wel
 
 Bug: 128812768
 Change-Id: Ia9a2755c44717c8d50593e9e5628bcdd4cd4c671
+Upstream-Status: Inappropriate
 Signed-off-by: james_hsiao <james_hsiao@compal.com>
 ---
  ...Sakura_FZW7_3267_0x99_V0x03_20180515_app.i | 2949 +++++++++++++++++

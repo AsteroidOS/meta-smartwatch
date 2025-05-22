@@ -8,6 +8,7 @@ Subject: [PATCH] touchscreen: raydium: Add delay for wakeup report. AsteroidOS
  finger is held down for atleast 200ms, this is done by emulating a 300ms
  touch.
 
+Upstream-Status: Inappropriate
 ---
  drivers/input/touchscreen/raydium_i2c_ts.c | 9 ++++++++-
  1 file changed, 8 insertions(+), 1 deletion(-)

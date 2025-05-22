@@ -5,6 +5,7 @@ Subject: [PATCH] mdss_mdp_pipe: Don't allocate first RGB pipe. The first Rgb
  pipe is used at boot. For some reason it isn't released for use with the
  compositor. Hacky workaround: Don't alocate pipe the first time.
 
+Upstream-Status: Inappropriate
 ---
  drivers/video/msm/mdss/mdss_mdp_pipe.c | 9 +++++++++
  1 file changed, 9 insertions(+)

@@ -3,6 +3,7 @@ From: MagneFire <IDaNLContact@gmail.com>
 Date: Tue, 23 Jun 2020 14:42:32 +0200
 Subject: [PATCH] Backport mainline 4.1 Bluetooth subsystem
 
+Upstream-Status: Inappropriate
 ---
  drivers/bluetooth/Kconfig                   |   77 +-
  drivers/bluetooth/Makefile                  |   12 +-

@@ -4,6 +4,7 @@ Date: Sun, 26 Dec 2021 19:45:26 +0100
 Subject: [PATCH] fbdev: Don't use ioctl for FBIOBLANK. The hwcomposer already
  controls blanking, no need to do it here too.
 
+Upstream-Status: Inappropriate
 ---
  mce-fbdev.c | 2 ++
  1 file changed, 2 insertions(+)

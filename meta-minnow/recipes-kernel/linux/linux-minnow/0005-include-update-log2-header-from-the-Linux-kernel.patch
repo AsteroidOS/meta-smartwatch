@@ -17,6 +17,7 @@ This removes static checks of ilog2() arguments.
 
 Original author of commit where I stole this from in uboot:
 Heinrich Schuchardt <xypron.glpk@gmx.de>
+Upstream-Status: Inappropriate
 ---
  include/linux/log2.h | 59 +++++++++++++++++++++++++-------------------
  1 file changed, 33 insertions(+), 26 deletions(-)

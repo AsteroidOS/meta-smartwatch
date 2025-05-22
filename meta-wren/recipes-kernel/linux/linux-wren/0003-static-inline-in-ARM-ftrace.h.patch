@@ -9,6 +9,7 @@ linkable version of the inline function). In this case using static inline
 and removing the NULL version of return_address in return_address.c does
 the right thing.
 
+Upstream-Status: Inappropriate
 Signed-off-by: Behan Webster <behanw@converseincode.com>
 Reviewed-by: Mark Charlebois <charlebm@gmail.com>
 

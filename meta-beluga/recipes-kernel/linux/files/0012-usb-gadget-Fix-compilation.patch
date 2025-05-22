@@ -3,6 +3,7 @@ From: MagneFire <dgriet@gmail.com>
 Date: Thu, 10 Feb 2022 21:57:38 +0100
 Subject: [PATCH] usb-gadget: Fix compilation.
 
+Upstream-Status: Inappropriate
 ---
  drivers/usb/gadget/Makefile | 1 +
  1 file changed, 1 insertion(+)

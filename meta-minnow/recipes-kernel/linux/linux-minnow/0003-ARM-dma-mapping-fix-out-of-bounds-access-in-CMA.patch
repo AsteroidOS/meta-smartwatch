@@ -18,6 +18,7 @@ Add a runtime check to prevent this from happening, while also
 avoiding the compile-time warning.
 
 Fixes: c79095092834 ("ARM: integrate CMA with DMA-mapping subsystem")
+Upstream-Status: Inappropriate
 Signed-off-by: Arnd Bergmann <arnd@arndb.de>
 ---
  arch/arm/mm/dma-mapping.c | 8 ++++++++

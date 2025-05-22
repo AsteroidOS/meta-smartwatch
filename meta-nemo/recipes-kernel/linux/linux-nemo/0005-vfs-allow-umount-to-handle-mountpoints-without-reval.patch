@@ -28,6 +28,7 @@ end complicates things a bit.
 
 Cc: Neil Brown <neilb@suse.de>
 Reported-by: Christopher T Vogan <cvogan@us.ibm.com>
+Upstream-Status: Inappropriate
 Signed-off-by: Jeff Layton <jlayton@redhat.com>
 Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
 Signed-off-by: Darrel Griët <dgriet@gmail.com>

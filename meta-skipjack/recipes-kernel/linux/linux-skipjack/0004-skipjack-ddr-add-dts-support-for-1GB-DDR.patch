@@ -8,6 +8,7 @@ Subject: [PATCH] skipjack: ddr: add dts support for 1GB DDR
 
 Bug: 147842730
 Change-Id: I99266e76dff481eb7eb7e130173779ff9bde554a
+Upstream-Status: Inappropriate
 Signed-off-by: abel_fang <Abel_Fang@compal.com>
 ---
  arch/arm/boot/dts/msm8909w-skipjack/apq8009w-skipjack-wtp.dts | 3 ++-

@@ -3,6 +3,7 @@ From: Florent Revest <revestflo@gmail.com>
 Date: Sat, 4 Nov 2017 23:33:11 +0100
 Subject: [PATCH 1/2] bcm_bzhw: Use inverted IRQ lines polarity
 
+Upstream-Status: Inappropriate
 ---
  drivers/bluetooth/bcm_bzhw.c | 4 ++--
  1 file changed, 2 insertions(+), 2 deletions(-)

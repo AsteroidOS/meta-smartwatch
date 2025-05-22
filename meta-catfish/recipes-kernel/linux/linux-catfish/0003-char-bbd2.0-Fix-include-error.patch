@@ -3,6 +3,7 @@ From: MagneFire <IDaNLContact@gmail.com>
 Date: Wed, 3 Nov 2021 12:42:48 +0100
 Subject: [PATCH] char: bbd2.0: Fix include error.
 
+Upstream-Status: Inappropriate
 ---
  drivers/char/broadcom/bbd2.0/bcm_gps_hostwake.c | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)

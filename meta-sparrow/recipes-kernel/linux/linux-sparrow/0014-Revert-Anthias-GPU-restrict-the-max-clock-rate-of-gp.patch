@@ -6,6 +6,7 @@ Subject: [PATCH] Revert "Anthias: GPU: restrict the max clock rate of gpu to
 
 This reverts commit 3de2d9e2a55b4743cacaf74d0036cb8d0ed7502a.
 
+Upstream-Status: Inappropriate
 ---
  drivers/gpu/msm/kgsl_pwrctrl.c | 5 -----
  1 file changed, 5 deletions(-)

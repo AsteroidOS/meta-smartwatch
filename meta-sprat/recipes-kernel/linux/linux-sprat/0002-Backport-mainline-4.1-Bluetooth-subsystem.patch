@@ -3,6 +3,7 @@ From: Florent Revest <revestflo@gmail.com>
 Date: Sun, 18 Sep 2016 11:37:50 +0200
 Subject: [PATCH] Backport mainline 4.1 Bluetooth subsystem
 
+Upstream-Status: Inappropriate
 ---
  drivers/bluetooth/Kconfig.rej      |   65 +
  drivers/bluetooth/Makefile.rej     |   13 +

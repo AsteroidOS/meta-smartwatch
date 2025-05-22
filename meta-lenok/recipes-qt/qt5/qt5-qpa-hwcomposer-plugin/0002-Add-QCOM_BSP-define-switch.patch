@@ -6,6 +6,7 @@ Subject: [PATCH 2/2] Add QCOM_BSP define switch
 Needed as otherwise the structures defined on the android side doesn't match the ones
 we're using here.
 
+Upstream-Status: Inappropriate
 Signed-off-by: Simon Busch <morphis@gravedo.de>
 ---
  hwcomposer/hwcomposer.pro | 2 ++

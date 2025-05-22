@@ -3,6 +3,7 @@ From: MagneFire <dgriet@gmail.com>
 Date: Thu, 10 Feb 2022 21:15:00 +0100
 Subject: [PATCH] gpu: Compilation fix.
 
+Upstream-Status: Inappropriate
 ---
  drivers/gpu/msm/Makefile | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)

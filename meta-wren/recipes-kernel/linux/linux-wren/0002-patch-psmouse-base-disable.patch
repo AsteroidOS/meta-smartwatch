@@ -4,6 +4,7 @@ Date: Fri, 1 Jul 2016 23:22:27 +0200
 Subject: [PATCH] psmouse-base: disable references to lifebook_detect which
  needs x86
 
+Upstream-Status: Inappropriate
 ---
  drivers/input/mouse/psmouse-base.c | 4 ++--
  1 file changed, 2 insertions(+), 2 deletions(-)

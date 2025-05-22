@@ -19,6 +19,7 @@ but seems a little too big to be backported to 4.4.
 
 Let's take the simplest fix and change only the one broken line in the
 same way as newer kernels.
+Upstream-Status: Inappropriate
 ---
  arch/arm/include/asm/uaccess.h | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)

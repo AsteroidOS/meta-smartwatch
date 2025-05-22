@@ -3,6 +3,7 @@ From: MagneFire <dgriet@gmail.com>
 Date: Tue, 26 Apr 2022 22:10:42 +0200
 Subject: [PATCH] initramfs: Don't skip initramfs.
 
+Upstream-Status: Inappropriate
 ---
  init/initramfs.c | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)

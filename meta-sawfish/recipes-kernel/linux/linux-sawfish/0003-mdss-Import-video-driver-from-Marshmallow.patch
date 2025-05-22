@@ -5,6 +5,7 @@ Subject: [PATCH] mdss: Import video driver from Marshmallow. For some reason a
  garbled output is observed when using Nougat based kernels. Using the
  Marshmallow implementation fixes this.
 
+Upstream-Status: Inappropriate
 ---
  drivers/clk/msm/mdss/mdss-pll-util.c          |  19 +-
  drivers/video/msm/mdss/Kconfig                |  15 +

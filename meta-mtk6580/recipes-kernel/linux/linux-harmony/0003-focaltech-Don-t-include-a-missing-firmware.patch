@@ -3,6 +3,7 @@ From: Florent Revest <revestflo@gmail.com>
 Date: Tue, 27 Jun 2017 13:41:41 +0200
 Subject: [PATCH 02/11] focaltech: Don't include a missing firmware
 
+Upstream-Status: Inappropriate
 ---
  .../input/touchscreen/mediatek/focaltech_all/focaltech_flash.c  | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)

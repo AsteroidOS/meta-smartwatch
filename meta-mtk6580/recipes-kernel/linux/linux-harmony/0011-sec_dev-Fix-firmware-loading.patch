@@ -3,6 +3,7 @@ From: Florent Revest <revestflo@gmail.com>
 Date: Tue, 19 Sep 2017 22:41:15 +0200
 Subject: [PATCH 10/11] sec_dev: Fix firmware loading
 
+Upstream-Status: Inappropriate
 ---
  drivers/misc/mediatek/masp/asf/core/sec_dev.c | 4 ++--
  1 file changed, 2 insertions(+), 2 deletions(-)

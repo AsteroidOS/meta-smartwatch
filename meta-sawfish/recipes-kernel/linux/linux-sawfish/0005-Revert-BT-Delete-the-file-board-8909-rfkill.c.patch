@@ -4,6 +4,7 @@ Date: Tue, 16 Feb 2021 23:33:20 +0100
 Subject: [PATCH 2/4] Revert "BT: Delete the file board-8909-rfkill.c"
 
 This reverts commit 67b5153e14ae16f0613fa5db3934cc5e01963015.
+Upstream-Status: Inappropriate
 ---
  arch/arm/mach-msm/board-8909-rfkill.c | 204 ++++++++++++++++++++++++++
  1 file changed, 204 insertions(+)

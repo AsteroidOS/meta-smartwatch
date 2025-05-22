@@ -8,6 +8,7 @@ Subject: [PATCH] touchscreen: focaltech: Add delay for wakeup report.
  the the finger is held down for atleast 200ms, this is done by emulating a
  300ms touch.
 
+Upstream-Status: Inappropriate
 ---
  drivers/input/touchscreen/focaltech_core.c | 12 +++++++++++-
  1 file changed, 11 insertions(+), 1 deletion(-)

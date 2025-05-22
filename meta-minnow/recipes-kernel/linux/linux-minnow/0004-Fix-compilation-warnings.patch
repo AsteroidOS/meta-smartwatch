@@ -3,6 +3,7 @@ From: MagneFire <dgriet@gmail.com>
 Date: Sun, 8 May 2022 19:03:55 +0200
 Subject: [PATCH] Fix compilation warnings.
 
+Upstream-Status: Inappropriate
 ---
  Makefile                   | 2 +-
  arch/arm/kernel/bootinfo.c | 2 +-

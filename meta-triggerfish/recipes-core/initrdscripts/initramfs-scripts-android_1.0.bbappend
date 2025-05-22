@@ -4,8 +4,8 @@ SRC_URI:append:triggerfish = " file://init.machine.sh \
     file://ld.config.28.txt"
 
 do_install:append:triggerfish() {
-    install -m 0755 ${WORKDIR}/init.machine.sh ${D}/init.machine
-    install -m 0755 ${WORKDIR}/ld.config.28.txt ${D}/ld.config.28.txt
+    install -m 0755 ${UNPACKDIR}/init.machine.sh ${D}/init.machine
+    install -m 0755 ${UNPACKDIR}/ld.config.28.txt ${D}/ld.config.28.txt
 }
 
 RDEPENDS:${PN}:append:triggerfish = " msm-fb-refresher"

@@ -6,6 +6,7 @@ Subject: [PATCH 3/3] hci_core: handle incorrect specified max page number
 Some chips seem to report a different maximum page number than they
 allow us to read. Therfor we check for the status code after each
 read and skip those reporting out-of-range reads.
+Upstream-Status: Inappropriate
 ---
  net/bluetooth/hci_event.c | 8 ++++++++
  1 file changed, 8 insertions(+)

@@ -9,6 +9,7 @@ Content-Transfer-Encoding: 8bit
 
 This reverts commit 9e8428e7643f8e5304baa8d721cec019758c1ca3.
 
+Upstream-Status: Inappropriate
 Signed-off-by: Darrel Griët <dgriet@gmail.com>
 ---
  .../dts/apq8026-dory/apq8026-dory-bt.dtsi     | 20 +++++++++++--------

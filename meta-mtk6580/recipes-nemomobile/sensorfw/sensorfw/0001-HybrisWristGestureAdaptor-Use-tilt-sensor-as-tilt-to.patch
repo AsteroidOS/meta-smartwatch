@@ -4,6 +4,7 @@ Date: Fri, 5 Mar 2021 16:37:13 +0100
 Subject: [PATCH] HybrisWristGestureAdaptor: Use tilt sensor for tilt-to-wake
  sensor.
 
+Upstream-Status: Inappropriate
 ---
  .../hybriswristgestureadaptor/hybriswristgestureadaptor.cpp | 6 +++---
  1 file changed, 3 insertions(+), 3 deletions(-)
