@@ -1,0 +1,9 @@
+[Unit]
+Description=Linux Firmware Loader Daemon
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/firmwared -d /vendor/firmware:/vendor/firmware_mnt/image:/system/etc/firmware:/etc/firmware:/lib/firmware/updates/:/lib/firmware:/firmware/image
+
+[Install]
+WantedBy=basic.target
