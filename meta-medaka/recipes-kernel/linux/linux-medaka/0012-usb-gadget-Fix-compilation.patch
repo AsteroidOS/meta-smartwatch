@@ -1,0 +1,24 @@
+From 6d2cbd1db64e493eeca92b56787504a3ac13984f Mon Sep 17 00:00:00 2001
+From: MagneFire <dgriet@gmail.com>
+Date: Thu, 10 Feb 2022 21:57:38 +0100
+Subject: [PATCH] usb-gadget: Fix compilation.
+
+---
+ drivers/usb/gadget/Makefile | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/drivers/usb/gadget/Makefile b/drivers/usb/gadget/Makefile
+index 2bde573d0096..b9e7c2aac039 100644
+--- a/drivers/usb/gadget/Makefile
++++ b/drivers/usb/gadget/Makefile
+@@ -4,6 +4,7 @@
+ subdir-ccflags-$(CONFIG_USB_GADGET_DEBUG)	:= -DDEBUG
+ subdir-ccflags-$(CONFIG_USB_GADGET_VERBOSE)	+= -DVERBOSE_DEBUG
+ ccflags-y				+= -I$(srctree)/drivers/usb/gadget/udc
++ccflags-y				+= -I$(srctree)/drivers/usb/gadget/function -I$(srctree)/drivers/usb/gadget
+ 
+ obj-$(CONFIG_USB_LIBCOMPOSITE)	+= libcomposite.o
+ libcomposite-y			:= usbstring.o config.o epautoconf.o
+-- 
+2.35.1
+
