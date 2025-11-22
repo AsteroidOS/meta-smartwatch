@@ -8,4 +8,4 @@ do_install:append:skipjack() {
     install -m 0644 ${UNPACKDIR}/plat* ${D}/
 }
 
-FILES:${PN} += "/nonplat* /plat*"
+FILES:${PN}:append:skipjack = " /nonplat* /plat*"

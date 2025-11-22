@@ -10,4 +10,4 @@ do_install:append:catfish() {
     install -m 0644 ${UNPACKDIR}/default.prop ${D}/
 }
 
-FILES:${PN} += "/nonplat* /plat* /default.prop"
+FILES:${PN}:append:catfish = " /nonplat* /plat* /default.prop"

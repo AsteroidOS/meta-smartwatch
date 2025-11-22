@@ -8,4 +8,4 @@ do_install:append:koi() {
     install -m 0644 ${UNPACKDIR}/plat* ${D}/
 }
 
-FILES:${PN} += "/nonplat* /plat*"
+FILES:${PN}:append:koi = " /nonplat* /plat*"
