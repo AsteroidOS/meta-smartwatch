@@ -8,4 +8,4 @@ do_install:append:mooneye() {
     install -m 0644 ${UNPACKDIR}/plat* ${D}/
 }
 
-FILES:${PN} += "/nonplat* /plat*"
+FILES:${PN}:append:mooneye = " /nonplat* /plat*"

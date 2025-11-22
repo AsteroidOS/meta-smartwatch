@@ -8,7 +8,7 @@ do_install:append:ray() {
     install -m 0644 ${UNPACKDIR}/plat* ${D}/
 }
 
-FILES:${PN} += "/nonplat* /plat*"
+FILES:${PN}:append:ray = " /nonplat* /plat*"
 
 FILESEXTRAPATHS:prepend:firefish := "${THISDIR}/${PN}:"
 
@@ -20,4 +20,4 @@ do_install:append:firefish() {
     install -m 0644 ${UNPACKDIR}/plat* ${D}/
 }
 
-FILES:${PN} += "/nonplat* /plat*"
+FILES:${PN}:append:firefish = " /nonplat* /plat*"

@@ -8,4 +8,4 @@ do_install:append:narwhal() {
     install -m 0644 ${UNPACKDIR}/plat* ${D}/
 }
 
-FILES:${PN} += "/nonplat* /plat*"
+FILES:${PN}:append:narwhal= " /nonplat* /plat*"

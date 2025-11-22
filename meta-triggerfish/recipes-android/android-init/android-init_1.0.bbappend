@@ -10,4 +10,4 @@ do_install:append:triggerfish() {
     install -m 0644 ${UNPACKDIR}/default.prop ${D}/
 }
 
-FILES:${PN} += "/nonplat* /plat* /default.prop"
+FILES:${PN}:append:triggerfish = " /nonplat* /plat* /default.prop"
