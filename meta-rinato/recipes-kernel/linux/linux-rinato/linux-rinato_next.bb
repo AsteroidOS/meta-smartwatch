@@ -12,7 +12,7 @@ SRC_URI = " git://git@github.com/casept/linux-samsung-smartwatch.git;protocol=ht
 SRCREV = "bf245d6426986d0b24e1d8d2a671726c2f994862"
 
 LINUX_VERSION ?= "next"
-KERNEL_VERSION_SANITY_SKIP="1"
+KERNEL_VERSION_SANITY_SKIP = "1"
 
 PV = "${LINUX_VERSION}"
 S = "${WORKDIR}/git"
