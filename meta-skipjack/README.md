@@ -15,3 +15,4 @@ https://www.youtube.com/watch?v=C7DH4V8kl48
 ==Product Page==
 
 https://www.mobvoi.com/us/pages/ticwatchc2plus
+https://www.mobvoi.com/us/pages/ticwatchc2
