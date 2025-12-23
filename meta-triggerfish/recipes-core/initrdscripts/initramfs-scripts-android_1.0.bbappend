@@ -9,4 +9,4 @@ do_install:append:triggerfish() {
 }
 
 RDEPENDS:${PN}:append:triggerfish = " msm-fb-refresher"
-FILES:${PN}:append:triggerfish = " /ld.config.28.txt"
+FILES:${PN}:append:triggerfish = " /ld.config.28.txt /init.machine"

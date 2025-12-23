@@ -8,3 +8,5 @@ do_install:append:hoki() {
 
 RDEPENDS:${PN}:append:hoki = " msm-fb-refresher"
 
+FILES:${PN}:append:hoki = " /init.machine"
+
