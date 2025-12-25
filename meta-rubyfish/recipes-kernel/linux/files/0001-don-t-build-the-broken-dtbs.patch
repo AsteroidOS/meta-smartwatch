@@ -1,0 +1,28 @@
+From 4c63d44566d8cefdc7c6cf31c16ac9cff70fecf6 Mon Sep 17 00:00:00 2001
+From: Philip Russell <argosphil@murena.io>
+Date: Mon, 4 Sep 2023 14:17:40 +0000
+Subject: [PATCH] don't build the broken dtbs
+
+---
+ arch/arm64/boot/dts/qcom/Makefile | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/qcom/Makefile b/arch/arm64/boot/dts/qcom/Makefile
+index c47cf50b1f09..6193192f3b78 100644
+--- a/arch/arm64/boot/dts/qcom/Makefile
++++ b/arch/arm64/boot/dts/qcom/Makefile
+@@ -4,8 +4,9 @@ dtbo-$(CONFIG_ARCH_SDM429) += rubyfish-overlay.dtbo
+ rover-overlay.dtbo-base := rover.dtb
+ rubyfish-overlay.dtbo-base := rubyfish.dtb
+ else
+-dtb-$(CONFIG_ARCH_SDM429) += rover.dtb
+-dtb-$(CONFIG_ARCH_SDM429) += rubyfish.dtb
++# dtb-$(CONFIG_ARCH_SDM429) += rover.dtb
++# dtb-$(CONFIG_ARCH_SDM429) += rubyfish.dtb
++dtb-$(CONFIG_ARCH_SDM429) += rover-usable.dtb rubyfish-usable.dtb
+ endif
+ always		:= $(dtb-y)
+ subdir-y	:= $(dts-dirs)
+-- 
+2.41.0
+
