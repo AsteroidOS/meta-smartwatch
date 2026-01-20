@@ -23,7 +23,6 @@ SRC_URI = "git://android.googlesource.com/kernel/msm;branch=android-msm-catshark
 SRCREV = "2b65638aaf038943506d1e6e7a942a4948490a42"
 LINUX_VERSION ?= "3.18"
 PV = "${LINUX_VERSION}+pie"
-S = "${WORKDIR}/git"
 B = "${S}"
 
 do_configure:prepend() {

@@ -15,7 +15,7 @@ PACKAGE_ARCH = "${MACHINE_ARCH}"
 INHIBIT_PACKAGE_STRIP = "1"
 COMPATIBLE_MACHINE = "dory"
 INSANE_SKIP:${PN} = "already-stripped"
-S = "${WORKDIR}/sources"
+S = "${UNPACKDIR}/sources"
 UNPACKDIR = "${S}"
 B = "${S}"
 

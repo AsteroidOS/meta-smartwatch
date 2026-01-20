@@ -5,7 +5,7 @@ SRC_URI = "file://underclock.service \
            file://COPYING"
 LICENSE = "GPL-3.0-only"
 LIC_FILES_CHKSUM = "file://COPYING;md5=84dcc94da3adb52b53ae4fa38fe49e5d"
-S = "${WORKDIR}/sources"
+S = "${UNPACKDIR}/sources"
 UNPACKDIR = "${S}"
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 COMPATIBLE_MACHINE = "bass"
