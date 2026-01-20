@@ -12,8 +12,7 @@ PACKAGE_ARCH = "${MACHINE_ARCH}"
 INHIBIT_PACKAGE_STRIP = "1"
 COMPATIBLE_MACHINE = "hoki"
 INSANE_SKIP:${PN} = "ldflags dev-so already-stripped"
-S = "${UNPACKDIR}/sources"
-UNPACKDIR = "${S}"
+S = "${UNPACKDIR}"
 B = "${S}"
 
 do_install() {

@@ -14,8 +14,7 @@ PACKAGE_ARCH = "${MACHINE_ARCH}"
 INHIBIT_PACKAGE_STRIP = "1"
 COMPATIBLE_MACHINE = "ray|firefish"
 INSANE_SKIP:${PN} = "already-stripped"
-S = "${UNPACKDIR}/sources"
-UNPACKDIR = "${S}"
+S = "${UNPACKDIR}"
 B = "${S}"
 
 do_install() {

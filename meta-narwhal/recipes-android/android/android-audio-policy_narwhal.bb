@@ -7,8 +7,7 @@ PV = "oreo"
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 INHIBIT_PACKAGE_STRIP = "1"
 COMPATIBLE_MACHINE = "narwhal"
-S = "${UNPACKDIR}/sources"
-UNPACKDIR = "${S}"
+S = "${UNPACKDIR}"
 B = "${S}"
 
 do_install() {
