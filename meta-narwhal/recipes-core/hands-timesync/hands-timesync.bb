@@ -4,7 +4,7 @@ LICENSE = "GPL-3.0-only"
 LIC_FILES_CHKSUM = "file://LICENSE;md5=84dcc94da3adb52b53ae4fa38fe49e5d"
 
 SRC_URI = "git://github.com/asteroidos/narwhal-hands-timesync.git;branch=main;protocol=https"
-SRCREV = "${AUTOREV}"
+SRCREV = "c974b1fc4a7bda207f9778da6a69398282184a9d"
 PR = "r0"
 PV = "+git${SRCPV}"
 S = "${WORKDIR}/git"
