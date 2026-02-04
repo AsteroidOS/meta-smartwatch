@@ -5,6 +5,8 @@ on init
     write /sys/bus/msm_subsys/devices/subsys3/restart_level "RELATED"
     write /sys/bus/msm_subsys/devices/subsys4/restart_level "RELATED"
 
+    write /sys/class/nanohub/nanohub/lcd_mutex 1
+
     # Required to fix some symbolic links in wcnss firmware files.
     mkdir /mnt/vendor/
     symlink /persist /mnt/vendor/persist
