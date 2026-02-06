@@ -9,6 +9,6 @@ UNPACKDIR = "${S}"
 B = "${S}"
 
 do_install:append() {
-    install -d ${D}/lib/udev/rules.d
-    install -m 644 ${UNPACKDIR}/998-droid-system.rules ${D}/lib/udev/rules.d/
+    install -d ${D}/usr/lib/udev/rules.d
+    install -m 644 ${UNPACKDIR}/998-droid-system.rules ${D}/usr/lib/udev/rules.d/
 }
