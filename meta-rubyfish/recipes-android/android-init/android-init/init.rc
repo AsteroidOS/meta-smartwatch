@@ -41,6 +41,9 @@ on init
     chmod 777 /dev/mdss_rotator
     chmod 777 /sys/devices/platform/soc/soc:qcom,bg-rsb/enable
 
+    # Allow non-root to access nanohub (timesync)
+    chown 1000 root /dev/nanohub
+
     mkdir /data/
 
     # Start critical services first.
