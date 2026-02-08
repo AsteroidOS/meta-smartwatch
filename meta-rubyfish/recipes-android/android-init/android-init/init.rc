@@ -18,6 +18,15 @@ on init
     symlink /dev/fb0 /dev/graphics/fb0
     setprop sys.hwc.gpu_perf_mode 1
 
+    write /sys/class/leds/vibrator/trigger "transient"
+    chown system root /sys/class/leds/vibrator/trigger
+    chown system root /sys/class/leds/vibrator/activate
+    chown system root /sys/class/leds/vibrator/brightness
+    chown system root /sys/class/leds/vibrator/duration
+    chown system root /sys/class/leds/vibrator/state
+    chown system root /sys/class/timed_output/vibrator/enable
+    chmod 664 /sys/class/timed_output/vibrator/enable
+
     load_system_props
     restorecon_recursive /persist
 
