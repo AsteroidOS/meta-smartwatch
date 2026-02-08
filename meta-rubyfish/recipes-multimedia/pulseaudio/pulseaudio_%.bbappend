@@ -1,0 +1,1 @@
+RDEPENDS:pulseaudio-server:remove:rubyfish = " pulseaudio-modules-droid "
