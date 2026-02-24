@@ -1,0 +1,25 @@
+From b275076ffbc9a056ad340789361ceacd13c9a086 Mon Sep 17 00:00:00 2001
+From: Arseniy Movshev <dodoradio@outlook.com>
+Date: Sun, 19 Feb 2023 21:01:19 +0000
+Subject: [PATCH] add a log to check when devpts is mounted
+
+---
+ fs/devpts/inode.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/fs/devpts/inode.c b/fs/devpts/inode.c
+index c82edb049117..0410be8859ad 100644
+--- a/fs/devpts/inode.c
++++ b/fs/devpts/inode.c
+@@ -174,6 +174,8 @@ static int parse_mount_options(char *data, int op, struct pts_mount_opts *opts)
+ 	opts->ptmxmode = DEVPTS_DEFAULT_PTMX_MODE;
+ 	opts->max     = NR_UNIX98_PTY_MAX;
+ 
++    printk("PWET %s\n", data);
++
+ 	/* newinstance makes sense only on initial mount */
+ 	if (op == PARSE_MOUNT)
+ 		opts->newinstance = 0;
+-- 
+2.39.1
+
