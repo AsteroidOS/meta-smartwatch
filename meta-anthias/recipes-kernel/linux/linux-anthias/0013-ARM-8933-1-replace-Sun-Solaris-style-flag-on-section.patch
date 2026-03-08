@@ -1,4 +1,4 @@
-From 52b7b0ea9d9e4672dfc742f71cc6b08a8d10ffa7 Mon Sep 17 00:00:00 2001
+From 17dc731bb09faca47341090ff29d69176d818bc1 Mon Sep 17 00:00:00 2001
 From: casept <davids.paskevics@gmail.com>
 Date: Sun, 16 Jun 2024 00:51:52 +0200
 Subject: [PATCH] ARM: 8933/1: replace Sun/Solaris style flag on section
