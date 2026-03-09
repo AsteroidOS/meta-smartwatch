@@ -1,4 +1,4 @@
-From 94674820bffea9300372e327dd97a9747fee6ea8 Mon Sep 17 00:00:00 2001
+From 54a0729d0db818ed744e9e7b37910bb2300b8447 Mon Sep 17 00:00:00 2001
 From: ZaneZam <cyxman@yahoo.com>
 Date: Thu, 26 Mar 2015 14:50:10 +0100
 Subject: [PATCH] arm: LLVMLinux: use static inline in ARM ftrace.h
@@ -14,7 +14,6 @@ Signed-off-by: Behan Webster <behanw@converseincode.com>
 Reviewed-by: Mark Charlebois <charlebm@gmail.com>
 
 source: http://www.serverphorums.com/read.php?12,880351,880351#msg-880351
-
 ---
  arch/arm/include/asm/ftrace.h    | 2 +-
  arch/arm/kernel/return_address.c | 2 ++

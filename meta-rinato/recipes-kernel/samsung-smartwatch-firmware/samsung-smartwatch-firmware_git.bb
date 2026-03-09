@@ -9,7 +9,6 @@ SRC_URI = " git://git@github.com/casept/linux-samsung-smartwatch-firmware.git;pr
 SRC_URI[sha256sum] = "fffffffl33857fl2fa0318a1fac1e788941015bf39894a255b8323c5138037c6"
 SRCREV = "fe84f346a9337b5ad4a474895e1a62c52aad7f36"
 PV = "master"
-S = "${WORKDIR}/git"
 
 FILES:${PN} += " /usr/lib/firmware "
 

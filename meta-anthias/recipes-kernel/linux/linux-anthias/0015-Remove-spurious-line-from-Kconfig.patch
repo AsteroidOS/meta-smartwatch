@@ -1,0 +1,24 @@
+From f2aed267ee231db5cc8102042a40f5ecd4b138a1 Mon Sep 17 00:00:00 2001
+From: Ed Beroset <beroset@ieee.org>
+Date: Thu, 5 Mar 2026 15:12:49 -0500
+Subject: [PATCH] Remove spurious line from Kconfig
+
+This removes a line with a single `.` character that caused bitbake to
+emit an error.  The error is:
+ERROR: linux-anthias-3.10.40+marshmallow-r0 do_kernel_configcheck: config analysis failed when running 'symbol_why.py --dotconfig /home/ejb/asteroid/build/tmp/work-shared/anthias/kernel-source/.config --mismatches --classify'
+
+Upstream-Status: Inappropriate
+Signed-off-by: Ed Beroset <beroset@ieee.org>
+---
+ drivers/media/usb/stk1160/Kconfig | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/drivers/media/usb/stk1160/Kconfig b/drivers/media/usb/stk1160/Kconfig
+index 1c3a1ec00237..5fc9c2c354b8 100644
+--- a/drivers/media/usb/stk1160/Kconfig
++++ b/drivers/media/usb/stk1160/Kconfig
+@@ -17,4 +17,3 @@ config VIDEO_STK1160_AC97
+ 
+ 	---help---
+ 	  Enables AC97 codec support for stk1160 driver.
+-.

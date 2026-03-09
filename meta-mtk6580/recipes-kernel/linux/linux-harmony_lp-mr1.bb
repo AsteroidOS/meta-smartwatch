@@ -32,7 +32,6 @@ SRC_URI:append:inharmony = "file://inharmonyconfig"
 SRCREV = "b1ebbe66774b96f03fb440860d328a119b7f9a6b"
 LINUX_VERSION ?= "3.10"
 PV = "${LINUX_VERSION}+lollipop"
-S = "${WORKDIR}/git"
 B = "${S}"
 
 do_configure:prepend() {

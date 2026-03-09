@@ -1,4 +1,4 @@
-From 2c8286b220789706bc72a4d4006390393b69c1c6 Mon Sep 17 00:00:00 2001
+From 88814ab6c0065c2a28ff13cfc95e2d588ff923f7 Mon Sep 17 00:00:00 2001
 From: Lrs121 <lrs@lrsservers.net>
 Date: Fri, 10 Feb 2017 19:56:41 +0100
 Subject: [PATCH] Create copy of devfreq_trace.h
@@ -10,7 +10,7 @@ Credits to T10NAZ
 
 Upstream-Status: Inappropriate
 ---
- include/trace/devfreq_trace.h | 44 +++++++++++++++++++++++++++++++++++++++++++
+ include/trace/devfreq_trace.h | 44 +++++++++++++++++++++++++++++++++++
  1 file changed, 44 insertions(+)
  create mode 100644 include/trace/devfreq_trace.h
 
