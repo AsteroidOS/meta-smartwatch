@@ -1,26 +1,26 @@
-From 530c834baab0f28d3ebf0daa52b61b7c40fe5b37 Mon Sep 17 00:00:00 2001
+From aaa7d3b45d7ce201e6e948af29cdb3f2142bfc40 Mon Sep 17 00:00:00 2001
 From: Florent Revest <revestflo@gmail.com>
 Date: Thu, 2 Mar 2017 12:54:42 +0100
 Subject: [PATCH] Use Bluesleep instead of Nitrous for BT power management
 
 Upstream-Status: Inappropriate
 ---
- .../devicetree/bindings/bluetooth/nitrous.txt      |  44 --
- arch/arm/boot/dts/qcom/WI500Q_EVB2_msm8226.dtsi    |  20 +-
- arch/arm/boot/dts/qcom/WI500Q_SR2_msm8226.dtsi     |  20 +-
- arch/arm/boot/dts/qcom/WI500Q_SR_msm8226.dtsi      |  20 +-
- arch/arm/mach-msm/Makefile                         |   2 +-
- arch/arm/mach-msm/board-8226.c                     |  61 +++
- arch/arm/mach-msm/include/mach/board.h             |   6 +
- arch/arm/mach-msm/wi500q_rfkill.c                  | 125 +++++
- drivers/BCM_LPM/Makefile                           |   2 +-
- drivers/BCM_LPM/bluesleep.c                        |  28 +
- drivers/BCM_LPM/nitrous.c                          | 599 ---------------------
- drivers/bluetooth/hci_ldisc.c                      |   4 +
- drivers/tty/serial/msm_serial_hs.c                 |  21 +-
- include/linux/platform_data/msm_serial_hs.h        |   3 -
- include/net/bluetooth/hci.h                        |   1 +
- net/bluetooth/hci_sock.c                           |   4 +
+ .../devicetree/bindings/bluetooth/nitrous.txt |  44 --
+ .../boot/dts/qcom/WI500Q_EVB2_msm8226.dtsi    |  20 +-
+ .../arm/boot/dts/qcom/WI500Q_SR2_msm8226.dtsi |  20 +-
+ arch/arm/boot/dts/qcom/WI500Q_SR_msm8226.dtsi |  20 +-
+ arch/arm/mach-msm/Makefile                    |   2 +-
+ arch/arm/mach-msm/board-8226.c                |  61 ++
+ arch/arm/mach-msm/include/mach/board.h        |   6 +
+ arch/arm/mach-msm/wi500q_rfkill.c             | 125 ++++
+ drivers/BCM_LPM/Makefile                      |   2 +-
+ drivers/BCM_LPM/bluesleep.c                   |  28 +
+ drivers/BCM_LPM/nitrous.c                     | 599 ------------------
+ drivers/bluetooth/hci_ldisc.c                 |   4 +
+ drivers/tty/serial/msm_serial_hs.c            |  21 +-
+ include/linux/platform_data/msm_serial_hs.h   |   3 -
+ include/net/bluetooth/hci.h                   |   1 +
+ net/bluetooth/hci_sock.c                      |   4 +
  16 files changed, 259 insertions(+), 701 deletions(-)
  delete mode 100644 Documentation/devicetree/bindings/bluetooth/nitrous.txt
  create mode 100644 arch/arm/mach-msm/wi500q_rfkill.c
@@ -448,10 +448,11 @@ diff --git a/drivers/BCM_LPM/bluesleep.c b/drivers/BCM_LPM/bluesleep.c
 index adf3f4c0bca6..7bd1a9c2d149 100644
 --- a/drivers/BCM_LPM/bluesleep.c
 +++ b/drivers/BCM_LPM/bluesleep.c
-@@ -489,6 +489,34 @@ static void bluesleep_stop(void)
+@@ -488,6 +488,34 @@ static void bluesleep_stop(void)
+ 	wake_lock_timeout(&bsi->wake_lock, HZ / 2);
  }
  
- /**
++/**
 + * Handles HCI device events.
 + * @param this Not used.
 + * @param event The event that occurred.
@@ -479,10 +480,9 @@ index adf3f4c0bca6..7bd1a9c2d149 100644
 + }
 +}
 +
-+/**
+ /**
   * Read the <code>BT_WAKE</code> GPIO pin value via the proc interface.
   * When this function returns, <code>page</code> will contain a 1 if the
-  * pin is high, 0 otherwise.
 diff --git a/drivers/BCM_LPM/nitrous.c b/drivers/BCM_LPM/nitrous.c
 deleted file mode 100644
 index f5a3fe9cc846..000000000000

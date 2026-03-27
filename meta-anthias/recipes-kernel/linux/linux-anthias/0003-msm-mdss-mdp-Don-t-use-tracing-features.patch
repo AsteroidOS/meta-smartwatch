@@ -1,4 +1,4 @@
-From 4cb908cedf4a75c8fc4004cd531d0f1a94f187df Mon Sep 17 00:00:00 2001
+From f7beec8c3996f550decf09f741451888df118807 Mon Sep 17 00:00:00 2001
 From: Florent Revest <revestflo@gmail.com>
 Date: Fri, 10 Feb 2017 19:55:17 +0100
 Subject: [PATCH] msm-mdss-mdp: Don't use tracing features
@@ -6,10 +6,10 @@ Subject: [PATCH] msm-mdss-mdp: Don't use tracing features
 Upstream-Status: Inappropriate
 ---
  drivers/video/msm/mdss/mdss_mdp.c            |  3 ---
- drivers/video/msm/mdss/mdss_mdp_ctl.c        | 28 ----------------------------
- drivers/video/msm/mdss/mdss_mdp_intf_cmd.c   |  5 -----
+ drivers/video/msm/mdss/mdss_mdp_ctl.c        | 28 --------------------
+ drivers/video/msm/mdss/mdss_mdp_intf_cmd.c   |  5 ----
  drivers/video/msm/mdss/mdss_mdp_intf_video.c |  1 -
- drivers/video/msm/mdss/mdss_mdp_overlay.c    | 16 ----------------
+ drivers/video/msm/mdss/mdss_mdp_overlay.c    | 16 -----------
  drivers/video/msm/mdss/mdss_mdp_rotator.c    |  2 --
  6 files changed, 55 deletions(-)
 

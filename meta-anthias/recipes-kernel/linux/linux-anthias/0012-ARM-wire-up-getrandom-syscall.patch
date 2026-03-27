@@ -1,7 +1,7 @@
-From dd61fc65eaac75710bb8144047cc7b68afb6bd45 Mon Sep 17 00:00:00 2001
+From aaf7b97e8870e48f2fa52242004f56e8bdab3ab5 Mon Sep 17 00:00:00 2001
 From: Russell King <rmk+kernel@arm.linux.org.uk>
 Date: Fri, 8 Aug 2014 10:56:34 +0100
-Subject: [PATCH 2/2] ARM: wire up getrandom syscall
+Subject: [PATCH] ARM: wire up getrandom syscall
 
 Add the new getrandom syscall for ARM.
 
@@ -14,7 +14,7 @@ Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
  3 files changed, 3 insertions(+), 1 deletion(-)
 
 diff --git a/arch/arm/include/asm/unistd.h b/arch/arm/include/asm/unistd.h
-index 43876245fc5..2ed963aa6b3 100644
+index 43876245fc57..2ed963aa6b3b 100644
 --- a/arch/arm/include/asm/unistd.h
 +++ b/arch/arm/include/asm/unistd.h
 @@ -15,7 +15,7 @@
@@ -27,7 +27,7 @@ index 43876245fc5..2ed963aa6b3 100644
  
  #define __ARCH_WANT_STAT64
 diff --git a/arch/arm/include/uapi/asm/unistd.h b/arch/arm/include/uapi/asm/unistd.h
-index 8273348d4a3..1ec7540ce9f 100755
+index 8273348d4a35..1ec7540ce9ff 100755
 --- a/arch/arm/include/uapi/asm/unistd.h
 +++ b/arch/arm/include/uapi/asm/unistd.h
 @@ -412,6 +412,7 @@
@@ -39,7 +39,7 @@ index 8273348d4a3..1ec7540ce9f 100755
  
  /*
 diff --git a/arch/arm/kernel/calls.S b/arch/arm/kernel/calls.S
-index 3a0bcc0ecd2..4c21a438a88 100755
+index 3a0bcc0ecd24..4c21a438a888 100755
 --- a/arch/arm/kernel/calls.S
 +++ b/arch/arm/kernel/calls.S
 @@ -393,6 +393,7 @@
@@ -50,6 +50,3 @@ index 3a0bcc0ecd2..4c21a438a88 100755
  #ifndef syscalls_counted
  .equ syscalls_padding, ((NR_syscalls + 3) & ~3) - NR_syscalls
  #define syscalls_counted
--- 
-2.42.0
-

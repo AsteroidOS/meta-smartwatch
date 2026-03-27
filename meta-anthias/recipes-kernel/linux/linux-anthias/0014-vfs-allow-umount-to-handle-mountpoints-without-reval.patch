@@ -1,8 +1,8 @@
-From ddecc92c8a129eae2c1b4e1b73bcf075615ee2e8 Mon Sep 17 00:00:00 2001
+From 442f720805be9b051eba7c6e5490544718227ce4 Mon Sep 17 00:00:00 2001
 From: Jeff Layton <jlayton@redhat.com>
 Date: Fri, 26 Jul 2013 06:23:25 -0400
-Subject: [PATCH 04/25] vfs: allow umount to handle mountpoints without
- revalidating them
+Subject: [PATCH] vfs: allow umount to handle mountpoints without revalidating
+ them
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -232,7 +232,7 @@ index 23e510ef1994..2a5bfdf4c8cb 100644
   * It's inline, so penalty for filesystems that don't use sticky bit is
   * minimal.
 diff --git a/fs/namespace.c b/fs/namespace.c
-index 7d7da124cf92..63e2dc63d70a 100644
+index a45ba4f267fe..ad8ea9bc2518 100644
 --- a/fs/namespace.c
 +++ b/fs/namespace.c
 @@ -1318,7 +1318,7 @@ SYSCALL_DEFINE2(umount, char __user *, name, int, flags)
@@ -256,6 +256,3 @@ index 5a5ff57ceed4..cd09751c71a0 100644
  
  #define user_path(name, path) user_path_at(AT_FDCWD, name, LOOKUP_FOLLOW, path)
  #define user_lpath(name, path) user_path_at(AT_FDCWD, name, 0, path)
--- 
-2.46.0
-

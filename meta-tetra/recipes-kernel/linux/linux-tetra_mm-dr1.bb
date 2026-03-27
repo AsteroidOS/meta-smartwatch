@@ -33,7 +33,6 @@ SRC_URI = "git://android.googlesource.com/kernel/bcm;branch=android-bcm-tetra-3.
 SRCREV = "0de8b342797a4074625055e77d37d5367d8ff285"
 LINUX_VERSION ?= "3.10"
 PV = "${LINUX_VERSION}+marshmallow"
-S = "${WORKDIR}/git"
 B = "${S}"
 
 do_configure:prepend() {

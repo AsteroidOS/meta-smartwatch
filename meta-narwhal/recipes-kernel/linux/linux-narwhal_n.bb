@@ -22,7 +22,6 @@ SRC_URI = "git://android.googlesource.com/kernel/msm;branch=android-msm-narwhal-
 SRCREV = "ef2880c313e30d5b99e138599fd3d81d90daae3e"
 LINUX_VERSION ?= "3.18"
 PV = "${LINUX_VERSION}+oreo"
-S = "${WORKDIR}/git"
 B = "${S}"
 
 do_configure:prepend() {

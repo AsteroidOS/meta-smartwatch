@@ -33,7 +33,6 @@ SRC_URI = "git://android.googlesource.com/kernel/msm;branch=android-msm-sparrow-
 SRCREV = "3d2fa521411917b5a1683fec42ad2a8e50aee79f"
 LINUX_VERSION ?= "3.10"
 PV = "${LINUX_VERSION}+marshmallow"
-S = "${WORKDIR}/git"
 B = "${S}"
 
 do_configure:prepend() {

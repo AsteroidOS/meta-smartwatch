@@ -1,4 +1,4 @@
-From 8d3952268d5b9b238f8b5ad1832f918cf677b2a7 Mon Sep 17 00:00:00 2001
+From 2ef7db09ed3d1b796eeda433fed41ca2669e5f1e Mon Sep 17 00:00:00 2001
 From: Aussell King <rmk+kernel@arm.linux.org.uk>
 Date: Sun, 2 Dec 2018 19:34:23 +0100
 Subject: [PATCH] ARM: uaccess: remove put_user() code duplication
@@ -10,17 +10,18 @@ both implementations.
 
 Upstream-Status: Inappropriate
 ---
- arch/arm/include/asm/uaccess.h | 130 ++++++++++++++++++++++++-----------------
+ arch/arm/include/asm/uaccess.h | 130 ++++++++++++++++++++-------------
  1 file changed, 78 insertions(+), 52 deletions(-)
 
 diff --git a/arch/arm/include/asm/uaccess.h b/arch/arm/include/asm/uaccess.h
 index 7e1f76027f66..c6261f0e529d 100644
 --- a/arch/arm/include/asm/uaccess.h
 +++ b/arch/arm/include/asm/uaccess.h
-@@ -23,6 +23,35 @@
+@@ -22,6 +22,35 @@
+ #define VERIFY_READ 0
  #define VERIFY_WRITE 1
  
- /*
++/*
 + * These two functions allow hooking accesses to userspace to increase
 + * system integrity by ensuring that the kernel can not inadvertantly
 + * perform such accesses (eg, via list poison values) which could then
@@ -49,10 +50,9 @@ index 7e1f76027f66..c6261f0e529d 100644
 +#endif
 +}
 +
-+/*
+ /*
   * The exception table consists of pairs of addresses: the first is the
   * address of an instruction that is allowed to fault, and the second is
-  * the address at which the program should continue.  No registers are
 @@ -152,46 +181,23 @@ extern int __put_user_2(void *, unsigned int);
  extern int __put_user_4(void *, unsigned int);
  extern int __put_user_8(void *, unsigned long long);

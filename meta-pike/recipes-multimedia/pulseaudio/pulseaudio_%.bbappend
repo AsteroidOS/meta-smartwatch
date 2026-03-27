@@ -1,1 +1,1 @@
-RDEPENDS:pulseaudio-server:remove:pike= " pulseaudio-modules-droid "
+RDEPENDS:pulseaudio-server:remove:pike = " pulseaudio-modules-droid "
