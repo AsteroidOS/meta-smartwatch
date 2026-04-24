@@ -9,7 +9,7 @@ PR = "r0"
 PV = "+git${SRCPV}"
 S = "${WORKDIR}/git"
 DEPENDS = "qtbase"
-inherit cmake_qt5
+inherit qt6-cmake
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 
 do_install:append() {
