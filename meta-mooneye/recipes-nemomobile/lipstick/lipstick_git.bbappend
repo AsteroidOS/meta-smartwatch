@@ -1,1 +1,1 @@
-RDEPENDS:${PN}:append:mooneye = " qt5-qpa-hwcomposer-plugin "
+RDEPENDS:${PN}:append:mooneye = " qt6-qpa-hwcomposer-plugin "

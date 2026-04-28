@@ -1,1 +1,1 @@
-RDEPENDS:${PN}:append:dory = " qt5-qpa-hwcomposer-plugin "
+RDEPENDS:${PN}:append:dory = " qt6-qpa-hwcomposer-plugin "

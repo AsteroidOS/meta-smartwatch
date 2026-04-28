@@ -1,1 +1,1 @@
-RDEPENDS:${PN}:append:rubyfish = " qt5-qpa-hwcomposer-plugin "
+RDEPENDS:${PN}:append:rubyfish = " qt6-qpa-hwcomposer-plugin "

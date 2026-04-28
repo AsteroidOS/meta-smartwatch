@@ -1,1 +1,1 @@
-RDEPENDS:${PN}:append:skipjack = " qt5-qpa-hwcomposer-plugin "
+RDEPENDS:${PN}:append:skipjack = " qt6-qpa-hwcomposer-plugin "

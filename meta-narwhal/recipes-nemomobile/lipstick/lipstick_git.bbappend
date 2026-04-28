@@ -1,1 +1,1 @@
-RDEPENDS:${PN}:append:narwhal = " qt5-qpa-hwcomposer-plugin "
+RDEPENDS:${PN}:append:narwhal = " qt6-qpa-hwcomposer-plugin "

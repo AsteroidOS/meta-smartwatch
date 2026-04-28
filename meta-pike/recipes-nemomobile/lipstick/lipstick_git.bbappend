@@ -1,1 +1,1 @@
-RDEPENDS:${PN}:append:pike = " qt5-qpa-hwcomposer-plugin "
+RDEPENDS:${PN}:append:pike = " qt6-qpa-hwcomposer-plugin "

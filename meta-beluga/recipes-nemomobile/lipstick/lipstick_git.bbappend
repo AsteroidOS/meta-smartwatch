@@ -1,1 +1,1 @@
-RDEPENDS:${PN}:append:beluga = " qt5-qpa-hwcomposer-plugin "
+RDEPENDS:${PN}:append:beluga = " qt6-qpa-hwcomposer-plugin "

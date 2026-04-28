@@ -1,1 +1,1 @@
-RDEPENDS:${PN}:append:sturgeon = " qt5-qpa-hwcomposer-plugin "
+RDEPENDS:${PN}:append:sturgeon = " qt6-qpa-hwcomposer-plugin "

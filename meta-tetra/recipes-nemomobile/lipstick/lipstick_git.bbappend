@@ -1,1 +1,1 @@
-RDEPENDS:${PN}:append:tetra = " qt5-qpa-hwcomposer-plugin "
+RDEPENDS:${PN}:append:tetra = " qt6-qpa-hwcomposer-plugin "
