@@ -1,1 +1,1 @@
-RDEPENDS:${PN}:append:lenok = " qt5-qpa-hwcomposer-plugin "
+RDEPENDS:${PN}:append:lenok = " qt6-qpa-hwcomposer-plugin "

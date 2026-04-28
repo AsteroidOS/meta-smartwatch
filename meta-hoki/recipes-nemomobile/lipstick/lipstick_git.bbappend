@@ -1,1 +1,1 @@
-RDEPENDS:${PN}:append:hoki = " qt5-qpa-hwcomposer-plugin "
+RDEPENDS:${PN}:append:hoki = " qt6-qpa-hwcomposer-plugin "

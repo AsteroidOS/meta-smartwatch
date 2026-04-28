@@ -1,1 +1,1 @@
-RDEPENDS:${PN}:append:triggerfish = " qt5-qpa-hwcomposer-plugin "
+RDEPENDS:${PN}:append:triggerfish = " qt6-qpa-hwcomposer-plugin "

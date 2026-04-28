@@ -1,1 +1,1 @@
-RDEPENDS:${PN}:append:minnow = " qt5-qpa-hwcomposer-plugin "
+RDEPENDS:${PN}:append:minnow = " qt6-qpa-hwcomposer-plugin "

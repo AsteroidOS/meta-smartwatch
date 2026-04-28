@@ -1,1 +1,1 @@
-RDEPENDS:${PN}:append:sawfish = " qt5-qpa-hwcomposer-plugin "
+RDEPENDS:${PN}:append:sawfish = " qt6-qpa-hwcomposer-plugin "

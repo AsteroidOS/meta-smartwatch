@@ -1,1 +1,1 @@
-RDEPENDS:${PN}:append:smelt = " qt5-qpa-hwcomposer-plugin "
+RDEPENDS:${PN}:append:smelt = " qt6-qpa-hwcomposer-plugin "

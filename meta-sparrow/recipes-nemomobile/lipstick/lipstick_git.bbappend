@@ -1,1 +1,1 @@
-RDEPENDS:${PN}:append:sparrow = " qt5-qpa-hwcomposer-plugin "
+RDEPENDS:${PN}:append:sparrow = " qt6-qpa-hwcomposer-plugin "
