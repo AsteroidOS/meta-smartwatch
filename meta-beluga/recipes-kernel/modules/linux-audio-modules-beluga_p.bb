@@ -13,7 +13,6 @@ SRC_URI = " git://android.googlesource.com/kernel/msm-extra;branch=android-msm-b
 SRCREV = "9c56e30ea127e2c88188db5e2c1637e346ae75a3"
 LINUX_VERSION ?= "4.9"
 PV = "${LINUX_VERSION}+pie"
-S = "${WORKDIR}/git"
 B = "${S}"
 
 DEPENDS = "virtual/kernel virtual/cross-cc"

@@ -25,7 +25,6 @@ SRC_URI = "git://github.com/fossil-engineering/kernel-msm-fossil-cw;branch=fossi
 SRCREV = "c0b4c201f2d5a641defe19958a9b4c16f40d866b"
 LINUX_VERSION ?= "4.14"
 PV = "${LINUX_VERSION}+pie"
-S = "${WORKDIR}/git"
 B = "${S}"
 
 do_configure:prepend() {

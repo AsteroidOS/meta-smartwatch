@@ -17,7 +17,6 @@ SRC_URI = "git://github.com/z3ntu/linux;branch=qcom-msm8226-6.0.y-dsi;protocol=h
 SRCREV = "70abf059e2b6984116e2e4fd3894fa91a829e248"
 LINUX_VERSION ?= "6.0"
 PV = "${LINUX_VERSION}"
-S = "${WORKDIR}/git"
 B = "${S}"
 
 do_configure:prepend() {

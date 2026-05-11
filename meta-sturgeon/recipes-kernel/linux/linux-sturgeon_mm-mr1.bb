@@ -30,7 +30,6 @@ SRC_URI = " git://android.googlesource.com/kernel/msm;branch=android-msm-sturgeo
 SRCREV = "97abcf5b24684a46530ffc8a4748dd7ae6c2e65a"
 LINUX_VERSION ?= "3.10"
 PV = "${LINUX_VERSION}+marshmallow"
-S = "${WORKDIR}/git"
 B = "${S}"
 
 do_configure:prepend() {

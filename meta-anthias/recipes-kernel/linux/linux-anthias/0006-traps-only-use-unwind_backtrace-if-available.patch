@@ -1,4 +1,4 @@
-From ab23f3a219c5972c23e83044ad35747030efcfdb Mon Sep 17 00:00:00 2001
+From 54be5c6a0bf77d371cac2c1d28ce9209c98b2ce2 Mon Sep 17 00:00:00 2001
 From: Florent Revest <revestflo@gmail.com>
 Date: Fri, 10 Feb 2017 21:33:22 +0100
 Subject: [PATCH] traps: only use unwind_backtrace if available

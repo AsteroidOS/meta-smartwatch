@@ -24,7 +24,6 @@ SRC_URI = "git://android.googlesource.com/kernel/msm;branch=android-msm-triggerf
 SRCREV = "82824770e036a1e7576a299bc37b52d633d62675"
 LINUX_VERSION ?= "4.9"
 PV = "${LINUX_VERSION}+pie"
-S = "${WORKDIR}/git"
 B = "${S}"
 
 do_configure:prepend() {

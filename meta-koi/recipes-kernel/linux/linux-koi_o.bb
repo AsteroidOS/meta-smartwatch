@@ -21,7 +21,6 @@ SRC_URI = " git://android.googlesource.com/kernel/exynos;branch=android-exynos-k
 SRCREV = "f684256405854c40b5ccc2d126f810cf4c29ca2f"
 LINUX_VERSION ?= "3.18"
 PV = "${LINUX_VERSION}+oreo"
-S = "${WORKDIR}/git"
 B = "${S}"
 
 do_configure:prepend() {

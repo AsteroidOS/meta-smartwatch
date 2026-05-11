@@ -1,4 +1,4 @@
-From 307a3e5682bb6302534f4bff83e56aa343e219e7 Mon Sep 17 00:00:00 2001
+From 4c98ee696d95dd5c2defa218758caa9d652856fa Mon Sep 17 00:00:00 2001
 From: Florent Revest <revestflo@gmail.com>
 Date: Thu, 2 Mar 2017 13:46:09 +0100
 Subject: [PATCH] Backport mainline 4.1 Bluetooth subsystem
@@ -19,14 +19,14 @@ Upstream-Status: Inappropriate
  drivers/bluetooth/btmrvl_debugfs.c |   37 +-
  drivers/bluetooth/btmrvl_drv.h     |   60 +-
  drivers/bluetooth/btmrvl_main.c    |  390 +-
- drivers/bluetooth/btmrvl_sdio.c    |  487 ++-
+ drivers/bluetooth/btmrvl_sdio.c    |  487 +-
  drivers/bluetooth/btmrvl_sdio.h    |   10 +
  drivers/bluetooth/btsdio.c         |   12 +-
  drivers/bluetooth/btuart_cs.c      |   61 +-
- drivers/bluetooth/btusb.c          | 2176 +++++++++--
+ drivers/bluetooth/btusb.c          | 2176 +++++++--
  drivers/bluetooth/btwilink.c       |   10 +-
  drivers/bluetooth/dtl1_cs.c        |   73 +-
- drivers/bluetooth/hci_ath.c        |  653 +---
+ drivers/bluetooth/hci_ath.c        |  653 +--
  drivers/bluetooth/hci_bcm.c        |  153 +
  drivers/bluetooth/hci_bcsp.c       |   54 +-
  drivers/bluetooth/hci_h4.c         |  161 +-
@@ -39,15 +39,15 @@ Upstream-Status: Inappropriate
  include/linux/skbuff.h             |   22 +-
  include/linux/wait.h               |   25 +-
  include/net/bluetooth/bluetooth.h  |   98 +-
- include/net/bluetooth/hci.h        |  726 ++--
- include/net/bluetooth/hci_core.h   |  884 +++--
+ include/net/bluetooth/hci.h        |  726 ++-
+ include/net/bluetooth/hci_core.h   |  884 ++--
  include/net/bluetooth/hci_sock.h   |  175 +
  include/net/bluetooth/l2cap.h      |  186 +-
  include/net/bluetooth/mgmt.h       |  312 +-
  include/net/bluetooth/rfcomm.h     |   24 +-
  include/net/bluetooth/sco.h        |   32 -
  kernel/wait.c                      |  113 +
- net/bluetooth/6lowpan.c            | 1469 ++++++++
+ net/bluetooth/6lowpan.c            | 1469 ++++++
  net/bluetooth/Kconfig              |   46 +
  net/bluetooth/Makefile             |    7 +-
  net/bluetooth/a2mp.c               |  136 +-
@@ -63,35 +63,35 @@ Upstream-Status: Inappropriate
  net/bluetooth/cmtp/Kconfig         |    2 +-
  net/bluetooth/cmtp/capi.c          |   14 +-
  net/bluetooth/cmtp/core.c          |   24 +-
- net/bluetooth/ecc.c                |  816 +++++
+ net/bluetooth/ecc.c                |  816 ++++
  net/bluetooth/ecc.h                |   54 +
- net/bluetooth/hci_conn.c           | 1046 ++++--
- net/bluetooth/hci_core.c           | 2490 ++++++++-----
- net/bluetooth/hci_debugfs.c        | 1142 ++++++
+ net/bluetooth/hci_conn.c           | 1046 +++-
+ net/bluetooth/hci_core.c           | 2490 ++++++----
+ net/bluetooth/hci_debugfs.c        | 1142 +++++
  net/bluetooth/hci_debugfs.h        |   48 +
- net/bluetooth/hci_event.c          | 2666 +++++++++++---
+ net/bluetooth/hci_event.c          | 2666 ++++++++---
  net/bluetooth/hci_request.c        |  566 +++
  net/bluetooth/hci_request.h        |   57 +
- net/bluetooth/hci_sock.c           |  613 +++-
+ net/bluetooth/hci_sock.c           |  613 ++-
  net/bluetooth/hci_sysfs.c          |  378 +-
  net/bluetooth/hidp/Kconfig         |    2 +-
  net/bluetooth/hidp/core.c          |  185 +-
  net/bluetooth/hidp/hidp.h          |    6 +
- net/bluetooth/l2cap_core.c         | 2576 ++++++++-----
- net/bluetooth/l2cap_sock.c         |  493 ++-
+ net/bluetooth/l2cap_core.c         | 2576 ++++++----
+ net/bluetooth/l2cap_sock.c         |  493 +-
  net/bluetooth/lib.c                |   15 +-
- net/bluetooth/mgmt.c               | 7094 +++++++++++++++++++++++++++++-------
- net/bluetooth/mgmt_util.c          |  210 ++
+ net/bluetooth/mgmt.c               | 7094 ++++++++++++++++++++++------
+ net/bluetooth/mgmt_util.c          |  210 +
  net/bluetooth/mgmt_util.h          |   53 +
  net/bluetooth/rfcomm/Kconfig       |    2 +-
  net/bluetooth/rfcomm/core.c        |  173 +-
  net/bluetooth/rfcomm/sock.c        |  115 +-
- net/bluetooth/rfcomm/tty.c         |  475 +--
+ net/bluetooth/rfcomm/tty.c         |  475 +-
  net/bluetooth/sco.c                |  353 +-
  net/bluetooth/selftest.c           |  271 ++
  net/bluetooth/selftest.h           |   45 +
- net/bluetooth/smp.c                | 3774 ++++++++++++++++---
- net/bluetooth/smp.h                |  209 ++
+ net/bluetooth/smp.c                | 3774 ++++++++++++---
+ net/bluetooth/smp.h                |  209 +
  net/core/skbuff.c                  |   14 +-
  88 files changed, 28516 insertions(+), 8292 deletions(-)
  create mode 100644 drivers/bluetooth/btbcm.c
@@ -29431,10 +29431,11 @@ index de030f50f72b..a230aa27b323 100644
  
  	hid->dev.parent = &session->conn->hcon->dev;
  	hid->ll_driver = &hidp_hid_driver;
-@@ -856,6 +871,29 @@ static void hidp_session_dev_del(struct hidp_session *session)
+@@ -855,6 +870,29 @@ static void hidp_session_dev_del(struct hidp_session *session)
+ 		input_unregister_device(session->input);
  }
  
- /*
++/*
 + * Asynchronous device registration
 + * HID device drivers might want to perform I/O during initialization to
 + * detect device types. Therefore, call device registration in a separate
@@ -29457,10 +29458,9 @@ index de030f50f72b..a230aa27b323 100644
 +		hidp_session_terminate(session);
 +}
 +
-+/*
+ /*
   * Create new session object
   * Allocate session object, initialize static fields, copy input data into the
-  * object and take a reference to all sub-objects.
 @@ -884,11 +922,11 @@ static int hidp_session_new(struct hidp_session **out, const bdaddr_t *bdaddr,
  	kref_init(&session->ref);
  	atomic_set(&session->state, HIDP_SESSION_IDLING);

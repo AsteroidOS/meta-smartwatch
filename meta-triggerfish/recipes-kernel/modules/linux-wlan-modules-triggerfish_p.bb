@@ -10,7 +10,6 @@ SRC_URI = " git://android.googlesource.com/kernel/msm-modules/wlan;branch=androi
 SRCREV = "207571b39e06ee3d8ff7d64d3062eb037a696532"
 LINUX_VERSION ?= "4.9"
 PV = "${LINUX_VERSION}+pie"
-S = "${WORKDIR}/git"
 B = "${S}"
 
 DEPENDS = "virtual/kernel virtual/cross-cc"

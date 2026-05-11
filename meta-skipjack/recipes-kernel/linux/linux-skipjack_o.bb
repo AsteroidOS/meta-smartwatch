@@ -26,7 +26,6 @@ SRC_URI = "git://android.googlesource.com/kernel/msm;branch=android-msm-skipjack
 SRCREV = "f46a8c36f416d4245b13b451c36f36a0c690283d"
 LINUX_VERSION ?= "3.18"
 PV = "${LINUX_VERSION}+pie"
-S = "${WORKDIR}/git"
 B = "${S}"
 
 do_configure:prepend() {

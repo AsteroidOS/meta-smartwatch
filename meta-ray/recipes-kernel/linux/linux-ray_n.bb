@@ -22,7 +22,6 @@ SRC_URI = " git://android.googlesource.com/kernel/msm;branch=android-msm-ray-3.1
 SRCREV = "ceb81fda35a733c904776eaaabd72dddf1e603c9"
 LINUX_VERSION ?= "3.18"
 PV = "${LINUX_VERSION}+oreo"
-S = "${WORKDIR}/git"
 B = "${S}"
 
 do_configure:prepend() {

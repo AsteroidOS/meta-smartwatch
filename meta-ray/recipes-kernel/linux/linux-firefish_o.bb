@@ -22,7 +22,6 @@ SRC_URI = "git://android.googlesource.com/kernel/msm;branch=android-msm-firefish
 SRCREV = "20d62df1b6b88de89184cbd1bf826291f43ddec8"
 LINUX_VERSION ?= "3.18"
 PV = "${LINUX_VERSION}+oreo"
-S = "${WORKDIR}/git"
 B = "${S}"
 
 do_configure:prepend() {

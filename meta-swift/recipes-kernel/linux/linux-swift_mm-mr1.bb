@@ -18,7 +18,6 @@ SRC_URI = "git://android.googlesource.com/kernel/msm;branch=android-msm-swift-3.
 SRCREV = "2f958570bcf7457da4827dc8da5ff3195d447cb3"
 LINUX_VERSION ?= "3.18"
 PV = "${LINUX_VERSION}+marshmallow"
-S = "${WORKDIR}/git"
 B = "${S}"
 
 do_configure:prepend() {

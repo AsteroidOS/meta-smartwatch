@@ -25,7 +25,6 @@ SRC_URI = "git://android.googlesource.com/kernel/mediatek;branch=android-mediate
 SRCREV = "faeb8c03bca6c09f8817f4d509e0280b53af8b99"
 LINUX_VERSION ?= "4.4"
 PV = "${LINUX_VERSION}+oreo"
-S = "${WORKDIR}/git"
 B = "${S}"
 
 do_configure:prepend() {

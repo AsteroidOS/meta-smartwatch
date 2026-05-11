@@ -1,1 +1,1 @@
-RDEPENDS:pulseaudio-server:remove:nemo= " pulseaudio-modules-droid "
+RDEPENDS:pulseaudio-server:remove:nemo = " pulseaudio-modules-droid "

@@ -15,7 +15,6 @@ SRC_URI = "git://github.com/fossil-engineering/kernel-msm-fossil-extra-cw-audiok
 SRCREV = "c984389253fc58bc316af06bf3504dd2c25382be"
 LINUX_VERSION ?= "4.9"
 PV = "${LINUX_VERSION}+pie"
-S = "${WORKDIR}/git"
 B = "${S}"
 
 DEPENDS = "virtual/kernel"

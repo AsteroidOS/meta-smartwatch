@@ -26,7 +26,6 @@ SRC_URI = " git://android.googlesource.com/kernel/omap;branch=android-omap-minno
 SRCREV = "f651c7734b8d1ca6f2e39764eda8f413831bcf81"
 LINUX_VERSION ?= "3.10"
 PV = "${LINUX_VERSION}+marshmallow"
-S = "${WORKDIR}/git"
 B = "${S}"
 
 do_configure:prepend() {
