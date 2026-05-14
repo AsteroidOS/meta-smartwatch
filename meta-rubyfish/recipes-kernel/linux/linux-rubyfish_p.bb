@@ -16,6 +16,7 @@ SRC_URI = " git://github.com/mobvoi/mobvoi-ticwatch-kernel;branch=mobvoi-android
     file://0003-initramfs-Don-t-skip-initramfs.patch \
     file://0004-dts-Add-stock-rubyfish-device-tree.patch \
     file://0005-dts-Add-stock-rover-device-tree.patch \
+    file://0006-net-bcmhd-Allow-compilation-as-module.patch \
 "
 
 SRCREV = "c428ef3654d52e816308a6cf11009a1742f86c1c"
