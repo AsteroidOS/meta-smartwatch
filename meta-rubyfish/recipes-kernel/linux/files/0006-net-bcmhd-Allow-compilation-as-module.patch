@@ -1,0 +1,47 @@
+From 9bae84070cbeb689f3aaa20896ce07d246d50a63 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Darrel=20Gri=C3=ABt?= <dgriet@gmail.com>
+Date: Sun, 10 May 2026 22:49:32 +0200
+Subject: [PATCH] net: bcmhd: Allow compilation as module
+
+The default driver is always compiled as a built-in regardless of
+whatever is used in the config.
+
+This changes it such that the kernel configuration is respected.
+
+Upstream-Status: Inappropriate
+
+---
+ drivers/net/wireless/Makefile        | 2 +-
+ drivers/net/wireless/bcmdhd/Makefile | 6 +++---
+ 2 files changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/net/wireless/Makefile b/drivers/net/wireless/Makefile
+index 1c3bbd1ad588..4e6041c0d0e7 100755
+--- a/drivers/net/wireless/Makefile
++++ b/drivers/net/wireless/Makefile
+@@ -69,7 +69,7 @@ obj-$(CONFIG_WL_TI)	+= ti/
+ 
+ obj-$(CONFIG_MWIFIEX)	+= mwifiex/
+ 
+-obj-y    += bcmdhd/
++obj-$(CONFIG_BCMDHD)	+= bcmdhd/
+ obj-$(CONFIG_BRCMFMAC)	+= brcm80211/
+ obj-$(CONFIG_BRCMSMAC)	+= brcm80211/
+ 
+diff --git a/drivers/net/wireless/bcmdhd/Makefile b/drivers/net/wireless/bcmdhd/Makefile
+index 0f8d24a05d8e..50fed23870f2 100755
+--- a/drivers/net/wireless/bcmdhd/Makefile
++++ b/drivers/net/wireless/bcmdhd/Makefile
+@@ -1,9 +1,9 @@
+ # bcmdhd
+ 
+ MODULE_NAME := bcmdhd
+-CONFIG_WLAN :=y
+-CONFIG_BCMDHD := y
+-CONFIG_BCMDHD_SDIO := y
++#CONFIG_WLAN :=y
++#CONFIG_BCMDHD := y
++#CONFIG_BCMDHD_SDIO := y
+ #CONFIG_BCMDHD_PCIE := y
+ #CONFIG_BCMDHD_USB := y
+ 
