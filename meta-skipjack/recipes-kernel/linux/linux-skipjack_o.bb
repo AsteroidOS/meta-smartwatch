@@ -21,6 +21,7 @@ SRC_URI = "git://android.googlesource.com/kernel/msm;branch=android-msm-skipjack
     file://0010-touch-new-TP-ID-for-support-different-design.patch \
     file://0011-touch-new-TP-ID-for-support-different-design.patch \
     file://0012-ARM-8933-1-replace-Sun-Solaris-style-flag-on-section.patch \
+    file://0013-input-touchscreen-focaltech-Override-size-for-tunny-.patch \
     file://defconfig \
     file://img_info"
 SRCREV = "f46a8c36f416d4245b13b451c36f36a0c690283d"
