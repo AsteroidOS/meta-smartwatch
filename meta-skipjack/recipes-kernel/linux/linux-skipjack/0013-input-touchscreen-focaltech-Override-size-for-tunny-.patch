@@ -1,0 +1,52 @@
+From 04d8a1acc80753dc082abe5fdb2df95608b445b0 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Darrel=20Gri=C3=ABt?= <dgriet@gmail.com>
+Date: Wed, 27 May 2026 20:57:13 +0200
+Subject: [PATCH] input: touchscreen: focaltech: Override size for tunny
+ platform
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+tunny and skipjack share the same specs other than the display
+resolution (400x400 vs 360x360).
+
+To avoid building for two platforms dynamically figure out what the
+touchscreen size should be based on the kernel command line.
+
+Upstream-Status: Inappropriate
+
+Signed-off-by: Darrel Griët <dgriet@gmail.com>
+---
+ drivers/input/touchscreen/focaltech_core.c | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/drivers/input/touchscreen/focaltech_core.c b/drivers/input/touchscreen/focaltech_core.c
+index 139f6a34..c6dc67f3 100644
+--- a/drivers/input/touchscreen/focaltech_core.c
++++ b/drivers/input/touchscreen/focaltech_core.c
+@@ -19,6 +19,8 @@
+ *******************************************************************************/
+ /*user defined include header files */
+ #include "focaltech_core.h"
++#include <linux/init.h>
++#include <linux/string.h>
+ 
+ #if defined(CONFIG_FB)
+ #include <linux/notifier.h>
+@@ -1636,6 +1638,13 @@ static int fts_get_dt_coords(struct device *dev, char *name,
+ 		return rc;
+ 	}
+ 
++	if (saved_command_line && strstr(saved_command_line, "androidboot.bootloader=TUNNY")) {
++		if (!strcmp(name, "focaltech,display-coords") || !strcmp(name, "focaltech,panel-coords")) {
++			coords[2] = 400;
++			coords[3] = 400;
++		}
++	}
++
+ 	if (!strcmp(name, "focaltech,panel-coords")) {
+ 		pdata->panel_minx = coords[0];
+ 		pdata->panel_miny = coords[1];
+-- 
+2.50.1 (Apple Git-155)
+
