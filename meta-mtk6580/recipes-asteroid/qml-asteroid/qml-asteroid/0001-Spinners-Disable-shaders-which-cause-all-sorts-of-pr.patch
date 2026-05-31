@@ -1,4 +1,4 @@
-From 18cf457d2549930fc62a4897bc50d55e4abd5c86 Mon Sep 17 00:00:00 2001
+From 85890a635522a1df1c969c09ee5778558de1fd80 Mon Sep 17 00:00:00 2001
 From: Florent Revest <revestflo@gmail.com>
 Date: Sun, 3 Dec 2017 00:37:37 +0100
 Subject: [PATCH] Spinners: Disable shaders which cause all sorts of problems
@@ -11,20 +11,20 @@ Upstream-Status: Inappropriate
  2 files changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/src/controls/qml/CircularSpinner.qml b/src/controls/qml/CircularSpinner.qml
-index 74dcaf4..e1cf4f0 100644
+index 15d9266..2aefa4b 100644
 --- a/src/controls/qml/CircularSpinner.qml
 +++ b/src/controls/qml/CircularSpinner.qml
-@@ -91,7 +91,7 @@ PathView {
+@@ -93,7 +93,7 @@ PathView {
          visible: false
      }
  
 -    layer.enabled: true
 +    layer.enabled: false
      layer.effect: ShaderEffect {
-         fragmentShader: "
-         #ifdef GL_ES
+         fragmentShader: "spinnerfade.frag.qsb"
+     }
 diff --git a/src/controls/qml/Spinner.qml b/src/controls/qml/Spinner.qml
-index 7dd2f80..53d0ada 100644
+index 8e34115..08eb9bf 100644
 --- a/src/controls/qml/Spinner.qml
 +++ b/src/controls/qml/Spinner.qml
 @@ -70,7 +70,7 @@ ListView {
@@ -34,5 +34,5 @@ index 7dd2f80..53d0ada 100644
 -    layer.enabled: true
 +    layer.enabled: false
      layer.effect: ShaderEffect {
-         fragmentShader: "
-         #ifdef GL_ES
+         fragmentShader: "spinnerfade.frag.qsb"
+     }
