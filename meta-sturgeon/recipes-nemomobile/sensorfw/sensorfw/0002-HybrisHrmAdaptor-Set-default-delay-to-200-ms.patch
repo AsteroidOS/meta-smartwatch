@@ -1,4 +1,4 @@
-From 4c2337a555c07020771ca3aa72304a269b400dc6 Mon Sep 17 00:00:00 2001
+From 29c1432f4b35838333d3d068562fef3dd9620047 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Darrel=20Gri=C3=ABt?= <dgriet@gmail.com>
 Date: Wed, 17 Aug 2022 21:50:14 +0200
 Subject: [PATCH] HybrisHrmAdaptor: Set default delay to 200 ms.
@@ -13,11 +13,11 @@ Signed-off-by: Darrel Griët <dgriet@gmail.com>
  1 file changed, 2 insertions(+), 3 deletions(-)
 
 diff --git a/adaptors/hybrishrmadaptor/hybrishrmadaptor.cpp b/adaptors/hybrishrmadaptor/hybrishrmadaptor.cpp
-index b1a7909..fd25bbc 100644
+index 9eae26f..a5d0ecd 100644
 --- a/adaptors/hybrishrmadaptor/hybrishrmadaptor.cpp
 +++ b/adaptors/hybrishrmadaptor/hybrishrmadaptor.cpp
 @@ -42,9 +42,6 @@ HybrisHrmAdaptor::HybrisHrmAdaptor(const QString& id) :
-     	sensordLogW() << "Path does not exists: " << powerStatePath;
+     	qCWarning(lcSensorFw) << "Path does not exists: " << powerStatePath;
      	powerStatePath.clear();
      }
 -    // Set default delay.
