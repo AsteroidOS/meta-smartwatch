@@ -1,0 +1,66 @@
+From: Florent Revest <revestflo@gmail.com>
+Date: Tue, 9 Jun 2026 22:00:00 +0000
+Subject: [PATCH] amplifiers: cl_dsp: return -ENOENT when a coeff control is
+ not found
+
+cl_dsp_get_reg() only assigns *reg inside the lookup loop, when a
+matching coefficient descriptor is found. If no descriptor matches
+(e.g. the cs40l26-codec "A2H Level" kcontrol getter looking up
+"VOLUMELEVEL" in the A2H algo before any cs40l26-a2h.bin coefficient
+file has been loaded), the loop falls through silently and the
+subsequent memory-region sanity check runs on the caller's
+UNINITIALIZED stack value. When that garbage happens to carry the
+expected region prefix bits, cl_dsp_get_reg() returns 0 and the
+caller regmap-reads/writes a garbage register address on the chip.
+
+On the Pixel Watch 2 this is not theoretical: AGM enumerates every
+mixer control of the monaco snd card as soon as card_state goes
+ONLINE, its read of 'A2H Level' (numid 150) reaches this path, and
+the resulting garbage-address access hard-hangs the bus -- the SoC
+dies in a silent PS_HOLD HARD_RESET with no kernel output, ~0.5s
+after the ADSP comes up. Reproduced deterministically with an
+amixer cget sweep: numids 1-149 survive, numid 150 resets the SoC.
+Stock WearOS survives the same sweep only because its kernel build
+leaves different stack garbage that fails the region check (-EFAULT).
+
+Track whether the lookup matched and return -ENOENT if it did not,
+so kcontrol accessors fail gracefully until the A2H/SVC coefficient
+files are actually loaded.
+
+Upstream-Status: Pending [genuine cirrus cl_dsp driver bug, present
+                          upstream; should be submitted]
+
+Signed-off-by: Florent Revest <revestflo@gmail.com>
+---
+ private/google-modules/amplifiers/cs40l26/cl_dsp.c | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/private/google-modules/amplifiers/cs40l26/cl_dsp.c b/private/google-modules/amplifiers/cs40l26/cl_dsp.c
+--- a/private/google-modules/amplifiers/cs40l26/cl_dsp.c
++++ b/private/google-modules/amplifiers/cs40l26/cl_dsp.c
+@@ -138,6 +138,7 @@
+ 	int ret = 0;
+ 	struct cl_dsp_coeff_desc *coeff_desc;
+ 	unsigned int mem_region_prefix;
++	bool found = false;
+ 
+ 	if (!dsp)
+ 		return -EPERM;
+@@ -164,9 +165,17 @@
+ 			return -ENXIO;
+ 		}
+ 
++		found = true;
+ 		break;
+ 	}
+ 
++	if (!found) {
++		dev_dbg(dsp->dev,
++			"No DSP control called %s for algo 0x%X\n",
++			coeff_name, algo_id);
++		return -ENOENT;
++	}
++
+ 	/* verify register found in expected region */
+ 	switch (block_type) {
+ 	case CL_DSP_XM_PACKED_TYPE:

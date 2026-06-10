@@ -1,0 +1,66 @@
+From: Florent Revest <revestflo@gmail.com>
+Date: Fri, 5 Jun 2026 21:30:00 +0000
+Subject: [PATCH] audio: monaco: bind haptics codec by deterministic MFD child
+ name
+Upstream-Status: Inappropriate [aurora-specific HW glue]
+
+monaco's haptics dai_links reference the cs40l26 codec component by
+the literal name "cs40l26-codec.2.auto". That is the auto-numbered
+platform-device name the i2c-driven MFD child gets on stock WearOS,
+where the global PLATFORM_DEVID_AUTO allocation order happens to give
+it id 2. With our module set/load order the id differs, so
+snd_soc_register_card() deferred forever waiting for a component
+that never appears by that name.
+
+An earlier version of this patch "fixed" the deferral by switching
+the dai_links to "cs40l26_codec", the aurora DT's asoc-codec-names
+entry, so monaco's of_property_match_string() remap resolved the
+codec by of_node. That bound the WRONG component: the asoc-codec
+phandle points at a compatible-less "cs40l26-codec" child node of
+bolero-cdc, and bolero_add_child_devices() spawns a platform device
+named after that node (parented to the bolero device) which
+string-matches the cs40l26-codec platform driver. That driver's
+probe does
+
+    cs40l26 = dev_get_drvdata(pdev->dev.parent);
+
+which on the bolero-spawned instance yields bolero's private struct,
+not the real cs40l26_private (the cs40l26_loaded global gate passes
+because the genuine i2c probe already ran). The resulting component
+is the only one whose of_node matches the card, so the card binds it
+with codec->core pointing into bolero_priv. Reading any kcontrol
+that chases core->dsp ('A2H Level', numid 150 -- the first control
+AGM's enumeration sweep hits when the card comes ONLINE) then walks
+a "list head" that actually contains module .text, the bogus
+dereference hard-hangs the bus, and the SoC dies in a silent PS_HOLD
+HARD_RESET. Stock WearOS carries the same poisoned instance but its
+machine driver never binds it; the asoc-codec-names entry is
+vestigial there.
+
+Bind the healthy MFD child instead, like stock does, but by a
+deterministic name: the companion amplifiers patch pins the MFD
+child platform id to 0, so the component is always
+"cs40l26-codec.0" regardless of probe order.
+
+Signed-off-by: Florent Revest <revestflo@gmail.com>
+---
+ private/msm-google-modules/audio/asoc/msm_monaco_dailink.h | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/private/msm-google-modules/audio/asoc/msm_monaco_dailink.h b/private/msm-google-modules/audio/asoc/msm_monaco_dailink.h
+--- a/private/msm-google-modules/audio/asoc/msm_monaco_dailink.h
++++ b/private/msm-google-modules/audio/asoc/msm_monaco_dailink.h
+@@ -158,11 +158,11 @@ SND_SOC_DAILINK_DEFS(pri_mi2s_tx,
+
+ SND_SOC_DAILINK_DEFS(sec_mi2s_haptics_rx,
+ 	DAILINK_COMP_ARRAY(COMP_CPU("snd-soc-dummy-dai")),
+-	DAILINK_COMP_ARRAY(COMP_CODEC("cs40l26-codec.2.auto", "cs40l26-pcm")),
++	DAILINK_COMP_ARRAY(COMP_CODEC("cs40l26-codec.0", "cs40l26-pcm")),
+ 	DAILINK_COMP_ARRAY(COMP_PLATFORM("snd-soc-dummy")));
+
+ SND_SOC_DAILINK_DEFS(pri_mi2s_haptics_rx,
+ 	DAILINK_COMP_ARRAY(COMP_CPU("snd-soc-dummy-dai")),
+-	DAILINK_COMP_ARRAY(COMP_CODEC("cs40l26-codec.2.auto", "cs40l26-pcm")),
++	DAILINK_COMP_ARRAY(COMP_CODEC("cs40l26-codec.0", "cs40l26-pcm")),
+ 	DAILINK_COMP_ARRAY(COMP_PLATFORM("snd-soc-dummy")));
+ #endif
