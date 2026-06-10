@@ -1,0 +1,24 @@
+[Unit]
+Description=Halium-13 LXC Android container (hwcomposer + vendor HALs)
+DefaultDependencies=no
+After=local-fs.target aurora-vendor-mount.service var-lib-lxc-android-rootfs.mount systemd-journald.service
+Requires=var-lib-lxc-android-rootfs.mount
+Wants=aurora-vendor-mount.service
+Before=basic.target network.target bluetooth.service ofono.service sensord.service
+Conflicts=shutdown.target
+Before=shutdown.target
+ConditionPathExists=/var/lib/lxc/android/config
+
+[Service]
+Type=simple
+ExecStart=/usr/libexec/aurora-lxc-android-start.sh
+ExecStop=/usr/bin/lxc-stop -n android -k
+Restart=on-failure
+RestartSec=10
+# Container output goes to lxc.console.logfile; keep the unit's own logging
+# on the journal only (NOT console) so lxc-start chatter can't spam the TTY.
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
