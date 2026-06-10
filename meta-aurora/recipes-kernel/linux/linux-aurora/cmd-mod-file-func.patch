@@ -1,0 +1,36 @@
+Subject: [PATCH] kbuild: generate .mod via $(file) not printf (qcacld/WiFi)
+
+scripts/Makefile.build cmd_mod does
+  printf '%s\n' $(real-search ...) | awk ... > $@
+For a module with thousands of objects (qcacld-3.0 WiFi on aurora) the
+$(real-search) expansion becomes a single argv string that exceeds the
+kernel's MAX_ARG_STRLEN (128 KiB per argument) — /bin/sh rejects the
+printf with "Argument list too long" (NOT ARG_MAX; ulimit -s does not
+help). The module link itself already uses an @response-file, only the
+.mod generation overflows. GNU make >= 4 provides the builtin
+$(file >FILE,TEXT) which writes the list with no shell/argv limit;
+write the object list with that and dedup with awk. Fixes the qcacld
+build; harmless for all other modules. Device-specific build aid.
+
+Upstream-Status: Inappropriate [aurora qcacld build workaround for an
+old kbuild; newer kbuild already avoids the giant argv]
+
+Signed-off-by: Florent Revest <revestflo@gmail.com>
+---
+--- a/scripts/Makefile.build
++++ b/scripts/Makefile.build
+@@ -308,8 +308,12 @@
+ 	$(call if_changed,cc_lto_link_modules)
+ endif
+ 
+-cmd_mod = printf '%s\n' $(call real-search, $*.o, .o, -objs -y -m) | \
+-	$(AWK) '!x[$$0]++ { print("$(obj)/"$$0) }' > $@
++# qcacld etc. have thousands of objects: `printf '%s\n' <list>`
++# exceeds the kernel MAX_ARG_STRLEN (128 KiB single argv string).
++# Write the list via GNU make's builtin $(file ...) (no shell/argv
++# limit) then dedup with awk. (Patched for aurora qcacld/WiFi.)
++cmd_mod = $(file >$@.tmp,$(call real-search, $*.o, .o, -objs -y -m)) \
++	$(AWK) '{ for (i = 1; i <= NF; i++) if (!x[$$i]++) print "$(obj)/" $$i }' $@.tmp > $@ && rm -f $@.tmp
+ 
+ $(obj)/%.mod: FORCE
+ 	$(call if_changed,mod)
