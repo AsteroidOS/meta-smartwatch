@@ -1,0 +1,15 @@
+# Aurora: stop android-tools-adbd from being auto-enabled at boot.
+#
+# Upstream meta-oe ships /lib/systemd/system-preset/98-android-tools-adbd.preset
+# with `enable android-tools-adbd.service`, which makes systemctl preset put
+# a symlink in basic.target.wants. On aurora we want android-tools-adbd to
+# start ONLY when usb-moded's appsync_activate_pre StartUnit triggers it
+# (via the adb_mode dyn-mode + adb-startserver.ini appsync entry). Auto-
+# starting it at basic.target races configfs_set_function() and adbd
+# either fails to open ep0 (because adbd-prepare hasn't mounted FunctionFS
+# yet against a configfs function dir that doesn't exist), or it claims
+# the abstract socket "local:5037" which then blocks later restarts.
+#
+# Preset processing reads files in lexicographic order with "first match
+# wins" semantics, so this 10-prefixed file beats the 98- upstream one.
+disable android-tools-adbd.service

@@ -1,0 +1,19 @@
+[Unit]
+Description=Aurora: bootstrap configfs USB gadget (g1) for adbd + usb-moded
+# adbd-prepare (mounts /dev/usb-ffs/adb against ffs.adb) and aurora-udc-bind
+# (writes the UDC to /config/usb_gadget/g1) both need g1 to exist when they
+# run at basic.target -- so the gadget skeleton has to be staged earlier,
+# before basic.target activates. Pulling this in via sysinit.target.wants
+# guarantees that ordering. Re-running is idempotent (mkdir -p).
+DefaultDependencies=no
+After=local-fs.target
+Before=basic.target sysinit.target shutdown.target
+Conflicts=shutdown.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/init_gfs
+RemainAfterExit=yes
+
+[Install]
+WantedBy=sysinit.target

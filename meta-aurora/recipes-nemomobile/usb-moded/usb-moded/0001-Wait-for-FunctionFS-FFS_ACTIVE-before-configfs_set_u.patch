@@ -1,0 +1,67 @@
+From: Florent Revest <revestflo@gmail.com>
+Date: Wed, 4 Jun 2026 14:30:00 +0000
+Subject: [PATCH] Wait for FunctionFS FFS_ACTIVE before configfs_set_udc
+
+Upstream-Status: Inappropriate [aurora-specific workaround]
+
+Aurora ships an adb_mode that uses a FunctionFS function (ffs.adb).
+The kernel composite_bind() walk calls ffs_func_bind() which requires
+the FunctionFS instance to be in FFS_ACTIVE state (raw_descs_data and
+raw_descs_length set, see drivers/usb/gadget/function/f_fs.c) -- if
+not, it returns -ENODEV, composite_bind fails, the UDC write returns
+ENODEV.
+
+usb-moded's appsync_activate_pre() calls systemd's StartUnit() (the
+D-Bus reply returns as soon as the job is queued, NOT when the unit
+reaches Active state) and then immediately calls
+appsync_mark_active_locked() on the app. By the time
+modesetting_enter_dynamic_mode falls through to configfs_set_udc(),
+the corresponding adbd hasn't opened /dev/usb-ffs/adb/ep0 yet, let
+alone written the function descriptors.
+
+The wait MUST happen AFTER configfs_set_function() (which creates the
+configfs functions/ffs.adb dir adbd-prepare needs to mount FunctionFS
+against) and BEFORE configfs_set_udc(): adbd-prepare's mount only
+succeeds once that configfs function dir exists, then adbd's ep0 open
++ descriptor write triggers FFS_ACTIVE which makes ep1 appear, and
+only THEN can the UDC write succeed.
+
+This is a hack and not the right long-term fix (that would be to make
+appsync_mark_active_locked actually wait for systemd's JobRemoved or
+poll the unit's ActiveState property). But it unblocks aurora rootfs
+adb with the minimum diff.
+
+Hardcoded for ffs.adb because that's the only FunctionFS function
+aurora ships in dyn-modes. A generic implementation would iterate
+over all configs/b.1/ffs.* symlinks; happy to refactor on request.
+---
+ src/usb_moded-modesetting.c | 18 ++++++++++++++++++
+ 1 file changed, 18 insertions(+)
+
+--- a/src/usb_moded-modesetting.c
++++ b/src/usb_moded-modesetting.c
+@@ -769,6 +769,24 @@
+         char *id = config_get_android_vendor_id();
+         configfs_set_vendorid(data->idVendorOverride ?: id);
+         free(id);
++        /* HACK: ffs_func_bind() in kernel composite_bind requires the
++         * FunctionFS instance in FFS_ACTIVE state -- i.e. adbd must
++         * have already opened ep0 and written descriptors. Otherwise
++         * the UDC write below returns ENODEV and we fall through to
++         * charging_only. Poll for ep1 (only exists after descriptors
++         * have been written) so we don't race ahead of adbd. This must
++         * sit AFTER configfs_set_function() (which mkdir'd functions/
++         * ffs.adb so adbd-prepare's `mount -t functionfs adb` can find
++         * the kernel-side instance) and BEFORE configfs_set_udc().
++         */
++        const char *ffs_ep1 = "/dev/usb-ffs/adb/ep1";
++        for( int i = 0; i < 60; ++i ) {
++            if( access(ffs_ep1, F_OK) == 0 ) {
++                log_debug("FunctionFS ready (%s present)", ffs_ep1);
++                break;
++            }
++            g_usleep(500 * 1000);
++        }
+         if( !configfs_set_udc(true) )
+             goto EXIT;
+     }

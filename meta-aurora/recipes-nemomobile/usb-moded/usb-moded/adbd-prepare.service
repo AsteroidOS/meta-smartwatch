@@ -1,0 +1,38 @@
+# Aurora override of upstream usb-moded's adbd-prepare.service.
+#
+# Two changes from upstream:
+#
+# 1. ExecStartPre creates /config/usb_gadget/g1/functions/ffs.adb. The
+#    `mount -t functionfs adb /dev/usb-ffs/adb` in adbd-functionfs.sh requires
+#    this configfs function dir to exist (the kernel matches the FunctionFS
+#    instance name against a configfs functions/ffs.<name> dir; without one the
+#    mount returns ENODEV "special device adb does not exist"). usb-moded
+#    normally creates this in configfs_set_function(), but
+#    appsync_activate_pre() fires StartUnit(adbd-prepare) BEFORE
+#    configfs_set_function -- so by the time adbd-prepare runs, the dir isn't
+#    there yet. Pre-create idempotently here; mkdir EEXIST is fine, and
+#    usb-moded's later mkdir is also a no-op.
+#
+# 2. No [Install] section -- this is a static unit. It's pulled in by
+#    android-tools-adbd.service via Wants= in 99-aurora-no-configfs.conf
+#    (drop-in), which itself is only started when usb-moded's
+#    appsync_activate_pre fires StartUnit. Auto-starting it from basic.target
+#    would race with usb-moded's configfs_set_function and create the
+#    chicken-and-egg above; relying on the usb-moded trigger is the only safe
+#    ordering.
+#
+# Conditioned on /etc/usb-debugging-enabled so the unit fails fast if USB
+# debugging has been turned off.
+
+[Unit]
+Description=functionfs setup for adbd
+ConditionPathExists=/etc/usb-debugging-enabled
+Before=android-tools-adbd.service
+PartOf=android-tools-adbd.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStartPre=/bin/mkdir -p /config/usb_gadget/g1/functions/ffs.adb
+ExecStart=/usr/sbin/adbd-functionfs.sh
+ExecStop=/bin/umount /dev/usb-ffs/adb
