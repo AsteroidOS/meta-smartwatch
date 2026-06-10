@@ -1,0 +1,15 @@
+[Unit]
+Description=Aurora Halium-13 container rootfs (loop-mount android-rootfs.img)
+DefaultDependencies=no
+After=aurora-vendor-mount.service
+Before=aurora-lxc-android.service local-fs.target
+RequiresMountsFor=/var/lib/lxc/android
+
+[Mount]
+What=/var/lib/lxc/android/android-rootfs.img
+Where=/var/lib/lxc/android/rootfs
+Type=ext4
+Options=loop,ro,nosuid,nodev
+
+[Install]
+WantedBy=local-fs.target

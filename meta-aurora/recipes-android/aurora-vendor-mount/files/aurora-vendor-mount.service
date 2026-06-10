@@ -1,0 +1,17 @@
+[Unit]
+Description=Recreate dm-linear /dev/mapper/vendor_b from /super and mount /vendor
+DefaultDependencies=no
+After=systemd-tmpfiles-setup-dev.service
+Before=local-fs.target
+ConditionPathExists=/dev/mmcblk0p80
+RequiresMountsFor=/dev
+
+[Service]
+Type=oneshot
+ExecStart=/usr/libexec/aurora-vendor-mount.sh
+RemainAfterExit=yes
+StandardOutput=journal+console
+StandardError=journal+console
+
+[Install]
+WantedBy=local-fs.target
