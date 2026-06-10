@@ -1,0 +1,64 @@
+From: Florent Revest <revestflo@gmail.com>
+Date: Sat, 6 Jun 2026 09:40:00 +0000
+Subject: [PATCH] icnss2: register cnss-genl family for ADRASTEA too
+Upstream-Status: Inappropriate [aurora-specific HW glue]
+
+cnss-daemon's initialize_cld80211() resolves a generic-netlink family
+named "cnss-genl" (mcast group "cnss-genl-grp") to talk to icnss/cnss
+platform drivers. Pixel Watch 2 (aurora) probes via DT compatible
+"qcom,icnss" which maps to ADRASTEA_DEVICE_ID, so the existing
+icnss_genl_init() / icnss_genl_exit() calls -- gated behind
+WCN6750/WCN6450 -- are skipped and "cnss-genl" never appears in the
+kernel's family table.
+
+cnss-daemon therefore logs "Couldn't resolve family id" and falls
+back to legacy USERSOCK, leaving the WLAN bringup path stuck with
+no genl bridge.
+
+Genl-family registration is harmless for any variant, so lift both
+calls out of the WCN6750/WCN6450 conditional.
+
+Signed-off-by: Florent Revest <revestflo@gmail.com>
+
+--- a/private/msm-google-modules/wlan/platform/icnss2/main.c
++++ b/private/msm-google-modules/wlan/platform/icnss2/main.c
+@@ -4610,10 +4610,6 @@
+ 		INIT_WORK(&priv->soc_wake_msg_work, icnss_soc_wake_msg_work);
+ 		INIT_LIST_HEAD(&priv->soc_wake_msg_list);
+ 
+-		ret = icnss_genl_init();
+-		if (ret < 0)
+-			icnss_pr_err("ICNSS genl init failed %d\n", ret);
+-
+ 		init_completion(&priv->smp2p_soc_wake_wait);
+ 		icnss_runtime_pm_init(priv);
+ 		icnss_aop_mbox_init(priv);
+@@ -4632,6 +4628,19 @@
+ 		INIT_WORK(&wpss_loader, icnss_wpss_load);
+ 	}
+ 
++	/* The cnss-genl netlink family is what cnss-daemon's
++	 * initialize_cld80211() resolves to talk to icnss/cnss platform
++	 * drivers. Upstream gates icnss_genl_init() on WCN6750/WCN6450,
++	 * but Pixel Watch 2 (aurora) probes via compatible "qcom,icnss"
++	 * which sets device_id = ADRASTEA_DEVICE_ID and skips registration
++	 * entirely -- so cnss-daemon falls back to legacy USERSOCK and the
++	 * platform driver is unreachable. The registration is safe for any
++	 * variant.
++	 */
++	ret = icnss_genl_init();
++	if (ret < 0)
++		icnss_pr_err("ICNSS genl init failed %d\n", ret);
++
+ 	timer_setup(&priv->recovery_timer,
+ 		    icnss_recovery_timeout_hdlr, 0);
+ 
+@@ -4737,6 +4746,8 @@
+ 			destroy_workqueue(priv->soc_wake_wq);
+ 	}
+ 
++	icnss_genl_exit();
++
+ 	class_destroy(priv->icnss_ramdump_class);
+ 	unregister_chrdev_region(priv->icnss_ramdump_dev, RAMDUMP_NUM_DEVICES);
+ 

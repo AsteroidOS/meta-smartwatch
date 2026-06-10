@@ -1,0 +1,68 @@
+From: Florent Revest <revestflo@gmail.com>
+Date: Mon, 9 Jun 2026 12:00:00 +0000
+Subject: [PATCH] bt: btpower: make bt_clk_enable idempotent
+
+btpower has two independent "is BT powered" state trackers:
+
+  - `pwr_state` in the ioctl handler (updated only when
+    ioctl(BT_CMD_PWR_CTRL,...) flips the state),
+  - `bt_chip_clk->is_enabled` (set by bt_clk_enable / cleared by
+    bt_clk_disable),
+
+and a THIRD power path that touches `is_enabled` without touching
+`pwr_state`:
+
+  - the rfkill callback `btpower_toggle_radio()` calls
+    `bluetooth_power(!blocked)` directly,
+  - userspace unblocks rfkill at boot, so by the time the QTI BT HAL
+    opens /dev/btpower and calls `ioctl(BT_CMD_PWR_CTRL, 0)` then
+    `ioctl(BT_CMD_PWR_CTRL, 1)`:
+      * the (0) call is a no-op (pwr_state still 0, never updated
+        by the rfkill path) -- no bt_clk_disable() runs,
+      * the (1) call falls into bluetooth_power(1) -> bt_clk_enable()
+        -> sees clk->is_enabled == 1 -> returns -EINVAL.
+
+The HAL logs `ioctl failed to power control:-1 error =(Invalid
+argument)`, ignores it, proceeds to open /dev/ttyHS0 and send the
+HCI VS Get Version command, but the chip was never actually
+re-asserted, so it never ACKs and the host-side bluebinder enters a
+60s restart cascade.
+
+bt_vreg_enable() is already idempotent on `vreg->is_enabled` (it
+just skips its prepare/load/enable block); make bt_clk_enable() do
+the same instead of returning -EINVAL on "already enabled". This
+matches the regulator's behavior and makes the two parallel power
+paths (ioctl + rfkill) safely interleave.
+
+bt_clk_disable() keeps its existing strict check (it's only called
+on the explicit power-off path; calling it on a not-enabled clock
+is a real bug).
+
+Upstream-Status: Inappropriate [aurora bring-up bridge between ioctl
+                                and rfkill power paths]
+
+Signed-off-by: Florent Revest <revestflo@gmail.com>
+---
+ private/msm-google-modules/bt/pwr/btpower.c | 11 ++++++-----
+ 1 file changed, 6 insertions(+), 5 deletions(-)
+
+diff --git a/private/msm-google-modules/bt/pwr/btpower.c b/private/msm-google-modules/bt/pwr/btpower.c
+--- a/private/msm-google-modules/bt/pwr/btpower.c
++++ b/private/msm-google-modules/bt/pwr/btpower.c
+@@ -397,11 +397,12 @@ static int bt_clk_enable(struct bt_power_clk_data *clk)
+
+ 	pr_info("%s: %s\n", __func__, clk->name);
+
+-	/* Get the clock handle for vreg */
+-	if (!clk->clk || clk->is_enabled) {
+-		pr_err("%s: error - node: %p, clk->is_enabled:%d\n",
+-			__func__, clk->clk, clk->is_enabled);
++	if (!clk->clk)
+ 		return -EINVAL;
++	if (clk->is_enabled) {
++		pr_info("%s: %s already enabled (idempotent)\n",
++			__func__, clk->name);
++		return 0;
+ 	}
+
+ 	rc = clk_prepare_enable(clk->clk);
