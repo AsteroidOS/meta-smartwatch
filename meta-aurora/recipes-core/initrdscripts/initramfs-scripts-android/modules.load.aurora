@@ -1,0 +1,116 @@
+sched-walt.ko
+qcom_ipc_logging.ko
+qcom-mpm.ko
+pinctrl-msm.ko
+pinctrl-spmi-gpio.ko
+pinctrl-monaco.ko
+clk-qcom.ko
+clk-dummy.ko
+gdsc-regulator.ko
+clk-smd-rpm.ko
+dispcc-monaco.ko
+gcc-monaco.ko
+gpucc-monaco.ko
+msm_gpi.ko
+mdt_loader.ko
+smem.ko
+smp2p.ko
+glink_probe.ko
+secure_buffer.ko
+mem_buf.ko
+mem_buf_dev.ko
+socinfo.ko
+qcom_wdt_core.ko
+qcom_soc_wdt.ko
+eud.ko
+memory_dump_v2.ko
+dcc_v2.ko
+qcom-pmu-lib.ko
+qcom-dcvs.ko
+bwmon.ko
+panel_event_notifier.ko
+qcom_cpu_vendor_hooks.ko
+crypto-qti-common.ko
+hwkm_v1.ko
+crypto-qti-hwkm.ko
+msm_performance.ko
+minidump.ko
+qcom_logbuf_vh.ko
+qti-fixed-regulator.ko
+# proxy-consumer.ko is deliberately absent: CONFIG_REGULATOR_PROXY_CONSUMER
+# stays OFF (see sw5100.fragment -- the GDSC proxy-regulator path breaks
+# gcc-monaco clock registration), so the module is never built.
+rpm-smd-regulator.ko
+stub-regulator.ko
+debug-regulator.ko
+arm_smmu.ko
+msm_dma_iommu_mapping.ko
+qcom_iommu_util.ko
+iommu-logger.ko
+regmap-spmi.ko
+qti-regmap-debugfs.ko
+qseecom_proxy.ko
+qcom-spmi-pmic.ko
+qcom_dma_heaps.ko
+spmi-pmic-arb.ko
+phy-generic.ko
+phy-msm-snps-hs.ko
+dwc3-msm.ko
+qpnp-power-on.ko
+rtc-pm8xxx.ko
+i2c-msm-geni.ko
+spi-msm-geni.ko
+msm_geni_serial.ko
+# qcom-hv-haptics.ko (PMIC haptics, carried over from the stock load list) is
+# deliberately absent: aurora's haptics is the cs40l26 i2c amp loaded below,
+# and the PMIC HV-haptics driver was never part of our module set.
+qcom-dload-mode.ko
+qcom-reboot-reason.ko
+cpu_hotplug.ko
+qcom-cpufreq-hw.ko
+sdhci-msm.ko
+cqhci.ko
+qcom-scm.ko
+qcom-apcs-ipc-mailbox.ko
+qcom_aoss.ko
+msm_qmp.ko
+qcom_hwspinlock.ko
+rproc_qcom_common.ko
+adsp_loader_dlkm.ko
+cdsp-loader.ko
+qcom_glink.ko
+qcom_glink_rpm.ko
+rpm-smd.ko
+qcom_glink_smem.ko
+qcom_smd.ko
+qcom-spmi-adc5-gen3.ko
+qcom-vadc-common.ko
+nvmem_qcom-spmi-sdam.ko
+qnoc-monaco.ko
+icc-rpm.ko
+qnoc-qos-rpm.ko
+qrtr.ko
+# qrtr-smd bridges the qrtr bus onto SMD/glink so ADSP services (audio APM/PDR,
+# WLFW) become reachable; without it the monaco sound card never goes ONLINE.
+# Only safe to autoload now that AGM's boot-time mixer sweep no longer
+# hard-resets the SoC (poisoned cs40l26 codec fixed by cs40l26-codec.0 binding).
+qrtr-smd.ko
+msm_drm.ko
+msm_kgsl.ko
+qseecom_dlkm.ko
+smcinvoke_dlkm.ko
+google-extcon-usb-shim.ko
+gvotable.ko
+logbuffer.ko
+qpnp-smblite-main.ko
+qti-qbg-main.ko
+google-bms.ko
+google-battery.ko
+google-charger.ko
+sw5100_bms.ko
+nanohub.ko
+touch_nt38350.ko
+cl_dsp.ko
+cl_dsp-debugfs.ko
+input-cs40l26-i2c.ko
+snd-soc-cs40l26.ko

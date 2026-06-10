@@ -1,0 +1,96 @@
+/lib/modules/debug-regulator.ko:
+/lib/modules/clk-dummy.ko: /lib/modules/clk-qcom.ko /lib/modules/gdsc-regulator.ko /lib/modules/debug-regulator.ko /lib/modules/proxy-consumer.ko
+/lib/modules/gcc-monaco.ko: /lib/modules/clk-qcom.ko /lib/modules/gdsc-regulator.ko /lib/modules/debug-regulator.ko /lib/modules/proxy-consumer.ko
+/lib/modules/qpnp-power-on.ko:
+/lib/modules/qcom_ipc_logging.ko:
+/lib/modules/qcom_dma_heaps.ko: /lib/modules/msm_dma_iommu_mapping.ko /lib/modules/mem_buf_dev.ko /lib/modules/secure_buffer.ko /lib/modules/qcom-scm.ko
+/lib/modules/eud.ko: /lib/modules/qcom-scm.ko
+/lib/modules/qcom-dload-mode.ko: /lib/modules/minidump.ko /lib/modules/smem.ko /lib/modules/qcom-scm.ko
+/lib/modules/cpu_hotplug.ko:
+/lib/modules/qcom-reboot-reason.ko:
+/lib/modules/gvotable.ko:
+/lib/modules/google-charger.ko: /lib/modules/google-bms.ko /lib/modules/logbuffer.ko /lib/modules/gvotable.ko
+/lib/modules/qcom-apcs-ipc-mailbox.ko:
+/lib/modules/clk-qcom.ko: /lib/modules/gdsc-regulator.ko /lib/modules/debug-regulator.ko /lib/modules/proxy-consumer.ko
+/lib/modules/google-bms.ko: /lib/modules/logbuffer.ko
+/lib/modules/touch_nt38350.ko: /lib/modules/nanohub.ko /lib/modules/panel_event_notifier.ko
+/lib/modules/proxy-consumer.ko:
+/lib/modules/qcom_logbuf_vh.ko: /lib/modules/minidump.ko /lib/modules/smem.ko
+/lib/modules/qcom_cpu_vendor_hooks.ko:
+/lib/modules/minidump.ko: /lib/modules/smem.ko
+/lib/modules/iommu-logger.ko:
+/lib/modules/qnoc-qos-rpm.ko:
+/lib/modules/msm_kgsl.ko: /lib/modules/msm_performance.ko /lib/modules/sched-walt.ko /lib/modules/qcom-cpufreq-hw.ko /lib/modules/qcom-pmu-lib.ko /lib/modules/qcom_iommu_util.ko /lib/modules/socinfo.ko /lib/modules/mdt_loader.ko /lib/modules/qcom-dcvs.ko /lib/modules/smem.ko /lib/modules/mem_buf_dev.ko /lib/modules/secure_buffer.ko /lib/modules/qcom-scm.ko /lib/modules/clk-qcom.ko /lib/modules/gdsc-regulator.ko /lib/modules/debug-regulator.ko /lib/modules/proxy-consumer.ko
+/lib/modules/qcom-pmu-lib.ko:
+/lib/modules/qcom-mpm.ko:
+/lib/modules/qcom-cpufreq-hw.ko:
+/lib/modules/msm_performance.ko: /lib/modules/sched-walt.ko /lib/modules/qcom-cpufreq-hw.ko /lib/modules/qcom-pmu-lib.ko
+/lib/modules/qcom_glink_smem.ko: /lib/modules/qcom_glink.ko /lib/modules/qcom_ipc_logging.ko /lib/modules/smem.ko
+/lib/modules/qcom_glink.ko: /lib/modules/qcom_ipc_logging.ko
+/lib/modules/qcom-scm.ko:
+/lib/modules/qcom_smd.ko: /lib/modules/smem.ko
+/lib/modules/msm_dma_iommu_mapping.ko:
+/lib/modules/rpm-smd.ko: /lib/modules/qcom-mpm.ko
+/lib/modules/qcom_wdt_core.ko: /lib/modules/minidump.ko /lib/modules/smem.ko /lib/modules/qcom-scm.ko
+/lib/modules/mdt_loader.ko: /lib/modules/qcom-scm.ko
+/lib/modules/qnoc-monaco.ko: /lib/modules/qnoc-qos-rpm.ko /lib/modules/icc-rpm.ko /lib/modules/rpm-smd.ko /lib/modules/qcom-mpm.ko
+/lib/modules/qcom-dcvs.ko:
+/lib/modules/qti-regmap-debugfs.ko:
+/lib/modules/rproc_qcom_common.ko: /lib/modules/qcom_smd.ko /lib/modules/qcom_glink_smem.ko /lib/modules/qcom_glink.ko /lib/modules/qcom_ipc_logging.ko /lib/modules/smem.ko
+/lib/modules/mem_buf.ko: /lib/modules/mem_buf_dev.ko /lib/modules/secure_buffer.ko /lib/modules/qcom-scm.ko
+/lib/modules/gpucc-monaco.ko: /lib/modules/clk-qcom.ko /lib/modules/gdsc-regulator.ko /lib/modules/debug-regulator.ko /lib/modules/proxy-consumer.ko
+/lib/modules/bwmon.ko: /lib/modules/qcom-dcvs.ko
+/lib/modules/qrtr.ko: /lib/modules/qcom_ipc_logging.ko
+/lib/modules/nanohub.ko:
+/lib/modules/qcom_hwspinlock.ko:
+/lib/modules/i2c-msm-geni.ko: /lib/modules/qcom_ipc_logging.ko
+/lib/modules/logbuffer.ko:
+/lib/modules/memory_dump_v2.ko: /lib/modules/minidump.ko /lib/modules/smem.ko /lib/modules/qcom-scm.ko
+/lib/modules/qseecom_proxy.ko:
+/lib/modules/qcom_iommu_util.ko: /lib/modules/secure_buffer.ko /lib/modules/qcom-scm.ko
+/lib/modules/panel_event_notifier.ko:
+/lib/modules/smem.ko:
+/lib/modules/qcom_soc_wdt.ko: /lib/modules/qcom_wdt_core.ko /lib/modules/minidump.ko /lib/modules/smem.ko /lib/modules/qcom-scm.ko
+/lib/modules/icc-rpm.ko: /lib/modules/rpm-smd.ko /lib/modules/qcom-mpm.ko
+/lib/modules/qcom-vadc-common.ko:
+/lib/modules/qcom_glink_rpm.ko: /lib/modules/qcom_glink.ko /lib/modules/qcom_ipc_logging.ko
+/lib/modules/smcinvoke_dlkm.ko: /lib/modules/qseecom_dlkm.ko /lib/modules/qseecom_proxy.ko /lib/modules/mem_buf_dev.ko /lib/modules/secure_buffer.ko /lib/modules/qcom-scm.ko
+/lib/modules/smp2p.ko: /lib/modules/qcom_ipc_logging.ko /lib/modules/smem.ko
+/lib/modules/dcc_v2.ko: /lib/modules/minidump.ko /lib/modules/smem.ko
+/lib/modules/socinfo.ko: /lib/modules/smem.ko
+/lib/modules/stub-regulator.ko: /lib/modules/debug-regulator.ko
+/lib/modules/rpm-smd-regulator.ko: /lib/modules/rpm-smd.ko /lib/modules/qcom-mpm.ko /lib/modules/debug-regulator.ko /lib/modules/proxy-consumer.ko
+/lib/modules/sw5100_bms.ko: /lib/modules/qpnp-smblite-main.ko /lib/modules/google-bms.ko /lib/modules/logbuffer.ko /lib/modules/gvotable.ko
+/lib/modules/pinctrl-spmi-gpio.ko:
+/lib/modules/rtc-pm8xxx.ko:
+/lib/modules/dwc3-msm.ko: /lib/modules/qcom_ipc_logging.ko /lib/modules/clk-qcom.ko /lib/modules/gdsc-regulator.ko /lib/modules/debug-regulator.ko /lib/modules/proxy-consumer.ko
+/lib/modules/google-extcon-usb-shim.ko:
+/lib/modules/pinctrl-msm.ko: /lib/modules/qcom-scm.ko
+/lib/modules/mem_buf_dev.ko: /lib/modules/secure_buffer.ko /lib/modules/qcom-scm.ko
+/lib/modules/msm_drm.ko: /lib/modules/spmi-pmic-arb.ko /lib/modules/pinctrl-msm.ko /lib/modules/qcom_iommu_util.ko /lib/modules/nanohub.ko /lib/modules/panel_event_notifier.ko /lib/modules/msm_dma_iommu_mapping.ko /lib/modules/secure_buffer.ko /lib/modules/qcom-scm.ko
+/lib/modules/qcom-spmi-adc5-gen3.ko: /lib/modules/qcom-vadc-common.ko
+/lib/modules/crypto-qti-hwkm.ko: /lib/modules/hwkm_v1.ko /lib/modules/qcom-scm.ko
+/lib/modules/google-battery.ko: /lib/modules/google-bms.ko /lib/modules/logbuffer.ko /lib/modules/gvotable.ko
+/lib/modules/secure_buffer.ko: /lib/modules/qcom-scm.ko
+/lib/modules/phy-msm-snps-hs.ko: /lib/modules/qcom-scm.ko
+/lib/modules/glink_probe.ko: /lib/modules/rproc_qcom_common.ko /lib/modules/qcom_smd.ko /lib/modules/qcom_glink_smem.ko /lib/modules/qcom_glink.ko /lib/modules/qcom_ipc_logging.ko /lib/modules/smem.ko
+/lib/modules/qpnp-smblite-main.ko: /lib/modules/gvotable.ko
+/lib/modules/msm_gpi.ko: /lib/modules/qcom_ipc_logging.ko
+/lib/modules/phy-generic.ko:
+/lib/modules/cqhci.ko: /lib/modules/crypto-qti-common.ko /lib/modules/crypto-qti-hwkm.ko /lib/modules/hwkm_v1.ko /lib/modules/qcom-scm.ko
+/lib/modules/regmap-spmi.ko:
+/lib/modules/sched-walt.ko: /lib/modules/qcom-cpufreq-hw.ko
+/lib/modules/nvmem_qcom-spmi-sdam.ko:
+/lib/modules/qti-qbg-main.ko:
+/lib/modules/qti-fixed-regulator.ko: /lib/modules/debug-regulator.ko /lib/modules/proxy-consumer.ko
+/lib/modules/gdsc-regulator.ko: /lib/modules/debug-regulator.ko /lib/modules/proxy-consumer.ko
+/lib/modules/arm_smmu.ko: /lib/modules/iommu-logger.ko /lib/modules/qcom_iommu_util.ko /lib/modules/secure_buffer.ko /lib/modules/qcom-scm.ko
+/lib/modules/pinctrl-monaco.ko: /lib/modules/pinctrl-msm.ko /lib/modules/qcom-scm.ko
+/lib/modules/clk-smd-rpm.ko: /lib/modules/rpm-smd.ko /lib/modules/qcom-mpm.ko /lib/modules/clk-qcom.ko /lib/modules/gdsc-regulator.ko /lib/modules/debug-regulator.ko /lib/modules/proxy-consumer.ko
+/lib/modules/crypto-qti-common.ko: /lib/modules/crypto-qti-hwkm.ko /lib/modules/hwkm_v1.ko /lib/modules/qcom-scm.ko
+/lib/modules/dispcc-monaco.ko: /lib/modules/clk-qcom.ko /lib/modules/gdsc-regulator.ko /lib/modules/debug-regulator.ko /lib/modules/proxy-consumer.ko
+/lib/modules/qseecom_dlkm.ko: /lib/modules/qseecom_proxy.ko /lib/modules/mem_buf_dev.ko /lib/modules/secure_buffer.ko /lib/modules/qcom-scm.ko
+/lib/modules/hwkm_v1.ko:
+/lib/modules/qcom-spmi-pmic.ko: /lib/modules/qti-regmap-debugfs.ko /lib/modules/regmap-spmi.ko
+/lib/modules/sdhci-msm.ko: /lib/modules/cqhci.ko /lib/modules/crypto-qti-common.ko /lib/modules/crypto-qti-hwkm.ko /lib/modules/hwkm_v1.ko /lib/modules/pinctrl-msm.ko /lib/modules/qcom_ipc_logging.ko /lib/modules/qcom-scm.ko /lib/modules/clk-qcom.ko /lib/modules/gdsc-regulator.ko /lib/modules/debug-regulator.ko /lib/modules/proxy-consumer.ko
+/lib/modules/spmi-pmic-arb.ko:
