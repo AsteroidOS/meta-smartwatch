@@ -1,0 +1,173 @@
+libhybris: bridge Android-13 system-lib symbols
+
+aurora (Pixel Watch 2) is the first AsteroidOS device running Android-13
+system libraries under libhybris. libhybris replaces bionic libc with its
+hook table rather than loading it, so libc/runtime symbols imported by the
+Android system libs must be present in that table. Several are missing
+upstream, leaving them unresolved at load -> asteroid-launcher SIGSEGVs:
+
+  - libc++.so      -> the ARM EHABI unwinder family (_Unwind_*, __aeabi_*)
+  - libhidlbase.so -> android_get_device_api_level (libc, API 29+)
+  - libselinux.so  -> __system_properties_init (libc property-area init)
+  - memfd_create   (libc, API 30+)
+  - libbase.so     -> android_fdsan_create_owner_tag (libc, API 29+);
+                      crashed Qt's QSGRenderThread when unique_fd wrapped
+                      the first gralloc4 dmabuf fd (PC=0 from null GOT
+                      slot). Upstream already hooks set_error_level,
+                      exchange_owner_tag and close_with_tag, but missed
+                      create_owner_tag and the inspection / get_error_level
+                      helpers; add them as a disabled no-op consistent with
+                      the rest of the family (fdsan's pre-Q behavior).
+
+Map the unwinder + memfd_create straight to the host glibc/libgcc, back
+android_get_device_api_level() with ro.build.version.sdk, make
+__system_properties_init a success no-op (libhybris serves property reads via
+its own __system_property_* hooks), and stub the missing fdsan members so
+unique_fd tags every fd with 0 (untagged) and close_with_tag is a plain
+close().
+
+Upstream-Status: Pending
+
+Signed-off-by: Florent Revest <revestflo@gmail.com>
+
+--- a/common/hooks.c
++++ b/common/hooks.c
+@@ -2893,6 +2893,102 @@
+     return close(fd);
+ }
+ 
++// ---- Android-13 system-lib symbol bridges ----
++// Android-13's libc++.so pulls the full ARM EHABI unwinder family and
++// libhidlbase.so pulls libc's android_get_device_api_level(); upstream
++// libhybris bridges none of them, so the hybris linker leaves them
++// unresolved and asteroid-launcher SIGSEGVs at load. The unwind symbols are
++// all exported by the target glibc libgcc_s, so map them straight through.
++// We only take their addresses for the hook table (never call them here), so
++// a void(void) prototype is enough -- the address resolves to the real
++// libgcc_s symbol and is handed to the Android libc++.so, which calls it with
++// the correct ABI.
++extern void _Unwind_Resume(void);
++extern void _Unwind_RaiseException(void);
++extern void _Unwind_DeleteException(void);
++extern void _Unwind_Resume_or_Rethrow(void);
++extern void _Unwind_ForcedUnwind(void);
++extern void _Unwind_Backtrace(void);
++extern void _Unwind_Complete(void);
++extern void _Unwind_GetCFA(void);
++extern void _Unwind_GetRegionStart(void);
++extern void _Unwind_GetLanguageSpecificData(void);
++extern void _Unwind_GetDataRelBase(void);
++extern void _Unwind_GetTextRelBase(void);
++extern void _Unwind_VRS_Get(void);
++extern void _Unwind_VRS_Set(void);
++extern void _Unwind_VRS_Pop(void);
++extern void __gnu_unwind_frame(void);
++extern void __aeabi_unwind_cpp_pr0(void);
++extern void __aeabi_unwind_cpp_pr1(void);
++extern void __aeabi_unwind_cpp_pr2(void);
++
++// libc memfd_create() (API 30+); host glibc provides it.
++extern int memfd_create(const char *name, unsigned int flags);
++
++// libc android_get_device_api_level() (API 29+): return the device SDK level
++// from ro.build.version.sdk (default 29 if the property is unavailable).
++int _hybris_hook_android_get_device_api_level(void)
++{
++    char value[128] = {0};
++    int level;
++    my_property_get("ro.build.version.sdk", value, "29");
++    level = atoi(value);
++    return level > 0 ? level : 29;
++}
++
++// libc __system_properties_init() (plural): bionic maps the property area here.
++// Android-13 libselinux.so (and others) import it. libhybris serves property
++// reads through its own __system_property_* hooks, so the area init is a no-op
++// that just needs to report success.
++int _hybris_hook___system_properties_init(void)
++{
++    return 0;
++}
++
++// libc fdsan family (Android-10+): upstream libhybris already hooks
++// set_error_level, exchange_owner_tag and close_with_tag (just above), but
++// NOT android_fdsan_create_owner_tag -- which Android-13's libbase
++// android::base::unique_fd calls to mint its ownership tag. The symbol is
++// weak in the importing libs, so libbase loads with the GOT slot left NULL;
++// unique_fd then calls it unconditionally and the first fd wrapped (e.g. a
++// gralloc4 dmabuf in Qt's QSGRenderThread) jumps through a NULL pointer ->
++// SIGSEGV (PC=0). Implement create as the disabled no-op tag 0 (untagged),
++// so close_with_tag (already hooked, does close()) and exchange (already
++// hooked, no-op) stay consistent; fd ownership remains correct, only the
++// double-close diagnostic is off -- fdsan's pre-Q behavior. Also stub the
++// inspection helpers and get_error_level (set_error_level is already hooked
++// upstream): A13 libutils/libui/libgui/libbinder all use unique_fd and may
++// call these from log paths.
++uint64_t _hybris_hook_android_fdsan_create_owner_tag(int type, uint64_t tag)
++{
++    (void)type;
++    (void)tag;
++    return 0;
++}
++
++uint64_t _hybris_hook_android_fdsan_get_owner_tag(int fd)
++{
++    (void)fd;
++    return 0;
++}
++
++const char *_hybris_hook_android_fdsan_get_tag_type(uint64_t tag)
++{
++    (void)tag;
++    return "native_handle";
++}
++
++uint64_t _hybris_hook_android_fdsan_get_tag_value(uint64_t tag)
++{
++    return tag;
++}
++
++int _hybris_hook_android_fdsan_get_error_level(void)
++{
++    return 0; /* ANDROID_FDSAN_ERROR_LEVEL_DISABLED */
++}
++
+ // old property hooks for pre-android 8 approach
+ static struct _hook hooks_properties[] = {
+     HOOK_INDIRECT(property_get),
+@@ -2913,6 +3009,35 @@
+ 
+ static struct _hook hooks_common[] = {
+ 
++    // Android-13 unwinder + libc bridges (see the extern block above).
++    HOOK_DIRECT_NO_DEBUG(_Unwind_Resume),
++    HOOK_DIRECT_NO_DEBUG(_Unwind_RaiseException),
++    HOOK_DIRECT_NO_DEBUG(_Unwind_DeleteException),
++    HOOK_DIRECT_NO_DEBUG(_Unwind_Resume_or_Rethrow),
++    HOOK_DIRECT_NO_DEBUG(_Unwind_ForcedUnwind),
++    HOOK_DIRECT_NO_DEBUG(_Unwind_Backtrace),
++    HOOK_DIRECT_NO_DEBUG(_Unwind_Complete),
++    HOOK_DIRECT_NO_DEBUG(_Unwind_GetCFA),
++    HOOK_DIRECT_NO_DEBUG(_Unwind_GetRegionStart),
++    HOOK_DIRECT_NO_DEBUG(_Unwind_GetLanguageSpecificData),
++    HOOK_DIRECT_NO_DEBUG(_Unwind_GetDataRelBase),
++    HOOK_DIRECT_NO_DEBUG(_Unwind_GetTextRelBase),
++    HOOK_DIRECT_NO_DEBUG(_Unwind_VRS_Get),
++    HOOK_DIRECT_NO_DEBUG(_Unwind_VRS_Set),
++    HOOK_DIRECT_NO_DEBUG(_Unwind_VRS_Pop),
++    HOOK_DIRECT_NO_DEBUG(__gnu_unwind_frame),
++    HOOK_DIRECT_NO_DEBUG(__aeabi_unwind_cpp_pr0),
++    HOOK_DIRECT_NO_DEBUG(__aeabi_unwind_cpp_pr1),
++    HOOK_DIRECT_NO_DEBUG(__aeabi_unwind_cpp_pr2),
++    HOOK_INDIRECT(android_get_device_api_level),
++    HOOK_DIRECT_NO_DEBUG(memfd_create),
++    HOOK_INDIRECT(__system_properties_init),
++    HOOK_INDIRECT(android_fdsan_create_owner_tag),
++    HOOK_INDIRECT(android_fdsan_get_owner_tag),
++    HOOK_INDIRECT(android_fdsan_get_tag_type),
++    HOOK_INDIRECT(android_fdsan_get_tag_value),
++    HOOK_INDIRECT(android_fdsan_get_error_level),
++
+     HOOK_DIRECT(getenv),
+     HOOK_DIRECT_NO_DEBUG(printf),
+     HOOK_INDIRECT(malloc),
