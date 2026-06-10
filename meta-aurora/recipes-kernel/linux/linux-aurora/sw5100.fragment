@@ -1,0 +1,90 @@
+CONFIG_GOOGLE_VOTABLE=m
+CONFIG_GOOGLE_LOGBUFFER=m
+CONFIG_I2C_CHARDEV=m
+CONFIG_QCOM_RAMDUMP=m
+CONFIG_REGMAP_QTI_DEBUGFS_ALLOW_WRITE=y
+
+# cdsp-loader (drivers/soc/qcom/qdsp6v2/cdsp-loader.c) registers
+# /sys/kernel/boot_cdsp/boot. Android's init.qti.write.sh polls that
+# path with a ~90s timeout; without the driver, the oneshot service
+# eats 92s in the background. With the driver, the write goes through
+# PAS to the CDSP subsystem (or fails fast on missing firmware).
+CONFIG_MSM_CDSP_LOADER=m
+
+CONFIG_VT=y
+CONFIG_VT_CONSOLE=y
+CONFIG_VT_CONSOLE_SLEEP=y
+CONFIG_HW_CONSOLE=y
+CONFIG_CONSOLE_TRANSLATIONS=y
+CONFIG_DUMMY_CONSOLE=y
+CONFIG_LDISC_AUTOLOAD=y
+
+# Kernel-owned USB debug channel.
+CONFIG_USB_G_SERIAL=m
+CONFIG_U_SERIAL_CONSOLE=y
+
+# gcc-monaco/gdsc fail with "Failed to register GCC clocks" when
+# CONFIG_REGULATOR_PROXY_CONSUMER is set: the GDSC proxy-consumer path
+# does regulator_get(proxy) on an RPM regulator that is not up when the
+# clock controllers probe (-517, never resolves → no GCC clocks → dead
+# display + broken eMMC bus-scale → boot hang). With it unset the proxy
+# call is a no-op stub and GCC clocks register directly, matching the
+# stock device kernel. (proxy-consumer.ko is then not built.)
+# CONFIG_REGULATOR_PROXY_CONSUMER is not set
+
+# Namespaces — required by LXC for Halium.
+# monaco_GKI.config trims these (watches are RAM-constrained);
+# NAMESPACES/UTS/NET already =y so only these three are missing.
+# CONFIG_IPC_NS depends on CONFIG_SYSVIPC, which monaco_GKI ALSO trims
+# (# CONFIG_SYSVIPC is not set) — without this, olddefconfig silently
+# drops IPC_NS. SYSVIPC is a hard prerequisite of the (justified)
+# IPC_NS, and Android/LXC use SysV IPC anyway.
+CONFIG_SYSVIPC=y
+CONFIG_USER_NS=y
+CONFIG_PID_NS=y
+CONFIG_IPC_NS=y
+
+# LSM primary: AppArmor, matching UBPorts's running kernel on this hardware
+# (lsm=capability,apparmor). apparmor precedes selinux in CONFIG_LSM, so the
+# exclusive-LSM logic activates apparmor and never initialises selinux: selinuxfs
+# isn't registered and the Android container sees getenforce=Disabled boots
+# fine that way (vndservicemanager, apexd-bootstrap, and the display HALs all
+# run with selinux disabled).
+CONFIG_SECURITY_APPARMOR=y
+CONFIG_SECURITY_APPARMOR_HASH=y
+CONFIG_SECURITY_APPARMOR_HASH_DEFAULT=y
+CONFIG_SECURITY_PATH=y
+CONFIG_DEFAULT_SECURITY_APPARMOR=y
+CONFIG_LSM="landlock,lockdown,yama,loadpin,safesetid,integrity,apparmor,selinux,smack,tomoyo,bpf"
+
+# monaco_GKI.config sets CONFIG_QPNP_SMBLITE=m, but the kernel-tree
+# build of that driver fails — its smblite-shim.h includes
+# <misc/gvotable.h> which lives in the out-of-tree google-modules/bms
+# (Google builds qpnp-smblite as an external module via EXT_MODULES so
+# the gvotable header search path is set up via Module.symvers chaining).
+# Override to "not set" so the in-tree kernel build doesn't try this;
+# the driver is only buildable via the linux-aurora-modules EXT_MODULES
+# path once we add google-modules/bms (gvotable) and the kernel
+# drivers/power/supply/qcom as out-of-tree modules.
+# CONFIG_QCOM_POWER_SUPPLY is not set
+# CONFIG_QPNP_SMBLITE is not set
+# CONFIG_QTI_QBG is not set
+# CONFIG_MSM_SEB is not set
+# CONFIG_MSM_SEB_RPMSG is not set
+# CONFIG_MSM_SLATECOM is not set
+# CONFIG_MSM_SLATECOM_EVENT is not set
+# CONFIG_MSM_SLATECOM_INTERFACE is not set
+# CONFIG_MSM_SLATECOM_RPMSG is not set
+# CONFIG_MSM_SLATERSB is not set
+# CONFIG_MSM_SLATERSB_RPMSG is not set
+# CONFIG_QCOM_RPROC_SLATE is not set
+
+# CONFIG_RPMSG_QCOM_GLINK_SLATECOM is not set
+
+# Virtual HCI device — backs /dev/vhci, which bluebinder writes HCI
+# packets to so the kernel BlueZ stack sees them as if they came from a
+# real controller. The QCA BT chip on this watch is owned by the Android
+# vendor.bluetooth-1-0-qti HAL inside the LXC container; bluebinder
+# proxies binder→/dev/vhci to expose it to BlueZ on the host side. With
+# this off, /dev/vhci doesn't exist and bluebinder has nowhere to write.
+CONFIG_BT_HCIVHCI=m
