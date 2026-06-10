@@ -1,4 +1,4 @@
-From 35d8fbbc1f0f20b29be62ea22526773439af242f Mon Sep 17 00:00:00 2001
+From 62ebb71c2c620ef0de44cd16ab1d7c4aee96f2c1 Mon Sep 17 00:00:00 2001
 From: MagneFire <IDaNLContact@gmail.com>
 Date: Mon, 26 Oct 2020 21:20:24 +0100
 Subject: [PATCH] HybrisAlsAdaptor: Set default delay. Fixes excessive lags on
@@ -14,11 +14,11 @@ Signed-off-by: Darrel Griët <dgriet@gmail.com>
  1 file changed, 3 insertions(+)
 
 diff --git a/adaptors/hybrisalsadaptor/hybrisalsadaptor.cpp b/adaptors/hybrisalsadaptor/hybrisalsadaptor.cpp
-index 5ed7143..a0577d1 100644
+index b02decb..8765cd5 100644
 --- a/adaptors/hybrisalsadaptor/hybrisalsadaptor.cpp
 +++ b/adaptors/hybrisalsadaptor/hybrisalsadaptor.cpp
-@@ -41,6 +41,9 @@ HybrisAlsAdaptor::HybrisAlsAdaptor(const QString& id) :
-         sensordLogW() << NodeBase::id() << "Path does not exists: " << powerStatePath;
+@@ -40,6 +40,9 @@ HybrisAlsAdaptor::HybrisAlsAdaptor(const QString& id) :
+         qCWarning(lcSensorFw) << NodeBase::id() << "Path does not exists: " << powerStatePath;
      	powerStatePath.clear();
      }
 +    // Set default delay.
