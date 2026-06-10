@@ -1,0 +1,327 @@
+# Aurora vendor_kernel_boot.img module manifest.
+#
+# Drives aurora-boot-images.bb: each entry below ends up as a .ko in
+# vendor_kernel_boot's ramdisk, KMI-CRC-gated against our 5.15 kernel,
+# listed in modules.load + modules.load.recovery (Halium first-stage
+# load_kernel_modules reads modules.load.recovery), and -- where a
+# dependency isn't picked up by modpost automatically -- pinned in
+# modules.dep so modprobe walks suppliers before consumers.
+#
+# Syntax:
+#   <name>:k                 -- kernel-built (linux-aurora kernel-modules)
+#   <name>:tp                -- techpack-built (linux-aurora-modules ipk)
+#   @drop <name>             -- skip stock module (not built / dropped intentionally)
+#   @dep <child>: <parents>  -- add modules.dep line (or override)
+#   # comment / blank        -- ignored
+
+# ────────────────── Foundational SoC chain (load order matters) ──────────────────
+# Mirrors stock vkbrd modules.load with our KMI-correct .ko copies. The
+# foundational ones all come from linux-aurora's kernel-modules package
+# (built via sw5100_gki_defconfig + the .fragment).
+sched-walt:k
+qcom_ipc_logging:k
+qcom-mpm:k
+pinctrl-msm:k
+pinctrl-monaco:k
+clk-qcom:k
+clk-dummy:k
+gdsc-regulator:k
+clk-smd-rpm:k
+dispcc-monaco:k
+gcc-monaco:k
+gpucc-monaco:k
+mdt_loader:k
+smem:k
+smp2p:k
+glink_probe:k
+secure_buffer:k
+mem_buf:k
+mem_buf_dev:k
+socinfo:k
+qcom_wdt_core:k
+qcom_soc_wdt:k
+memory_dump_v2:k
+dcc_v2:k
+qcom-pmu-lib:k
+qcom-dcvs:k
+bwmon:k
+panel_event_notifier:k
+qcom_cpu_vendor_hooks:k
+crypto-qti-common:k
+hwkm_v1:k
+crypto-qti-hwkm:k
+msm_performance:k
+minidump:k
+qcom_logbuf_vh:k
+qti-fixed-regulator:k
+
+# proxy-consumer is intentionally NOT built: CONFIG_REGULATOR_PROXY_CONSUMER
+# stays OFF in sw5100.fragment because enabling it triggers gcc-monaco
+# "Failed to register GCC clocks".
+# Stock vkbrd modules.load lists it; we drop it.
+@drop proxy-consumer
+
+rpm-smd-regulator:k
+stub-regulator:k
+debug-regulator:k
+arm_smmu:k
+msm_dma_iommu_mapping:k
+qcom_iommu_util:k
+iommu-logger:k
+regmap-spmi:k
+qti-regmap-debugfs:k
+qseecom_proxy:k
+qcom-spmi-pmic:k
+qcom_dma_heaps:k
+spmi-pmic-arb:k
+rtc-pm8xxx:k
+qcom-dload-mode:k
+qcom-reboot-reason:k
+cpu_hotplug:k
+qcom-cpufreq-hw:k
+sdhci-msm:k
+cqhci:k
+qcom-scm:k
+qcom-apcs-ipc-mailbox:k
+# msm_qmp = AOSS Qualcomm Messaging Protocol mailbox. btpower's probe path
+# calls mbox_request_channel() against the &qmp_aop phandle to vote the BT
+# slowclock + control vreg rails through AOSS; without this driver the
+# channel request fails, bt_clk_enable() returns error, and Android's BT HAL
+# crashes with "bt_power gpio config failed" (misleading log -- the actual
+# failure is upstream of the GPIO step).
+msm_qmp:k
+qcom_hwspinlock:k
+rproc_qcom_common:k
+qcom_glink:k
+qcom_glink_rpm:k
+rpm-smd:k
+qcom_glink_smem:k
+qcom_smd:k
+nvmem_qcom-spmi-sdam:k
+qnoc-monaco:k
+icc-rpm:k
+qnoc-qos-rpm:k
+qrtr:k
+msm_drm:tp
+msm_kgsl:tp
+qseecom_dlkm:tp
+smcinvoke_dlkm:tp
+
+# ────────────────── Sensors + audio MCU plumbing ──────────────────
+# petc_input_filter + mcu_mic_codec register nanohub_io listeners on the
+# MCU's input + audio channels. Without them, the MCU's early-init
+# messages have no kernel-side consumer and the MCU may not fully
+# transition out of pre-handshake state -- mcu_mgmtd then sees an empty
+# firmware_version readback and re-uploads in a 5-second retry loop.
+nanohub:tp
+petc_input_filter:tp
+mcu_mic_codec:tp
+
+# ────────────────── Bluetooth -- DEFERRED ──────────────────
+# btpower + bt_fm_slim are NOT shipped here. Bricking flash bundle:
+# adding our KMI-correct btpower made it probe hard against
+# missing `wl-reset-gpio` in our DT, killing boot (G logo hang). To
+# re-enable, first add the GPIO bindings btpower expects (see DT) then
+# uncomment:
+#   btpower:tp
+#   bt_fm_slim:tp
+# Without us shipping btpower, Halium's vendor_dlkm phase loads the
+# stock 6.6-kernel btpower.ko with KMI mismatch (OE-tainted, force-
+# loaded, mostly nerfed) -- BT stays broken but the kernel survives.
+
+# ────────────────── USB chain ──────────────────
+# google-extcon-usb-shim probes dwc3-msm's extcon supplier; phy-msm-ssusb-qmp
+# is the QMP SS-PHY. Both must load BEFORE dwc3_msm (see modules.softdep) so
+# fw_devlink resolves. Stock vkbrd ships google-extcon-usb-shim; we add the
+# SS-PHY which is foundational on this SoC variant.
+google-extcon-usb-shim:tp
+phy-msm-ssusb-qmp:k
+phy-generic:k
+phy-msm-snps-hs:k
+dwc3-msm:k
+eud:k
+pinctrl-spmi-gpio:k
+msm_gpi:k
+qpnp-power-on:k
+i2c-msm-geni:k
+qcom-spmi-adc5-gen3:k
+qcom-vadc-common:k
+
+# ────────────────── Charger / BMS chain ──────────────────
+# Built via the linux-aurora-modules google-modules/bms{,/misc} +
+# drivers/power/supply/qcom EXT_MODULES path.
+gvotable:tp
+logbuffer:tp
+qpnp-smblite-main:tp
+qti-qbg-main:tp
+google-bms:tp
+google-battery:tp
+google-charger:tp
+sw5100_bms:tp
+
+# ────────────────── Touch ──────────────────
+# Loaded at first stage: the bootloader applies the stock dtbo, so the
+# touch DT node is present from boot and init_boot's modules.load.aurora
+# lists touch_nt38350.ko. Note the assembler has no ship-but-don't-load
+# syntax -- a `:tp` entry here plus a modules.load.aurora line is the
+# full load contract.
+touch_nt38350:tp
+
+# ────────────────── WLAN supplier graph (PIL/QMI plumbing, then platform) ──────────────────
+# Two-tier dep stack for ICNSS-attached WLAN on monaco (qca6750 integrated
+# into modem PAS). Layer 1 PIL/QMI; Layer 2 QMI/PDR/ramdump suppliers;
+# Layer 3 WLAN platform from techpack.
+#
+# WLAN supplier graph for this SoC (qca6750 over ICNSS/SMP2P/QMI):
+#   cnss_utils <- cnss_prealloc <- cnss_nl
+#               <- wlan_firmware_service <- cnss_plat_ipc_qmi_svc
+#               <- icnss2 (binds DT qcom,icnss)
+#   cfg80211 <- qca_cld3_wlan (binds via icnss_register_driver())
+spi-msm-geni:k
+msm_geni_serial:k
+qcom_aoss:k
+qmi_helpers:k
+smp2p_sleepstate:k
+qcom_ramdump:k
+pdr_interface:k
+qcom_pil_info:k
+qcom_sysmon:k
+qcom_q6v5:k
+
+# ────────────────── SoC infra modem fw expects up before it boots ──────────────────
+msm_sharedmem:k
+msm_memshare:k
+heap_mem_ext_v01:k
+soc_sleep_stats:k
+subsystem_sleep_stats:k
+sysmon_subsystem_stats:k
+power_state:k
+
+# ────────────────── ADSP audio chain (boots ADSP via /sys/kernel/boot_adsp/boot) ──────────────────
+# adsp_loader_dlkm creates /sys/kernel/boot_adsp/boot; writing 1 triggers
+# rproc_boot of remoteproc0 (ab00000.remoteproc-adsp). Modem firmware
+# waits for ADSP to be alive; without this chain modem perpetually
+# crashes & recovers, WLFW QMI server arrives only intermittently,
+# cnss-daemon never gets past wlfw_service_request.
+snd_event_dlkm:tp
+q6_pdr_dlkm:tp
+q6_notifier_dlkm:tp
+gpr_dlkm:tp
+spf_core_dlkm:tp
+audpkt_ion_dlkm:tp
+audio_pkt_dlkm:tp
+audio_prm_dlkm:tp
+adsp_loader_dlkm:tp
+
+# cdsp-loader (in-tree, drivers/soc/qcom/qdsp6v2/cdsp-loader.c) creates
+# /sys/kernel/boot_cdsp/boot; writing 1 triggers PAS boot of the CDSP
+# subsystem. Without this the Android container's
+# init.qti.write.sh wrapper polls for the sysfs node and times out after
+# ~92s in the background.
+cdsp-loader:k
+
+# ────────────────── Modem PAS LAST (auto-boots remoteproc on probe) ──────────────────
+# All infra above must be ready first.
+qcom_q6v5_pas:k
+qrtr-smd:k
+
+# ────────────────── WLAN platform (techpack wlan-platform + cfg80211 + qcacld) ──────────────────
+# google_wlan_mac reads the WLAN MAC address from DT and pushes it into
+# cnss_utils' storage. qca_cld3_wlan reads it back from cnss_utils at
+# init. Without google_wlan_mac, qca_cld3_wlan has no MAC -> no wlan0.
+# google_wlan_mac MUST load before wlan (declared via @dep below) so
+# modprobe orders them correctly.
+cnss_utils:tp
+google_wlan_mac:tp
+cnss_prealloc:tp
+cnss_nl:tp
+wlan_firmware_service:tp
+cnss_plat_ipc_qmi_svc:tp
+icnss2:tp
+cfg80211:k
+wlan:tp
+
+# ────────────────── cs40l26 haptics + boosted speaker amp ──────────────────
+# google-modules/amplifiers/cs40l26: cl_dsp (DSP loader supplier),
+# input-cs40l26-i2c (platform driver -> /sys/class/leds/vibrator),
+# snd-soc-cs40l26 (ALSA codec). All NEW vs stock vkbrd.
+cl_dsp:tp
+cl_dsp-debugfs:tp
+input-cs40l26-i2c:tp
+snd-soc-cs40l26:tp
+
+# ────────────────────────────────────────────────────────────────────
+# modules.dep entries -- each driver lists its direct symbol-suppliers
+# in load order. Halium's modprobe walks transitive deps from this file.
+# Suppliers MUST precede consumers.
+# ────────────────────────────────────────────────────────────────────
+@dep spi-msm-geni.ko: qcom_ipc_logging.ko
+@dep msm_geni_serial.ko: qcom_ipc_logging.ko
+@dep qcom_aoss.ko:
+# msm_qmp imports qmp_send_msg (and friends) from qcom_aoss. Without this
+# dep declaration in modules.dep, busybox modprobe insmod's msm_qmp before
+# qcom_aoss is up and the kernel rejects it on unresolved symbols.
+@dep msm_qmp.ko: qcom_aoss.ko
+@dep qmi_helpers.ko:
+@dep nanohub.ko:
+# The kernel-build depmod emits an empty dep line for qrtr-smd (rpmsg core is
+# built into the GKI kernel so most of its imports resolve to vmlinux), but it
+# does import qrtr_endpoint_* from qrtr.ko and qcom_glink_is_wakeup from
+# qcom_glink.ko -- naked insmod would be rejected on unresolved symbols.
+@dep qrtr-smd.ko: qrtr.ko qcom_glink.ko
+@dep smp2p_sleepstate.ko:
+@dep qcom_ramdump.ko:
+@dep pdr_interface.ko: qmi_helpers.ko
+@dep qcom_pil_info.ko:
+@dep qcom_sysmon.ko: qmi_helpers.ko rproc_qcom_common.ko
+@dep qcom_q6v5.ko: rproc_qcom_common.ko smem.ko qcom_sysmon.ko qmi_helpers.ko
+@dep qcom_q6v5_pas.ko: qcom_sysmon.ko rproc_qcom_common.ko qcom_q6v5.ko qcom-scm.ko mdt_loader.ko qcom_pil_info.ko qcom_aoss.ko secure_buffer.ko qcom_ramdump.ko qmi_helpers.ko smem.ko
+
+# ADSP / audio chain
+@dep snd_event_dlkm.ko:
+@dep q6_pdr_dlkm.ko: pdr_interface.ko qmi_helpers.ko
+@dep q6_notifier_dlkm.ko: rproc_qcom_common.ko q6_pdr_dlkm.ko pdr_interface.ko qmi_helpers.ko
+@dep gpr_dlkm.ko: snd_event_dlkm.ko q6_notifier_dlkm.ko rproc_qcom_common.ko q6_pdr_dlkm.ko pdr_interface.ko qmi_helpers.ko
+@dep spf_core_dlkm.ko: gpr_dlkm.ko snd_event_dlkm.ko q6_notifier_dlkm.ko rproc_qcom_common.ko q6_pdr_dlkm.ko pdr_interface.ko qmi_helpers.ko
+@dep adsp_loader_dlkm.ko: spf_core_dlkm.ko gpr_dlkm.ko snd_event_dlkm.ko q6_notifier_dlkm.ko rproc_qcom_common.ko q6_pdr_dlkm.ko pdr_interface.ko qmi_helpers.ko
+@dep cdsp-loader.ko: rproc_qcom_common.ko qcom_q6v5_pas.ko qcom_q6v5.ko qcom_sysmon.ko qmi_helpers.ko
+@dep audpkt_ion_dlkm.ko: secure_buffer.ko
+@dep audio_pkt_dlkm.ko: gpr_dlkm.ko audpkt_ion_dlkm.ko spf_core_dlkm.ko qcom_ipc_logging.ko snd_event_dlkm.ko q6_notifier_dlkm.ko rproc_qcom_common.ko q6_pdr_dlkm.ko pdr_interface.ko qmi_helpers.ko secure_buffer.ko
+@dep audio_prm_dlkm.ko: q6_notifier_dlkm.ko gpr_dlkm.ko spf_core_dlkm.ko snd_event_dlkm.ko rproc_qcom_common.ko q6_pdr_dlkm.ko pdr_interface.ko qmi_helpers.ko
+
+# SoC infra
+@dep msm_sharedmem.ko:
+@dep msm_memshare.ko: qmi_helpers.ko rproc_qcom_common.ko
+@dep heap_mem_ext_v01.ko: qmi_helpers.ko
+@dep soc_sleep_stats.ko: smem.ko
+@dep subsystem_sleep_stats.ko:
+@dep sysmon_subsystem_stats.ko: smem.ko
+@dep power_state.ko: rproc_qcom_common.ko
+
+# Sensors/audio MCU listeners
+@dep petc_input_filter.ko: nanohub.ko
+@dep mcu_mic_codec.ko: nanohub.ko
+
+# WLAN platform
+@dep cnss_utils.ko:
+@dep google_wlan_mac.ko: cnss_utils.ko
+@dep cnss_prealloc.ko:
+@dep cnss_nl.ko: cnss_utils.ko
+@dep wlan_firmware_service.ko: qmi_helpers.ko
+@dep cnss_plat_ipc_qmi_svc.ko: qmi_helpers.ko
+@dep icnss2.ko: wlan_firmware_service.ko qmi_helpers.ko pdr_interface.ko qcom_ramdump.ko
+@dep cfg80211.ko:
+# google_wlan_mac is NOT a symbol dep of qca_cld3_wlan -- they talk via
+# cnss_utils -- so modpost wouldn't generate this. But modprobe walks
+# modules.dep to ORDER loads; this forces google_wlan_mac BEFORE wlan.
+@dep wlan.ko: cfg80211.ko icnss2.ko cnss_utils.ko google_wlan_mac.ko
+
+# USB chain
+@dep google-extcon-usb-shim.ko:
+@dep phy-msm-ssusb-qmp.ko:
+
+# cs40l26 haptics
+@dep cl_dsp.ko:
+@dep cl_dsp-debugfs.ko: cl_dsp.ko
+@dep input-cs40l26-i2c.ko: cl_dsp.ko cl_dsp-debugfs.ko
+@dep snd-soc-cs40l26.ko: input-cs40l26-i2c.ko cl_dsp.ko cl_dsp-debugfs.ko
