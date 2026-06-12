@@ -5,13 +5,13 @@ Subject: [PATCH] Rotate screen for harmony
 
 Upstream-Status: Inappropriate
 ---
- src/compositor/lipstickcompositor.cpp | 2 ++
+ lipstick/src/compositor/lipstickcompositor.cpp | 2 ++
  1 file changed, 2 insertions(+)
 
-diff --git a/src/compositor/lipstickcompositor.cpp b/src/compositor/lipstickcompositor.cpp
+diff --git a/lipstick/src/compositor/lipstickcompositor.cpp b/lipstick/src/compositor/lipstickcompositor.cpp
 index 4dce9d7b..cf5a796e 100644
---- a/src/compositor/lipstickcompositor.cpp
-+++ b/src/compositor/lipstickcompositor.cpp
+--- a/lipstick/src/compositor/lipstickcompositor.cpp
++++ b/lipstick/src/compositor/lipstickcompositor.cpp
 @@ -397,6 +397,8 @@ void LipstickCompositor::initialize()
      QDBusMessage message = QDBusMessage::createMethodCall(MCE_SERVICE, MCE_REQUEST_PATH, MCE_REQUEST_IF, MCE_DISPLAY_LPM_SET_SUPPORTED);
      message.setArguments(QVariantList() << ambientSupported());
