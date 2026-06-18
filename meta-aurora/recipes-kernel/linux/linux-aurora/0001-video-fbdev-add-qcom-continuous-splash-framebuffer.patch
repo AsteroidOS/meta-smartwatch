@@ -1,0 +1,264 @@
+From 50cd91f86d0b1767ded718f610d15c85b9814f9f Mon Sep 17 00:00:00 2001
+From: Florent Revest <revestflo@gmail.com>
+Date: Thu, 18 Jun 2026 10:00:00 +0000
+Subject: [PATCH] video: fbdev: add qcom continuous-splash framebuffer
+
+Upstream-Status: Inappropriate
+
+Expose a Qualcomm bootloader continuous-splash buffer as a legacy /dev/fb0.
+The SDE/MDSS display keeps scanning the bootloader splash region until the
+userspace composer takes over, but the downstream SDE DRM driver has no fbdev
+emulation -- so simple fbdev clients (psplash) have no surface during boot.
+This minimal platform driver, bound to a 'qcom,cont-splash-fb' DT node, maps
+that already-live region write-combine into userspace; writes appear on the
+panel immediately with no modeset/DRM/kickoff. Generic across qcom ports.
+---
+ drivers/video/fbdev/Kconfig               |  11 ++
+ drivers/video/fbdev/Makefile              |   1 +
+ drivers/video/fbdev/qcom-cont-splash-fb.c | 206 ++++++++++++++++++++++
+ 3 files changed, 218 insertions(+)
+ create mode 100644 drivers/video/fbdev/qcom-cont-splash-fb.c
+
+diff --git a/drivers/video/fbdev/Kconfig b/drivers/video/fbdev/Kconfig
+index 662524574cc3..981bae74e89a 100644
+--- a/drivers/video/fbdev/Kconfig
++++ b/drivers/video/fbdev/Kconfig
+@@ -2241,3 +2241,14 @@ config FB_SM712
+ source "drivers/video/fbdev/omap/Kconfig"
+ source "drivers/video/fbdev/omap2/Kconfig"
+ source "drivers/video/fbdev/mmp/Kconfig"
++config FB_QCOM_CONT_SPLASH
++	tristate "Qualcomm continuous-splash framebuffer support"
++	depends on FB && OF
++	help
++	  Expose a Qualcomm bootloader continuous-splash buffer (described by a
++	  "qcom,cont-splash-fb" device-tree node) as a legacy /dev/fb0, so simple
++	  fbdev clients such as psplash can draw a boot splash into the buffer the
++	  SDE/MDSS display is already scanning, before the userspace composer
++	  takes over the display.
++
++
+diff --git a/drivers/video/fbdev/Makefile b/drivers/video/fbdev/Makefile
+index 477b9624b703..5b1776d5a7ad 100644
+--- a/drivers/video/fbdev/Makefile
++++ b/drivers/video/fbdev/Makefile
+@@ -132,3 +132,4 @@ obj-$(CONFIG_FB_SIMPLE)           += simplefb.o
+ 
+ # the test framebuffer is last
+ obj-$(CONFIG_FB_VIRTUAL)          += vfb.o
++obj-$(CONFIG_FB_QCOM_CONT_SPLASH) += qcom-cont-splash-fb.o
+diff --git a/drivers/video/fbdev/qcom-cont-splash-fb.c b/drivers/video/fbdev/qcom-cont-splash-fb.c
+new file mode 100644
+index 000000000000..f90258d39307
+--- /dev/null
++++ b/drivers/video/fbdev/qcom-cont-splash-fb.c
+@@ -0,0 +1,206 @@
++// SPDX-License-Identifier: GPL-2.0-only
++/*
++ * qcom-cont-splash-fb: expose a Qualcomm bootloader continuous-splash buffer
++ * as a legacy /dev/fb0.
++ *
++ * On Qualcomm SoCs the bootloader paints a boot logo into a reserved
++ * "continuous splash" memory region and the SDE/MDSS display keeps scanning
++ * that region out to the panel until the userspace composer takes over. The
++ * downstream SDE DRM driver intentionally ships no fbdev emulation, so there is
++ * no /dev/fb0 for simple fbdev clients (e.g. psplash) during the boot window.
++ *
++ * This driver exposes that already-live splash buffer as a minimal framebuffer:
++ * a userspace write lands in the very buffer the display is scanning, so it
++ * appears immediately -- no modeset, no DRM, no command-mode kickoff. Once the
++ * composer takes over the display the splash region is no longer scanned and
++ * this fb simply stops being visible, which is exactly the boot-splash lifetime.
++ *
++ * The buffer is described by a DT node (simple-framebuffer-style geometry):
++ *
++ *	cont-splash-fb {
++ *		compatible = "qcom,cont-splash-fb";
++ *		reg = <0x0 0x5c000000 0x0 0x90000>;
++ *		width  = <384>;
++ *		height = <384>;
++ *		stride = <1536>;
++ *		format = "x8r8g8b8";
++ *	};
++ *
++ * The region is mapped write-combine into userspace so writes drain straight to
++ * DRAM regardless of whether the display master is cache-coherent; the kernel
++ * never writes the cacheable linear alias, so no cache maintenance is needed.
++ */
++
++#include <linux/fb.h>
++#include <linux/io.h>
++#include <linux/mm.h>
++#include <linux/module.h>
++#include <linux/of.h>
++#include <linux/of_address.h>
++#include <linux/platform_device.h>
++
++struct qcsfb_format {
++	const char *name;
++	u32 bpp;
++	struct fb_bitfield transp, red, green, blue;
++};
++
++/* Names match the device-tree "format" strings used by simple-framebuffer. */
++static const struct qcsfb_format qcsfb_formats[] = {
++	{ "r5g6b5",   16, {0, 0, 0}, {11, 5, 0}, {5, 6, 0}, {0, 5, 0} },
++	{ "x8r8g8b8", 32, {0, 0, 0},  {16, 8, 0}, {8, 8, 0}, {0, 8, 0} },
++	{ "a8r8g8b8", 32, {24, 8, 0}, {16, 8, 0}, {8, 8, 0}, {0, 8, 0} },
++	{ "x8b8g8r8", 32, {0, 0, 0},  {0, 8, 0},  {8, 8, 0}, {16, 8, 0} },
++	{ "a8b8g8r8", 32, {24, 8, 0}, {0, 8, 0},  {8, 8, 0}, {16, 8, 0} },
++};
++
++struct qcsfb_par {
++	resource_size_t base;
++	resource_size_t size;
++};
++
++static int qcsfb_mmap(struct fb_info *info, struct vm_area_struct *vma)
++{
++	struct qcsfb_par *par = info->par;
++	unsigned long size = vma->vm_end - vma->vm_start;
++	unsigned long offset = (unsigned long)vma->vm_pgoff << PAGE_SHIFT;
++
++	if (offset > par->size || size > par->size - offset)
++		return -EINVAL;
++
++	vma->vm_page_prot = pgprot_writecombine(vma->vm_page_prot);
++	return remap_pfn_range(vma, vma->vm_start,
++			       (par->base >> PAGE_SHIFT) + vma->vm_pgoff,
++			       size, vma->vm_page_prot);
++}
++
++/* Geometry is fixed by the bootloader; reject any reconfiguration so clients
++ * (e.g. psplash probing for a double buffer) fall back to single-buffered use. */
++static int qcsfb_check_var(struct fb_var_screeninfo *var, struct fb_info *info)
++{
++	if (var->bits_per_pixel != info->var.bits_per_pixel)
++		return -EINVAL;
++	var->xres = var->xres_virtual = info->var.xres;
++	var->yres = var->yres_virtual = info->var.yres;
++	var->xoffset = var->yoffset = 0;
++	var->red = info->var.red;
++	var->green = info->var.green;
++	var->blue = info->var.blue;
++	var->transp = info->var.transp;
++	return 0;
++}
++
++static const struct fb_ops qcsfb_ops = {
++	.owner		= THIS_MODULE,
++	.fb_check_var	= qcsfb_check_var,
++	.fb_mmap	= qcsfb_mmap,
++};
++
++static int qcsfb_probe(struct platform_device *pdev)
++{
++	struct device *dev = &pdev->dev;
++	const struct qcsfb_format *fmt = NULL;
++	struct fb_info *info;
++	struct qcsfb_par *par;
++	struct resource res;
++	const char *format;
++	u32 width, height, stride;
++	int ret, i;
++
++	ret = of_address_to_resource(dev->of_node, 0, &res);
++	if (ret)
++		return dev_err_probe(dev, ret, "missing/invalid reg\n");
++
++	if (of_property_read_u32(dev->of_node, "width", &width) ||
++	    of_property_read_u32(dev->of_node, "height", &height) ||
++	    of_property_read_u32(dev->of_node, "stride", &stride) ||
++	    of_property_read_string(dev->of_node, "format", &format))
++		return dev_err_probe(dev, -EINVAL,
++				     "need width/height/stride/format\n");
++
++	for (i = 0; i < ARRAY_SIZE(qcsfb_formats); i++) {
++		if (!strcmp(format, qcsfb_formats[i].name)) {
++			fmt = &qcsfb_formats[i];
++			break;
++		}
++	}
++	if (!fmt)
++		return dev_err_probe(dev, -EINVAL, "unsupported format '%s'\n",
++				     format);
++
++	if ((resource_size_t)stride * height > resource_size(&res))
++		return dev_err_probe(dev, -EINVAL,
++				     "geometry exceeds reserved region\n");
++
++	info = framebuffer_alloc(sizeof(*par), dev);
++	if (!info)
++		return -ENOMEM;
++	par = info->par;
++	par->base = res.start;
++	par->size = resource_size(&res);
++
++	strscpy(info->fix.id, "qcomsplash", sizeof(info->fix.id));
++	info->fix.type = FB_TYPE_PACKED_PIXELS;
++	info->fix.visual = FB_VISUAL_TRUECOLOR;
++	info->fix.accel = FB_ACCEL_NONE;
++	info->fix.line_length = stride;
++	info->fix.smem_start = res.start;
++	info->fix.smem_len = par->size;
++
++	info->var.xres = info->var.xres_virtual = width;
++	info->var.yres = info->var.yres_virtual = height;
++	info->var.bits_per_pixel = fmt->bpp;
++	info->var.transp = fmt->transp;
++	info->var.red = fmt->red;
++	info->var.green = fmt->green;
++	info->var.blue = fmt->blue;
++	info->var.activate = FB_ACTIVATE_NOW;
++	info->var.vmode = FB_VMODE_NONINTERLACED;
++	info->var.width = info->var.height = -1;
++
++	info->fbops = &qcsfb_ops;
++	info->flags = FBINFO_DEFAULT | FBINFO_VIRTFB;
++	/* Userspace maps the splash region directly (see qcsfb_mmap); the kernel
++	 * never touches a cacheable alias of it, so leave screen_base unset. */
++	info->screen_base = NULL;
++	info->screen_size = par->size;
++
++	ret = register_framebuffer(info);
++	if (ret) {
++		framebuffer_release(info);
++		return dev_err_probe(dev, ret, "register_framebuffer failed\n");
++	}
++
++	platform_set_drvdata(pdev, info);
++	dev_info(dev, "fb%d: %ux%u-%u %s splash@%pa\n", info->node,
++		 width, height, fmt->bpp, format, &res.start);
++	return 0;
++}
++
++static int qcsfb_remove(struct platform_device *pdev)
++{
++	struct fb_info *info = platform_get_drvdata(pdev);
++
++	unregister_framebuffer(info);
++	framebuffer_release(info);
++	return 0;
++}
++
++static const struct of_device_id qcsfb_of_match[] = {
++	{ .compatible = "qcom,cont-splash-fb" },
++	{ }
++};
++MODULE_DEVICE_TABLE(of, qcsfb_of_match);
++
++static struct platform_driver qcsfb_driver = {
++	.driver = {
++		.name = "qcom-cont-splash-fb",
++		.of_match_table = qcsfb_of_match,
++	},
++	.probe = qcsfb_probe,
++	.remove = qcsfb_remove,
++};
++module_platform_driver(qcsfb_driver);
++
++MODULE_DESCRIPTION("Qualcomm continuous-splash framebuffer");
++MODULE_LICENSE("GPL");
+-- 
+2.47.3
+

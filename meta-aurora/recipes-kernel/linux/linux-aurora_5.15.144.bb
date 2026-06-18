@@ -15,7 +15,8 @@ SRC_URI = "git://gitlab.com/ubports/porting/community-ports/android13/google-eos
            file://cmd-mod-file-func.patch \
            file://cc-o-c-respfile.patch \
            file://eud-secure-fail-nonfatal.patch \
-           file://rtc-pm8xxx-read-only.patch"
+           file://rtc-pm8xxx-read-only.patch \
+           file://0001-video-fbdev-add-qcom-continuous-splash-framebuffer.patch"
 SRCREV = "063840c5aae117bf0faac8b34fba0e37c9f619f8"
 require linux-aurora-version.inc
 LINUX_VERSION = "${AURORA_KERNEL_VERSION}"
