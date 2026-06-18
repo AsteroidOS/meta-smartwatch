@@ -81,6 +81,25 @@ CONFIG_LSM="landlock,lockdown,yama,loadpin,safesetid,integrity,apparmor,selinux,
 
 # CONFIG_RPMSG_QCOM_GLINK_SLATECOM is not set
 
+# Boot splash (psplash) via the bootloader continuous-splash buffer.
+#
+# psplash needs a legacy /dev/fb0. The SDE DRM driver deliberately has no fbdev
+# emulation, and on this command-mode panel the in-kernel drm_fb_helper modeset
+# is gated by SDE cont_splash and never lights the panel anyway. Instead, the
+# bootloader's cont_splash buffer (reserved splash_region) is *already* being
+# scanned out to the panel during boot, so qcom-cont-splash-fb (a tiny generic
+# fbdev driver, bound to an injected "qcom,cont-splash-fb" DT node) exposes that
+# live region as /dev/fb0 — psplash writes land in the buffer the display is
+# scanning and appear immediately, no DRM/modeset/kickoff.
+#
+# CONFIG_FB for the fbdev core; FRAMEBUFFER_CONSOLE stays off (EXPERT=y gates it
+# off) so nothing else draws on the splash. CONFIG_DRM_FBDEV_EMULATION is forced
+# OFF: its Kconfig default is 'y', and with it on the stock msm_drv.c references
+# msm_fbdev_init()/free() which this tree does not provide -> insmod fails.
+CONFIG_FB=y
+CONFIG_FB_QCOM_CONT_SPLASH=y
+# CONFIG_DRM_FBDEV_EMULATION is not set
+
 # Virtual HCI device — backs /dev/vhci, which bluebinder writes HCI
 # packets to so the kernel BlueZ stack sees them as if they came from a
 # real controller. The QCA BT chip on this watch is owned by the Android

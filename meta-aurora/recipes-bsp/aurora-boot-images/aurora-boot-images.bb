@@ -138,6 +138,22 @@ do_compile() {
     "${FDTPUT}" -t x ${WORKDIR}/dtb-ramoops.dtb "$N" pmsg-size ${RAMOOPS_PMSG}
     bbnote "ramoops node injected into base DTB"
 
+    # ─── Step 3b: continuous-splash framebuffer node. The bootloader paints
+    #     the boot logo into splash_region@0x5c000000 and SDE keeps scanning it
+    #     until the composer takes over. qcom-cont-splash-fb binds this node and
+    #     exposes that live buffer as /dev/fb0 for psplash. Geometry is the
+    #     panel native res (384x384, 32bpp xRGB, stride 384*4=1536); frame =
+    #     1536*384 = 0x90000 bytes. ───
+    S_NODE=/cont-splash-fb
+    "${FDTPUT}" -c ${WORKDIR}/dtb-ramoops.dtb "$S_NODE"
+    "${FDTPUT}" -t s ${WORKDIR}/dtb-ramoops.dtb "$S_NODE" compatible "qcom,cont-splash-fb"
+    "${FDTPUT}" -t x ${WORKDIR}/dtb-ramoops.dtb "$S_NODE" reg 0 0x5c000000 0 0x90000
+    "${FDTPUT}" -t u ${WORKDIR}/dtb-ramoops.dtb "$S_NODE" width 384
+    "${FDTPUT}" -t u ${WORKDIR}/dtb-ramoops.dtb "$S_NODE" height 384
+    "${FDTPUT}" -t u ${WORKDIR}/dtb-ramoops.dtb "$S_NODE" stride 1536
+    "${FDTPUT}" -t s ${WORKDIR}/dtb-ramoops.dtb "$S_NODE" format "x8r8g8b8"
+    bbnote "cont-splash-fb node injected into base DTB"
+
     # ─── Step 4: cpio + lz4 the vkb ramdisk ───
     ( cd ${WORKDIR}/vkb_ramdisk && find . | sort | \
         cpio -o -H newc --owner root:root 2>/dev/null ) > ${WORKDIR}/vkb_rd.cpio
