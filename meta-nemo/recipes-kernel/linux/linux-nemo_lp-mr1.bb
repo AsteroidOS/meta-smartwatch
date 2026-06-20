@@ -13,6 +13,7 @@ SRC_URI = "git://android.googlesource.com/kernel/msm;branch=android-msm-nemo-3.1
     file://0002-static-inline-in-ARM-ftrace.h.patch;striplevel=1 \
     file://0003-Backport-mainline-4.1-Bluetooth-subsystem.patch;striplevel=1 \
     file://0004-bluesleep-Use-kernel-s-HCI-events-instead-of-proc-bl.patch \
+    file://0005-msm_pwm_vibrator-Convert-timed_output-APIs-to-ff_mem.patch \
     file://0006-ARM-uaccess-remove-put_user-code-duplication.patch \
     file://0009-ARM-8933-1-replace-Sun-Solaris-style-flag-on-section.patch \
     file://0010-vfs-allow-umount-to-handle-mountpoints-without-reval.patch \
