@@ -1,0 +1,24 @@
+From: Timo Könnecke <mo@mowerk.net>
+Date: Thu, 19 Jun 2026 22:15:25 +0200
+Subject: [PATCH] nitrous: add bluesleep_hci_event stub
+
+Temporary stopgap to let the nitrous rfkill driver build and load
+without a full bluesleep power-management implementation. Bluetooth
+low-power sleep is effectively disabled by this stub; proper LPM
+support is a follow-up.
+
+Upstream-Status: Inappropriate [nemo-specific port patch]
+
+diff --git a/drivers/bluetooth/nitrous.c b/drivers/bluetooth/nitrous.c
+--- a/drivers/bluetooth/nitrous.c
++++ b/drivers/bluetooth/nitrous.c
+@@ -569,5 +569,9 @@
+ module_init(nitrous_init);
+ module_exit(nitrous_exit);
+ MODULE_DESCRIPTION("Nitrous Oxide Driver for Bluetooth");
+ MODULE_AUTHOR("Google");
+ MODULE_LICENSE("GPL");
++
++void bluesleep_hci_event(unsigned long event)
++{}
++EXPORT_SYMBOL(bluesleep_hci_event);
