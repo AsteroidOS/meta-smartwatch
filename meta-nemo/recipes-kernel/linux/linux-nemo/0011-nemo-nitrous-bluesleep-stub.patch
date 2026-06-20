@@ -1,24 +1,60 @@
 From: Timo Könnecke <mo@mowerk.net>
 Date: Thu, 19 Jun 2026 22:15:25 +0200
-Subject: [PATCH] nitrous: add bluesleep_hci_event stub
+Subject: [PATCH] nitrous: wire bluesleep_hci_event into existing wake mechanism
 
-Temporary stopgap to let the nitrous rfkill driver build and load
-without a full bluesleep power-management implementation. Bluetooth
-low-power sleep is effectively disabled by this stub; proper LPM
-support is a follow-up.
+The nitrous driver requires hci_ldisc.c's bluesleep_hci_event() symbol
+to link, but provides no implementation of its own (unlike bass's
+bcm_bluesleep driver, which both provides and uses this hook). A prior
+revision of this patch added an empty stub purely to satisfy the
+linker, which left Bluetooth low-power sleep effectively disabled.
+
+hci_ldisc.c calls bluesleep_hci_event(HCI_DEV_WRITE) on every outgoing
+HCI write. With an empty stub, nothing ever asserts dev-wake-gpio
+before a write, so the BT chip is never woken for outgoing UART
+traffic. This routes the call into nitrous's own existing
+nitrous_wake_device_locked() wake path instead of doing nothing.
 
 Upstream-Status: Inappropriate [nemo-specific port patch]
 
+The nitrous driver requires hci_ldisc.c's bluesleep_hci_event() symbol
+to link, but provides no implementation of its own (unlike bass's
+bcm_bluesleep driver, which both provides and uses this hook). A prior
+session added an empty stub purely to satisfy the linker.
+
+hci_ldisc.c calls bluesleep_hci_event(HCI_DEV_WRITE) on every outgoing
+HCI write. With an empty stub, nothing ever asserts dev-wake-gpio
+before a write, so the BT chip is never woken for outgoing UART
+traffic, including the initial patchram handshake. This routes the
+call into nitrous's own existing nitrous_wake_device_locked() wake
+path instead of doing nothing.
+
 diff --git a/drivers/bluetooth/nitrous.c b/drivers/bluetooth/nitrous.c
+index d994958..98ce5f1 100644
 --- a/drivers/bluetooth/nitrous.c
 +++ b/drivers/bluetooth/nitrous.c
-@@ -569,5 +569,9 @@
- module_init(nitrous_init);
- module_exit(nitrous_exit);
+@@ -20,7 +20,7 @@
+  * The current implementation is very specific to Qualcomm serial driver
+  * with BCM chipset.
+  */
+-
++#define HCI_DEV_WRITE 7
+ #include <linux/delay.h>
+ #include <linux/gpio.h>
+ #include <linux/hrtimer.h>
+@@ -567,3 +567,16 @@ module_exit(nitrous_exit);
  MODULE_DESCRIPTION("Nitrous Oxide Driver for Bluetooth");
  MODULE_AUTHOR("Google");
  MODULE_LICENSE("GPL");
 +
 +void bluesleep_hci_event(unsigned long event)
-+{}
++{
++	unsigned long flags;
++	if (!bt_lpm)
++		return;
++	if (event == HCI_DEV_WRITE) {
++		spin_lock_irqsave(&bt_lpm->uart_port->lock, flags);
++		nitrous_wake_device_locked(bt_lpm, true);
++		spin_unlock_irqrestore(&bt_lpm->uart_port->lock, flags);
++	}
++}
 +EXPORT_SYMBOL(bluesleep_hci_event);
