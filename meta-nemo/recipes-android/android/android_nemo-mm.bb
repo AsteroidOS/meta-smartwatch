@@ -18,6 +18,7 @@ SRC_URI = "https://dl.dropboxusercontent.com/s/hta18rrkn7wenc9/system-M1D64S.tar
            file://adsp.b08 \
            file://adsp.b10 \
            file://adsp.b11 \
+           file://sensor_def_nemo.conf \
            "
 SRC_URI[md5sum] = "a20e105e7d5f38c127e0e0c1f7808999"
 SRC_URI[sha256sum] = "36327f17517bc1d850d2f5b4b774e39d514946413f58b387306fbf19f2684fc4"
@@ -72,6 +73,8 @@ do_install:append() {
     install -m 0644 ${UNPACKDIR}/adsp.b08 ${D}/system/vendor/firmware/adsp.b08
     install -m 0644 ${UNPACKDIR}/adsp.b10 ${D}/system/vendor/firmware/adsp.b10
     install -m 0644 ${UNPACKDIR}/adsp.b11 ${D}/system/vendor/firmware/adsp.b11
+    install -d ${D}/system/etc/sensors/
+    install -m 0644 ${UNPACKDIR}/sensor_def_nemo.conf ${D}/system/etc/sensors/sensor_def_nemo.conf
 }
 
 # FIXME: QA Issue: Architecture did not match (40 to 164) on /work/nemo-oe-linux-gnueabi/android/lollipop-r0/packages-split/android-system/system/vendor/firmware/adsp.b00 [arch]
