@@ -6,6 +6,18 @@ SRC_URI = "https://dl.dropboxusercontent.com/s/hta18rrkn7wenc9/system-M1D64S.tar
            file://fw_bcmdhd.bin_a1 \
            file://fw_bcmdhd_apsta.bin_a1 \
            file://bcmdhd.cal_a1 \
+           file://adsp.mdt \
+           file://adsp.b00 \
+           file://adsp.b01 \
+           file://adsp.b02 \
+           file://adsp.b03 \
+           file://adsp.b04 \
+           file://adsp.b05 \
+           file://adsp.b06 \
+           file://adsp.b07 \
+           file://adsp.b08 \
+           file://adsp.b10 \
+           file://adsp.b11 \
            "
 SRC_URI[md5sum] = "a20e105e7d5f38c127e0e0c1f7808999"
 SRC_URI[sha256sum] = "36327f17517bc1d850d2f5b4b774e39d514946413f58b387306fbf19f2684fc4"
@@ -48,6 +60,18 @@ do_install:append() {
     install -m 0644 ${UNPACKDIR}/fw_bcmdhd_apsta.bin_a1 ${D}/system/vendor/firmware/fw_bcmdhd_apsta.bin_a1
     install -d ${D}/system/etc/wifi/
     install -m 0644 ${UNPACKDIR}/bcmdhd.cal_a1 ${D}/system/etc/wifi/bcmdhd.cal_a1
+    install -m 0644 ${UNPACKDIR}/adsp.mdt ${D}/system/vendor/firmware/adsp.mdt
+    install -m 0644 ${UNPACKDIR}/adsp.b00 ${D}/system/vendor/firmware/adsp.b00
+    install -m 0644 ${UNPACKDIR}/adsp.b01 ${D}/system/vendor/firmware/adsp.b01
+    install -m 0644 ${UNPACKDIR}/adsp.b02 ${D}/system/vendor/firmware/adsp.b02
+    install -m 0644 ${UNPACKDIR}/adsp.b03 ${D}/system/vendor/firmware/adsp.b03
+    install -m 0644 ${UNPACKDIR}/adsp.b04 ${D}/system/vendor/firmware/adsp.b04
+    install -m 0644 ${UNPACKDIR}/adsp.b05 ${D}/system/vendor/firmware/adsp.b05
+    install -m 0644 ${UNPACKDIR}/adsp.b06 ${D}/system/vendor/firmware/adsp.b06
+    install -m 0644 ${UNPACKDIR}/adsp.b07 ${D}/system/vendor/firmware/adsp.b07
+    install -m 0644 ${UNPACKDIR}/adsp.b08 ${D}/system/vendor/firmware/adsp.b08
+    install -m 0644 ${UNPACKDIR}/adsp.b10 ${D}/system/vendor/firmware/adsp.b10
+    install -m 0644 ${UNPACKDIR}/adsp.b11 ${D}/system/vendor/firmware/adsp.b11
 }
 
 # FIXME: QA Issue: Architecture did not match (40 to 164) on /work/nemo-oe-linux-gnueabi/android/lollipop-r0/packages-split/android-system/system/vendor/firmware/adsp.b00 [arch]
