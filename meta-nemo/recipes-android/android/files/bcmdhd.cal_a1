@@ -1,0 +1,77 @@
+# NVRAM file for BCM943430WLSELG - 20150813
+# 2.4 GHz, 20 MHz BW mode
+
+# The following parameter values are just placeholders, need to be updated.
+manfid=0x2d0
+prodid=0x0726
+vendid=0x14e4
+devid=0x43e2
+boardtype=0x0726
+boardrev=0x1201
+boardnum=22
+macaddr=00:90:4c:c5:12:38
+sromrev=11
+boardflags=0x00404201
+boardflags3=0x08000000
+xtalfreq=37400
+nocrc=1
+ag0=0
+aa2g=1
+ccode=ALL
+
+pa0itssit=0x20
+extpagain2g=0
+
+#PA parameters for 2.4GHz, measured at FEM OUTPUT
+pa2ga0=0xFFA2,0x1BCE,0xFD26
+#pa0b0=0x1ACE
+#pa0b1=0xFD32
+#pa0b2=0xFFA2
+AvVmid_c0=0x0,0xc8
+cckpwroffset0=3
+
+# PPR params
+maxp2ga0=74
+txpwrbckof=6
+cckbw202gpo=0
+legofdmbw202gpo=0x88888888
+mcsbw202gpo=0xaaaaaaaa
+propbw202gpo=0xdd
+
+# OFDM IIR :
+ofdmdigfilttype=17
+ofdmdigfilttypebe=18
+# PAPD mode:
+papdmode=1
+papdvalidtest=1
+pacalidx2g=42
+papdepsoffset=-22
+papdendidx=58
+
+il0macaddr=00:90:4c:c5:12:38
+wl0id=0x431b
+
+deadman_to=0xffffffff
+# muxenab: 0x1 for UART enable, 0x2 for GPIOs, 0x8 for JTAG, 0x10 for Host awake
+muxenab=0x10
+# CLDO PWM voltage settings - 0x4 - 1.1 volt
+#cldo_pwm=0x4
+
+#VCO freq 326.4MHz
+spurconfig=0x3
+
+txpwroffset2g=4,0,1,1,0,2,0,-1,0,0,5,0,-1,0
+# LTECX flags
+#ltecxmux=1
+#ltecxpadnum=0x02030401
+#ltecxfnsel=0x3003
+#ltecxgcigpio=0x3012
+
+#btc_params 8 45000
+#btc_params 10 20000
+
+#edonthd20l=-65
+#edoffthd20ul=-71
+
+rssicorrnorm=-3
+

@@ -2,7 +2,11 @@ inherit gettext
 
 SUMMARY = "Downloads the LG Watch Urbane /system and /usr/include/android folders and installs them for libhybris"
 LICENSE = "CLOSED"
-SRC_URI = "https://dl.dropboxusercontent.com/s/hta18rrkn7wenc9/system-M1D64S.tar.gz"
+SRC_URI = "https://dl.dropboxusercontent.com/s/hta18rrkn7wenc9/system-M1D64S.tar.gz \
+           file://fw_bcmdhd.bin_a1 \
+           file://fw_bcmdhd_apsta.bin_a1 \
+           file://bcmdhd.cal_a1 \
+           "
 SRC_URI[md5sum] = "a20e105e7d5f38c127e0e0c1f7808999"
 SRC_URI[sha256sum] = "36327f17517bc1d850d2f5b4b774e39d514946413f58b387306fbf19f2684fc4"
 PV = "marshmallow"
@@ -10,6 +14,7 @@ PV = "marshmallow"
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 INHIBIT_PACKAGE_STRIP = "1"
 COMPATIBLE_MACHINE = "nemo"
+FILESEXTRAPATHS:prepend:nemo := "${THISDIR}/files:"
 INSANE_SKIP:${PN} = "already-stripped"
 S = "${WORKDIR}/sources"
 UNPACKDIR = "${S}"
@@ -36,6 +41,13 @@ do_install() {
 
     mkdir etc/
     ln -s /system/etc/firmware etc/firmware
+}
+
+do_install:append() {
+    install -m 0644 ${UNPACKDIR}/fw_bcmdhd.bin_a1 ${D}/system/vendor/firmware/fw_bcmdhd.bin_a1
+    install -m 0644 ${UNPACKDIR}/fw_bcmdhd_apsta.bin_a1 ${D}/system/vendor/firmware/fw_bcmdhd_apsta.bin_a1
+    install -d ${D}/system/etc/wifi/
+    install -m 0644 ${UNPACKDIR}/bcmdhd.cal_a1 ${D}/system/etc/wifi/bcmdhd.cal_a1
 }
 
 # FIXME: QA Issue: Architecture did not match (40 to 164) on /work/nemo-oe-linux-gnueabi/android/lollipop-r0/packages-split/android-system/system/vendor/firmware/adsp.b00 [arch]
