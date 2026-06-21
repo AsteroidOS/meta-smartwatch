@@ -19,6 +19,7 @@ SRC_URI = "https://dl.dropboxusercontent.com/s/hta18rrkn7wenc9/system-M1D64S.tar
            file://adsp.b10 \
            file://adsp.b11 \
            file://sensor_def_nemo.conf \
+           file://sensors.msm8226.so \
            "
 SRC_URI[md5sum] = "a20e105e7d5f38c127e0e0c1f7808999"
 SRC_URI[sha256sum] = "36327f17517bc1d850d2f5b4b774e39d514946413f58b387306fbf19f2684fc4"
@@ -75,6 +76,7 @@ do_install:append() {
     install -m 0644 ${UNPACKDIR}/adsp.b11 ${D}/system/vendor/firmware/adsp.b11
     install -d ${D}/system/etc/sensors/
     install -m 0644 ${UNPACKDIR}/sensor_def_nemo.conf ${D}/system/etc/sensors/sensor_def_nemo.conf
+    install -m 0755 ${UNPACKDIR}/sensors.msm8226.so ${D}/system/vendor/lib/hw/sensors.msm8226.so
     sed -i \
         -e 's/^ro.product.name=bass$/ro.product.name=nemo/' \
         -e 's/^ro.product.device=bass$/ro.product.device=nemo/' \
