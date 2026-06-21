@@ -75,6 +75,17 @@ do_install:append() {
     install -m 0644 ${UNPACKDIR}/adsp.b11 ${D}/system/vendor/firmware/adsp.b11
     install -d ${D}/system/etc/sensors/
     install -m 0644 ${UNPACKDIR}/sensor_def_nemo.conf ${D}/system/etc/sensors/sensor_def_nemo.conf
+    sed -i \
+        -e 's/^ro.product.name=bass$/ro.product.name=nemo/' \
+        -e 's/^ro.product.device=bass$/ro.product.device=nemo/' \
+        -e 's/^ro.product.board=bass$/ro.product.board=nemo/' \
+        ${D}/system/build.prop
+    ln -sf /usr/libexec/hal-droid/system/lib/hw/hwcomposer.msm8226.so ${D}/system/lib/hw/hwcomposer.nemo.so
+    ln -sf /usr/libexec/hal-droid/system/lib/hw/gralloc.msm8226.so ${D}/system/lib/hw/gralloc.nemo.so
+    ln -sf /usr/libexec/hal-droid/system/lib/hw/memtrack.msm8226.so ${D}/system/lib/hw/memtrack.nemo.so
+    ln -sf lights.bass.so ${D}/system/lib/hw/lights.nemo.so
+    ln -sf power.bass.so ${D}/system/lib/hw/power.nemo.so
+    ln -sf sensors.msm8226.so ${D}/system/vendor/lib/hw/sensors.nemo.so
 }
 
 # FIXME: QA Issue: Architecture did not match (40 to 164) on /work/nemo-oe-linux-gnueabi/android/lollipop-r0/packages-split/android-system/system/vendor/firmware/adsp.b00 [arch]
