@@ -20,6 +20,7 @@ SRC_URI = "git://android.googlesource.com/kernel/msm;branch=android-msm-nemo-3.1
     file://0009-ARM-8933-1-replace-Sun-Solaris-style-flag-on-section.patch \
     file://0010-vfs-allow-umount-to-handle-mountpoints-without-reval.patch \
     file://0011-nemo-nitrous-bluesleep-stub.patch \
+    file://0012-nemo-dts-remove-cont-splash-and-ulps.patch \
     file://defconfig \
     file://img_info "
 SRCREV = "504f3357f3ef296bf5ccbfe05df2025fa41eb354"

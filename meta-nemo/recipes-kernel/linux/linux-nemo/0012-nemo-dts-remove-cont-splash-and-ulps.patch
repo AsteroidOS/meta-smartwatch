@@ -1,0 +1,46 @@
+From: Timo Könnecke <mo@mowerk.net>
+Date: Mon, 23 Jun 2026 00:00:00 +0200
+Subject: [PATCH] nemo: dts: disable cont-splash and ULPS for display bringup
+
+The nemo panel DTS has qcom,cont-splash-enabled set in both panel
+nodes, but msm8926-nemo-panel.dtsi simultaneously deletes
+qcom,memblock-reserve from mdss_fb0 via /delete-property/.  The MDSS
+driver then detects "continuous splash enabled" but fails to reserve
+the splash memory, leaving the display subsystem in a broken
+half-initialized state: setPowerMode(NORMAL) returns 0 but the DSI
+panel never turns on, and a subsequent FBIOBLANK(POWERDOWN) followed
+by FBIOBLANK(UNBLANK) hangs the kernel waiting for an ULPS exit that
+never completes.
+
+Remove qcom,cont-splash-enabled so the driver performs a clean
+cold-start DSI panel initialization on the first FBIOBLANK(UNBLANK)
+call from the hwcomposer.  Also remove qcom,ulps-enabled for now to
+avoid the ULPS-exit hang on blank/unblank cycles while pinctrl for the
+DSI controller is not available (mdss_dsi_pinctrl_init logs "failed to
+get pinctrl" at probe time because no pinctrl-names/pinctrl-0/1 are
+defined in the DSI node).  Both properties can be revisited once the
+display is confirmed working.
+
+Upstream-Status: Inappropriate [nemo-specific port patch]
+
+diff --git a/arch/arm/boot/dts/msm8926-nemo/msm8926-nemo-panel.dtsi b/arch/arm/boot/dts/msm8926-nemo/msm8926-nemo-panel.dtsi
+index 1111111..2222222 100644
+--- a/arch/arm/boot/dts/msm8926-nemo/msm8926-nemo-panel.dtsi
++++ b/arch/arm/boot/dts/msm8926-nemo/msm8926-nemo-panel.dtsi
+@@ -148,8 +148,6 @@
+ 		qcom,mdss-dsi-bl-pmic-control-type = "bl_ctrl_dcs_l";
+ 		qcom,mdss-dsi-reset-sequence = <1 50>;
+ 		qcom,mdss-brightness-default-level = <208>;
+-		qcom,cont-splash-enabled;
+-		qcom,ulps-enabled;
+ 		qcom,mdss-dsi-lp11-init;
+ 		qcom,mdss-dsi-off-pre-reset-delay = <20>;
+ 		qcom,mdss-dsi-off-post-reset-delay = <20>;
+@@ -380,8 +378,6 @@
+ 		qcom,mdss-dsi-bl-pmic-control-type = "bl_ctrl_dcs_l";
+ 		qcom,mdss-dsi-reset-sequence = <1 50>;
+ 		qcom,mdss-brightness-default-level = <208>;
+-		qcom,cont-splash-enabled;
+-		qcom,ulps-enabled;
+ 		qcom,mdss-flip-ud;
+ 		qcom,blmap = /bits/ 8 <
