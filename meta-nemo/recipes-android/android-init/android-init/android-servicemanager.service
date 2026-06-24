@@ -1,0 +1,13 @@
+[Unit]
+Description=Android Binder servicemanager for hwcomposer/display HAL
+After=local-fs.target
+Before=android-boot-completed.service
+DefaultDependencies=no
+Conflicts=shutdown.target
+
+[Service]
+Type=simple
+ExecStart=/system/bin/servicemanager
+
+[Install]
+WantedBy=multi-user.target
