@@ -1,14 +1,6 @@
 on init
     write /sys/kernel/boot_adsp/boot 1
-
-    mkdir /dev/graphics/
-    symlink /dev/fb0 /dev/graphics/fb0
-    chown system root /sys/class/timed_output/vibrator/enable
-
     load_system_props
-    restorecon_recursive /persist
-    restorecon /persist/bdaddr.txt
-
     class_start core
 
 service logd /system/bin/logd
@@ -22,3 +14,4 @@ service servicemanager /system/bin/servicemanager
 
 service sensors /system/bin/sensors.qcom
     class core
+    oneshot
