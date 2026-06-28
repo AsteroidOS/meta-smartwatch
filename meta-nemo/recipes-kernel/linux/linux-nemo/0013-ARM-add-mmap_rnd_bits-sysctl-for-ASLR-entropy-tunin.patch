@@ -1,0 +1,200 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Timo Könnecke <mo@mowerk.net>
+Date: Sat, 28 Jun 2026 00:00:00 +0000
+Subject: [PATCH] ARM: add mmap_rnd_bits sysctl for ASLR entropy tuning
+
+Backport the /proc/sys/vm/mmap_rnd_bits tunable to the nemo 3.10 kernel.
+
+Android Nougat's /system/bin/init (security.cpp set_mmap_rnd_bits) opens
+this sysctl on every boot and tries to write values starting from 32 down
+to a minimum of 8.  If every write fails the function returns false and
+init calls security_failure() -> android_reboot("recovery"), producing a
+true bootloop with no SSH/ADB connectivity.
+
+On nemo's 3.10 kernel this sysctl is absent, causing the bootloop that
+blocked the android-init property_contexts fix.  On sawfish (3.18) it is
+present and configured with MIN=8 / MAX=16 / DEFAULT=8.  This patch
+matches those values exactly.
+
+Mechanism: init writes "32"; proc_dointvec_minmax rejects it (> max 16);
+init decrements until it writes "16" which succeeds; check passes.
+
+Changes:
+  arch/Kconfig               - generic HAVE_ARCH_MMAP_RND_BITS Kconfig
+                               infrastructure with ARCH_MMAP_RND_BITS,
+                               ARCH_MMAP_RND_BITS_MIN, ARCH_MMAP_RND_BITS_MAX
+  arch/arm/Kconfig           - select HAVE_ARCH_MMAP_RND_BITS if MMU;
+                               set ARM defaults MIN=8, MAX=16
+  arch/arm/mm/mmap.c         - implement arch_mmap_rnd() using mmap_rnd_bits;
+                               wire into arch_pick_mmap_layout()
+  include/linux/mm.h         - declare mmap_rnd_bits extern and arch_mmap_rnd()
+  kernel/sysctl.c            - register /proc/sys/vm/mmap_rnd_bits in vm_table
+                               with proc_dointvec_minmax enforcing [MIN, MAX]
+  mm/mmap.c                  - define mmap_rnd_bits = CONFIG_ARCH_MMAP_RND_BITS
+
+Upstream-Status: Inappropriate [nemo-specific Android init compatibility]
+Signed-off-by: Timo Könnecke <mo@mowerk.net>
+---
+ arch/Kconfig           | 26 ++++++++++++++++++++++++++
+ arch/arm/Kconfig       |  7 +++++++
+ arch/arm/mm/mmap.c     | 12 +++++++++++-
+ include/linux/mm.h     |  5 +++++
+ kernel/sysctl.c        | 15 +++++++++++++++
+ mm/mmap.c              |  3 +++
+ 6 files changed, 68 insertions(+), 0 deletions(-)
+
+diff --git a/arch/Kconfig b/arch/Kconfig
+index 78d8539d861e..291440990192 100644
+--- a/arch/Kconfig
++++ b/arch/Kconfig
+@@ -434,4 +434,30 @@ config OLD_SIGACTION
+ config COMPAT_OLD_SIGACTION
+ 	bool
+
++config HAVE_ARCH_MMAP_RND_BITS
++	bool
++
++config ARCH_MMAP_RND_BITS_MIN
++	int
++	depends on HAVE_ARCH_MMAP_RND_BITS
++
++config ARCH_MMAP_RND_BITS_MAX
++	int
++	depends on HAVE_ARCH_MMAP_RND_BITS
++
++config ARCH_MMAP_RND_BITS
++	int "Number of bits to use for ASLR of mmap base address" if EXPERT
++	range ARCH_MMAP_RND_BITS_MIN ARCH_MMAP_RND_BITS_MAX
++	default ARCH_MMAP_RND_BITS_MIN
++	depends on HAVE_ARCH_MMAP_RND_BITS
++	help
++	  This value can be used to select the number of bits to use to
++	  determine the random offset to the base address of vma regions
++	  resulting from mmap allocations on architectures which support
++	  tuning address space layout randomization. This value will be
++	  bounded by the architecture's minimum and maximum supported values.
++
++	  This value can be changed after boot using the
++	  /proc/sys/vm/mmap_rnd_bits tunable.
++
+ source "kernel/gcov/Kconfig"
+diff --git a/arch/arm/Kconfig b/arch/arm/Kconfig
+index d18d3c9b8d9d..cce814be49d5 100644
+--- a/arch/arm/Kconfig
++++ b/arch/arm/Kconfig
+@@ -59,6 +59,7 @@ config ARM
+ 	select CLONE_BACKWARDS
+ 	select OLD_SIGSUSPEND3
+ 	select OLD_SIGACTION
++	select HAVE_ARCH_MMAP_RND_BITS if MMU
+ 	select HAVE_CONTEXT_TRACKING
+ 	help
+ 	  The ARM series is a line of low-power-consumption RISC chip designs
+@@ -68,6 +69,12 @@ config ARM
+ 	  Europe.  There is an ARM Linux project with a web page at
+ 	  <http://www.arm.linux.org.uk/>.
+
++config ARCH_MMAP_RND_BITS_MIN
++	default 8
++
++config ARCH_MMAP_RND_BITS_MAX
++	default 16
++
+ config ARM_HAS_SG_CHAIN
+ 	bool
+
+diff --git a/arch/arm/mm/mmap.c b/arch/arm/mm/mmap.c
+index 5e85ed371364..240747a9e8a0 100644
+--- a/arch/arm/mm/mmap.c
++++ b/arch/arm/mm/mmap.c
+@@ -169,14 +169,24 @@ arch_get_unmapped_area_topdown(struct file *filp, const unsigned long addr0,
+ 	return addr;
+ }
+
++#ifdef CONFIG_HAVE_ARCH_MMAP_RND_BITS
++unsigned long arch_mmap_rnd(void)
++{
++	return ((unsigned long)get_random_int() & ((1UL << mmap_rnd_bits) - 1)) << PAGE_SHIFT;
++}
++#endif
++
+ void arch_pick_mmap_layout(struct mm_struct *mm)
+ {
+ 	unsigned long random_factor = 0UL;
+
+-	/* 8 bits of randomness in 20 address space bits */
+ 	if ((current->flags & PF_RANDOMIZE) &&
+ 	    !(current->personality & ADDR_NO_RANDOMIZE))
++#ifdef CONFIG_HAVE_ARCH_MMAP_RND_BITS
++		random_factor = arch_mmap_rnd();
++#else
+ 		random_factor = (get_random_int() % (1 << 8)) << PAGE_SHIFT;
++#endif
+
+ 	if (mmap_is_legacy()) {
+ 		mm->mmap_base = TASK_UNMAPPED_BASE + random_factor;
+diff --git a/include/linux/mm.h b/include/linux/mm.h
+index 3794258f39d1..3f6476ed1ec7 100644
+--- a/include/linux/mm.h
++++ b/include/linux/mm.h
+@@ -1814,6 +1814,11 @@ unsigned long shrink_slab(struct shrink_control *shrink,
+ extern int randomize_va_space;
+ #endif
+
++#ifdef CONFIG_HAVE_ARCH_MMAP_RND_BITS
++extern int mmap_rnd_bits;
++extern unsigned long arch_mmap_rnd(void);
++#endif
++
+ const char * arch_vma_name(struct vm_area_struct *vma);
+ void print_vma_addr(char *prefix, unsigned long rip);
+
+diff --git a/kernel/sysctl.c b/kernel/sysctl.c
+index 00459ab77621..399b5afbe874 100644
+--- a/kernel/sysctl.c
++++ b/kernel/sysctl.c
+@@ -129,6 +129,10 @@ static int zero;
+ static int __maybe_unused one = 1;
+ static int __maybe_unused two = 2;
+ static int __maybe_unused three = 3;
++#ifdef CONFIG_HAVE_ARCH_MMAP_RND_BITS
++static int mmap_rnd_bits_min = CONFIG_ARCH_MMAP_RND_BITS_MIN;
++static int mmap_rnd_bits_max = CONFIG_ARCH_MMAP_RND_BITS_MAX;
++#endif
+ static unsigned long one_ul = 1;
+ static int one_hundred = 100;
+ #ifdef CONFIG_PRINTK
+@@ -1533,6 +1537,17 @@ static struct ctl_table vm_table[] = {
+ 		.proc_handler	= mmap_min_addr_handler,
+ 	},
+ #endif
++#ifdef CONFIG_HAVE_ARCH_MMAP_RND_BITS
++	{
++		.procname	= "mmap_rnd_bits",
++		.data		= &mmap_rnd_bits,
++		.maxlen		= sizeof(int),
++		.mode		= 0600,
++		.proc_handler	= proc_dointvec_minmax,
++		.extra1		= &mmap_rnd_bits_min,
++		.extra2		= &mmap_rnd_bits_max,
++	},
++#endif
+ #ifdef CONFIG_NUMA
+ 	{
+ 		.procname	= "numa_zonelist_order",
+diff --git a/mm/mmap.c b/mm/mmap.c
+index 37528a3597ce..fb2785c6e623 100644
+--- a/mm/mmap.c
++++ b/mm/mmap.c
+@@ -89,6 +89,9 @@ int sysctl_overcommit_ratio __read_mostly = 50;	/* default is 50% */
+ int sysctl_max_map_count __read_mostly = DEFAULT_MAX_MAP_COUNT;
+ unsigned long sysctl_user_reserve_kbytes __read_mostly = 1UL << 17; /* 128MB */
+ unsigned long sysctl_admin_reserve_kbytes __read_mostly = 1UL << 13; /* 8MB */
++#ifdef CONFIG_HAVE_ARCH_MMAP_RND_BITS
++int mmap_rnd_bits __read_mostly = CONFIG_ARCH_MMAP_RND_BITS;
++#endif
+ /*
+  * Make sure vm_committed_as in one cacheline and not cacheline shared with
+  * other variables. It can be updated by several CPUs frequently.
+--
+2.50.0
