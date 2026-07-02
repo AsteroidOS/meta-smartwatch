@@ -63,7 +63,8 @@ FILESEXTRAPATHS:prepend:aurora := "${THISDIR}/usb-moded:"
 #    appsync. Auto-start at basic.target races our adbd-prepare with
 #    usb-moded's configfs_set_function and ends up with adbd holding the
 #    abstract socket "local:5037" without a valid /dev/usb-ffs/adb/ep0.
-SRC_URI:append:aurora = " file://init_gfs \
+SRC_URI:append:aurora = " file://usb_moded.service \
+                          file://init_gfs \
                           file://init_gfs.service \
                           file://aurora-defaults.ini \
                           file://dyn-modes/adb_mode.ini \
