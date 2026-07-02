@@ -1,0 +1,12 @@
+dolby.audio.           u:object_r:audio_prop:s0
+dolby.                 u:object_r:dolby_prop:s0
+netd.fstman.           u:object_r:netd_prop:s0
+persist.huawei.shd     u:object_r:mcu_prop:s0
+persist.mcu            u:object_r:mcu_prop:s0
+persist.net.doxlat     u:object_r:xlat_prop:s0
+persist.sys.key_block  u:object_r:key_block_prop:s0
+sys.bt_modem.type      u:object_r:bt_modem_type_prop:s0
+sys.ims.               u:object_r:qcom_ims_prop:s0
+sys.product.type       u:object_r:product_type_prop:s0
+system.rmt_storage_prop  u:object_r:rmt_storage_prop:s0
+user.                  u:object_r:user_prop:s0
