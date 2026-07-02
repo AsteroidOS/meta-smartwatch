@@ -8,7 +8,7 @@ LICENSE = "GPL-2.0-only"
 LIC_FILES_CHKSUM = "file://COPYING;md5=d7810fab7487fb0aad327b76f1be7cd7"
 COMPATIBLE_MACHINE = "nemo"
 
-SRC_URI = "git://android.googlesource.com/kernel/msm;branch=android-msm-nemo-3.10-marshmallow-mr1-wear-release;protocol=https \
+SRC_URI = "git://android.googlesource.com/kernel/msm;branch=android-msm-nemo-3.10-n-preview-4-wear-release;protocol=https \
     file://0001-scripts-dtc-Remove-redundant-YYLOC-global-declaratio.patch \
     file://0002-static-inline-in-ARM-ftrace.h.patch;striplevel=1 \
     file://0003-Backport-mainline-4.1-Bluetooth-subsystem.patch;striplevel=1 \
@@ -18,10 +18,9 @@ SRC_URI = "git://android.googlesource.com/kernel/msm;branch=android-msm-nemo-3.1
     file://0009-ARM-8933-1-replace-Sun-Solaris-style-flag-on-section.patch \
     file://0010-vfs-allow-umount-to-handle-mountpoints-without-reval.patch \
     file://0012-nemo-dts-fix-cont-splash-memblock-reserve.patch \
-    file://0013-ARM-add-mmap_rnd_bits-sysctl-for-ASLR-entropy-tunin.patch \
     file://defconfig \
     file://img_info "
-SRCREV = "504f3357f3ef296bf5ccbfe05df2025fa41eb354"
+SRCREV = "3dfd484b0b21fbf4c10fc775cd88e0cfebd4e93a"
 LINUX_VERSION ?= "3.10"
 PV = "${LINUX_VERSION}+marshmallow"
 S = "${WORKDIR}/git"
