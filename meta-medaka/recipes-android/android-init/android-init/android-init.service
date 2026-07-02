@@ -1,0 +1,14 @@
+[Unit]
+Description=/system/bin/init initializes the property service and launches servicemanager and logd
+After=local-fs.target
+Before=basic.target network.target bluetooth.service ofono.service sensord.service
+DefaultDependencies=no
+Conflicts=shutdown.target
+
+[Service]
+Type=simple
+ExecStartPre=/bin/touch /dev/.coldboot_done
+ExecStart=/usr/libexec/hal-droid/system/bin/init
+
+[Install]
+WantedBy=graphical.target
