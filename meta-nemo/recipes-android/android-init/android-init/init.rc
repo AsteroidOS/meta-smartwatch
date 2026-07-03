@@ -12,6 +12,13 @@ service logd /system/bin/logd
 service servicemanager /system/bin/servicemanager
     class core
 
+# The modem firmware reaches its EFS/NV data (the modemst1/modemst2/fsg
+# partitions) through this daemon over QMI. Without it the modem errfatals
+# after an EFS-sync timeout and the subsystem-restart policy resets the
+# whole SoC.
+service rmt_storage /system/bin/rmt_storage
+    class core
+
 service sensors /system/bin/sensors.qcom
     class core
     oneshot
