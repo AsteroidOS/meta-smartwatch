@@ -20,6 +20,9 @@ SRC_URI = " git://android.googlesource.com/kernel/omap;branch=android-omap-minno
     file://0009-ARM-8933-1-replace-Sun-Solaris-style-flag-on-section.patch \
     file://0010-vfs-allow-umount-to-handle-mountpoints-without-reval.patch \
     file://0011-vfs-allow-O_PATH-file-descriptors-for-fstatfs.patch \
+    file://0012-Revert-net-bluetooth-Remove-the-AID_NET_BT-gid-numbe.patch \
+    file://0013-Revert-Bluetooth-Keep-master-role-when-SCO-or-eSCO-i.patch \
+    file://0014-Backport-mainline-4.1-Bluetooth-subsystem.patch \
     file://defconfig \
     file://img_info \
 "

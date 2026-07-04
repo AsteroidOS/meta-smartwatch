@@ -1,0 +1,51 @@
+From 743d3c9ac85587ed290190bc5dfcd0f1e2d1e8e1 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Darrel=20Gri=C3=ABt?= <dgriet@gmail.com>
+Date: Sat, 4 Jul 2026 19:20:34 +0200
+Subject: [PATCH 12/13] Revert "Bluetooth: Keep master role when SCO or eSCO is
+ active"
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+This reverts commit 1cd2b0c882404af5bc3a53358c2385482ed9fb34.
+
+Signed-off-by: Darrel Griët <dgriet@gmail.com>
+
+Upstream-Status: Inappropriate
+---
+ net/bluetooth/hci_event.c | 12 +-----------
+ 1 file changed, 1 insertion(+), 11 deletions(-)
+ mode change 100755 => 100644 net/bluetooth/hci_event.c
+
+diff --git a/net/bluetooth/hci_event.c b/net/bluetooth/hci_event.c
+old mode 100755
+new mode 100644
+index 1cd90753d1cb..77455ccbe1bf
+--- a/net/bluetooth/hci_event.c
++++ b/net/bluetooth/hci_event.c
+@@ -1748,15 +1748,6 @@ unlock:
+ 	hci_conn_check_pending(hdev);
+ }
+ 
+-static inline bool is_sco_active(struct hci_dev *hdev)
+-{
+-	if (hci_conn_hash_lookup_state(hdev, SCO_LINK, BT_CONNECTED) ||
+-			(hci_conn_hash_lookup_state(hdev, ESCO_LINK,
+-						    BT_CONNECTED)))
+-		return true;
+-	return false;
+-}
+-
+ static void hci_conn_request_evt(struct hci_dev *hdev, struct sk_buff *skb)
+ {
+ 	struct hci_ev_conn_request *ev = (void *) skb->data;
+@@ -1804,8 +1795,7 @@ static void hci_conn_request_evt(struct hci_dev *hdev, struct sk_buff *skb)
+ 
+ 			bacpy(&cp.bdaddr, &ev->bdaddr);
+ 
+-			if (lmp_rswitch_capable(hdev) && ((mask & HCI_LM_MASTER)
+-						|| is_sco_active(hdev)))
++			if (lmp_rswitch_capable(hdev) && (mask & HCI_LM_MASTER))
+ 				cp.role = 0x00; /* Become master */
+ 			else
+ 				cp.role = 0x01; /* Remain slave */
