@@ -23,6 +23,7 @@ SRC_URI = " git://android.googlesource.com/kernel/omap;branch=android-omap-minno
     file://0012-Revert-net-bluetooth-Remove-the-AID_NET_BT-gid-numbe.patch \
     file://0013-Revert-Bluetooth-Keep-master-role-when-SCO-or-eSCO-i.patch \
     file://0014-Backport-mainline-4.1-Bluetooth-subsystem.patch \
+    file://0015-ARM-omap2-minnow-register-btwilink-platform-device.patch \
     file://defconfig \
     file://img_info \
 "

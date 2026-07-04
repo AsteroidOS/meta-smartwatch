@@ -1,0 +1,46 @@
+From be1f85111221d55afc3f68f05958abbd7efaf01d Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Darrel=20Gri=C3=ABt?= <dgriet@gmail.com>
+Date: Sat, 4 Jul 2026 23:06:21 +0200
+Subject: [PATCH] ARM: omap2: minnow: register btwilink platform device
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Expose the WiLink 18xx Bluetooth core as an hci device via the
+btwilink driver so BlueZ can use it. WearOS only registered TI's
+hci_tty char device for the Android Bluetooth stack.
+
+Signed-off-by: Darrel Griët <dgriet@gmail.com>
+
+Upstream-Status: Inappropriate
+---
+ arch/arm/mach-omap2/board-minnow.c | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/arch/arm/mach-omap2/board-minnow.c b/arch/arm/mach-omap2/board-minnow.c
+index af6f13b371d3..afc42380ae4a 100644
+--- a/arch/arm/mach-omap2/board-minnow.c
++++ b/arch/arm/mach-omap2/board-minnow.c
+@@ -63,6 +63,14 @@ static struct platform_device hci_tty_device = {
+ 	.id = -1,
+ };
+ 
++/* Bind the btwilink driver so the WiLink BT core is exposed as an hci
++ * device to BlueZ, instead of only through TI's hci_tty char device
++ * that the Android Bluetooth stack used. */
++static struct platform_device btwilink_device = {
++	.name = "btwilink",
++	.id = -1,
++};
++
+ static int platform_wilink_kim_suspend(struct platform_device *pdev,
+ 		pm_message_t msg)
+ {
+@@ -78,6 +86,7 @@ static inline void __init minnow_init_btwilink(void)
+ {
+ 	platform_device_register(&wl18xx_device);
+ 	platform_device_register(&hci_tty_device);
++	platform_device_register(&btwilink_device);
+ }
+ 
+ static void __init minnow_init_gpio_clock(void)
