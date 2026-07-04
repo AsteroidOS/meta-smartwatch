@@ -19,6 +19,7 @@ SRC_URI = " git://android.googlesource.com/kernel/omap;branch=android-omap-minno
     file://0008-ARM-wire-up-getrandom-syscall.patch \
     file://0009-ARM-8933-1-replace-Sun-Solaris-style-flag-on-section.patch \
     file://0010-vfs-allow-umount-to-handle-mountpoints-without-reval.patch \
+    file://0011-vfs-allow-O_PATH-file-descriptors-for-fstatfs.patch \
     file://defconfig \
     file://img_info \
 "
