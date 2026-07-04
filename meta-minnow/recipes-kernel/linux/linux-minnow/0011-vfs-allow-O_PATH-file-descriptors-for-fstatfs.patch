@@ -1,0 +1,44 @@
+From c1f0e477db78c532fd08c354bbb81597732693cd Mon Sep 17 00:00:00 2001
+From: Linus Torvalds <torvalds@linux-foundation.org>
+Date: Mon, 30 Sep 2013 08:35:10 -0700
+Subject: vfs: allow O_PATH file descriptors for fstatfs()
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+commit 9d05746e7b16d8565dddbe3200faa1e669d23bbf upstream.
+
+Olga reported that file descriptors opened with O_PATH do not work with
+fstatfs(), found during further development of ksh93's thread support.
+
+There is no reason to not allow O_PATH file descriptors here (fstatfs is
+very much a path operation), so use "fdget_raw()".  See commit
+55815f70147d ("vfs: make O_PATH file descriptors usable for 'fstat()'")
+for a very similar issue reported for fstat() by the same team.
+Upstream-Status: Inappropriate
+
+Reported-and-tested-by: ольга крыжановская <olga.kryzhanovska@gmail.com>
+Acked-by: Al Viro <viro@zeniv.linux.org.uk>
+Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Darrel Griët <dgriet@gmail.com>
+---
+ fs/statfs.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/fs/statfs.c b/fs/statfs.c
+index c219e733f553..083dc0ac9140 100644
+--- a/fs/statfs.c
++++ b/fs/statfs.c
+@@ -94,7 +94,7 @@ retry:
+ 
+ int fd_statfs(int fd, struct kstatfs *st)
+ {
+-	struct fd f = fdget(fd);
++	struct fd f = fdget_raw(fd);
+ 	int error = -EBADF;
+ 	if (f.file) {
+ 		error = vfs_statfs(&f.file->f_path, st);
+-- 
+2.50.1 (Apple Git-155)
+
