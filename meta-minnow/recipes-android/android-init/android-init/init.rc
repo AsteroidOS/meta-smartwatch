@@ -47,3 +47,7 @@ service pvrsrv /system/bin/pvrsrvctl_SGX530_125 --start --no-module
 service adspd /system/bin/adspd /dev/ttyO0
     class core
     socket adspdsock stream 0660 system audio
+
+#shared transport user space mgr service for Bluetooth
+service uim /system/bin/uim-sysfs
+    class core
