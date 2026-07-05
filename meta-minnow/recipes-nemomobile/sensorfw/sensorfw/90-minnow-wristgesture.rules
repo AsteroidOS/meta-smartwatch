@@ -1,0 +1,4 @@
+# Enable the M4 sensor-hub gesture IIO scan element at boot. The buffer itself
+# is enabled on demand by sensorfw's wrist adaptor (powerstate_path), which
+# requires a scan element to already be enabled.
+SUBSYSTEM=="iio", KERNEL=="iio:device*", ATTR{name}=="m4sensorhub_gesture", ATTR{scan_elements/in_gesture_en}="1"
