@@ -29,16 +29,24 @@ cannot be reused as-is: nemo's modem PIL is real, board-wired hardware
 power rail, and CONFIG_MSM_PIL_MSS_QDSP6V5=y is enabled in our
 defconfig) with a genuine future ofono/LTE bring-up goal, and the
 upstream address range overlaps modem_mem's declared region
-(0x03300000-0x07d00000 per msm8926-nemo-memory.dtsi). Confirmed live via
-/proc/iomem on hardware that 0x01900000-0x01afffff (2MB) is free and
-does not overlap any active reservation. Sized at 0x100000 (1MB),
-comfortably covering a single 24bpp 480x480 splash frame (the panel's
-own qcom,mdss-dsi-bpp = <24>, qcom,mdss-dsi-panel-width/height = <480>)
-with the same ~4/3 margin used by sibling watch ports bass and lenok for
-their own (320x320, same bpp) panel at qcom,memblock-reserve =
-<0x07e9c000 0x64000> -- that address itself is not reused, as bass's own
-memory map (no modem_mem at all; modem_pil's contiguous-region is
-deleted there) has no bearing on nemo's.
+(0x03300000-0x07d00000 per msm8926-nemo-memory.dtsi).
+
+Sized at 0x100000 (1MB), comfortably covering a single 24bpp 480x480
+splash frame (the panel's own qcom,mdss-dsi-bpp = <24>,
+qcom,mdss-dsi-panel-width/height = <480>) with the same ~4/3 margin
+used by sibling watch ports bass and lenok for their own (320x320,
+same bpp) panel at qcom,memblock-reserve = <0x07e9c000 0x64000> --
+that address itself is not reused, as bass's own memory map (no
+modem_mem at all; modem_pil's contiguous-region is deleted there) has
+no bearing on nemo's.
+
+Placed at 0x07e00000: with the boot image's own ramdisk and tags/DTB
+addresses matching nemo's real factory boot.img (see img_info), this
+sits in the clear window between modem_mem's end (0x07d00000) and the
+ramdisk's real load address (0x08500000), comfortably clear on both
+sides, and does not overlap any other declared reservation
+(modem_efs_region, adsp_pil_mem, sbl_mem, external_image_mem, modem_mem
+itself, or the real tags/DTB address at 0x01900000).
 
 qcom,ulps-enabled is intentionally left removed. Its removal addresses
 a separate, still-unresolved issue: no pinctrl-names/pinctrl-0/1 are
@@ -75,5 +83,5 @@ index 1111111..2222222 100644
 
  &mdss_fb0 {
 -	/delete-property/ qcom,memblock-reserve;
-+	qcom,memblock-reserve = <0x01900000 0x100000>;
++	qcom,memblock-reserve = <0x07e00000 0x100000>;
  };
