@@ -1,0 +1,79 @@
+From: Timo Könnecke <mo@mowerk.net>
+Date: Wed, 1 Jul 2026 00:00:00 +0200
+Subject: [PATCH] nemo: dts: fix cont-splash memblock-reserve instead of disabling cont-splash
+
+msm8926-nemo-panel.dtsi sets qcom,cont-splash-enabled in both panel
+nodes, but simultaneously deletes qcom,memblock-reserve from mdss_fb0
+via /delete-property/. The MDSS driver then detects "continuous splash
+enabled" but has no reserved splash memory to hand off, leaving the
+display subsystem in a broken half-initialized state:
+setPowerMode(NORMAL) returns 0 but the DSI panel never turns on, and a
+subsequent FBIOBLANK(POWERDOWN) followed by FBIOBLANK(UNBLANK) hangs
+the kernel.
+
+Disabling qcom,cont-splash-enabled entirely instead of restoring the
+memblock-reserve avoids the immediate hang by forcing a cold-start DSI
+panel init on the first FBIOBLANK(UNBLANK) from the hwcomposer, but
+that routes around the actual defect (the deleted memblock-reserve)
+rather than fixing it, and breaks the psplash-to-launcher display
+handoff: without cont-splash, the kernel cannot inherit the
+bootloader's already-initialized splash framebuffer/pipe state, so the
+pipe handoff from bootloader -> kernel -> psplash -> compositor has to
+be solved by this port instead of being inherited for free.
+
+This patch restores qcom,cont-splash-enabled and gives mdss_fb0 a real
+memblock-reserve instead of deleting the property. The upstream base
+value (msm8226-mdss.dtsi, qcom,memblock-reserve = <0x03200000 0xFA0000>)
+cannot be reused as-is: nemo's modem PIL is real, board-wired hardware
+(modem_pil in msm8926-nemo.dtsi carries live register addresses and a
+power rail, and CONFIG_MSM_PIL_MSS_QDSP6V5=y is enabled in our
+defconfig) with a genuine future ofono/LTE bring-up goal, and the
+upstream address range overlaps modem_mem's declared region
+(0x03300000-0x07d00000 per msm8926-nemo-memory.dtsi). Confirmed live via
+/proc/iomem on hardware that 0x01900000-0x01afffff (2MB) is free and
+does not overlap any active reservation. Sized at 0x100000 (1MB),
+comfortably covering a single 24bpp 480x480 splash frame (the panel's
+own qcom,mdss-dsi-bpp = <24>, qcom,mdss-dsi-panel-width/height = <480>)
+with the same ~4/3 margin used by sibling watch ports bass and lenok for
+their own (320x320, same bpp) panel at qcom,memblock-reserve =
+<0x07e9c000 0x64000> -- that address itself is not reused, as bass's own
+memory map (no modem_mem at all; modem_pil's contiguous-region is
+deleted there) has no bearing on nemo's.
+
+qcom,ulps-enabled is intentionally left removed. Its removal addresses
+a separate, still-unresolved issue: no pinctrl-names/pinctrl-0/1 are
+defined for the DSI controller in nemo's DTS, so
+mdss_dsi_pinctrl_init() fails to get pinctrl at probe time, and
+re-enabling ULPS reintroduces a hang on the ULPS-exit path during
+blank/unblank cycles. That is a separate fix to be scoped and tested on
+its own.
+
+Upstream-Status: Inappropriate [nemo-specific port patch]
+
+diff --git a/arch/arm/boot/dts/msm8926-nemo/msm8926-nemo-panel.dtsi b/arch/arm/boot/dts/msm8926-nemo/msm8926-nemo-panel.dtsi
+index 1111111..2222222 100644
+--- a/arch/arm/boot/dts/msm8926-nemo/msm8926-nemo-panel.dtsi
++++ b/arch/arm/boot/dts/msm8926-nemo/msm8926-nemo-panel.dtsi
+@@ -149,7 +149,6 @@
+ 		qcom,mdss-dsi-reset-sequence = <1 50>;
+ 		qcom,mdss-brightness-default-level = <208>;
+ 		qcom,cont-splash-enabled;
+-		qcom,ulps-enabled;
+ 		qcom,mdss-dsi-lp11-init;
+ 		qcom,mdss-dsi-off-pre-reset-delay = <20>;
+ 		qcom,mdss-dsi-off-post-reset-delay = <20>;
+@@ -381,7 +380,6 @@
+ 		qcom,mdss-dsi-reset-sequence = <1 50>;
+ 		qcom,mdss-brightness-default-level = <208>;
+ 		qcom,cont-splash-enabled;
+-		qcom,ulps-enabled;
+ 		qcom,mdss-flip-ud;
+ 		qcom,blmap = /bits/ 8 <
+ 			0 0 0 0 1 1 1 1 1 1                         /* 0-9 */
+@@ -452,5 +450,5 @@
+ };
+
+ &mdss_fb0 {
+-	/delete-property/ qcom,memblock-reserve;
++	qcom,memblock-reserve = <0x01900000 0x100000>;
+ };

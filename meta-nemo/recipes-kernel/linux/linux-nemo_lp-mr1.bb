@@ -17,6 +17,7 @@ SRC_URI = "git://android.googlesource.com/kernel/msm;branch=android-msm-nemo-3.1
     file://0008-ARM-wire-up-getrandom-syscall.patch \
     file://0009-ARM-8933-1-replace-Sun-Solaris-style-flag-on-section.patch \
     file://0010-vfs-allow-umount-to-handle-mountpoints-without-reval.patch \
+    file://0012-nemo-dts-fix-cont-splash-memblock-reserve.patch \
     file://0013-ARM-add-mmap_rnd_bits-sysctl-for-ASLR-entropy-tunin.patch \
     file://defconfig \
     file://img_info "
