@@ -1,0 +1,46 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Darrel=20Gri=C3=ABt?= <dgriet@gmail.com>
+Date: Tue, 14 Jul 2026 23:19:47 +0200
+Subject: [PATCH] misc: bq5105x_detect: Don't force the backlight on the
+ wireless dock
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+bq5105x_detect broadcasts DISPLAY_WAKE_EVENT_DOCKON when the dock is
+detected. While docked, m4sensorhub_als then sends its light readings
+to leds-lm3535 instead of userspace.
+
+The hwcomposer plugin calls the power HAL's setInteractive(false) after
+turning the screen off. power.minnow.so writes that to lm3535's
+"interactive" node. lm3535 then turns the backlight back on at a level
+derived from each reading. The backlight stays lit with the screen off.
+
+Drop the broadcast. m4sensorhub_als then keeps sending its readings to
+userspace, resulting in the backlight staying off while docked.
+
+Upstream-Status: Inappropriate [AsteroidOS-specific policy]
+Signed-off-by: Darrel Griët <dgriet@gmail.com>
+---
+ drivers/misc/bq5105x_detect.c | 5 -----
+ 1 file changed, 5 deletions(-)
+
+diff --git a/drivers/misc/bq5105x_detect.c b/drivers/misc/bq5105x_detect.c
+index 37cbdcaa11ce..b8889b551622 100644
+--- a/drivers/misc/bq5105x_detect.c
++++ b/drivers/misc/bq5105x_detect.c
+@@ -215,11 +215,6 @@ static void bq5105x_detect_report(struct bq5105x_detect *chip, bool docked)
+ {
+ 	if (chip->reported_docked != docked) {
+ 		dev_dbg(&chip->pdev->dev, "report docked=%d\n", docked);
+-#ifdef CONFIG_WAKEUP_SOURCE_NOTIFY
+-		wakeup_source_notify_subscriber(docked
+-						? DISPLAY_WAKE_EVENT_DOCKON
+-						: DISPLAY_WAKE_EVENT_DOCKOFF);
+-#endif
+ 		chip->reported_docked = docked;
+ 		power_supply_changed(&chip->charger);
+ 		switch_set_state(chip->sdev, docked);
+-- 
+2.50.1 (Apple Git-155)
+
