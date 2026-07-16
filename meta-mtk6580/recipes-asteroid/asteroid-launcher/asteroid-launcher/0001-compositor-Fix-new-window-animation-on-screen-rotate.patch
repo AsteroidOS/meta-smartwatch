@@ -1,4 +1,4 @@
-From f50cea46d403b8beabc18bbe1b0d37816ff14a66 Mon Sep 17 00:00:00 2001
+From 39ec5d1765aa9636e826bea13b6ceff90e05a44f Mon Sep 17 00:00:00 2001
 From: Florent Revest <revestflo@gmail.com>
 Date: Mon, 24 Sep 2018 01:17:41 +0200
 Subject: [PATCH] =?UTF-8?q?compositor:=20Fix=20new=20window=20animation=20?=
@@ -13,12 +13,12 @@ Upstream-Status: Inappropriate
  1 file changed, 4 insertions(+), 1 deletion(-)
 
 diff --git a/src/qml/compositor/compositor.qml b/src/qml/compositor/compositor.qml
-index 8c738c6..6ea9148 100644
+index 4e046d0..13c3672 100644
 --- a/src/qml/compositor/compositor.qml
 +++ b/src/qml/compositor/compositor.qml
-@@ -236,7 +236,10 @@ Item {
+@@ -242,7 +242,10 @@ Item {
                  }
-                 parent.ready = false
+                 appLayer.ready = false
                  w.smoothBorders = true
 -                w.x = width
 +                if(root.rotation == 0)
