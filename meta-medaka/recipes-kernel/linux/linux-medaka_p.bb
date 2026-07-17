@@ -12,6 +12,8 @@ SRC_URI = " git://android.googlesource.com/kernel/exynos;branch=android-exynos-m
     file://defconfig \
     file://img_info \
     file://0001-scripts-dtc-Remove-redundant-YYLOC-global-declaratio.patch \
+    file://0002-dw_mmc-condition-on-CONFIG_BCMDHD_SDIO-instead-of-CO.patch \
+    file://0003-bcmdhd-always-load-firmware-from-BCMDHD_FW_PATH.patch \
 " 
 
 SRCREV = "6115e9fa122a3d1d38af5696b34fdd2c7364d7f9"
