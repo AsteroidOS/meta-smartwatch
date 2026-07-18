@@ -1,0 +1,68 @@
+From: Florent Revest <revestflo@gmail.com>
+Date: Sat, 18 Jul 2026 00:00:00 +0000
+Subject: [PATCH] wlan: mgmt_txrx: don't hold a system wakelock for pending mgmt
+ tx (let S2R arm WoW)
+
+On aurora (Pixel Watch 2, Halium-13 + lipstick compositor + autosleep) the
+watch relies on system suspend (S2R) to save power off-charger. The qcacld
+mgmt_txrx layer takes a system (S2R-blocking) wakelock "mgmt_txrx tx_cmp"
+whenever a management frame TX is pending completion (up to 300ms).
+
+The WLAN wiphy .suspend callback (hdd_suspend_wlan) itself transmits a few
+802.11 power-save / WoW-transition management frames as part of arming suspend.
+The tx_cmp system wakelock those frames raise then trips pm_wakeup_pending() on
+the very next device in the dpm_suspend order (kgsl-smmu) and aborts the
+suspend BEFORE it reaches WMI_WOW_ENABLE. WoW never arms, the rollback-resume
+re-sends the transition frames, and the next attempt aborts the same way -- a
+self-perpetuating storm (~100mA, watch never sleeps). Confirmed on HW: when a
+suspend occasionally wins the race and arms WoW, mgmt tx stops and the watch
+deep-sleeps cleanly and permanently.
+
+Drop only the SYSTEM wakelock for pending mgmt tx; keep the runtime-PM lock
+(wakelock_tx_runtime_cmp) so WLAN runtime-PM is unaffected. Firmware buffers
+mgmt tx-completion across S2R and delivers it on resume, so nothing is lost.
+
+Upstream-Status: Inappropriate [aurora-specific; upstream would gate this behind
+a config option -- the system wakelock is intentional for non-autosleep hosts]
+Signed-off-by: Florent Revest <revestflo@gmail.com>
+---
+diff --git a/private/msm-google-modules/wlan/qca-wifi-host-cmn/umac/cmn_services/mgmt_txrx/core/src/wlan_mgmt_txrx_main.c b/private/msm-google-modules/wlan/qca-wifi-host-cmn/umac/cmn_services/mgmt_txrx/core/src/wlan_mgmt_txrx_main.c
+--- a/private/msm-google-modules/wlan/qca-wifi-host-cmn/umac/cmn_services/mgmt_txrx/core/src/wlan_mgmt_txrx_main.c
++++ b/private/msm-google-modules/wlan/qca-wifi-host-cmn/umac/cmn_services/mgmt_txrx/core/src/wlan_mgmt_txrx_main.c
+@@ -126,9 +126,19 @@ struct mgmt_txrx_desc_elem_t *wlan_mgmt_txrx_desc_get(
+ 
+ 	qdf_spin_unlock_bh(&mgmt_txrx_pdev_ctx->mgmt_desc_pool.desc_pool_lock);
+ 
+-	/* acquire the wakelock when there are pending mgmt tx frames */
+-	qdf_wake_lock_timeout_acquire(&mgmt_txrx_pdev_ctx->wakelock_tx_cmp,
+-				      MGMT_TXRX_WAKELOCK_TIMEOUT_TX_CMP);
++	/*
++	 * aurora: do NOT take the system (S2R) wakelock for a pending mgmt tx.
++	 * On this autosleep/Halium watch the lipstick compositor keeps the GPU
++	 * fd open, so the SoC relies on system suspend (S2R) to save power. The
++	 * WLAN wiphy .suspend callback (hdd_suspend_wlan) itself transmits a few
++	 * 802.11 power-save/WoW-transition mgmt frames; the tx_cmp system wakelock
++	 * those raise then trips pm_wakeup_pending() on the very next device in
++	 * the dpm_suspend order and aborts the suspend BEFORE it can send
++	 * WMI_WOW_ENABLE. WoW never arms, the rollback-resume re-sends the frames,
++	 * and the suspend attempt self-perpetuates (~100mA, never sleeps). Keeping
++	 * only the runtime-PM lock lets the first S2R complete and arm WoW;
++	 * firmware buffers mgmt tx-completion across S2R and delivers it on resume.
++	 */
+ 	qdf_runtime_pm_prevent_suspend(
+ 		&mgmt_txrx_pdev_ctx->wakelock_tx_runtime_cmp);
+ 
+@@ -170,10 +180,11 @@ void wlan_mgmt_txrx_desc_put(
+ 	qdf_spin_unlock_bh(&mgmt_txrx_pdev_ctx->mgmt_desc_pool.desc_pool_lock);
+ 
+ 	if (release_wakelock) {
++		/* aurora: system tx_cmp wakelock is no longer taken (see
++		 * wlan_mgmt_txrx_desc_get); only drop the runtime-PM lock here.
++		 */
+ 		qdf_runtime_pm_allow_suspend(
+ 			&mgmt_txrx_pdev_ctx->wakelock_tx_runtime_cmp);
+-		qdf_wake_lock_release(&mgmt_txrx_pdev_ctx->wakelock_tx_cmp,
+-				      MGMT_TXRX_WAKELOCK_REASON_TX_CMP);
+ 	}
+ }
+ 
