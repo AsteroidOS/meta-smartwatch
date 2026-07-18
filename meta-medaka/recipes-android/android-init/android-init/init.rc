@@ -1,6 +1,7 @@
 on init
     write /sys/kernel/boot_adsp/boot 1
 
+    exec -- /usr/bin/macaddr-generator
     exec -- /sbin/modprobe -a bcmdhd
 
     mkdir /dev/graphics/
