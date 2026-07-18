@@ -55,6 +55,7 @@ SRC_URI = "\
   file://0004-amplifiers-cs40l26-set-loaded-before-mfd-add-devices.patch \
   file://0005-amplifiers-cl_dsp-return-ENOENT-when-coeff-control-i.patch \
   file://0006-amplifiers-cs40l26-pin-codec-MFD-child-platform-id.patch \
+  file://0007-wlan-mgmt_txrx-drop-system-wakelock-so-S2R-can-arm-wow.patch \
   file://0008-nanohub-per-channel-receive-quota-and-io_stats.patch \
   file://0009-nanohub-drop-packets-for-channels-nobody-has-open.patch \
 "
