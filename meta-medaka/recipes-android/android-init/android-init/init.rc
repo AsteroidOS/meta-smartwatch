@@ -1,8 +1,7 @@
 on init
     write /sys/kernel/boot_adsp/boot 1
 
-    exec -- /usr/bin/macaddr-generator
-    exec -- /sbin/modprobe -a bcmdhd
+    exec -- /sbin/modprobe bcmdhd firmware_path="/vendor/firmware/fw_bcmdhd.bin" nvram_path="/vendor/etc/wifi/nvram.txt"
 
     mkdir /dev/graphics/
     symlink /dev/fb0 /dev/graphics/fb0
