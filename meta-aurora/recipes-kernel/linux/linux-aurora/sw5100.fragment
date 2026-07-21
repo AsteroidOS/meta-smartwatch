@@ -142,3 +142,14 @@ CONFIG_PM_AUTOSLEEP=y
 # proxies binder→/dev/vhci to expose it to BlueZ on the host side. With
 # this off, /dev/vhci doesn't exist and bluebinder has nowhere to write.
 CONFIG_BT_HCIVHCI=m
+
+# Qualcomm ships this off in monaco_GKI.config because Android's WiFi
+# framework (wificond/WifiStateMachine) enables nl80211 powersave itself
+# once a network connects. We run connman, which never touches the knob,
+# so every wdev kept cfg80211's initial value: powersave OFF, i.e. the
+# WLAN chip in full-active RX around the clock — measured at ~320 mW on
+# the charger ammeter (2026-07-21), both awake AND across AP suspend,
+# the single largest battery drain on this watch. Upstream's default is
+# y; restore it so the driver comes up in IMPS/BMPS without needing a
+# userspace `iw dev wlan0 set power_save on`.
+CONFIG_CFG80211_DEFAULT_PS=y
