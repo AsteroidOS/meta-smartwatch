@@ -12,10 +12,18 @@ on init
     restorecon_recursive /persist
 
     mkdir /data/
+    mkdir /data/system
+    mkdir /data/system/gps
 
     setprop init.svc.bluetooth running
 
+    chown system root /dev/hwbinder
+    chown system root /dev/vndbinder
+    chmod 0777 /dev/hwbinder
+    chmod 0777 /dev/vndbinder
+
     class_start core
+    class_start hal
 
 service logd /usr/libexec/hal-droid/system/bin/logd
     class core
@@ -57,3 +65,6 @@ service wcnss_service /vendor/bin/wcnss_service
     class core
     user root
     oneshot
+
+service vendor.gnss_service /vendor/bin/hw/android.hardware.gnss@1.0-service
+    class hal
