@@ -152,3 +152,14 @@ CONFIG_BT_HCIVHCI=m
 # PSCI like a clean reboot and the ramoops console and panic record survive
 # into the next boot's pstore, where systemd-pstore archives them.
 # CONFIG_QCOM_FORCE_WDOG_BITE_ON_PANIC is not set
+
+# Qualcomm ships this off in monaco_GKI.config because Android's WiFi
+# framework (wificond/WifiStateMachine) enables nl80211 powersave itself
+# once a network connects. We run connman, which never touches the knob,
+# so every wdev kept cfg80211's initial value: powersave OFF, i.e. the
+# WLAN chip in full-active RX around the clock — measured at ~320 mW on
+# the charger ammeter (2026-07-21), both awake AND across AP suspend,
+# the single largest battery drain on this watch. Upstream's default is
+# y; restore it so the driver comes up in IMPS/BMPS without needing a
+# userspace `iw dev wlan0 set power_save on`.
+CONFIG_CFG80211_DEFAULT_PS=y
