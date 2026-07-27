@@ -8,7 +8,7 @@ bitbake-built inputs: \
  - vendor_kernel_boot  = ramdisk (kernel modules per aurora-vkb-modules.lst, \
                          KMI-CRC-gated against this kernel) + DTB with \
                          ramoops node injected, mkbootimg header v4 \
- - init_boot.img       = initramfs-android-image's cpio.gz, repacked as \
+ - init_boot.img       = asteroid-initramfs's cpio.gz, repacked as \
                          lz4, mkbootimg header v4 \
 \
 The base DTB is shipped as a static input (vkb-base.dtb) -- the kernel \
@@ -35,13 +35,13 @@ COMPATIBLE_MACHINE = "aurora"
 #  - virtual/kernel: provides Image + Module.symvers + kernel-built .ko's
 #                    (we read them out of the linux-aurora workdir).
 #  - linux-aurora-modules: techpack .ko's; we read its deploy ipk.
-#  - initramfs-android-image: init_boot.img ramdisk content (cpio.gz).
+#  - asteroid-initramfs: init_boot.img ramdisk content (cpio.gz).
 #  - mkbootimg-tools-native: provides ${STAGING_BINDIR_NATIVE}/mkbootimg
 #  - dtc-native: provides ${STAGING_BINDIR_NATIVE}/fdtput
 DEPENDS = "\
     virtual/kernel \
     linux-aurora-modules \
-    initramfs-android-image \
+    asteroid-initramfs \
     mkbootimg-tools-native \
     dtc-native \
     clang-native \
@@ -50,7 +50,7 @@ do_compile[depends] += "\
     virtual/kernel:do_compile \
     virtual/kernel:do_install \
     linux-aurora-modules:do_package_write_ipk \
-    initramfs-android-image:do_image_complete \
+    asteroid-initramfs:do_image_complete \
 "
 
 PACKAGES = ""
@@ -202,12 +202,12 @@ do_compile() {
         -o ${WORKDIR}/boot.img
 
     # ─── Step 7: mkbootimg init_boot.img (v4): asteroid initramfs as lz4 ───
-    CPIO_GZ=$(ls -t ${DEPLOY_DIR_IMAGE}/initramfs-android-image-${MACHINE}-*.cpio.gz 2>/dev/null | grep -v debug | head -1)
+    CPIO_GZ=$(ls -t ${DEPLOY_DIR_IMAGE}/asteroid-initramfs-${MACHINE}-*.cpio.gz 2>/dev/null | grep -v debug | head -1)
     if [ -z "$CPIO_GZ" ] || [ ! -f "$CPIO_GZ" ]; then
-        CPIO_GZ=${DEPLOY_DIR_IMAGE}/initramfs-android-image-${MACHINE}.cpio.gz
+        CPIO_GZ=${DEPLOY_DIR_IMAGE}/asteroid-initramfs-${MACHINE}.cpio.gz
     fi
     if [ ! -f "$CPIO_GZ" ]; then
-        bbfatal "initramfs-android-image cpio.gz not found in ${DEPLOY_DIR_IMAGE}"
+        bbfatal "asteroid-initramfs cpio.gz not found in ${DEPLOY_DIR_IMAGE}"
     fi
     gunzip -c "$CPIO_GZ" | lz4 -l -9 > ${WORKDIR}/init_boot_rd.lz4
     "${MKBOOTIMG}" \
