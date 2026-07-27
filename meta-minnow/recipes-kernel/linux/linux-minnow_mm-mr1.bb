@@ -25,7 +25,6 @@ SRC_URI = " git://android.googlesource.com/kernel/omap;branch=android-omap-minno
     file://0014-Backport-mainline-4.1-Bluetooth-subsystem.patch \
     file://0015-ARM-omap2-minnow-register-btwilink-platform-device.patch \
     file://defconfig \
-    file://img_info \
 "
 
 SRCREV = "f651c7734b8d1ca6f2e39764eda8f413831bcf81"
@@ -42,4 +41,8 @@ do_install:append() {
     rm -rf ${D}/usr/src/usr/
 }
 
-inherit mkboot old-kernel-gcc-hdrs
+MKBOOTIMG_CMDLINE = "rootwait init=/init utags.blkdev=/dev/mmcblk0p7 omapfb.vram=0:1200K androidboot.hardware=minnow selinux=0 SYSTEMD_CGROUP_ENABLE_LEGACY_FORCE=1"
+MKBOOTIMG_BOARD = "minnow"
+MKBOOTIMG_ARGS = "--base 0x00000000 --kernel_offset 0x00008000 --ramdisk_offset 0x01000000 --tags_offset 0x01e00000 --pagesize 2048"
+
+inherit mkbootimg old-kernel-gcc-hdrs

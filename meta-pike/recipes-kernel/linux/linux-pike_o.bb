@@ -19,8 +19,7 @@ SRC_URI = "git://android.googlesource.com/kernel/mediatek;branch=android-mediate
     file://0005-ARM-wire-up-getrandom-syscall.patch \
     file://0006-ARM-8933-1-replace-Sun-Solaris-style-flag-on-section.patch \
     file://0007-vfs-allow-umount-to-handle-mountpoints-without-reval.patch \
-    file://defconfig \
-    file://img_info"
+    file://defconfig "
 SRCREV = "5f7ba64dbb0f566149f5190db8c229da623a54bb"
 LINUX_VERSION ?= "3.10"
 PV = "${LINUX_VERSION}+oreo"
@@ -35,4 +34,7 @@ do_install:append() {
     rm -rf ${D}/usr/src/usr/
 }
 
-inherit mkboot old-kernel-gcc-hdrs
+MKBOOTIMG_CMDLINE = "buildvariant=user selinux=0 SYSTEMD_CGROUP_ENABLE_LEGACY_FORCE=1"
+MKBOOTIMG_ARGS = "--base 0x80100000 --kernel_offset 0x00008000 --ramdisk_offset 0x02000000 --tags_offset 0x01e00000 --pagesize 2048"
+
+inherit mkbootimg old-kernel-gcc-hdrs

@@ -21,7 +21,6 @@ SRC_URI = "git://android.googlesource.com/kernel/msm;branch=android-msm-lenok-3.
            file://0010-ARM-8933-1-replace-Sun-Solaris-style-flag-on-section.patch \
            file://0011-vfs-allow-umount-to-handle-mountpoints-without-reval.patch \
            file://defconfig \
-           file://img_info \
            "
 SRCREV = "2e918211eabb2843d87ac3c02baf5b03d84790f7"
 LINUX_VERSION ?= "3.10"
@@ -37,4 +36,8 @@ do_install:append() {
     rm -rf ${D}/usr/src/usr/
 }
 
-inherit mkboot old-kernel-gcc-hdrs
+MKBOOTIMG_CMDLINE = "androidboot.hardware=lenok user_debug=31 maxcpus=4 msm_rtb.filter=0x3F pm_levels.sleep_disabled=1 selinux=0 SYSTEMD_CGROUP_ENABLE_LEGACY_FORCE=1"
+MKBOOTIMG_BOARD = "lenok"
+MKBOOTIMG_ARGS = "--base 0x00000000 --kernel_offset 0x00008000 --ramdisk_offset 0x02000000 --tags_offset 0x01e00000 --pagesize 2048"
+
+inherit mkbootimg old-kernel-gcc-hdrs

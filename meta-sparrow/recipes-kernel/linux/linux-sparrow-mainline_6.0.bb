@@ -12,8 +12,7 @@ DEPENDS += "rsync-native"
 
 SRC_URI = "git://github.com/z3ntu/linux;branch=qcom-msm8226-6.0.y-dsi;protocol=https \
     file://0001-ata-ahci-fix-enum-constants-for-gcc-13.patch \
-    file://defconfig \
-    file://img_info "
+    file://defconfig "
 SRCREV = "70abf059e2b6984116e2e4fd3894fa91a829e248"
 LINUX_VERSION ?= "6.0"
 PV = "${LINUX_VERSION}"
@@ -30,4 +29,7 @@ do_deploy:append() {
     cat ${KERNEL_OUTPUT_DIR}/${KERNEL_IMAGETYPE} ${KERNEL_OUTPUT_DIR}/dts/${KERNEL_DEVICETREE} > ${KERNEL_OUTPUT}
 }
 
-inherit mkboot
+MKBOOTIMG_BOARD = "sparrow"
+MKBOOTIMG_ARGS = "--base 0x00000000 --kernel_offset 0x00008000 --ramdisk_offset 0x02000000 --tags_offset 0x01e00000 --pagesize 2048"
+
+inherit mkbootimg

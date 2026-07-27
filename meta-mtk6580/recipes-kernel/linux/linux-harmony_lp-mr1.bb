@@ -9,7 +9,6 @@ COMPATIBLE_MACHINE = "harmony|inharmony"
 
 SRC_URI = "git://github.com/OpenWatchProject/android_kernel_mediatek_mt6580;protocol=https;branch=android-8.1 \
     file://defconfig \
-    file://img_info \
     file://0001-scripts-dtc-Remove-redundant-YYLOC-global-declaratio.patch \
     file://0002-printk-Expose-mt_enable_uart-and-mt_disable_uart-for.patch \
     file://0003-focaltech-Don-t-include-a-missing-firmware.patch \
@@ -44,4 +43,8 @@ do_install:append() {
     rm -rf ${D}/usr/src/usr/
 }
 
-inherit mkboot old-kernel-gcc-hdrs
+MKBOOTIMG_CMDLINE = "bootopt=64S3,32S1,32S1 SYSTEMD_CGROUP_ENABLE_LEGACY_FORCE=1"
+MKBOOTIMG_BOARD = "KW88_CS1_B_GSM_"
+MKBOOTIMG_ARGS = "--base 0x80000000 --kernel_offset 0x00008000 --ramdisk_offset 0x04000000 --tags_offset 0x0e000000 --pagesize 2048"
+
+inherit mkbootimg old-kernel-gcc-hdrs

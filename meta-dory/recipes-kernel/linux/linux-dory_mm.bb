@@ -10,7 +10,6 @@ COMPATIBLE_MACHINE = "dory"
 
 SRC_URI = "git://android.googlesource.com/kernel/msm;branch=android-msm-dory-3.10-marshmallow-mr1-wear-release;protocol=https \
     file://defconfig \
-    file://img_info \
     file://0001-scripts-dtc-Remove-redundant-YYLOC-global-declaratio.patch \
     file://0002-Revert-Enable-Nitrous-BT-power-management-driver-for.patch \
     file://0003-Backport-mainline-4.1-Bluetooth-subsystem.patch \
@@ -40,4 +39,8 @@ do_install:append() {
     find ${D}/usr/src/ -name ..install.cmd | xargs rm -f
 }
 
-inherit mkboot old-kernel-gcc-hdrs
+MKBOOTIMG_CMDLINE = "androidboot.hardware=dory user_debug=31 maxcpus=4 msm_rtb.filter=0x3F pm_levels.sleep_disabled=1 selinux=0 SYSTEMD_CGROUP_ENABLE_LEGACY_FORCE=1"
+MKBOOTIMG_BOARD = "dory"
+MKBOOTIMG_ARGS = "--base 0x00000000 --kernel_offset 0x00008000 --ramdisk_offset 0x02000000 --tags_offset 0x01e00000 --pagesize 2048"
+
+inherit mkbootimg old-kernel-gcc-hdrs

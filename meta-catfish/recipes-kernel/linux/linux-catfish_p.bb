@@ -10,7 +10,6 @@ COMPATIBLE_MACHINE = "catfish"
 
 SRC_URI = "git://android.googlesource.com/kernel/msm;branch=android-msm-catshark-3.18-pie-wear-dr;protocol=https \
            file://defconfig \
-           file://img_info \
            file://0001-scripts-dtc-Remove-redundant-YYLOC-global-declaratio.patch \
            file://0002-usb-gadget-include-gadget-folder-to-fix-compilation.patch \
            file://0003-char-bbd2.0-Fix-include-error.patch \
@@ -37,4 +36,8 @@ do_install:append() {
     find ${D}/usr/src/ -name ..install.cmd | xargs rm -f
 }
 
-inherit mkboot old-kernel-gcc-hdrs
+MKBOOTIMG_CMDLINE = "androidboot.hardware=catfish console=null androidboot.selinux=permissive androidboot.console=null msm_rtb.filter=0x237 ehci-hcd.park=3 lpm_levels.sleep_disabled=1 earlycon=msm_hsl_uart,0x78af000 buildvariant=user audit=0 SYSTEMD_CGROUP_ENABLE_LEGACY_FORCE=1"
+MKBOOTIMG_BOARD = "catfish"
+MKBOOTIMG_ARGS = "--base 0x00000000 --kernel_offset 0x00008000 --ramdisk_offset 0x02000000 --tags_offset 0x01e00000 --pagesize 2048"
+
+inherit mkbootimg old-kernel-gcc-hdrs

@@ -22,8 +22,7 @@ SRC_URI = "git://android.googlesource.com/kernel/msm;branch=android-msm-skipjack
     file://0011-touch-new-TP-ID-for-support-different-design.patch \
     file://0012-ARM-8933-1-replace-Sun-Solaris-style-flag-on-section.patch \
     file://0013-input-touchscreen-focaltech-Override-size-for-tunny-.patch \
-    file://defconfig \
-    file://img_info"
+    file://defconfig "
 SRCREV = "f46a8c36f416d4245b13b451c36f36a0c690283d"
 LINUX_VERSION ?= "3.18"
 PV = "${LINUX_VERSION}+pie"
@@ -38,4 +37,7 @@ do_install:append() {
     rm -rf ${D}/usr/src/usr/
 }
 
-inherit mkboot old-kernel-gcc-hdrs
+MKBOOTIMG_CMDLINE = "buildvariant=user selinux=0 SYSTEMD_CGROUP_ENABLE_LEGACY_FORCE=1"
+MKBOOTIMG_ARGS = "--base 0x80100000 --kernel_offset 0x00008000 --ramdisk_offset 0x02000000 --tags_offset 0x01e00000 --pagesize 2048"
+
+inherit mkbootimg old-kernel-gcc-hdrs

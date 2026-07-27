@@ -20,7 +20,6 @@ SRC_URI = "git://android.googlesource.com/kernel/mediatek;branch=android-mediate
            file://0007-platform_uart-Avoid-a-kernel-panic-when-restoring-an.patch \
            file://0008-ARM-8933-1-replace-Sun-Solaris-style-flag-on-section.patch \
            file://defconfig \
-           file://img_info \
            "
 SRCREV = "faeb8c03bca6c09f8817f4d509e0280b53af8b99"
 LINUX_VERSION ?= "4.4"
@@ -36,4 +35,7 @@ do_install:append() {
     rm -rf ${D}/usr/src/usr/
 }
 
-inherit mkboot old-kernel-gcc-hdrs
+MKBOOTIMG_CMDLINE = "buildvariant=user selinux=0 SYSTEMD_CGROUP_ENABLE_LEGACY_FORCE=1"
+MKBOOTIMG_ARGS = "--base 0x80100000 --kernel_offset 0x00008000 --ramdisk_offset 0x02000000 --tags_offset 0x01e00000 --pagesize 2048"
+
+inherit mkbootimg old-kernel-gcc-hdrs
