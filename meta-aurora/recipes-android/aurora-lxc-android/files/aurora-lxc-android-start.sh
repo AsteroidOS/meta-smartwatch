@@ -23,6 +23,27 @@ if ! mountpoint -q $ROOTFS; then
     exit 1
 fi
 
+# mcu_mgmtd uses AServiceManager_isDeclared() before requesting
+# android.frameworks.stats.IStats/default. The Halium framework VINTF fragment
+# declares that AIDL service, but this image has no implementation (the
+# running statsd exposes android.os.IStatsd, which is a different interface).
+# Because it is declared, waitForService() asks servicemanager to lazy-start
+# it every second forever.
+#
+# Preserve the legacy HIDL declaration in the same fragment and hide only the
+# stale AIDL <hal> block before Android's servicemanager parses VINTF.
+STATS_MANIFEST="$ROOTFS/system/etc/vintf/manifest/android.frameworks.stats@1.0-service.xml"
+STATS_MANIFEST_RUNTIME=/run/aurora-android-frameworks-stats.xml
+if [ -f "$STATS_MANIFEST" ]; then
+    awk '
+        /<hal format="aidl">/ { skip = 1; next }
+        skip && /<\/hal>/ { skip = 0; next }
+        !skip { print }
+    ' "$STATS_MANIFEST" > "$STATS_MANIFEST_RUNTIME"
+    mount --bind "$STATS_MANIFEST_RUNTIME" "$STATS_MANIFEST"
+    echo "aurora-lxc-android: removed unavailable AIDL IStats declaration"
+fi
+
 # Wipe the host-shared property area before each start: /dev/__properties__ is
 # bind-mounted from the host and persists across runs; init (the property writer)
 # SIGSEGVs if it re-mmaps a stale area left by a previous run.
@@ -149,8 +170,8 @@ fi
 
 # Mask pixelstats-vendor.rc: pixelstats_vendor is Google's Pixel telemetry
 # daemon. It polls for android.frameworks.stats.IStats/default at ~2 Hz
-# forever, but IStats is implemented by the Android framework's statsd,
-# which a Halium container doesn't run -- so every poll makes
+# forever, but that AIDL reporting service is unavailable in this container
+# (the running statsd exposes the distinct android.os.IStatsd) -- so every poll makes
 # servicemanager fire a ctl.interface_start that init rejects with
 # "Could not find 'aidl/android.frameworks.stats.IStats/default'",
 # spamming kmsg for the whole uptime. Nothing consumes the telemetry
@@ -160,6 +181,50 @@ if [ -f "$PIXELSTATS_RC" ] && ! mountpoint -q "$PIXELSTATS_RC"; then
     : > /run/aurora-mask-pixelstats-vendor.rc
     if mount --bind /run/aurora-mask-pixelstats-vendor.rc "$PIXELSTATS_RC"; then
         echo "aurora-lxc-android: masked pixelstats-vendor.rc"
+    fi
+fi
+
+# Mask two more Android services which cannot provide anything useful in the
+# HAL-only container and otherwise run permanent failure/poll loops:
+#
+#  - time_daemon requires CAP_SYS_TIME. We deliberately drop that capability
+#    so Android cannot overwrite the host clock from Aurora's volatile PMIC
+#    RTC; init consequently retries the failed daemon every five seconds.
+#    It is declared both in init.time_daemon.rc and in the much larger
+#    init.qcom.rc, so empty the former and remove only its service stanza from
+#    the latter.
+#  - vendor.power.stats polls android.frameworks.stats.IStats/default once per
+#    second. That framework service is not available in this HAL-only setup,
+#    and AsteroidOS has no consumer for Pixel energy telemetry.
+TIME_DAEMON_RC="$VENDOR_INIT/init.time_daemon.rc"
+if [ -f "$TIME_DAEMON_RC" ] && ! mountpoint -q "$TIME_DAEMON_RC"; then
+    : > /run/aurora-mask-init.time_daemon.rc
+    if mount --bind /run/aurora-mask-init.time_daemon.rc "$TIME_DAEMON_RC"; then
+        echo "aurora-lxc-android: masked init.time_daemon.rc"
+    fi
+fi
+
+INIT_QCOM_RC="$VENDOR_INIT/hw/init.qcom.rc"
+if [ -f "$INIT_QCOM_RC" ] && ! mountpoint -q "$INIT_QCOM_RC"; then
+    INIT_QCOM_RC_OVERLAY=/run/aurora-init.qcom.rc
+    awk '
+        $1 == "service" && $2 == "time_daemon" { skip = 1; next }
+        skip && /^[ \t]/ { next }
+        skip { skip = 0 }
+        { print }
+    ' "$INIT_QCOM_RC" > "$INIT_QCOM_RC_OVERLAY"
+    chmod 0644 "$INIT_QCOM_RC_OVERLAY"
+    if mount --bind "$INIT_QCOM_RC_OVERLAY" "$INIT_QCOM_RC"; then
+        echo "aurora-lxc-android: removed time_daemon from init.qcom.rc"
+    fi
+fi
+
+POWER_STATS_RC="$VENDOR_INIT/android.hardware.power.stats-service.pixel.rc"
+if [ -f "$POWER_STATS_RC" ] && ! mountpoint -q "$POWER_STATS_RC"; then
+    : > /run/aurora-mask-android.hardware.power.stats-service.pixel.rc
+    if mount --bind /run/aurora-mask-android.hardware.power.stats-service.pixel.rc \
+            "$POWER_STATS_RC"; then
+        echo "aurora-lxc-android: masked Pixel power-stats service"
     fi
 fi
 
