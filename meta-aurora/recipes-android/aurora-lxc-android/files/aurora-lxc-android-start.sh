@@ -23,25 +23,37 @@ if ! mountpoint -q $ROOTFS; then
     exit 1
 fi
 
-# mcu_mgmtd uses AServiceManager_isDeclared() before requesting
-# android.frameworks.stats.IStats/default. The Halium framework VINTF fragment
-# declares that AIDL service, but this image has no implementation (the
-# running statsd exposes android.os.IStatsd, which is a different interface).
-# Because it is declared, waitForService() asks servicemanager to lazy-start
-# it every second forever.
+# mcu_mgmtd treats android.frameworks.stats.IStats/default as mandatory.  If
+# AServiceManager_isDeclared() returns false, its stats thread gives up after
+# twenty retries and exits the whole process. Android init then restarts
+# mcu_mgmtd, which reloads the MCU firmware underneath long-lived sensor
+# clients every three minutes.
 #
-# Preserve the legacy HIDL declaration in the same fragment and hide only the
-# stale AIDL <hal> block before Android's servicemanager parses VINTF.
+# The stock fragment only declares the legacy HIDL interface. Add the AIDL
+# declaration used by mcu_mgmtd; aurora-stats-service provides the reporting
+# sink in this otherwise framework-less container.
 STATS_MANIFEST="$ROOTFS/system/etc/vintf/manifest/android.frameworks.stats@1.0-service.xml"
 STATS_MANIFEST_RUNTIME=/run/aurora-android-frameworks-stats.xml
+while mountpoint -q "$STATS_MANIFEST"; do
+    umount "$STATS_MANIFEST"
+done
 if [ -f "$STATS_MANIFEST" ]; then
-    awk '
-        /<hal format="aidl">/ { skip = 1; next }
-        skip && /<\/hal>/ { skip = 0; next }
-        !skip { print }
-    ' "$STATS_MANIFEST" > "$STATS_MANIFEST_RUNTIME"
+    if grep -q '<hal format="aidl">' "$STATS_MANIFEST"; then
+        cp "$STATS_MANIFEST" "$STATS_MANIFEST_RUNTIME"
+    else
+        awk '
+            /<\/manifest>/ {
+                print "    <hal format=\"aidl\">"
+                print "        <name>android.frameworks.stats</name>"
+                print "        <version>1</version>"
+                print "        <fqname>IStats/default</fqname>"
+                print "    </hal>"
+            }
+            { print }
+        ' "$STATS_MANIFEST" > "$STATS_MANIFEST_RUNTIME"
+    fi
     mount --bind "$STATS_MANIFEST_RUNTIME" "$STATS_MANIFEST"
-    echo "aurora-lxc-android: removed unavailable AIDL IStats declaration"
+    echo "aurora-lxc-android: declared the AIDL IStats service"
 fi
 
 # Wipe the host-shared property area before each start: /dev/__properties__ is
@@ -128,6 +140,33 @@ for src in /android/vendor /android/vendor_dlkm; do
         echo "aurora-lxc-android: overlaid vendor/build.prop (disable_ubwc=1)"
     fi
 done
+
+# Neutralise the container's futile in-container kernel-module loads. Android
+# init blocks the display HAL on `wait_for_prop vendor.*.modules.ready`, which
+# init.insmod.sh sets only after its modprobe pass. But every module in
+# /vendor/lib/modules is a stock-WearOS-kernel module and fails to insmod on
+# aurora's from-source kernel with "Exec format error" (vermagic mismatch) --
+# the common cfg tries all ~271, the device cfg 4 more -- while the host has
+# already loaded the correct from-source modules. So those ~275 failing
+# modprobes cost ~7s of boot for nothing before the composer can start. Overlay
+# each cfg with a setprop-only version: the ready props still fire (instantly),
+# and no module that loads today stops loading (none do).
+INSMOD_ETC="$ROOTFS/vendor/etc"
+overlay_insmod_cfg() {
+    _cfg="$INSMOD_ETC/$1"
+    shift
+    [ -f "$_cfg" ] || return 0
+    mountpoint -q "$_cfg" && return 0
+    _ovl="/run/aurora-$(basename "$_cfg")"
+    : > "$_ovl"
+    for _p in "$@"; do echo "setprop|$_p" >> "$_ovl"; done
+    chmod 0644 "$_ovl"
+    mount --bind "$_ovl" "$_cfg" && \
+        echo "aurora-lxc-android: setprop-only overlay for $(basename "$_cfg") (skip failing module loads)"
+}
+overlay_insmod_cfg init.insmod.sw5100.cfg vendor.common.modules.ready
+overlay_insmod_cfg init.insmod.aurora.cfg \
+    vendor.device.modules.ready vendor.all.modules.ready vendor.all.devices.ready
 
 # Mask vendor init's USB scripts. AsteroidOS owns the USB gadget end-to-end
 # (init_gfs.service stages /config/usb_gadget/g1; aurora-udc-bind binds UDC
