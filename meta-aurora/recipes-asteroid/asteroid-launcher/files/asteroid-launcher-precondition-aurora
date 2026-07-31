@@ -1,0 +1,14 @@
+#! /bin/sh
+# Hold the compositor until the Android container's display HAL is actually
+# binder-ready. aurora-android-hal-ready.service drops /run/aurora-hal-ready
+# once lshal shows the composer registered (not merely init.svc=running, which
+# flips before the HAL's binder is serviceable). Without this the launcher's
+# libhybris races HAL registration and, on ~half of boots, the composer never
+# cleanly registers -> first frame stalls ~24s and mce blanks the panel.
+# Bounded so a wedged container can't block the UI forever.
+i=0
+while [ ! -e /run/aurora-hal-ready ] && [ "$i" -lt 60 ]; do
+    sleep 1
+    i=$((i + 1))
+done
+exit 0
