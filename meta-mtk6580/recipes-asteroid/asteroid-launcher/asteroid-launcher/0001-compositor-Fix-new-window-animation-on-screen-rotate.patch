@@ -13,13 +13,12 @@ Upstream-Status: Inappropriate
  1 file changed, 4 insertions(+), 1 deletion(-)
 
 diff --git a/src/qml/compositor/compositor.qml b/src/qml/compositor/compositor.qml
-index 4e046d0..13c3672 100644
 --- a/src/qml/compositor/compositor.qml
 +++ b/src/qml/compositor/compositor.qml
-@@ -242,7 +242,10 @@ Item {
-                 }
-                 appLayer.ready = false
-                 w.smoothBorders = true
+@@ -244,7 +244,10 @@
+                 w.smoothBorders = Qt.binding(function() {
+                     return gestureArea.active || appLayer.opacity < 1.0 || !appLayer.ready
+                 })
 -                w.x = width
 +                if(root.rotation == 0)
 +                    w.x = width
