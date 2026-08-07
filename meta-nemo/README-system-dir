@@ -2,13 +2,20 @@
 =====================================
 
 The /system/ directory available on the nemo platform and provided in prebuilt
-form by android_nemo-lp.bb is a tricky mix of an original Android Wear /system
+form by android_nemo-ng.bb is a tricky mix of an original Android Wear /system
 and some recompiled parts. This is due to the half-closed nature of Android
 Wear. This file explains you how to rebuild manually your own /system dir.
 
-We first need to adb pull a /system directory from a living Android Wear 5.1.1
-installation and then modify it with some symlinks:
+The nemo ships Android 7.1.1 (build NWD1.180306.004, SDK 25). Either adb pull
+from a live device or mount a system.img extracted from the device:
+
+  # Option A: live device
   adb pull /system/ system
+
+  # Option B: system.img
+  sudo mount -o loop,ro system.img /mnt/nemo-system
+  cp -r /mnt/nemo-system/ system
+
   cd system/
   rm -rf app/ fonts/ framework/ media/ priv-app/ xbin/
   sed -i "/persist.hwc.mdpcomp.enable=true/d" build.prop
@@ -22,25 +29,28 @@ installation and then modify it with some symlinks:
   ln -s sensors.msm8226.so sensors.nemo.so
   cd ../../../
 
+Note: lights.nemo.so and power.nemo.so already exist as real files in the
+Nougat dump and must not be replaced with symlinks.
+
 This installation wouldn't be enough because libhybris needs a patched bionic
-and the GPU drivers also need to be recompiled on the QCOM platform with the
+and some components need to be recompiled on the QCOM platform with the
 QCOM_BSP flag. Thankfully, those specific parts are open-source so we can
 download and then build them. (This may take a while)
+
   ### Download
   curl https://storage.googleapis.com/git-repo-downloads/repo > repo
   chmod a+x repo
-  mkdir -p android-nemo/
-  cd android-nemo
-  # For now the repo manifest is pretty much dory-specific, maybe we should
-  # split/merge branches later?
-  ../repo init -u https://github.com/AsteroidOS/android_manifest
+  mkdir -p android-nemo-ng/
+  cd android-nemo-ng
+  ../repo init -u https://github.com/MagneFire/android_manifest \
+               -b nougat-mr1.8-release
   ../repo sync
 
   ### Build (can only be done in bash)
   . build/envsetup.sh
   export TARGET_USES_C2D_COMPOSITION=true # Needed by copybit
   export TARGET_USES_QCOM_BSP=true        # Fixes GPU problems on QCOM platforms
-  export TARGET_BOARD_PLATFORM=msm8226    # We Specify the SoC by hand
+  export TARGET_BOARD_PLATFORM=msm8226    # We specify the SoC by hand
   mmma hardware/qcom/display/msm8226/     # hwcomposer, gralloc, dependencies...
   mmma frameworks/native/cmds/servicemanager/
   mmma system/core/logd/
@@ -58,13 +68,11 @@ download and then build them. (This may take a while)
 libhybris headers
 =================
 
-The second part of this tarball contains header files to compile against
-libhybris. There is a script in the libhybris distribution that can pull
-the header files from the downloaded android distribution (above).
+Skip this step. libhybris headers come from a separate version-pinned package
+independent of the per-device system-dir tarball; see
+meta-narwhal/conf/machine/narwhal.conf for how this is handled in the build
+system.
 
-  git clone https://github.com/libhybris/libhybris
-  ./libhybris/utils/extract_headers.sh android-dory include
+With the system directory prepared, create the system-dir tarball:
 
-With the system and include directories, you can create the system-dir tarball:
-
-  tar zxvf system.tar.gz system include
+  tar czf system-nougat-nemo.tar.gz system/
