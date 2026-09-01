@@ -10,7 +10,21 @@
 # ffs.adb just makes for a race we cannot win. usb-moded is the sole writer of
 # g1/functions/* and configs/b.1/<links>.
 
-serial="$(cat /proc/cmdline | sed 's/.*androidboot.serialno=//' | sed 's/ .*//')"
+# USB serial number, from the device tree.
+#
+# aurora's cmdline carries no androidboot.serialno= key, so a plain sed
+# substitution would pass the line through unchanged and yield the first cmdline
+# token. The serial lives in chosen/config/dsn; the cmdline is only consulted
+# when the key is actually present.
+serial=""
+if [ -r /sys/firmware/devicetree/base/chosen/config/dsn ]; then
+    serial="$(tr -d '\0' < /sys/firmware/devicetree/base/chosen/config/dsn)"
+fi
+if [ -z "$serial" ] && grep -q "androidboot.serialno=" /proc/cmdline; then
+    serial="$(sed 's/.*androidboot.serialno=//; s/ .*//' /proc/cmdline)"
+fi
+# An empty serialnumber breaks `adb -s` as thoroughly as a wrong one.
+[ -n "$serial" ] || serial="aurora"
 
 # usb-moded reads configfs through /config; mount the kernel's configfs there
 # if not already mounted.
