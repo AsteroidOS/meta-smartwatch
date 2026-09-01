@@ -1,0 +1,36 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Pengcheng Li <lipengcheng8@huawei.com>
+Date: Sat, 28 Apr 2018 02:16:11 -0400
+Subject: [PATCH] misc: st_core: Fix skb double free corruption
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+When some failures happened in hci_recv_frame() function,
+skb is freed by both hci_recv_frame and st_send_frame
+
+Signed-off-by: Li Pengcheng <lipengcheng8@huawei.com>
+Signed-off-by: Yao Baofeng <yaobaofeng@huawei.com>
+Signed-off-by: Li Jiangxiong <lijiangxiong@huawei.com>
+Upstream-Status: Inappropriate [driver removed from mainline]
+Signed-off-by: Darrel Griët <dgriet@gmail.com>
+[ regenerated against 3.10: the archive mangled tabs and the pr_err() string differs ]
+---
+ drivers/misc/ti-st/st_core.c | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/drivers/misc/ti-st/st_core.c b/drivers/misc/ti-st/st_core.c
+index 92449a6a1d6b..ff5c81ae39d4 100644
+--- a/drivers/misc/ti-st/st_core.c
++++ b/drivers/misc/ti-st/st_core.c
+@@ -132,7 +132,6 @@
+ 			(st_gdata->list[chnl_id]->priv_data, st_gdata->rx_skb)
+ 			     != 0)) {
+ 			pr_err("proto stack %d's ->recv failed\n", chnl_id);
+-			kfree_skb(st_gdata->rx_skb);
+ 			return;
+ 		}
+ 	} else {
+-- 
+2.8.0
+
