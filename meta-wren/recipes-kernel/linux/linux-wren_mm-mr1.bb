@@ -37,8 +37,7 @@ SRC_URI = "git://android.googlesource.com/kernel/msm;branch=android-msm-wren-3.1
     file://0021-ARM-uaccess-remove-put_user-code-duplication.patch \
     file://0022-ARM-8933-1-replace-Sun-Solaris-style-flag-on-section.patch \
     file://0023-vfs-allow-umount-to-handle-mountpoints-without-reval.patch \
-    file://defconfig \
-    file://img_info "
+    file://defconfig "
 SRCREV = "00f21f748f01888888909f9f58280f5a363cd5f9"
 LINUX_VERSION ?= "3.10.40"
 LINUX_VERSION_EXTENSION = ""
@@ -59,4 +58,8 @@ do_install:append() {
     rm -rf ${D}/usr/src/usr/
 }
 
-inherit mkboot old-kernel-gcc-hdrs
+MKBOOTIMG_CMDLINE = "console=ttyHSL0,115200,n8 androidboot.console=ttyHSL0 androidboot.hardware=wren user_debug=31 maxcpus=4 msm_rtb.filter=0x3F pm_levels.sleep_disabled=1 selinux=0 SYSTEMD_CGROUP_ENABLE_LEGACY_FORCE=1"
+MKBOOTIMG_BOARD = "wren"
+MKBOOTIMG_ARGS = "--base 0x00000000 --kernel_offset 0x00008000 --ramdisk_offset 0x02000000 --tags_offset 0x01e00000 --pagesize 2048"
+
+inherit mkbootimg old-kernel-gcc-hdrs
