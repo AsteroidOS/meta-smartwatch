@@ -20,6 +20,7 @@ SRC_URI = "git://github.com/fossil-engineering/kernel-msm-fossil-cw;branch=fossi
            file://0004-usb-hcd-Handle-when-host-mode-isn-t-available.patch \
            file://0005-initramfs-Don-t-skip-initramfs.patch \
            file://0006-ARM-8933-1-replace-Sun-Solaris-style-flag-on-section.patch \
+           file://0007-pcm_native-guard-pm_qos_remove_request-with-active-.patch \
            "
 
 SRCREV = "c0b4c201f2d5a641defe19958a9b4c16f40d866b"
