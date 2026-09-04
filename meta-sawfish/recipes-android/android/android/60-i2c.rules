@@ -1,1 +1,9 @@
-KERNEL=="i2c-2", MODE="0666"
+# Allow pulseaudio to control I2C devices, for speaker.
+#
+# The Huawei Watch 2 speaker is driven by an NXP TFA98xx smart amplifier on
+# i2c-5 at address 0x34, which the vendor audio HAL drives directly over
+# /dev/i2c-5. PulseAudio runs as ceres, so without this the HAL fails with
+#   lxI2cInit: Can't open i2c bus:/dev/i2c-5
+# and module-droid-card never loads, leaving the watch with no audio devices
+# at all. This board has i2c-1, i2c-3 and i2c-5; there is no i2c-2.
+KERNEL=="i2c-5", GROUP="audio", MODE="0660"
