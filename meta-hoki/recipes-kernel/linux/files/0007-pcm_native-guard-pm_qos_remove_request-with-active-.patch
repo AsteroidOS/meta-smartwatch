@@ -1,0 +1,40 @@
+From: pettcomputers <chris@pettcomputers.com>
+Date: Tue, 2 Sep 2026 00:00:00 -0500
+Subject: [PATCH] pcm_native: guard pm_qos_remove_request with an active check
+ in snd_pcm_hw_free
+
+snd_pcm_hw_free() calls pm_qos_remove_request() unconditionally, while
+two other call sites in this same file (snd_pcm_release_substream and
+snd_pcm_hw_params) correctly guard the equivalent remove call with
+pm_qos_request_active() first. If hw_params ever skips its own
+conditional pm_qos_add_request() (a real, reachable path on hoki via
+the "Tertiary MI2S TX Hostless" PCM device, which never gets a real
+stream opened against it), hw_free's unconditional remove fires
+against a request that was never added, producing a kernel warning
+with a full backtrace.
+
+Found while debugging audio capture on hoki (Skagen Falster Gen 6) -
+see https://github.com/AsteroidOS/meta-smartwatch (audio bring-up).
+Confirmed via direct before/after dmesg comparison that the warning
+and backtrace are gone after this change, both immediately post-boot
+and after a settled retest.
+
+Signed-off-by: pettcomputers <chris@pettcomputers.com>
+---
+ sound/core/pcm_native.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/sound/core/pcm_native.c b/sound/core/pcm_native.c
+index 7d9ef49..cfbf2b5 100644
+--- a/sound/core/pcm_native.c
++++ b/sound/core/pcm_native.c
+@@ -787,6 +787,7 @@ static int snd_pcm_hw_free(struct snd_pcm_substream *substream)
+ 	if (substream->ops->hw_free)
+ 		result = substream->ops->hw_free(substream);
+ 	snd_pcm_set_state(substream, SNDRV_PCM_STATE_OPEN);
++	if (pm_qos_request_active(&substream->latency_pm_qos_req))
+ 	pm_qos_remove_request(&substream->latency_pm_qos_req);
+ 	return result;
+ }
+--
+2.34.1
