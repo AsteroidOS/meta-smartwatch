@@ -1,0 +1,14 @@
+[Unit]
+Description=Aurora: re-enumerate USB once the gadget is complete
+# Runs after the gadget is assembled; the script waits for a bound gadget
+# carrying adb and does nothing if that never happens.
+After=init_gfs.service usb-moded.service aurora-usb-network.service
+Wants=init_gfs.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/bin/aurora-usb-reenumerate
+
+[Install]
+WantedBy=multi-user.target

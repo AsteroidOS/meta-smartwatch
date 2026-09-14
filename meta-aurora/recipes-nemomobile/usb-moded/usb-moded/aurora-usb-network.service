@@ -1,0 +1,16 @@
+[Unit]
+Description=Aurora: USB network (NCM) for ssh-over-USB
+# Needs the g1 skeleton in place. Deliberately not ordered against
+# android-tools-adbd: it is preset-disabled and may never be started by
+# usb-moded's appsync, so this unit starts it instead.
+After=init_gfs.service usb-moded.service
+Wants=init_gfs.service adbd-prepare.service
+Before=aurora-usb-reenumerate.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/bin/aurora-usb-network
+
+[Install]
+WantedBy=multi-user.target
