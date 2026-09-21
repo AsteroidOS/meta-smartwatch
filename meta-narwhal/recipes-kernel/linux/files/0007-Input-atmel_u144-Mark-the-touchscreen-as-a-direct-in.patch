@@ -1,0 +1,33 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Darrel=20Gri=C3=ABt?= <dgriet@gmail.com>
+Date: Mon, 21 Sep 2026 21:55:13 +0200
+Subject: [PATCH] Input: atmel_u144: Mark the touchscreen as a direct input
+ device
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+The driver sets neither BTN_TOUCH nor INPUT_PROP_DIRECT.
+udev needs one of them to tag the device with ID_INPUT_TOUCHSCREEN.
+Without this tag Qt doesn't detect the touchscreen automatically.
+
+Set INPUT_PROP_DIRECT to fix touchscreen detection.
+
+Upstream-Status: Inappropriate [vendor driver]
+Signed-off-by: Darrel Griët <dgriet@gmail.com>
+---
+ drivers/input/touchscreen/atmel_u144.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/drivers/input/touchscreen/atmel_u144.c b/drivers/input/touchscreen/atmel_u144.c
+index 12444f7dab2e..90a09b563fa4 100644
+--- a/drivers/input/touchscreen/atmel_u144.c
++++ b/drivers/input/touchscreen/atmel_u144.c
+@@ -3069,6 +3069,7 @@ int mxt_initialize_t100_input_device(struct mxt_data *data)
+ 	__set_bit(EV_SYN, input_dev->evbit);
+ 	__set_bit(EV_KEY, input_dev->evbit);
+ 	__set_bit(KEY_SLEEP, input_dev->keybit);
++	__set_bit(INPUT_PROP_DIRECT, input_dev->propbit);
+ 
+ 	/* For multi touch */
+ 	input_mt_init_slots(input_dev, data->pdata->numtouch, 0);

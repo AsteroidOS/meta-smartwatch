@@ -17,6 +17,7 @@ SRC_URI = "git://android.googlesource.com/kernel/msm;branch=android-msm-narwhal-
            file://0004-Backport-mainline-4.1-Bluetooth-drivers.patch \
            file://0005-video-mdp3-Continue-when-the-overlay-wasn-t-released.patch \
            file://0006-ARM-8933-1-replace-Sun-Solaris-style-flag-on-section.patch \
+           file://0007-Input-atmel_u144-Mark-the-touchscreen-as-a-direct-in.patch \
            "
 
 SRCREV = "ef2880c313e30d5b99e138599fd3d81d90daae3e"
