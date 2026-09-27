@@ -1,0 +1,25 @@
+From: Cristodcgomez <cristo.c.mc@gmail.com>
+Subject: [PATCH] usb: dwc3: dwc3-msm: force vbus_active in peripheral mode
+
+The T5 DT declares extcon=<charger eud>; without a charger vbus_active stays
+false and the glue does not arm the cable (B_SESS_VLD), so the host never
+enumerates even though the UDC exists. In dr_mode=peripheral, force it.
+
+Upstream-Status: Inappropriate [dace bring-up]
+Signed-off-by: Cristodcgomez <cristo.c.mc@gmail.com>
+---
+
+--- a/drivers/usb/dwc3/dwc3-msm-core.c
++++ b/drivers/usb/dwc3/dwc3-msm-core.c
+@@ -5964,6 +5964,11 @@
+ 	if (of_property_read_bool(node, "qcom,msm-probe-core-init"))
+ 		dwc3_ext_event_notify(mdwc);
+ 
++	if (mdwc->dr_mode == USB_DR_MODE_PERIPHERAL) {
++		mdwc->vbus_active = true;
++		dwc3_ext_event_notify(mdwc);
++	}
++
+ 	return 0;
+ 
+ put_dwc3:

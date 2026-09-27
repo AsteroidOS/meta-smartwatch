@@ -1,0 +1,39 @@
+From: Cristodcgomez <cristo.c.mc@gmail.com>
+Subject: [PATCH] opp: tolerate missing ICC providers (dace bring-up)
+
+dev_pm_opp_of_find_icc_paths returned -EPROBE_DEFER when the ICC provider
+(qnoc-monaco) was not loaded -> sdhci/kgsl/drm/geni deferred and no eMMC.
+Without qnoc (whose registration triggers a hard reset to EDL, a pending
+cause), the ICC paths stay empty and the drivers run without bw voting (bus
+with ABL rates).
+Upstream-Status: Inappropriate [dace bring-up]
+Signed-off-by: Cristodcgomez <cristo.c.mc@gmail.com>
+---
+
+diff --git a/drivers/opp/of.c b/drivers/opp/of.c
+index 3028353af..f7f27ada2 100644
+--- a/drivers/opp/of.c
++++ b/drivers/opp/of.c
+@@ -491,12 +491,16 @@ int dev_pm_opp_of_find_icc_paths(struct device *dev,
+ 	for (i = 0; i < num_paths; i++) {
+ 		paths[i] = of_icc_get_by_index(dev, i);
+ 		if (IS_ERR(paths[i])) {
+-			ret = PTR_ERR(paths[i]);
+-			if (ret != -EPROBE_DEFER) {
+-				dev_err(dev, "%s: Unable to get path%d: %d\n",
+-					__func__, i, ret);
+-			}
+-			goto err;
++			/* dace bring-up: qnoc-monaco is not loaded (its
++			 * registration triggers a hard reset to EDL). Leave the
++			 * ICC paths empty instead of deferring: the drivers probe
++			 * without bw voting (the bus keeps the bootloader rates).
++			 * Consumers tolerate path==NULL (sdhci-msm already does:
++			 * 'Failed to get bus_scale data' is non-fatal). */
++			dev_info(dev, "%s: icc path%d not available (%ld) - no bw voting\n",
++				__func__, i, PTR_ERR(paths[i]));
++			kfree(paths);
++			return 0;
+ 		}
+ 	}
+ 

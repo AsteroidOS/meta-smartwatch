@@ -1,0 +1,56 @@
+From: Cristodcgomez <cristo.c.mc@gmail.com>
+Date: Sat, 19 Sep 2026 15:00:00 +0000
+Subject: [PATCH] tty: serial: msm_geni_serial: force the HS UART qup05 mux on open
+
+On monaco/dace the only place that muxes the HS UART pins (GPIO 26-29:
+TX/RX/CTS/RTS) to the qup05 function is
+msm_geni_serial_resources_on() -> pinctrl_select_state(geni_gpio_active), and
+that is only called from the runtime-PM cycle (runtime_resume) and from
+msm_geni_console_setup (console). The HS UART open
+(msm_geni_serial_startup) does NOT call it, so the device's pinctrl state stays
+at "shutdown" (gpio function) and the UART block neither receives nor sends
+anything: the WCN3988 BT looks mute even though the vendor HAL does the whole
+bring-up (PowerUpChip, wakeup, bauds, Get Version) and the SE is clean
+(rx_fifo_sts:0x0, geni_ios:0x0).
+
+Verified live with /sys/kernel/debug/pinctrl/pinctrl-handles:
+  device: 4a94000.qcom,qup_uart current state: shutdown
+    state: active ... function: qup05 (179)
+(the active state exists and is correct, but it is not selected).
+
+The DT is identical to aurora's (Pixel Watch 2, same SW5100 and same kernel).
+A pinctrl "hog" on the controller DOES mux but claims the pins and breaks the
+UART probe (msm_geni_serial loads with 0 ports). That is why we force the mux
+here, when opening the UART, with the return value visible.
+
+Upstream-Status: Inappropriate [dace bring-up]
+
+Signed-off-by: dace bring-up <dace@localhost>
+---
+ drivers/tty/serial/msm_geni_serial.c | 15 +++++++++++++++
+ 1 file changed, 15 insertions(+)
+
+--- a/drivers/tty/serial/msm_geni_serial.c
++++ b/drivers/tty/serial/msm_geni_serial.c
+@@ -3654,6 +3654,21 @@
+ 		}
+ 	}
+ 
++	/*
++	 * dace: on this device the runtime-PM cycle does not run, so the
++	 * pinctrl_select_state(active) from resources_on() (the only place that
++	 * muxes the HS UART pins to qup05) never executes: pins 26-29 stay at
++	 * function=gpio and the WCN3988 BT looks mute. The mux is forced here,
++	 * when opening the UART.
++	 */
++	if (likely(!uart_console(uport))) {
++		ret = pinctrl_select_state(msm_port->serial_rsc.geni_pinctrl,
++					   msm_port->serial_rsc.geni_gpio_active);
++		if (ret)
++			dev_err(uport->dev, "%s: failed to select active pinctrl: %d\n",
++				__func__, ret);
++	}
++
+ 	get_tx_fifo_size(msm_port);
+ 	if (!msm_port->port_setup) {
+ 		ret = msm_geni_serial_port_setup(uport);
