@@ -1,0 +1,3 @@
+# dace: when the USB psy changes (plug/unplug), set the SDP current.
+# Without this smblite leaves `usb/online=0` on an SDP port and the watch does not charge.
+ACTION=="change", SUBSYSTEM=="power_supply", ATTR{type}=="USB", RUN+="/usr/libexec/dace-usb-icl.sh"
