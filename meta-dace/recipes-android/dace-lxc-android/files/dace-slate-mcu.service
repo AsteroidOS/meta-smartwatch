@@ -1,0 +1,31 @@
+[Unit]
+Description=dace: start the slate MCU (remoteproc2) for Bluetooth
+Documentation=file:///usr/libexec/dace-slate-mcu.sh
+DefaultDependencies=no
+# The MCU firmware (slatefw.mdt) is served by dace-vendor-mount (firmware_class.path
+# + /vendor/firmware_mnt). The slate .ko's are loaded by udev/modprobe much earlier.
+After=dace-lxc-android.service graphical.target dace-lxc-hal-start.service
+Requires=dace-lxc-android.service
+ConditionPathExists=/sys/class/remoteproc/remoteproc2/state
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+# MARGIN: starting the MCU at ~23 s (while the container was coming up) ended
+# in a kernel Oops (jump to 0) a few seconds later. With the system already up
+# (graphical.target + this margin) it is stable: this is the window in which the
+# full chip bring-up was verified live (Get Version -> patch -> hci0 UP
+# RUNNING). The BT HAL retries every ~60 s, so the MCU does not need to be up
+# before it.
+ExecStartPre=/bin/sleep 20
+ExecStart=/usr/libexec/dace-slate-mcu.sh
+# Do NOT write to journald/console: with journald/logd stuck the write BLOCKS
+# and the script hung on its first message -> the unit died by timeout without
+# starting the MCU (measured 2026-09-20). The script logs to
+# /run/dace-slate-mcu.log (tmpfs).
+StandardOutput=null
+StandardError=null
+TimeoutStartSec=420
+
+[Install]
+WantedBy=multi-user.target

@@ -26,6 +26,9 @@ SRC_URI = "https://dl.dropboxusercontent.com/scl/fi/insvp7s5wp516iv56a4vx/dace-l
            file://dace-no-kmsg.conf \
            file://dace-lxc-hal-start.sh \
            file://dace-lxc-hal-start.service \
+           file://dace-slate-mcu.sh \
+           file://dace-slate-mcu.service \
+           file://dace-bt-power.pl \
            file://bluebinder-dace.conf"
 SRC_URI[md5sum] = "145a40e6e863afa6a00be6ad0fa28ea4"
 S = "${UNPACKDIR}"
@@ -113,6 +116,15 @@ do_install() {
         ${D}${libexecdir}/dace-lxc-hal-start.sh
     install -m 0644 ${UNPACKDIR}/dace-lxc-hal-start.service \
         ${D}${systemd_unitdir}/system/dace-lxc-hal-start.service
+    # The slate MCU (remoteproc2) provides the glink link the BT HAL (and the
+    # crown) talk to; it must be up before the HAL.
+    install -m 0755 ${UNPACKDIR}/dace-slate-mcu.sh \
+        ${D}${libexecdir}/dace-slate-mcu.sh
+    install -m 0644 ${UNPACKDIR}/dace-slate-mcu.service \
+        ${D}${systemd_unitdir}/system/dace-slate-mcu.service
+    # The BT chip rails are not voted by the AP HAL when soc=slate.
+    install -m 0755 ${UNPACKDIR}/dace-bt-power.pl \
+        ${D}${libexecdir}/dace-bt-power.pl
     install -m 0644 ${UNPACKDIR}/dace-lxc-android-rootfs.mount \
         ${D}${systemd_unitdir}/system/var-lib-lxc-android-rootfs.mount
 
@@ -133,12 +145,15 @@ do_install() {
 do_package_qa() {
 }
 
-SYSTEMD_SERVICE:${PN} = "dace-lxc-android.service dace-lxc-hal-start.service var-lib-lxc-android-rootfs.mount"
+SYSTEMD_SERVICE:${PN} = "dace-lxc-android.service dace-lxc-hal-start.service dace-slate-mcu.service var-lib-lxc-android-rootfs.mount"
 SYSTEMD_AUTO_ENABLE:${PN} = "enable"
 FILES:${PN} = "${localstatedir}/lib/lxc/android \
                ${libexecdir}/dace-lxc-android-start.sh \
                ${libexecdir}/dace-lxc-hal-start.sh \
+               ${libexecdir}/dace-slate-mcu.sh \
+               ${libexecdir}/dace-bt-power.pl \
                ${systemd_unitdir}/system/dace-lxc-hal-start.service \
+               ${systemd_unitdir}/system/dace-slate-mcu.service \
                ${systemd_unitdir}/system/dace-lxc-android.service \
                ${systemd_unitdir}/system/var-lib-lxc-android-rootfs.mount \
                ${systemd_unitdir}/system/bluebinder.service.d/bluebinder-dace.conf \
