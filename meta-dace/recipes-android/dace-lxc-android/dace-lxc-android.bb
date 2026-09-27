@@ -24,6 +24,8 @@ SRC_URI = "https://dl.dropboxusercontent.com/scl/fi/insvp7s5wp516iv56a4vx/dace-l
            file://dace-lxc-android-rootfs.mount \
            file://dace-lxc-android-start.sh \
            file://dace-no-kmsg.conf \
+           file://dace-lxc-hal-start.sh \
+           file://dace-lxc-hal-start.service \
            file://bluebinder-dace.conf"
 SRC_URI[md5sum] = "145a40e6e863afa6a00be6ad0fa28ea4"
 S = "${UNPACKDIR}"
@@ -105,6 +107,12 @@ do_install() {
     install -d ${D}${systemd_unitdir}/system
     install -m 0644 ${UNPACKDIR}/dace-lxc-android.service \
         ${D}${systemd_unitdir}/system/dace-lxc-android.service
+    # The composer and allocator services have no 'interface' line in their
+    # .rc, so Android init never starts them on its own.
+    install -m 0755 ${UNPACKDIR}/dace-lxc-hal-start.sh \
+        ${D}${libexecdir}/dace-lxc-hal-start.sh
+    install -m 0644 ${UNPACKDIR}/dace-lxc-hal-start.service \
+        ${D}${systemd_unitdir}/system/dace-lxc-hal-start.service
     install -m 0644 ${UNPACKDIR}/dace-lxc-android-rootfs.mount \
         ${D}${systemd_unitdir}/system/var-lib-lxc-android-rootfs.mount
 
@@ -125,10 +133,12 @@ do_install() {
 do_package_qa() {
 }
 
-SYSTEMD_SERVICE:${PN} = "dace-lxc-android.service var-lib-lxc-android-rootfs.mount"
+SYSTEMD_SERVICE:${PN} = "dace-lxc-android.service dace-lxc-hal-start.service var-lib-lxc-android-rootfs.mount"
 SYSTEMD_AUTO_ENABLE:${PN} = "enable"
 FILES:${PN} = "${localstatedir}/lib/lxc/android \
                ${libexecdir}/dace-lxc-android-start.sh \
+               ${libexecdir}/dace-lxc-hal-start.sh \
+               ${systemd_unitdir}/system/dace-lxc-hal-start.service \
                ${systemd_unitdir}/system/dace-lxc-android.service \
                ${systemd_unitdir}/system/var-lib-lxc-android-rootfs.mount \
                ${systemd_unitdir}/system/bluebinder.service.d/bluebinder-dace.conf \
