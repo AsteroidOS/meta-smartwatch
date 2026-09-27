@@ -1,0 +1,320 @@
+From: Cristodcgomez <cristo.c.mc@gmail.com>
+Subject: [PATCH] dace: launcher consumes the crown (REL_WHEEL wheel + KEY_MENU pushbutton)
+
+The crown wheel (slate-spi, event2) arrives as a QWheelEvent via Qt's generic
+evdevmouse plugin, but the launcher's default style
+(000-default-horizontal.qml) had no WheelHandler -> the app list did not move.
+Also that ListView binds `contentX: tutorialScroll` (a binding to 0), so
+contentX must be assigned directly. The crown pushbutton emits KEY_MENU
+(139) on event0 (gpio-keys); the AsteroidOS keymap maps it to Qt::Key_MenuKB,
+but the home scene does NOT receive keyboard focus (Keys.onPressed never
+fired), so it is captured with a GLOBAL event filter
+(CrownButtonHandler, same pattern as lipstick's VolumeControl). The crown is
+also a high-resolution continuous encoder, so the wheel is damped
+(accumulating deltas) both on home and when forwarding to apps
+(LipstickCompositorWindow::wheelEvent). All of this is specific to this
+variant's hardware (dace / TicWatch Pro 5 with the slate MCU), not upstreamable.
+
+Upstream-Status: Inappropriate [dace bring-up]
+Signed-off-by: Cristodcgomez <cristo.c.mc@gmail.com>
+
+---
+diff --git a/lipstick/src/compositor/lipstickcompositorwindow.cpp b/lipstick/src/compositor/lipstickcompositorwindow.cpp
+index 7579afb..eb00ed2 100644
+--- a/lipstick/src/compositor/lipstickcompositorwindow.cpp
++++ b/lipstick/src/compositor/lipstickcompositorwindow.cpp
+@@ -262,7 +262,23 @@ void LipstickCompositorWindow::wheelEvent(QWheelEvent *event)
+             inputDevice->sendMouseMoveEvent(v, pos, pos);
+         }
+         QPoint angle = event->angleDelta();
+-        inputDevice->sendMouseWheelEvent(Qt::Vertical, angle.y());
++        // dace/CROWN (2026-09-22): the slate crown is a CONTINUOUS
++        // high-resolution encoder: each REL_WHEEL event is worth 1 and Qt
++        // delivers it as angleDelta.y = 120 (a "notch"). A minimal turn generates
++        // a huge number of events, so they are accumulated and 1 notch is sent
++        // per daceDiv. Increase daceDiv = less sensitive. (This is the APPS path;
++        // home damps it in its QML WheelHandlers.)
++        static int daceWheelAccum = 0;
++        const int daceDiv = 3;
++        daceWheelAccum += angle.y();
++        while (daceWheelAccum >= 120 * daceDiv) {
++            daceWheelAccum -= 120 * daceDiv;
++            inputDevice->sendMouseWheelEvent(Qt::Vertical, 120);
++        }
++        while (daceWheelAccum <= -120 * daceDiv) {
++            daceWheelAccum += 120 * daceDiv;
++            inputDevice->sendMouseWheelEvent(Qt::Vertical, -120);
++        }
+     } else {
+         event->ignore();
+     }
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 87f77f1..fd4956b 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -5,14 +5,16 @@ set(SRC
+ 	gesturefilterarea.cpp
+ 	applauncher.cpp
+ 	notificationsnoozer.cpp
+-	watchfacereloader.cpp)
++	watchfacereloader.cpp
++	crownbuttonhandler.cpp)
+ set(HEADERS
+ 	applauncherbackground.h
+ 	firstrun.h
+ 	gesturefilterarea.h
+ 	applauncher.h
+ 	notificationsnoozer.h
+-	watchfacereloader.h)
++	watchfacereloader.h
++	crownbuttonhandler.h)
+ 
+ add_executable(asteroid-launcher ${SRC} ${HEADERS} resources-qml.qrc)
+ 
+diff --git a/src/applauncher/000-default-horizontal.qml b/src/applauncher/000-default-horizontal.qml
+index cdcd723..466c008 100644
+--- a/src/applauncher/000-default-horizontal.qml
++++ b/src/applauncher/000-default-horizontal.qml
+@@ -42,6 +42,48 @@ Item {
+     property bool fakePressed: false
+ 
+     anchors.fill: parent
++
++    /* dace/CROWN (2026-09-22): the side wheel (slate-spi, event2) arrives as a
++     * QWheelEvent via Qt's generic evdevmouse plugin. The ListView does not
++     * consume it on its own, so we advance/go back one item per "tooth"
++     * (angleDelta = 120 per notch). If the direction comes out inverted, change
++     * the sign of `steps`. */
++    function launchSelected() {
++        var idx = Math.round(appsListView.contentX / appsListView.width)
++        idx = Math.max(0, Math.min(appsListView.count - 1, idx))
++        var it = launcherModel.get(idx)
++        // launcherModel.get() may return the item directly or a wrapper with
++        // .object depending on the model: accept both (before only .object ->
++        // "no object" and it launched nothing).
++        var obj = (it && it.object !== undefined) ? it.object : it
++        if (obj && obj.launchApplication)
++            obj.launchApplication()
++    }
++
++    WheelHandler {
++        id: crownWheel
++        property real daceAccum: 0
++        // dace/CROWN: continuous encoder -> daceDiv events per item. In the app
++        // list 3 was too sensitive (moves a whole item per step); 6 is finer.
++        // Increase daceDiv = less sensitive.
++        readonly property int daceDiv: 6
++        onWheel: (event) => {
++            daceAccum += event.angleDelta.y / 120.0
++            var steps = 0
++            while (daceAccum >= daceDiv)  { daceAccum -= daceDiv; steps += 1 }
++            while (daceAccum <= -daceDiv) { daceAccum += daceDiv; steps -= 1 }
++            if (steps !== 0) {
++                // NOTE: this ListView has `contentX: tutorialScroll` (a binding to
++                // 0), so positionViewAtIndex moved nothing. contentX is assigned
++                // directly (the assignment from JS breaks the binding).
++                var cur = Math.round(appsListView.contentX / appsListView.width)
++                var n = Math.max(0, Math.min(appsListView.count - 1, cur + steps))
++                appsListView.contentX = n * appsListView.width
++            }
++            event.accepted = true
++        }
++    }
++
+     ListView {
+         id: appsListView
+ 
+diff --git a/src/applauncher/005-speed-dial.qml b/src/applauncher/005-speed-dial.qml
+index 8652837..9679c63 100644
+--- a/src/applauncher/005-speed-dial.qml
++++ b/src/applauncher/005-speed-dial.qml
+@@ -27,6 +27,12 @@ Item {
+     id: root
+     property int itemIndexOffset: 4
+     property var selectedLauncherItem: null
++
++    // dace/CROWN: launch the selected app from the crown pushbutton.
++    function launchSelected() {
++        if (selectedLauncherItem && selectedLauncherItem.launchApplication)
++            selectedLauncherItem.launchApplication()
++    }
+     // Scaling for when the launcher is shown as full screen (1.0) or in the settings app (0.5).
+     property var viewScale: (root.width > root.height ? root.height : root.width) / Dims.l(100)
+     property alias currentIndex: pv.currentIndex
+@@ -229,9 +235,22 @@ Item {
+         }
+ 
+         WheelHandler {
+-            property: "offset"
+-            rotationScale: (1 / 15) * 0.01
+-            onRotationChanged: snapTimer.restart()
++            id: crownWheel
++            property real daceAccum: 0
++            // dace/CROWN: continuous encoder; daceDiv events per item (before
++            // (1/15)*0.01 gave 0.01 item/notch: the wheel seemed dead).
++            readonly property int daceDiv: 3
++            onWheel: (event) => {
++                daceAccum += event.angleDelta.y / 120.0
++                var steps = 0
++                while (daceAccum >= daceDiv)  { daceAccum -= daceDiv; steps += 1 }
++                while (daceAccum <= -daceDiv) { daceAccum += daceDiv; steps -= 1 }
++                if (steps !== 0) {
++                    offset = Math.round(offset) + steps
++                    snapTimer.restart()
++                }
++                event.accepted = true
++            }
+         }
+ 
+         Timer {
+diff --git a/src/crownbuttonhandler.cpp b/src/crownbuttonhandler.cpp
+new file mode 100644
+index 0000000..64f0b40
+--- /dev/null
++++ b/src/crownbuttonhandler.cpp
+@@ -0,0 +1,27 @@
++/*
++ * dace (TicWatch Pro 5): crown pushbutton. See crownbuttonhandler.h.
++ */
++
++#include "crownbuttonhandler.h"
++
++#include <QEvent>
++#include <QKeyEvent>
++
++CrownButtonHandler::CrownButtonHandler(QObject *parent) : QObject(parent)
++{
++}
++
++bool CrownButtonHandler::eventFilter(QObject *obj, QEvent *event)
++{
++    if (event->type() == QEvent::KeyPress) {
++        QKeyEvent *ke = static_cast<QKeyEvent *>(event);
++        // Key_MenuKB is what the AsteroidOS keymap maps KEY_MENU (139) to.
++        // Key_Menu is also accepted in case the keymap changes.
++        if (!ke->isAutoRepeat() &&
++            (ke->key() == Qt::Key_MenuKB || ke->key() == Qt::Key_Menu)) {
++            emit pressed();
++            return true; // consumed: do not forward it to the scene
++        }
++    }
++    return QObject::eventFilter(obj, event);
++}
+\ No newline at end of file
+diff --git a/src/crownbuttonhandler.h b/src/crownbuttonhandler.h
+new file mode 100644
+index 0000000..15a18d4
+--- /dev/null
++++ b/src/crownbuttonhandler.h
+@@ -0,0 +1,31 @@
++/*
++ * dace (TicWatch Pro 5): crown pushbutton.
++ *
++ * The pushbutton emits KEY_MENU (139) on /dev/input/event0 (gpio-keys). The
++ * AsteroidOS keymap maps it to Qt::Key_MenuKB. The launcher's "home" scene does
++ * NOT receive keyboard focus (MainScreen.crownPressed() never fired with
++ * Keys.onPressed), so the key is captured with a global event filter installed
++ * on the QGuiApplication -- the same pattern lipstick uses for the volume
++ * buttons (VolumeControl::eventFilter). On receiving it, `pressed()` is emitted,
++ * which compositor.qml forwards to MainScreen.
++ */
++#ifndef CROWNBUTTONHANDLER_H
++#define CROWNBUTTONHANDLER_H
++
++#include <QObject>
++
++class CrownButtonHandler : public QObject
++{
++    Q_OBJECT
++
++public:
++    explicit CrownButtonHandler(QObject *parent = nullptr);
++
++signals:
++    void pressed();
++
++protected:
++    bool eventFilter(QObject *obj, QEvent *event) override;
++};
++
++#endif // CROWNBUTTONHANDLER_H
+\ No newline at end of file
+diff --git a/src/main.cpp b/src/main.cpp
+index c676c4d..bb98577 100644
+--- a/src/main.cpp
++++ b/src/main.cpp
+@@ -46,6 +46,7 @@
+ #include "notificationsnoozer.h"
+ #include "applauncher.h"
+ #include "watchfacereloader.h"
++#include "crownbuttonhandler.h"
+ 
+ int main(int argc, char **argv)
+ {
+@@ -92,6 +93,14 @@ int main(int argc, char **argv)
+     qmlRegisterType<NotificationSnoozer>("org.asteroid.launcher", 1, 0, "NotificationSnoozer");
+     qmlRegisterType<AppLauncher>("org.asteroid.launcher", 1, 0, "AppLauncher");
+ 
++    /* dace: crown pushbutton (KEY_MENU -> Qt::Key_MenuKB). The home scene does
++     * not receive keyboard focus, so it is captured with a GLOBAL event filter
++     * (same pattern as lipstick/VolumeControl). compositor.qml connects to its
++     * `pressed` signal and calls MainScreen.crownPressed(). */
++    CrownButtonHandler *crownButton = new CrownButtonHandler();
++    app.installEventFilter(crownButton);
++    app.engine()->rootContext()->setContextProperty("crownButton", crownButton);
++
+     // Give these to the environment inside the launcher's wayland compositor
+     // Fixes a bug where some applications wouldn't launch, eg. terminal or browser
+     setenv("EGL_PLATFORM", "wayland", 1);
+diff --git a/src/qml/MainScreen.qml b/src/qml/MainScreen.qml
+index 3d78ce9..80d864b 100644
+--- a/src/qml/MainScreen.qml
++++ b/src/qml/MainScreen.qml
+@@ -48,6 +48,25 @@ Item {
+     visible: Lipstick.compositor.homeActive || aboutToOpen || aboutToClose || aboutToMinimize
+     enabled: visible
+ 
++    /* dace/CROWN (2026-09-22): the crown pushbutton. It is delivered by the
++     * GLOBAL event filter (CrownButtonHandler, src/main.cpp): this scene does NOT
++     * receive keyboard focus, with Keys.onPressed the key never arrived.
++     * compositor.qml forwards its `pressed` signal here as crownPressed().
++     * If the app list is open, launch the selected app; if it is not open,
++     * open the app list. */
++    function crownPressed() {
++        if (!visible)
++            return
++        if (grid.currentVerticalPos === 1) {
++            if (Desktop.appLauncher && Desktop.appLauncher.launchSelected)
++                Desktop.appLauncher.launchSelected()
++            else
++                grid.moveTo(0, 0)
++        } else {
++            grid.moveTo(0, 1)
++        }
++    }
++
+     // Requests the active watchface Loader to reload from disk. A signal, so
+     // the handler can live in the Loader's own scope.
+     signal watchfaceReloadRequested()
+diff --git a/src/qml/compositor/compositor.qml b/src/qml/compositor/compositor.qml
+index c7b6c04..8d53f7f 100644
+--- a/src/qml/compositor/compositor.qml
++++ b/src/qml/compositor/compositor.qml
+@@ -44,6 +44,17 @@ Item {
+     height: Dims.h(100)
+     rotation: Screen.angleBetween(Screen.primaryScreen, Lipstick.compositor.screenOrientation)
+ 
++    // dace/CROWN: crown pushbutton. CrownButtonHandler (src/main.cpp) captures it
++    // with a global filter (the scene does not receive keyboard focus) and here
++    // it is forwarded to home.
++    Connections {
++        target: crownButton
++        function onPressed() {
++            if (homeLoader.item)
++                homeLoader.item.crownPressed()
++        }
++    }
++
+     // The home screen is a persistent item at the bottom of the z-stack, not
+     // an in-process "window". Its z follows MainScreen's own z (raised while
+     // the splash is up) so it can sit above running apps when needed.
