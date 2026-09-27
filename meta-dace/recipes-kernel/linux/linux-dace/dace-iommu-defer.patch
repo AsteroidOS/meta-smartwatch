@@ -1,0 +1,63 @@
+From: Cristodcgomez <cristo.c.mc@gmail.com>
+Subject: [PATCH] iommu/of: -EPROBE_DEFER ONLY for the QUP streams (dace bring-up)
+
+On dace apps-smmu is a module that cannot probe until qnoc-monaco registers the
+ICC provider (initramfs load). Devices with "iommus" that probe earlier are
+left without an IOMMU domain because of_iommu_xlate() returns the -ETIMEDOUT
+from driver_deferred_probe_check_state() (modules load after the initcalls and
+driver_deferred_probe_timeout==0) and of_iommu_configure() only respects
+-EPROBE_DEFER.
+
+And on this SoC being left without a domain is NOT harmless: the firmware leaves
+apps-smmu with CLIENTPD=0 and USFCFG=1 (bit LOCKED by TZ: the read-back does not
+change) -> unidentified streams are ABORTED. The firmware table only has 4 SMRs
+(0xc0 eMMC, 0xa0/0x120 USB, 0x422 handoff), so:
+
+  - eMMC, USB, qcrypto, tmc...: they are ALREADY in the firmware CB and work
+    with physical addresses. If Linux attaches them to a domain it CHANGES
+    their CB and the boot hangs (measured 2026-09-20 with the unconditional
+    patch) -> they must be left as they were (-ETIMEDOUT, still no domain).
+  - 0xe3 (qcom,qupv3_0_geni_se wrapper, which maps the SPI/UART buffers:
+    geni_se_tx/rx_dma_prep -> dma_map_single(wrapper->dev)) and 0xf6 (slate
+    GPI-DMA): they are NOT in the table -> their DMA is ABORTED (RX_SBE on the
+    HS UART, "general error" 0x40 from the slate GSI/GPI -> crown and BT
+    blocked). For them we DO need to wait for apps-smmu and give them a domain.
+
+That is why -EPROBE_DEFER is limited to those two stream IDs.
+
+The no-patch alternative (deferred_probe_timeout=N on the cmdline) was tried and
+is NOT valid: it delays ALL dependencies and leaves the USB chain without a UDC.
+
+Upstream-Status: Inappropriate [dace bring-up]
+Signed-off-by: Cristodcgomez <cristo.c.mc@gmail.com>
+---
+diff --git a/drivers/iommu/of_iommu.c b/drivers/iommu/of_iommu.c
+--- a/drivers/iommu/of_iommu.c
++++ b/drivers/iommu/of_iommu.c
+@@ -39,8 +39,25 @@
+ 	 * IOMMU device we're waiting for, which will be useful if we ever get
+ 	 * a proper probe-ordering dependency mechanism in future.
+ 	 */
+-	if (!ops)
++	if (!ops) {
++		/*
++		 * dace: -EPROBE_DEFER only for the QUP wrapper (0xe3) and GPI (0xf6).
++		 * The firmware leaves sCR0.USFCFG=1 (locked by TZ) and its SMR table
++		 * has no entry for these two, so their DMA with a physical address is
++		 * aborted. The other masters already have a firmware context bank and
++		 * must keep using it: attaching them to a Linux domain breaks them.
++		 */
++		u32 dace_sid = (iommu_spec->args_count > 0) ?
++				iommu_spec->args[0] : 0xffffffff;
++
++		if (dace_sid == 0xe3 || dace_sid == 0xf6) {
++			dev_err(dev,
++				"DACE-IOMMU: sid=0x%x -> -EPROBE_DEFER (waiting for apps-smmu)\n",
++				dace_sid);
++			return -EPROBE_DEFER;
++		}
+ 		return driver_deferred_probe_check_state(dev);
++	}
+ 
+ 	if (!try_module_get(ops->owner))
+ 		return -ENODEV;

@@ -1,0 +1,118 @@
+From: Cristodcgomez <cristo.c.mc@gmail.com>
+Subject: [PATCH] Bluetooth: hci_qca/btqca: add WCN3988 support + LDISC default (dace)
+
+Minimal backport of QCA WCN3988 support (the T5 BT) from t5-gki-kernel 5.15:
+ - btqca.h: QCA_WCN3988 enum (+ in qca_is_wcn399x).
+ - btqca.c: distinct rom_ver and "qca/apbtfw%02x.tlv" / "qca/apnv%02x.bin" names.
+ - hci_qca.c: qca_soc_data_wcn3988 + compatible "qcom,wcn3988-bt" (serdev, in
+   case serdev is ever ported to geni-serial).
+ - hci_qca.c: on the LDISC path (btattach, no serdev) force QCA_WCN3988 instead
+   of QCA_ROME (dace-only; no geni-serial driver in this tree supports serdev,
+   so the HCI goes through btattach -P qca).
+
+Real rails (from the stock monaco-standalone-idp-v1.dtsi): IO=L17A (0x184),
+core/RFA=L13A (0x181), PA/CH0=L26A (0x84).
+
+Upstream-Status: Inappropriate [dace bring-up]
+Signed-off-by: Cristodcgomez <cristo.c.mc@gmail.com>
+---
+diff --git a/drivers/bluetooth/btqca.c b/drivers/bluetooth/btqca.c
+index be04d7403..e37840d74 100644
+--- a/drivers/bluetooth/btqca.c
++++ b/drivers/bluetooth/btqca.c
+@@ -549,11 +549,19 @@ int qca_uart_setup(struct hci_dev *hdev, uint8_t baudrate,
+ 	/* Firmware files to download are based on ROM version.
+ 	 * ROM version is derived from last two bytes of soc_ver.
+ 	 */
+-	rom_ver = ((soc_ver & 0x00000f00) >> 0x04) | (soc_ver & 0x0000000f);
++	if (soc_type == QCA_WCN3988)
++		rom_ver = ((soc_ver & 0x00000f00) >> 0x05) |
++			  (soc_ver & 0x0000000f);
++	else
++		rom_ver = ((soc_ver & 0x00000f00) >> 0x04) |
++			  (soc_ver & 0x0000000f);
+ 
+ 	/* Download rampatch file */
+ 	config.type = TLV_TYPE_PATCH;
+-	if (qca_is_wcn399x(soc_type)) {
++	if (soc_type == QCA_WCN3988) {
++		snprintf(config.fwname, sizeof(config.fwname),
++			 "qca/apbtfw%02x.tlv", rom_ver);
++	} else if (qca_is_wcn399x(soc_type)) {
+ 		snprintf(config.fwname, sizeof(config.fwname),
+ 			 "qca/crbtfw%02x.tlv", rom_ver);
+ 	} else if (soc_type == QCA_QCA6390) {
+@@ -585,6 +593,9 @@ int qca_uart_setup(struct hci_dev *hdev, uint8_t baudrate,
+ 	if (firmware_name)
+ 		snprintf(config.fwname, sizeof(config.fwname),
+ 			 "qca/%s", firmware_name);
++	else if (soc_type == QCA_WCN3988)
++		snprintf(config.fwname, sizeof(config.fwname),
++			 "qca/apnv%02x.bin", rom_ver);
+ 	else if (qca_is_wcn399x(soc_type)) {
+ 		if (ver.soc_id == QCA_WCN3991_SOC_ID) {
+ 			snprintf(config.fwname, sizeof(config.fwname),
+diff --git a/drivers/bluetooth/btqca.h b/drivers/bluetooth/btqca.h
+index 30afa7703..ecf989c64 100644
+--- a/drivers/bluetooth/btqca.h
++++ b/drivers/bluetooth/btqca.h
+@@ -140,6 +140,7 @@ enum qca_btsoc_type {
+ 	QCA_INVALID = -1,
+ 	QCA_AR3002,
+ 	QCA_ROME,
++	QCA_WCN3988,
+ 	QCA_WCN3990,
+ 	QCA_WCN3998,
+ 	QCA_WCN3991,
+@@ -160,7 +161,7 @@ int qca_send_pre_shutdown_cmd(struct hci_dev *hdev);
+ static inline bool qca_is_wcn399x(enum qca_btsoc_type soc_type)
+ {
+ 	return soc_type == QCA_WCN3990 || soc_type == QCA_WCN3991 ||
+-	       soc_type == QCA_WCN3998;
++	       soc_type == QCA_WCN3998 || soc_type == QCA_WCN3988;
+ }
+ static inline bool qca_is_wcn6750(enum qca_btsoc_type soc_type)
+ {
+diff --git a/drivers/bluetooth/hci_qca.c b/drivers/bluetooth/hci_qca.c
+index 56b4b7248..029ba49c9 100644
+--- a/drivers/bluetooth/hci_qca.c
++++ b/drivers/bluetooth/hci_qca.c
+@@ -243,7 +243,11 @@ static enum qca_btsoc_type qca_soc_type(struct hci_uart *hu)
+ 
+ 		soc_type = qsd->btsoc_type;
+ 	} else {
+-		soc_type = QCA_ROME;
++		/* dace bring-up: the BT is brought up on the LDISC path
++		 * (btattach) and this kernel only runs on the T5, whose chip is
++		 * a WCN3988. Without this QCA_ROME is assumed and the "ap"
++		 * firmware (apbtfw/apnv) is not found. */
++		soc_type = QCA_WCN3988;
+ 	}
+ 
+ 	return soc_type;
+@@ -1846,6 +1850,17 @@ static const struct qca_device_data qca_soc_data_wcn3991 = {
+ 	.capabilities = QCA_CAP_WIDEBAND_SPEECH | QCA_CAP_VALID_LE_STATES,
+ };
+ 
++static const struct qca_device_data qca_soc_data_wcn3988 = {
++	.soc_type = QCA_WCN3988,
++	.vregs = (struct qca_vreg []) {
++		{ "vddio", 15000  },
++		{ "vddxo", 80000  },
++		{ "vddrf", 300000 },
++		{ "vddch0", 450000 },
++	},
++	.num_vregs = 4,
++};
++
+ static const struct qca_device_data qca_soc_data_wcn3998 = {
+ 	.soc_type = QCA_WCN3998,
+ 	.vregs = (struct qca_vreg []) {
+@@ -2327,6 +2342,7 @@ static const struct of_device_id qca_bluetooth_of_match[] = {
+ 	{ .compatible = "qcom,qca6174-bt" },
+ 	{ .compatible = "qcom,qca6390-bt", .data = &qca_soc_data_qca6390},
+ 	{ .compatible = "qcom,qca9377-bt" },
++	{ .compatible = "qcom,wcn3988-bt", .data = &qca_soc_data_wcn3988},
+ 	{ .compatible = "qcom,wcn3990-bt", .data = &qca_soc_data_wcn3990},
+ 	{ .compatible = "qcom,wcn3991-bt", .data = &qca_soc_data_wcn3991},
+ 	{ .compatible = "qcom,wcn3998-bt", .data = &qca_soc_data_wcn3998},
