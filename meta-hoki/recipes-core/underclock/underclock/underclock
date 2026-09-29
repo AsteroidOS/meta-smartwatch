@@ -3,6 +3,7 @@ set -e
 
 # Enable low power mode
 echo 0 > /sys/module/lpm_levels/parameters/sleep_disabled
+echo 0 > /sys/module/lpm_levels/system/system-pc/idle_enabled
 
 # Set CPU governor to ondemand (ramps up quickly for bursty workloads)
 echo ondemand > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
