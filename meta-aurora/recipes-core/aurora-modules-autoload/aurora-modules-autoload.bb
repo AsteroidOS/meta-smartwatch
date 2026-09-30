@@ -9,6 +9,7 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MIT;md5=0835ade698e0bcf8506ecda
 COMPATIBLE_MACHINE = "aurora"
 
 SRC_URI = "file://aurora-post-rootfs.conf"
+S = "${UNPACKDIR}"
 
 do_install() {
     install -d -m 0755 ${D}${sysconfdir}/modules-load.d
