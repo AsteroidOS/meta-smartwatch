@@ -90,11 +90,11 @@ do_install() {
 
     # Optional pre-start.d/ and overrides/ from the bundle.
     if [ -n "$(ls -A ${UNPACKDIR}/pre-start.d 2>/dev/null)" ]; then
-        cp -a ${UNPACKDIR}/pre-start.d/. ${D}${localstatedir}/lib/lxc/android/pre-start.d/
+        cp -a --no-preserve=ownership ${UNPACKDIR}/pre-start.d/. ${D}${localstatedir}/lib/lxc/android/pre-start.d/
         chmod 0755 ${D}${localstatedir}/lib/lxc/android/pre-start.d/*
     fi
     if [ -n "$(ls -A ${UNPACKDIR}/overrides 2>/dev/null)" ]; then
-        cp -a ${UNPACKDIR}/overrides/. ${D}${localstatedir}/lib/lxc/android/overrides/
+        cp -a --no-preserve=ownership ${UNPACKDIR}/overrides/. ${D}${localstatedir}/lib/lxc/android/overrides/
     fi
 
     # systemd unit + start script
