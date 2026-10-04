@@ -1,0 +1,17 @@
+[Unit]
+Description=dace: set the USB SDP current so smblite charges
+# smblite (qpnp-smblite-main) creates the 'usb' psy late and may re-initialize
+# usb_icl_votable to ~2 mA more than once during boot, so instead of a one-shot
+# we run a light loop (the script is idempotent and exits as soon as online=1 /
+# icl>=500 mA).
+After=dace-lxc-hal-start.service
+
+[Service]
+Type=simple
+ExecStart=/bin/sh -c 'while true; do /usr/libexec/dace-usb-icl.sh; sleep 30; done'
+Restart=always
+RestartSec=5
+Nice=10
+
+[Install]
+WantedBy=multi-user.target

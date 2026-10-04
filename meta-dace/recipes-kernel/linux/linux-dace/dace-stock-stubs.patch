@@ -1,0 +1,78 @@
+dace: kernel stubs for stock vendor modules (CFI/stackprotector)
+
+The prebuilt .ko's from the stock vendor_boot (Mobvoi msm-5.15 g7f9d6c16b5cd)
+were compiled against Google's GKI with CFI_CLANG + KASAN_HW_TAGS +
+STACKPROTECTOR + UBSAN_TRAP. Our kernel (without LTO/CFI due to host OOM)
+cannot enable CFI_CLANG (depends on LTO_CLANG), so 2 symbols that almost all
+stock modules need are missing: __cfi_slowpath_diag and
+__ubsan_handle_cfi_check_fail_abort → this patch (kernel/dace_stubs.c).
+__stack_chk_fail is covered by CONFIG_STACKPROTECTOR=y (t5-critical.fragment)
+and kasan_flag_enabled is exported by mm/kasan/hw_tags.c (KASAN_HW_TAGS active,
+same as stock). Without CFI, every indirect call target is valid (no-op stub);
+the handler signature is that of cfi_failure_handler
+(kernel/cfi.c:348): (void *data, void *ptr, void *vtable).
+
+Note: obj-y += goes at the END of kernel/Makefile because the first assignment
+of obj-y uses '=' (an earlier += would be overwritten).
+
+Upstream-Status: Inappropriate [dace bring-up: compat with vendor prebuilt modules]
+Signed-off-by: dace-port <dace@localhost>
+diff --git a/kernel/Makefile b/kernel/Makefile
+index 1f712db74..59d8beb5d 100644
+--- a/kernel/Makefile
++++ b/kernel/Makefile
+@@ -175,3 +175,6 @@ $(obj)/gki_module_exported.h: $(srctree)/android/abi_gki_modules_exports \
+ 				$(srctree)/scripts/gen_gki_modules_headers.sh
+ 	$(Q)$(CONFIG_SHELL) $(srctree)/scripts/gen_gki_modules_headers.sh $@ \
+ 	"$(srctree)"
++
++# dace: stubs for stock vendor modules (CFI/KASAN) — see dace-stock-stubs.patch
++obj-y += dace_stubs.o
+diff --git a/kernel/dace_stubs.c b/kernel/dace_stubs.c
+new file mode 100644
+index 000000000..98370fd73
+--- /dev/null
++++ b/kernel/dace_stubs.c
+@@ -0,0 +1,42 @@
++// SPDX-License-Identifier: GPL-2.0
++/*
++ * dace_stubs.c — symbols that the stock vendor modules (Mobvoi msm-5.15)
++ * expect from a GKI kernel with CFI_CLANG. See dace-stock-stubs.patch.
++ *
++ * kasan_flag_enabled does NOT go here: with the cc-option fix, KASAN_HW_TAGS
++ * stays active (like stock) and mm/kasan/hw_tags.c defines/exports it.
++ */
++#include <linux/export.h>
++#include <linux/panic.h>
++#include <linux/types.h>
++
++/*
++ * CFI slow path: the kernel has no CFI (CFI_CLANG requires LTO_CLANG, off due
++ * to OOM), so any indirect call target is valid. No-op = check passes (same
++ * effective behavior as stock for modules->kernel).
++ */
++void __cfi_slowpath_diag(u64 id, void *ptr, void *diag)
++{
++}
++EXPORT_SYMBOL(__cfi_slowpath_diag);
++
++/* CFI failure handler with UBSAN_TRAP. Unreachable without CFI; if reached,
++ * stock also panics (handle_cfi_failure in kernel/cfi.c). */
++void __ubsan_handle_cfi_check_fail_abort(void *data, void *ptr, void *vtable)
++{
++	panic("CFI failure (target: %pS)\n", ptr);
++}
++EXPORT_SYMBOL(__ubsan_handle_cfi_check_fail_abort);
++
++/*
++ * Stack protector: the stock Mobvoi .ko's were built with
++ * STACKPROTECTOR_STRONG and call __stack_chk_fail. The sw5100 fragment asks
++ * for CONFIG_STACKPROTECTOR=y but Kconfig discards it (dependency not met with
++ * this configuration), so it is provided here. It only runs if the canary is
++ * corrupted -> panic, same as the kernel itself.
++ */
++void __stack_chk_fail(void)
++{
++	panic("stack-protector: Kernel stack is corrupted\n");
++}
++EXPORT_SYMBOL(__stack_chk_fail);
