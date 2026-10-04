@@ -23,6 +23,7 @@ SRC_URI = "git://android.googlesource.com/kernel/msm;branch=android-msm-sawshark
            file://0010-video-mdp3-Continue-when-the-overlay-wasn-t-released.patch \
            file://00011-dts-sawshark-Remove-USB-gadget-function-list.patch \
            file://0011-ARM-8933-1-replace-Sun-Solaris-style-flag-on-section.patch \
+           file://0012-dts-sawshark-drop-legacy-AFE-clock-version-so-audio-w.patch \
            "
 
 SRCREV = "66cf3d5be07a599af417695e4f22f304af667979"
