@@ -1,0 +1,48 @@
+From: pettcomputers <chris@pettcomputers.com>
+Date: Mon, 31 Aug 2026 11:22:11 -0500
+Subject: [PATCH] fix: codec subdir recursion (wcd934x/sdm660_cdc/etc) gated
+ on KERNEL_BUILD==1, which never happens for external module builds since
+ MODNAME is always set
+
+asoc/codecs/Kbuild only recurses into wcd934x/, sdm660_cdc/, msm_sdw/
+and friends when KERNEL_BUILD==1 (an in-kernel-tree build). But the
+out-of-tree Makefile this recipe uses sets MODNAME globally, which
+makes KERNEL_BUILD always evaluate to 0 for this build - those
+subdirectories, including sdm660_cdc/ (which provides the
+msm_anlg_cdc_*/msm_dig_cdc_* symbols audio_machine.ko needs and was
+failing to load without), were structurally unreachable.
+
+Made the recursion unconditional. The actual per-module CONFIG_SND_SOC_*
+gates inside each subdir's own Kbuild are untouched and still apply
+correctly - this only fixes whether the build descends into the
+directory at all.
+
+Signed-off-by: pettcomputers <chris@pettcomputers.com>
+---
+ asoc/codecs/Kbuild | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/asoc/codecs/Kbuild b/asoc/codecs/Kbuild
+index ef8323c..0a4f5c1 100644
+--- a/asoc/codecs/Kbuild
++++ b/asoc/codecs/Kbuild
+@@ -6,7 +6,7 @@ else
+ 	KERNEL_BUILD := 0
+ endif
+
+-ifeq ($(KERNEL_BUILD), 1)
++ifeq (1, 1)
+ 	# These are configurable via Kconfig for kernel-based builds
+ 	# Need to explicitly configure for Android-based builds
+ 	AUDIO_BLD_DIR := $(shell pwd)/kernel/msm-4.14
+@@ -229,7 +229,7 @@ ifeq ($(KERNEL_BUILD), 0)
+   KBUILD_EXTRA_SYMBOLS +=$(AUDIO_KERNEL_OUT)/ipc/Module.symvers
+ endif
+
+-ifeq ($(KERNEL_BUILD), 1)
++ifeq (1, 1)
+ 	obj-y	+= wcd934x/
+ 	obj-y	+= sdm660_cdc/
+ 	obj-y	+= msm_sdw/
+--
+2.34.1

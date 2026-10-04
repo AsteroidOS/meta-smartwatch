@@ -1,0 +1,11 @@
+[Unit]
+Description=Copy tfa98xx amp DSP firmware into place before audio modules load
+Before=audio-firmware-hoki.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/bin/tfa98xx-firmware-hoki.sh
+
+[Install]
+WantedBy=multi-user.target

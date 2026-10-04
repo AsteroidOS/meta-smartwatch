@@ -1,0 +1,12 @@
+[Unit]
+Description=Hoki audio mixer routing fix (speaker + mic DAPM routes)
+After=audio-firmware-hoki.service
+Requires=audio-firmware-hoki.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/audio-mixer-fix-hoki.sh
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,12 @@
+[Unit]
+Description=Load hoki analog/digital codec and audio_machine kernel modules
+After=android-init.service tfa98xx-firmware-hoki.service
+Before=connman.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/bin/audio-firmware-hoki.sh
+
+[Install]
+WantedBy=multi-user.target
