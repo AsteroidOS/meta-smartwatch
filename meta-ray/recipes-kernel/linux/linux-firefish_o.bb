@@ -10,7 +10,6 @@ COMPATIBLE_MACHINE = "firefish"
 
 SRC_URI = "git://android.googlesource.com/kernel/msm;branch=android-msm-firefish-3.18-oreo-wear-dr;protocol=https \
            file://defconfig \
-           file://img_info \
            file://0001-scripts-dtc-Remove-redundant-YYLOC-global-declaratio.patch \
            file://0002-ARM-uaccess-remove-put_user-code-duplication.patch \
            file://0003-touchscreen-raydium-Add-delay-for-wakeup-report.patch \
@@ -33,4 +32,8 @@ do_install:append() {
     rm -rf ${D}/usr/src/usr/
 }
 
-inherit mkboot old-kernel-gcc-hdrs
+MKBOOTIMG_CMDLINE = "androidboot.hardware=ray console=ttyHSL0,115200,n8 androidboot.console=ttyHSL0 msm_rtb.filter=0x237 ehci-hcd.park=3 lpm_levels.sleep_disabled=1 earlycon=msm_hsl_uart,0x78af000 buildvariant=user selinux=0 SYSTEMD_CGROUP_ENABLE_LEGACY_FORCE=1"
+MKBOOTIMG_BOARD = "ray"
+MKBOOTIMG_ARGS = "--base 0x00000000 --kernel_offset 0x00008000 --ramdisk_offset 0x02000000 --tags_offset 0x01e00000 --pagesize 2048"
+
+inherit mkbootimg old-kernel-gcc-hdrs
