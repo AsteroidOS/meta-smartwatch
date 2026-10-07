@@ -11,10 +11,11 @@ Signed-off-by: Darrel Griët <dgriet@gmail.com>
 ---
  asoc/Kbuild        | 1 -
  asoc/codecs/Kbuild | 1 -
+ asoc/codecs/sdm660_cdc/Kbuild | 1 -
  dsp/Kbuild         | 1 -
  dsp/codecs/Kbuild  | 1 -
  soc/Kbuild         | 1 -
- 5 files changed, 5 deletions(-)
+ 6 files changed, 6 deletions(-)
 
 diff --git a/asoc/Kbuild b/asoc/Kbuild
 index 9beb346..e9737f9 100644
@@ -33,6 +34,17 @@ index 5bd1d98..ef8323c 100644
 --- a/asoc/codecs/Kbuild
 +++ b/asoc/codecs/Kbuild
 @@ -200,7 +200,6 @@ CDEFINES +=	-DANI_LITTLE_BYTE_ENDIAN \
+ 		-DANI_OS_TYPE_ANDROID=6 \
+ 		-DPTT_SOCK_SVC_ENABLE \
+ 		-Wall\
+-		-Werror\
+ 		-D__linux__
+ 
+ KBUILD_CPPFLAGS += $(CDEFINES)
+diff --git a/asoc/codecs/sdm660_cdc/Kbuild b/asoc/codecs/sdm660_cdc/Kbuild
+--- a/asoc/codecs/sdm660_cdc/Kbuild
++++ b/asoc/codecs/sdm660_cdc/Kbuild
+@@ -94,7 +94,6 @@ CDEFINES +=	-DANI_LITTLE_BYTE_ENDIAN \
  		-DANI_OS_TYPE_ANDROID=6 \
  		-DPTT_SOCK_SVC_ENABLE \
  		-Wall\

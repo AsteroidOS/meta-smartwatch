@@ -11,14 +11,14 @@ Uses a known working makefile for kernel modules but adjusts it to fit the needs
 Upstream-Status: Inappropriate
 Signed-off-by: Darrel Griët <dgriet@gmail.com>
 ---
- Makefile | 105 +++++++++++++++++++++++--------------------------------
- 1 file changed, 44 insertions(+), 61 deletions(-)
+ Makefile | 106 +++++++++++++++++++++++--------------------------------
+ 1 file changed, 45 insertions(+), 61 deletions(-)
 
 diff --git a/Makefile b/Makefile
 index b135f46..dc8069f 100644
 --- a/Makefile
 +++ b/Makefile
-@@ -1,67 +1,50 @@
+@@ -1,67 +1,51 @@
 -# auto-detect subdirs
 -ifeq ($(CONFIG_ARCH_SDM845), y)
 -include $(srctree)/techpack/audio/config/sdm845auto.conf
@@ -97,6 +97,7 @@ index b135f46..dc8069f 100644
 +obj-m += soc/
 +obj-m += asoc/
 +obj-m += asoc/codecs/
++obj-m += asoc/codecs/sdm660_cdc/
  
 -obj-y += soc/
 -obj-y += dsp/
