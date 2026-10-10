@@ -71,6 +71,10 @@ SRC_URI:append:aurora = " file://usb-moded.service \
                           file://run/adb-startserver.ini \
                           file://adbd-prepare.service \
                           file://10-aurora-android-tools.preset \
+                          file://aurora-usb-network \
+                          file://aurora-usb-network.service \
+                          file://aurora-usb-reenumerate \
+                          file://aurora-usb-reenumerate.service \
                           file://0001-Wait-for-FunctionFS-FFS_ACTIVE-before-configfs_set_u.patch"
 
 do_install:append:aurora() {
@@ -111,9 +115,31 @@ do_install:append:aurora() {
         ${D}/etc/usb-moded/dyn-modes/adb_mode.ini
     install -m 0644 ${UNPACKDIR}/run/adb-startserver.ini \
         ${D}/etc/usb-moded/run/adb-startserver.ini
+
+    # NCM gives ssh-over-USB alongside adb; the re-enumerate one-shot makes the
+    # host pick up the finished gadget. See the script headers.
+    install -m 0755 ${UNPACKDIR}/aurora-usb-network ${D}/usr/bin/aurora-usb-network
+    install -m 0644 ${UNPACKDIR}/aurora-usb-network.service \
+        ${D}${systemd_unitdir}/system/aurora-usb-network.service
+    install -d ${D}${systemd_unitdir}/system/multi-user.target.wants
+    ln -sf ../aurora-usb-network.service \
+        ${D}${systemd_unitdir}/system/multi-user.target.wants/aurora-usb-network.service
+
+    install -m 0755 ${UNPACKDIR}/aurora-usb-reenumerate ${D}/usr/bin/aurora-usb-reenumerate
+    install -m 0644 ${UNPACKDIR}/aurora-usb-reenumerate.service \
+        ${D}${systemd_unitdir}/system/aurora-usb-reenumerate.service
+    install -d ${D}${systemd_unitdir}/system/multi-user.target.wants
+    ln -sf ../aurora-usb-reenumerate.service \
+        ${D}${systemd_unitdir}/system/multi-user.target.wants/aurora-usb-reenumerate.service
 }
 
 FILES:${PN}:append:aurora = " ${systemd_unitdir}/system/init_gfs.service \
                               ${systemd_unitdir}/system/sysinit.target.wants/init_gfs.service \
                               ${systemd_unitdir}/system/adbd-prepare.service \
-                              ${systemd_unitdir}/system-preset/10-aurora-android-tools.preset"
+                              ${systemd_unitdir}/system-preset/10-aurora-android-tools.preset \
+                              /usr/bin/aurora-usb-network \
+                              ${systemd_unitdir}/system/aurora-usb-network.service \
+                              ${systemd_unitdir}/system/multi-user.target.wants/aurora-usb-network.service \
+                              /usr/bin/aurora-usb-reenumerate \
+                              ${systemd_unitdir}/system/aurora-usb-reenumerate.service \
+                              ${systemd_unitdir}/system/multi-user.target.wants/aurora-usb-reenumerate.service"

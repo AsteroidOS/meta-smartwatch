@@ -1,0 +1,123 @@
+#!/bin/sh
+# Add the NCM function to aurora's USB gadget, giving ssh-over-USB alongside adb.
+#
+# usb-moded's udev watch does not survive startup here, so it never selects a
+# mode: it neither starts adbd nor sets up a network function, and its
+# developer_mode asks for rndis, which these kernels do not provide. ncm.0 is
+# available, and linking it next to ffs.adb yields one composite gadget carrying
+# both channels at once.
+set -u
+
+G=/config/usb_gadget/g1
+ADDR="${AURORA_USB_ADDR:-192.168.42.2/24}"
+LOGF=/var/log/aurora-usb-network.log
+# usb-moded rewrites configs/b.1 while starting, so give it time to finish.
+SETTLE="${AURORA_USB_SETTLE:-8}"
+
+log() {
+    echo "aurora-usb-network: $1"
+    echo "$(cut -d. -f1 /proc/uptime)s $1" >> "$LOGF" 2>/dev/null || true
+}
+
+# MAC derived from the device serial, so the IPv6 link-local is stable per watch
+# and a host can reach it at fe80::...%iface without assigning addresses. 0x02
+# marks it locally administered and unicast.
+stable_mac() {
+    dsn=""
+    [ -r /sys/firmware/devicetree/base/chosen/config/dsn ] && \
+        dsn="$(tr -d '\0' < /sys/firmware/devicetree/base/chosen/config/dsn)"
+    [ -n "$dsn" ] || dsn="$(cat /etc/hostname 2>/dev/null)"
+    [ -n "$dsn" ] || dsn="asteroid"
+    h=$(printf '%s' "$dsn" | md5sum | cut -c1-10)
+    printf '02:%s:%s:%s:%s:%s\n' \
+        "$(printf '%s' "$h" | cut -c1-2)" "$(printf '%s' "$h" | cut -c3-4)" \
+        "$(printf '%s' "$h" | cut -c5-6)" "$(printf '%s' "$h" | cut -c7-8)" \
+        "$(printf '%s' "$h" | cut -c9-10)"
+}
+
+# dev_addr only reaches the netdev while the function is unbound and its
+# interface is down, hence the call sites below.
+pin_mac() {
+    want=$(stable_mac)
+    cur=$(tr -d '\0' < "$G/functions/ncm.0/dev_addr" 2>/dev/null)
+    [ "$cur" = "$want" ] && return 0
+    echo "$want" > "$G/functions/ncm.0/dev_addr" 2>/dev/null \
+        && log "dev_addr=$want" \
+        || log "could not set dev_addr; link-local will vary per boot"
+}
+
+# android-tools-adbd is preset-disabled and started by usb-moded's appsync,
+# which does not run here. Starting it late is safe: adbd pulls adbd-prepare in
+# itself, so FunctionFS is mounted before descriptors are written.
+ensure_adb() {
+    if [ ! -d "$G/functions/ffs.adb" ]; then
+        mkdir "$G/functions/ffs.adb" 2>/dev/null || log "could not create ffs.adb"
+    fi
+    systemctl is-active --quiet android-tools-adbd \
+        || systemctl start android-tools-adbd 2>/dev/null \
+        || log "adbd start failed"
+
+    # ep1 appears once FunctionFS is active; binding the UDC before that fails.
+    i=0
+    while [ ! -e /dev/usb-ffs/adb/ep1 ] && [ "$i" -lt 100 ]; do
+        i=$((i + 1)); sleep 0.1
+    done
+    [ -e /dev/usb-ffs/adb/ep1 ] || log "ep1 absent; adb will not work"
+
+    [ -e "$G/configs/b.1/ffs.adb" ] || \
+        ln -sf "$G/functions/ffs.adb" "$G/configs/b.1/ffs.adb" 2>/dev/null || \
+        log "could not link ffs.adb"
+}
+
+[ -d "$G" ] || { log "$G missing"; exit 1; }
+
+if [ ! -d "$G/functions/ncm.0" ]; then
+    # mkdir failing here means the kernel has no NCM function.
+    mkdir "$G/functions/ncm.0" 2>/dev/null || { log "no NCM support"; exit 0; }
+    pin_mac
+fi
+
+ensure_adb
+
+[ -e /sys/class/net/usb0 ] && ip link set usb0 down 2>/dev/null
+pin_mac
+
+if [ -e "$G/configs/b.1/ncm.0" ]; then
+    log "ncm.0 already linked"
+else
+    U=$(ls /sys/class/udc 2>/dev/null | head -1)
+    [ -n "$U" ] || { log "no UDC"; exit 1; }
+
+    # Adding a function requires unbinding, which briefly drops adb. Retry and
+    # confirm the link survived: usb-moded may still rewrite configs/b.1.
+    sleep "$SETTLE"
+    attempt=0
+    while [ "$attempt" -lt 5 ]; do
+        attempt=$((attempt + 1))
+        echo "" > "$G/UDC" 2>/dev/null
+        sleep 1
+        ln -sf "$G/functions/ncm.0" "$G/configs/b.1/ncm.0" 2>/dev/null
+        sleep 1
+        echo "$U" > "$G/UDC" 2>/dev/null
+        sleep 3
+        if [ -e "$G/configs/b.1/ncm.0" ] && [ -n "$(cat "$G/UDC" 2>/dev/null)" ]; then
+            log "ncm.0 linked (attempt $attempt)"
+            break
+        fi
+        log "attempt $attempt did not hold; retrying"
+        sleep 3
+    done
+    if [ ! -e "$G/configs/b.1/ncm.0" ]; then
+        log "could not keep ncm.0 linked"
+        echo "$U" > "$G/UDC" 2>/dev/null
+        exit 1
+    fi
+fi
+
+i=0
+while [ ! -e /sys/class/net/usb0 ] && [ "$i" -lt 15 ]; do i=$((i + 1)); sleep 1; done
+[ -e /sys/class/net/usb0 ] || { log "usb0 did not appear"; exit 1; }
+
+ip link set usb0 up 2>/dev/null
+ip addr add "$ADDR" dev usb0 2>/dev/null || true
+log "usb0 $(ip -4 addr show usb0 2>/dev/null | grep -o 'inet [0-9./]*' | head -1)"
