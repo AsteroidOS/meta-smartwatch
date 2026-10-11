@@ -1,0 +1,63 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Martin Monperrus <martin.monperrus@gnieh.org>
+Date: Wed, 3 Sep 2026 22:30:00 +0200
+Subject: [PATCH] dts: sawshark: drop legacy AFE clock version so audio works
+
+The sound node inherits qcom,msm-afe-clk-ver = <1> from the Qualcomm
+reference include msm8909-mtp.dtsi. That makes msm8952.c take the legacy
+V1 branch in msm8952_enable_dig_cdc_clk() and friends:
+
+    if (pdata->afe_clk_ver == AFE_CLK_VERSION_V1)
+            ret = afe_set_digital_codec_core_clock(...);
+    else
+            ret = afe_set_lpass_clock_v2(...);
+
+The Q6 firmware on this watch rejects the V1 parameter
+AFE_PARAM_ID_INTERNAL_DIGIATL_CDC_CLK_CONFIG, so every attempt to start
+the internal codec core clock fails:
+
+    afe_set_digital_codec_core_clock: config cmd failed [ADSP_EBADPARAM]
+    failed to enable the MCLK
+    msm8952_enable_dig_cdc_clk: failed to enable CCLK
+    ASoC: TERTIARY_MI2S_TX startup failed: -22
+     TERTIARY_MI2S_TX: ASoC: BE open failed -22
+
+With no codec core clock there is no working audio path at all: the
+microphone backend never starts, and the NXP TFA98xx speaker amplifier
+on i2c-5 never receives a bit clock, so its PLL cannot lock and its
+SpeakerBoost cold start times out forever.
+
+Since msm8952_asoc_machine_probe() defaults to AFE_CLK_VERSION_V2 when
+the property is absent, simply deleting it in the board overlay selects
+afe_set_lpass_clock_v2() with
+Q6AFE_LPASS_CLK_ID_INTERNAL_DIGITAL_CODEC_CORE.
+
+Tested on a Huawei Watch 2 (sawfish). After this change every
+ADSP_EBADPARAM disappears, the microphone backend starts, and the
+amplifier reports PLLS and CLKS asserted during playback where it
+previously reported neither.
+
+Upstream-Status: Inappropriate [vendor kernel, board specific]
+---
+diff --git a/arch/arm/boot/dts/apq8009w-sawshark/apq8009w-sound.dtsi b/arch/arm/boot/dts/apq8009w-sawshark/apq8009w-sound.dtsi
+--- a/arch/arm/boot/dts/apq8009w-sawshark/apq8009w-sound.dtsi
++++ b/arch/arm/boot/dts/apq8009w-sawshark/apq8009w-sound.dtsi
+@@ -32,6 +32,18 @@
+ 	pinctrl-2 = <&cdc_pdm_lines_sus &cdc_ext_tlmm_act>;
+ 	pinctrl-3 = <&cdc_pdm_lines_act &cdc_ext_tlmm_act>;
+ 	/delete-property/ qcom,cdc-us-euro-gpios;
++	/*
++	 * msm8909-mtp.dtsi sets qcom,msm-afe-clk-ver = <1>, which makes
++	 * msm8952.c use the legacy afe_set_digital_codec_core_clock()
++	 * call. The Q6 firmware on this watch rejects that parameter
++	 * (AFE_PARAM_ID_INTERNAL_DIGIATL_CDC_CLK_CONFIG) with
++	 * ADSP_EBADPARAM, so the internal codec core clock never starts
++	 * and neither the speaker nor the microphone works. Dropping the
++	 * property makes the driver default to AFE_CLK_VERSION_V2 and use
++	 * afe_set_lpass_clock_v2() with
++	 * Q6AFE_LPASS_CLK_ID_INTERNAL_DIGITAL_CODEC_CORE instead.
++	 */
++	/delete-property/ qcom,msm-afe-clk-ver;
+ };
+ &soc{
+ 	qcom,msm-dai-mi2s {
