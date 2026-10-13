@@ -1,0 +1,188 @@
+From: Florent Revest <revestflo@gmail.com>
+Date: Mon, 12 Oct 2026 00:00:00 +0000
+Subject: [PATCH] nanohub: keep one stalled channel from exhausting the receive pool
+
+Upstream-Status: Inappropriate [aurora-specific; works around vendor userspace]
+
+Every MCU->AP channel (/dev/nanohub, _comms, _debug_log, _metrics,
+_console, ...) is fed from one pool of READ_QUEUE_DEPTH receive buffers,
+and a buffer only returns to the pool when the channel's userspace reader
+drains it. Nothing bounds how many buffers one channel may hold.
+
+On aurora (Pixel Watch 2) this turns a transient overload into a permanent
+wedge of the sensor stack. The vendor daemon mcu_mgmtd drains
+/dev/nanohub_debug_log from its single epoll loop, and the same loop also
+issues synchronous requests to the MCU and blocks on them (registry lookups
+with a 5 s wait, the MCU watchdog echo with a 10 s wait, settings updates).
+Once a burst (e.g. ~30 DisplayInfo messages from a brightness fade plus the
+MCU's own log chatter) has filled the pool, the response the loop is
+waiting for cannot be received, the wait times out (USF error 16, which is
+exactly what UsfReqSyncCallback::Wait cancels with), the loop retries,
+blocks again, and the debug-log channel it would have to drain keeps every
+buffer: "nanohub: buffers exhausted" forever, error 16 from every client,
+the MCU gives up on the host transport, sensors dead until reboot
+(captures of 2026-07-12/14, reproduced 2026-10-12).
+
+Bound the damage in the driver: a channel may hold at most io_quota
+buffers, and once the free pool is down to pool_reserve a channel that
+already holds two buffers gets no more; excess packets are dropped (logs
+are expendable, requests are retransmitted by the MCU). Responses for
+the other channels then always get through, the blocked loop completes
+its wait and resumes draining. Both knobs are module parameters (0 = off).
+Also raise the pool to 64 buffers (17 KiB) and export per-channel
+occupancy and drop counters as nanohub_comms/io_stats for diagnosis.
+
+Signed-off-by: Florent Revest <revestflo@gmail.com>
+---
+--- a/private/google-modules/nanohub/main.h
++++ b/private/google-modules/nanohub/main.h
+@@ -52,6 +52,9 @@
+ 	uint8_t id;
+ 	bool is_kernel;
+ 	void (*on_message_received)(const char *buffer, size_t length);
++	/* buffers currently on buf_list (under buf_wait.lock) / packets dropped by quota */
++	int queued;
++	unsigned long dropped;
+ };
+ 
+ #ifdef CONFIG_NANOHUB_BL_NXP
+@@ -108,6 +111,7 @@
+ 	struct wakeup_source wakesrc_read;
+ 
+ 	struct nanohub_io free_pool;
++	unsigned long pool_exhausted;
+ 
+ 	atomic_t lock_mode;
+ 	/* these 3 vars should be accessed only with wakeup_wait.lock held */
+--- a/private/google-modules/nanohub/main.c
++++ b/private/google-modules/nanohub/main.c
+@@ -59,7 +59,32 @@
+ #include "display.h"
+ #endif
+ 
+-#define READ_QUEUE_DEPTH	20
++#define READ_QUEUE_DEPTH	64
++
++/*
++ * Receive-pool fairness. All MCU->AP channels (/dev/nanohub*, see ID_NANOHUB_*)
++ * draw from one pool of READ_QUEUE_DEPTH buffers that are only returned when
++ * the owning userspace reader drains its channel. If one reader stalls, its
++ * channel swallows the whole pool and every other channel starves: the MCU's
++ * responses to in-flight requests can no longer be received, so the stalled
++ * reader's own synchronous waits time out, which keeps it stalled. Seen on
++ * aurora (Pixel Watch 2): mcu_mgmtd blocks its event loop in 5-10 s
++ * synchronous waits while /dev/nanohub_debug_log (which that loop drains)
++ * holds every buffer -> "nanohub: buffers exhausted" forever, USF error 16
++ * everywhere, sensors dead until reboot.
++ *
++ * Policy: a channel may not hold more than io_quota buffers, and once the
++ * free pool is down to pool_reserve a channel that already holds
++ * NANOHUB_IO_MIN buffers gets no more; its packets are dropped instead (the
++ * MCU retransmits requests, logs are expendable). 0 disables either rule.
++ */
++#define NANOHUB_IO_MIN		2
++static unsigned int io_quota = READ_QUEUE_DEPTH / 2;
++module_param(io_quota, uint, 0644);
++MODULE_PARM_DESC(io_quota, "Max receive buffers one channel may hold (0=unlimited)");
++static unsigned int pool_reserve = 8;
++module_param(pool_reserve, uint, 0644);
++MODULE_PARM_DESC(pool_reserve, "Free buffers kept for channels holding < 2 (0=off)");
+ #define APP_FROM_HOST_EVENTID	0x000000F8
+ #define FIRST_SENSOR_EVENTID	0x00000200
+ #define LAST_SENSOR_EVENTID	0x000002FF
+@@ -204,6 +229,21 @@
+ 	io->id = id;
+ 	io->is_kernel = is_kernel;
+ 	atomic_set(&io->busy, 0);
++	io->queued = 0;
++	io->dropped = 0;
++}
++
++static bool nanohub_io_over_quota(struct nanohub_data *data,
++				  struct nanohub_io *io)
++{
++	int queued = READ_ONCE(io->queued);
++	int free = READ_ONCE(data->free_pool.queued);
++
++	if (io_quota && queued >= io_quota)
++		return true;
++	if (pool_reserve && free <= pool_reserve && queued >= NANOHUB_IO_MIN)
++		return true;
++	return false;
+ }
+ 
+ static inline bool nanohub_io_has_buf(struct nanohub_io *io)
+@@ -230,6 +270,7 @@
+ 	if (nanohub_io_has_buf(io)) {
+ 		buf = list_first_entry(&io->buf_list, struct nanohub_buf, list);
+ 		list_del(&buf->list);
++		io->queued--;
+ 	}
+ 	spin_unlock(&io->buf_wait.lock);
+ 
+@@ -244,6 +285,7 @@
+ 	spin_lock(&io->buf_wait.lock);
+ 	was_empty = !nanohub_io_has_buf(io);
+ 	list_add_tail(&buf->list, &io->buf_list);
++	io->queued++;
+ 	spin_unlock(&io->buf_wait.lock);
+ 
+ 	if (was_empty) {
+@@ -1376,8 +1418,32 @@
+ 	return count;
+ }
+ 
++static ssize_t nanohub_io_stats(struct device *dev,
++				struct device_attribute *attr, char *buf)
++{
++	struct nanohub_data *data = dev_get_drvdata(dev);
++	ssize_t n = 0;
++	int i;
++
++	n += scnprintf(buf + n, PAGE_SIZE - n,
++		       "depth %d free %d exhausted %lu quota %u reserve %u\n",
++		       READ_QUEUE_DEPTH, data->free_pool.queued,
++		       data->pool_exhausted, io_quota, pool_reserve);
++	for (i = 0; i < ID_NANOHUB_MAX; i++) {
++		struct nanohub_io *io = &data->io[i];
++
++		if (!io->queued && !io->dropped && !atomic_read(&io->busy))
++			continue;
++		n += scnprintf(buf + n, PAGE_SIZE - n,
++			       "id %d busy %d queued %d dropped %lu\n", i,
++			       atomic_read(&io->busy), io->queued, io->dropped);
++	}
++	return n;
++}
++
+ static struct device_attribute attributes[] = {
+ 	__ATTR(wakeup, 0440, nanohub_wakeup_query, NULL),
++	__ATTR(io_stats, 0440, nanohub_io_stats, NULL),
+ 	__ATTR(app_info, 0440, nanohub_app_info, NULL),
+ 	__ATTR(firmware_version, 0440, nanohub_firmware_query, NULL),
+ 	__ATTR(time_sync, 0440, nanohub_time_sync, NULL),
+@@ -1769,8 +1835,14 @@
+ 	if (id == ID_NANOHUB_CLIENT && atomic_read(&io->busy) != 1) {
+ 		pr_info("nanohub: dropping packet for /dev/nanohub/%d\n", id);
+ 	} else if (!io->is_kernel) {
+-		nanohub_io_put_buf(io, *buf);
+-		*buf = NULL;
++		if (nanohub_io_over_quota(data, io)) {
++			io->dropped++;
++			pr_warn_ratelimited("nanohub: id %d over quota (queued %d, free %d), dropping packet\n",
++					    id, io->queued, data->free_pool.queued);
++		} else {
++			nanohub_io_put_buf(io, *buf);
++			*buf = NULL;
++		}
+ 	}
+ 
+ 	if (wakeup)
+@@ -1894,6 +1966,7 @@
+ 				nanohub_set_state(data, ST_IDLE);
+ 				continue;
+ 			}
++			data->pool_exhausted++;
+ 			pr_warn_ratelimited("nanohub: buffers exhausted");
+ 			/* pending interrupt, but no room to read data -
+ 			 * clear interrupts */
