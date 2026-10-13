@@ -65,6 +65,15 @@ mount_if_unmounted /dev/mapper/vendor_dlkm_b  /android/vendor_dlkm
 # BSS peer and vdev, repeat. Besides wasting radio power, this races autosleep
 # and makes ConnMan association unreliable after resume.
 #
+# g_enable_packet_filter_bitmap is applied by the firmware only while the host
+# is suspended (cleared on resume): bit0 = IPv6 multicast, bit1 = IPv4
+# multicast, bit2 = IPv4 broadcast. The earlier value 4 dropped only IPv4
+# broadcast, so every mDNS/SSDP/IPv6-multicast packet on the LAN still woke
+# the AP (measured 2026-10-01 with cluster sleep disabled: WLAN_CE_2 was the
+# dominant resume cause). ARP and IPv6 NS are answered by the firmware
+# (hostArpOffload/hostNSOffload=1), so dropping all three classes in suspend
+# is safe: unicast traffic to the watch still wakes it.
+#
 # Keep the stock vendor partition read-only. Make a volatile copy and bind it
 # over the one configuration file before systemd-modules-load loads wlan.ko.
 WLAN_CFG=/android/vendor/firmware/wlan/qca_cld/WCNSS_qcom_cfg.ini
@@ -74,6 +83,8 @@ if [ -f "$WLAN_CFG" ]; then
     sed \
         -e 's/^FastRoamEnabled=.*/FastRoamEnabled=0/' \
         -e 's/^gRoamOffloadEnabled=.*/gRoamOffloadEnabled=0/' \
+        -e '/^END$/i gDisablePacketFilter=0' \
+        -e '/^END$/i g_enable_packet_filter_bitmap=7' \
         "$WLAN_CFG" > "$WLAN_CFG_RUNTIME"
     if ! grep -q '^gRoamOffloadEnabled=' "$WLAN_CFG_RUNTIME"; then
         sed -i '/^END$/i gRoamOffloadEnabled=0' "$WLAN_CFG_RUNTIME"
