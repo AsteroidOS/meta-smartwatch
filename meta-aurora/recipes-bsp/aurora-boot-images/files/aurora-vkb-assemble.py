@@ -251,6 +251,15 @@ def main():
         parsed = [p.strip() for p in parents.split() if p.strip()]
         # Allow either bare or prefixed in the manifest
         parsed = [p[len(PFX):] if p.startswith(PFX) else p for p in parsed]
+        # Same filter as the stock seed: a @drop'ed parent must not leak in.
+        # busybox modprobe insmods every parent on the line and gives up on
+        # the consumer at the first missing file.
+        parsed = [p for p in parsed if p[:-3] not in dropped]
+        shipped = {f"{n}.ko" for (n, _, _) in modules_in_order}
+        missing = [p for p in parsed if p not in shipped]
+        if missing:
+            sys.exit(f"manifest: @dep {child} names parents that are not in the "
+                     f"module list: {' '.join(missing)}")
         dep_map[child] = parsed
         overridden += 1
 
