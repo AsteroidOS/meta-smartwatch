@@ -1,0 +1,22 @@
+[Unit]
+Description=ceres home (local) in RAM
+DefaultDependencies=no
+# Qt writes the shader cache to /home/ceres/.local (QGfxShaderBuilder). If the
+# rootfs runs out of space (it happens: the 48 MB persistent journal leaves it at
+# 100%), Qt cannot create the directory -> "QML ShaderEffect: Cannot find member
+# data" + "Cannot read property 'homeActive' of null" and the compositor starts
+# but PAINTS BLACK (the screen stays off even though the CRTC is enabled,
+# wayland-0 exists and the render loop ticks).
+# Cost: 48 MB of RAM. Price: the UI never depends on disk space.
+Before=systemd-user-sessions.service
+After=local-fs.target
+RequiresMountsFor=/home/ceres
+
+[Mount]
+What=tmpfs
+Where=/home/ceres/.local
+Type=tmpfs
+Options=mode=0777,size=48M,nosuid,nodev
+
+[Install]
+WantedBy=local-fs.target

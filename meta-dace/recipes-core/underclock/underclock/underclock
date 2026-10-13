@@ -1,0 +1,10 @@
+#!/bin/sh
+
+# CPU0 governor: schedutil ramps quickly for bursty UI workloads.
+echo schedutil > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+
+# Offline cpu1..cpu3. The watch UI runs comfortably on one A53 core; the
+# saved idle current is meaningful for the small battery.
+echo 0 > /sys/devices/system/cpu/cpu1/online
+echo 0 > /sys/devices/system/cpu/cpu2/online
+echo 0 > /sys/devices/system/cpu/cpu3/online
