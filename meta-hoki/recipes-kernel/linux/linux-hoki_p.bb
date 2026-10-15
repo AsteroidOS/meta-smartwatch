@@ -20,6 +20,7 @@ SRC_URI = "git://github.com/fossil-engineering/kernel-msm-fossil-cw;branch=fossi
            file://0004-usb-hcd-Handle-when-host-mode-isn-t-available.patch \
            file://0005-initramfs-Don-t-skip-initramfs.patch \
            file://0006-ARM-8933-1-replace-Sun-Solaris-style-flag-on-section.patch \
+           file://wakelock.h \
            "
 
 SRCREV = "c0b4c201f2d5a641defe19958a9b4c16f40d866b"
@@ -28,8 +29,14 @@ LINUX_VERSION_EXTENSION = ""
 PE = "1"
 PV = "${LINUX_VERSION}+git${SRCPV}"
 
+# hoki's vendor kernel is old enough to predate the wakeup_source API
+# transition; several drivers (notably the out-of-tree WLAN driver, see
+# https://github.com/AsteroidOS/meta-smartwatch/issues/224) still #include
+# include/linux/wakelock.h, which was removed from mainline. Provide an
+# empty stub so those drivers build.
 do_configure:prepend() {
     install -m 644 -D ${UNPACKDIR}/defconfig ${WORKDIR}/defconfig
+    install -m 644 -D ${UNPACKDIR}/wakelock.h ${S}/include/linux/wakelock.h
 }
 
 do_install:append() {

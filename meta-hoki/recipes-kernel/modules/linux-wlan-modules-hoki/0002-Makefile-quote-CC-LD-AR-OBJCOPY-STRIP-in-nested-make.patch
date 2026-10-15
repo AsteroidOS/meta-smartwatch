@@ -1,0 +1,26 @@
+From c597ca249a4ec61fd8ceddd9474eda6e6717535c Mon Sep 17 00:00:00 2001
+From: pettcomputers <chris@pettcomputers.com>
+Date: Sun, 30 Aug 2026 10:10:18 -0500
+Subject: [PATCH] Makefile: quote CC/LD/AR/OBJCOPY/STRIP in nested make
+ invocation
+
+---
+ Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Makefile b/Makefile
+index d5c94f0..c644d01 100644
+--- a/Makefile
++++ b/Makefile
+@@ -5,7 +5,7 @@ KBUILD_OPTIONS += MODNAME=wlan
+ 
+ all::
+ 	$(MAKE) -C $(KERNEL_SOURCE) $(KBUILD_OPTIONS) $(EXTRA_CFLAGS) ARCH=$(ARCH) \
+-		SUBDIRS=$(CURDIR) CC=${CC} modules
++		SUBDIRS=$(CURDIR) CC="$(CC)" LD="$(LD)" AR="$(AR)" OBJCOPY="$(OBJCOPY)" STRIP="$(STRIP)" modules
+ 
+ modules_install:
+ 	$(MAKE) INSTALL_MOD_STRIP=1 -C $(KERNEL_SRC) M=$(shell pwd) modules_install
+-- 
+2.51.1
+
