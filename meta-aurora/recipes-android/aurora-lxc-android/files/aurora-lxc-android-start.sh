@@ -267,6 +267,86 @@ if [ -f "$POWER_STATS_RC" ] && ! mountpoint -q "$POWER_STATS_RC"; then
     fi
 fi
 
+# Mask Android services that have no consumer on AsteroidOS. The container
+# exists for the HALs that libhybris, sensorfw, bluebinder and pulseaudio talk
+# to (composer/allocator, sensors, bluetooth, audio, display offload) plus the
+# daemons the SoC needs (charger/gauge, MCU, thermal, WLAN-on-modem helpers).
+# The rest of the stock init set is Android-framework plumbing (package
+# installer, credential/gatekeeper stores, media codecs, perfetto, incident and
+# storage reporting, camera, wificond/netd for a framework that is not there)
+# and Qualcomm modem-data/diag helpers (IPA, cnd, tftp) with nothing to serve.
+# Measured 2026-10-15: they cost no idle power, but they are ~30 processes
+# and their rc files on the container's critical boot path, and each one is a
+# potential poll/crash loop of the pixelstats kind. Every file below holds only
+# its own service stanza plus mkdir/property boilerplate. Masking is a
+# bind-mount of an empty file, like the USB and pixelstats cases above.
+#
+# NOT in this list, both found the hard way:
+#  - vendor.qti.diag.rc (diag-router): the QTI diag client library linked
+#    into the audio HAL (AGMIPC) spins on EOF when diag-router is gone,
+#    logging ~300 lines/s; each line also goes to /dev/pmsg0 and the spinner
+#    starves every other Android logger on the pmsg lock, including the
+#    bluetooth HAL, which then drops the controller.
+#  - vendor.qti.tftp.rc (tftp_server): it is the modem's remote file system
+#    (RFSA). Without it the modem never announces its WLAN process domain
+#    (no "PDR: Indication received from msm/modem/wlan_pd"), the WLAN
+#    firmware never reports ready and wlan0 never appears.
+#  - vendor.google_clockwork.wristorientation@1.0-service.rc: the sensors
+#    sub-HAL (sensors.usf.so) and the display offload HAL link its
+#    IWristOrientation interface and block in getService() until it is
+#    registered. Without it the sensors HAL never registers ISensors,
+#    sensorfwd never answers mce, and mce's D-Bus connection fills up
+#    with pending replies (no tilt, no ALS, power key ignored).
+# statsd and media.swcodec come from APEX rc files that apexd bind-mounts
+# into /apex without submounts, so they cannot be masked here; they are
+# disabled from the servicemanager.rc overlay below instead.
+# sscrpcd (vendor.sensors) is the sensors-DSP RPC daemon:
+# monaco has no SDSP, open_device_node fails, and init respawns it at ~1 Hz
+# (30 logcat lines per attempt).
+#  - vold.rc: also load-bearing (found the hard way, 2026-10-16). vold has no
+#    consumer, but init.rc exec's /system/bin/vdc synchronously several
+#    times (checkpoint markBootAttempt, prepareCheckpoint, keymaster
+#    earlyBootEnded); without vold the post-fs-data sequence never
+#    completes, apexd/linkerconfig never run and the watch reset itself
+#    about 90 s into every boot. It stays, EIO uevent noise and all.
+NOCONSUMER_RCS="
+system/etc/init/camera_service.rc
+system/etc/init/credstore.rc
+system/etc/init/gatekeeperd.rc
+system/etc/init/installd.rc
+system/etc/init/incidentd.rc
+system/etc/init/idmap2d.rc
+system/etc/init/storaged.rc
+system/etc/init/perfetto.rc
+system/etc/init/drmserver.rc
+system/etc/init/gpuservice.rc
+system/etc/init/mediaextractor.rc
+system/etc/init/mediametrics.rc
+system/etc/init/wificond.rc
+system/etc/init/android.system.net.netd@1.1-service.rc
+vendor/etc/init/android.hardware.gatekeeper@1.0-service-qti.rc
+vendor/etc/init/android.hardware.media.omx@1.0-service.rc
+vendor/etc/init/vendor.qti.media.c2@1.0-service.rc
+vendor/etc/init/ipacm.rc
+vendor/etc/init/ipacm-diag.rc
+vendor/etc/init/cnd.rc
+vendor/etc/init/slatedaemon.rc
+vendor/etc/init/qconfig.rc
+vendor/etc/init/vendor.qti.hardware.powerstateservice@1.0-service.rc
+vendor/etc/init/powerstateutility.rc
+vendor/etc/init/vendor.qti.hardware.healthservices@1.0-service.rc
+vendor/etc/init/vendor.sensors.sscrpcd.rc
+"
+: > /run/aurora-mask-empty.rc
+_n=0
+for _rc in $NOCONSUMER_RCS; do
+    _f="$ROOTFS/$_rc"
+    [ -f "$_f" ] || continue
+    mountpoint -q "$_f" && continue
+    mount --bind /run/aurora-mask-empty.rc "$_f" && _n=$((_n + 1))
+done
+echo "aurora-lxc-android: masked $_n no-consumer Android services"
+
 # Drop the CDSP and CVP remoteproc boot writes from init.qti.kernel.rc's
 # early-boot action. The Compute-DSP (camera ML / NN / FastRPC compute offload)
 # and CVP (Computer Vision Processor: camera EIS / motion / detection) only
@@ -372,6 +452,22 @@ service servicemanager /system/bin/servicemanager
     onrestart class_restart --only-enabled early_hal
     task_profiles ServiceCapacityLow
     shutdown critical
+
+# Not servicemanager's business, but this is the one system-side rc we
+# already overlay. media.swcodec (software codecs; it polls the masked
+# vendor codec HAL once a second forever) and statsd (framework metrics;
+# aurora-stats-service is the IStats sink) come from APEX rc files that
+# cannot be masked at the source (see NOCONSUMER_RCS). Disable them before
+# class_start main, and stop them if they slipped through anyway.
+on property:apexd.status=activated
+    disable media.swcodec
+    disable statsd
+
+on property:init.svc.media.swcodec=running
+    stop media.swcodec
+
+on property:init.svc.statsd=running
+    stop statsd
 RC
 
 # system_dlkm (kernel modules for the Android container) -- UBPorts
