@@ -24,8 +24,7 @@ SRC_URI = "git://android.googlesource.com/kernel/msm;branch=android-msm-bass-3.1
     file://0008-ARM-wire-up-getrandom-syscall.patch \
     file://0009-ARM-8933-1-replace-Sun-Solaris-style-flag-on-section.patch \
     file://0010-vfs-allow-umount-to-handle-mountpoints-without-reval.patch \
-    file://defconfig \
-    file://img_info "
+    file://defconfig "
 SRCREV = "4bcdb1888f288bff5bed803dc79ee6a9121d71c7"
 LINUX_VERSION ?= "3.10.40"
 LINUX_VERSION_EXTENSION = ""
@@ -50,4 +49,8 @@ do_install:append() {
     find ${D}/usr/src/ -name ..install.cmd | xargs rm -f
 }
 
-inherit mkboot old-kernel-gcc-hdrs
+MKBOOTIMG_CMDLINE = "androidboot.hardware=bass user_debug=31 maxcpus=4 msm_rtb.filter=0x3F pm_levels.sleep_disabled=1 selinux=0 SYSTEMD_CGROUP_ENABLE_LEGACY_FORCE=1"
+MKBOOTIMG_BOARD = "bass"
+MKBOOTIMG_ARGS = "--base 0x00000000 --kernel_offset 0x00008000 --ramdisk_offset 0x02000000 --tags_offset 0x01e00000 --pagesize 2048"
+
+inherit mkbootimg old-kernel-gcc-hdrs

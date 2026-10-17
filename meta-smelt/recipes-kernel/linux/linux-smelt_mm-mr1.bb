@@ -15,7 +15,6 @@ EXTRA_OEMAKE:append = " \
 
 SRC_URI = " git://android.googlesource.com/kernel/msm;branch=android-msm-smelt-3.10-marshmallow-mr1-wear-release;protocol=https \
     file://defconfig \
-    file://img_info \
     file://0001-scripts-dtc-Remove-redundant-YYLOC-global-declaratio.patch \
     file://0002-Revert-Enable-Nitrous-BT-power-management-driver.patch \
     file://0003-Revert-Add-Nitrous-driver-for-BT-power-management.patch \
@@ -55,4 +54,8 @@ do_install:append() {
     rm -rf ${D}/usr/src/usr/
 }
 
-inherit mkboot old-kernel-gcc-hdrs
+MKBOOTIMG_CMDLINE = "console=ttyHSL0,115200,n8 androidboot.console=ttyHSL0 androidboot.hardware=smelt utags.blkdev=/dev/mmcblk0p7 utags.backup=/dev/mmcblk0p14 user_debug=31 msm_rtb.filter=0x3 selinux=0 SYSTEMD_CGROUP_ENABLE_LEGACY_FORCE=1"
+MKBOOTIMG_BOARD = "smelt"
+MKBOOTIMG_ARGS = "--base 0x00000000 --kernel_offset 0x00008000 --ramdisk_offset 0x02000000 --tags_offset 0x01e00000 --pagesize 2048"
+
+inherit mkbootimg old-kernel-gcc-hdrs

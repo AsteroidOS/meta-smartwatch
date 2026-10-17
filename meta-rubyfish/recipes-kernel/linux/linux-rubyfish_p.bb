@@ -10,7 +10,6 @@ COMPATIBLE_MACHINE = "rubyfish"
 
 SRC_URI = " git://github.com/mobvoi/mobvoi-ticwatch-kernel;branch=mobvoi-android-msm-rover-4.9;protocol=https \
     file://defconfig \
-    file://img_info \
     file://0001-Disable-tracing.patch \
     file://0002-ARM-8933-1-replace-Sun-Solaris-style-flag-on-section.patch \
     file://0003-initramfs-Don-t-skip-initramfs.patch \
@@ -36,4 +35,8 @@ do_install:append() {
     find ${D}/usr/src/ -name ..install.cmd | xargs rm -f
 }
 
-inherit mkboot old-kernel-gcc-hdrs
+MKBOOTIMG_CMDLINE = "console=ttyMSM0,115200,n8 androidboot.console=ttyMSM0 androidboot.selinux=permissive androidboot.hardware=rubyfish user_debug=30 msm_rtb.filter=0x237 ehci-hcd.park=3 androidboot.bootdevice=7824900.sdhci lpm_levels.sleep_disabled=1 earlycon=msm_serial_dm,0x78b0000 vmalloc=300M androidboot.usbconfigfs=true loop.max_part=7 androidboot.memcg=true cgroup.memory=nokmem,nosocket buildvariant=user audit=0"
+MKBOOTIMG_BOARD = "rubyfish"
+MKBOOTIMG_ARGS = "--base 0x80000000 --kernel_offset 0x00008000 --ramdisk_offset 0x01000000 --tags_offset 0x0000100 --pagesize 2048"
+
+inherit mkbootimg old-kernel-gcc-hdrs
