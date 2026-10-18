@@ -107,3 +107,13 @@ CONFIG_FB_QCOM_CONT_SPLASH=y
 # proxies binder→/dev/vhci to expose it to BlueZ on the host side. With
 # this off, /dev/vhci doesn't exist and bluebinder has nowhere to write.
 CONFIG_BT_HCIVHCI=m
+
+# Google sets this so a kernel panic ends in a secure watchdog bite that
+# hands the SoC to their ramdump pipeline (SDI + download-mode cookie). We
+# never collect those dumps: with the cookie unarmed the bootloader calls
+# the bite an abnormal warm reset and hard-resets the device, wiping the
+# ramoops console and panic record from DRAM; with it armed the watch parks
+# in USB ramdump mode until the crown is held. Off, a panic restarts through
+# PSCI like a clean reboot and the ramoops console and panic record survive
+# into the next boot's pstore, where systemd-pstore archives them.
+# CONFIG_QCOM_FORCE_WDOG_BITE_ON_PANIC is not set
