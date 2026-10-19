@@ -76,6 +76,10 @@ qcom_aoss.ko
 msm_qmp.ko
 qcom_hwspinlock.ko
 rproc_qcom_common.ko
+# qcom_q6v5_pas right after rproc_qcom_common: load the ADSP/modem remoteproc
+# driver deterministically here (its modules.dep line carries every parent)
+# instead of relying on a later udev coldplug that sometimes never happens.
+qcom_q6v5_pas.ko
 adsp_loader_dlkm.ko
 cdsp-loader.ko
 qcom_glink.ko

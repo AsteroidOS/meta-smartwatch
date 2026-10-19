@@ -18,7 +18,8 @@ PACKAGE_ARCH = "${MACHINE_ARCH}"
 inherit systemd
 
 SRC_URI = "file://aurora-vendor-mount.sh \
-           file://aurora-vendor-mount.service"
+           file://aurora-vendor-mount.service \
+           file://59-aurora-partitions.rules"
 S = "${UNPACKDIR}"
 
 RDEPENDS:${PN} = "lvm2 util-linux-mount"
@@ -35,6 +36,10 @@ do_install() {
     ln -sf ../../../systemd/system/aurora-vendor-mount.service \
         ${D}${sysconfdir}/systemd/system/local-fs.target.wants/aurora-vendor-mount.service
 
+    install -d ${D}${sysconfdir}/udev/rules.d
+    install -m 0644 ${UNPACKDIR}/59-aurora-partitions.rules \
+        ${D}${sysconfdir}/udev/rules.d/59-aurora-partitions.rules
+
     install -d ${D}/vendor
 }
 
@@ -42,4 +47,5 @@ SYSTEMD_SERVICE:${PN} = "aurora-vendor-mount.service"
 FILES:${PN} = "${libexecdir}/aurora-vendor-mount.sh \
                ${systemd_unitdir}/system/aurora-vendor-mount.service \
                ${sysconfdir}/systemd/system/local-fs.target.wants/aurora-vendor-mount.service \
+               ${sysconfdir}/udev/rules.d/59-aurora-partitions.rules \
                /vendor"
