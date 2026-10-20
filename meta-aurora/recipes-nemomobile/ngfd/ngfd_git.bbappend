@@ -1,17 +1,10 @@
-# Aurora vibrator path: ffmemless via cs40l26's FF_PERIODIC sine. We
-# build on top of meta-asteroid's:
-#   - 0003-ffmemless-accept-any-FF-capability    (cs40l26 selection)
-#   - 0004-ffmemless-add-FF_PERIODIC-fallback... (default fall-back
-#     effect uploads on devices without FF_CONSTANT/FF_RUMBLE)
-#   - 0005-ffmemless-fire-single-shot-and-honor-haptic.duration
-#     (single-shot events fire, and haptic.duration in events.d
-#     drives the kernel-side effect length)
-#
-# With 0005 every event hits ffmemless's start path and plays the
-# default fall-back sine, with a duration set by haptic.duration in
-# events.d. Different events deserve distinct durations, so override
-# them here. The defaults below are tuned for cs40l26's BUZZGEN whose
-# single-shot ceiling is ~1020ms (255 * 4ms).
+# Aurora vibrates through cs40l26's FF_PERIODIC sine via ffmemless, with
+# meta-asteroid's 0003-ffmemless-support-FF_PERIODIC-only-haptic-drivers
+# patch. Single-shot events play the default fall-back effect for
+# haptic.duration ms, set per event below. Alarm and ringtone play the
+# clock and ringtone effects from 50-ffmemless.ini, which repeat with a
+# pause until the client stops them. cs40l26's BUZZGEN caps a single
+# effect at ~1020ms (255 * 4ms).
 
 FILESEXTRAPATHS:prepend:aurora := "${THISDIR}/ngfd:"
 
@@ -42,16 +35,4 @@ do_install:append:aurora() {
         sed -i '/^haptic\.duration/d; /^sound\.repeat/d' "$f"
         echo 'haptic.duration = 800' >> "$f"
     fi
-
-    # Alarm and ringtone are already set up with sound.repeat = true
-    # upstream, so they'll loop ffmemless. Pin the kernel-side per-shot
-    # duration to the BUZZGEN ceiling so each pulse in the loop is as
-    # long as the chip can manage.
-    for e in alarm ringtone; do
-        f=${D}/usr/share/ngfd/events.d/${e}.ini
-        if [ -f "$f" ]; then
-            sed -i '/^haptic\.duration/d' "$f"
-            echo 'haptic.duration = 1000' >> "$f"
-        fi
-    done
 }
