@@ -48,6 +48,7 @@ SRC_URI = "\
   ${AGM}/google-modules/rotary-encoders;protocol=https;branch=android-msm-eos-5.15-tm-wear-kr3-pixel-watch;name=rotary;destsuffix=src/private/google-modules/rotary-encoders \
   ${AGM}/google-modules/sound/mcu_mic_codec;protocol=https;branch=android-msm-eos-5.15-tm-wear-kr3-pixel-watch;name=mcumic;destsuffix=src/private/google-modules/sound/mcu_mic_codec \
   ${AGM}/google-modules/amplifiers;protocol=https;branch=android-msm-eos-5.15-tm-wear-kr3-pixel-watch;name=amplifiers;destsuffix=src/private/google-modules/amplifiers \
+  ${AGM}/google-modules/nfc;protocol=https;branch=android-msm-eos-5.15-tm-wear-kr3-pixel-watch;name=nfc;destsuffix=src/private/google-modules/nfc \
   file://0001-audio-monaco-bind-haptics-codec-by-deterministic-MFD.patch \
   file://0002-icnss2-register-cnss-genl-family-for-ADRASTEA-too.patch \
   file://0003-bt-btpower-make-bt_clk_enable-idempotent.patch \
@@ -94,6 +95,7 @@ SRCREV_rotary      = "73dc43decfde15cf3fd1623b39a5f8f4dfec4fc9"
 # Same role as petc_input_filter on a different nanohub_io channel.
 SRCREV_mcumic      = "94deec7a3e641a845ebe7468341e902d0d2304fa"
 SRCREV_amplifiers  = "06552df7596558c5b9b0fe1ad39fefc4ae116ef7"
+SRCREV_nfc         = "bcb7942606f436a41a487fb9b90b0ecf88c91e96"
 SRCREV_FORMAT = "audio_bt_dataipa_datarmnet_datarmnetext_display_graphics_mm_mmrm_securemsm_video_wlanplat_qcacld_qcacmn_wlanfwapi_socmsm_bms_nvttouch_nanohub_rotary_mcumic_amplifiers"
 
 S = "${UNPACKDIR}/src"
@@ -142,6 +144,7 @@ EXT_MODULES = "\
   private/google-modules/rotary-encoders/petc_input_filter \
   private/google-modules/sound/mcu_mic_codec \
   private/google-modules/amplifiers/cs40l26 \
+  private/google-modules/nfc/nxp/snxxx \
 "
 # qcacld-3.0 is the WiFi driver. Building it out-of-tree (via M=) against this
 # kernel needs four accommodations, all applied here / in linux-aurora:
