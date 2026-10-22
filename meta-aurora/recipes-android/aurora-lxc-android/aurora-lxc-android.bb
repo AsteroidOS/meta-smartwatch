@@ -88,6 +88,12 @@ do_install() {
     # after the tarball's mount.sh.
     echo 'lxc.hook.mount = /var/lib/lxc/android/mount-binder.sh' >> ${D}${localstatedir}/lib/lxc/android/config
 
+    # Off-mode-charging boots carry androidboot.mode=charger in the bootconfig
+    # and Android init would skip late-init (no HALs). The start script writes
+    # a copy with the mode forced to normal; show that one to the container.
+    echo 'lxc.mount.entry = /run/aurora-bootconfig proc/bootconfig none bind,ro,optional 0 0' \
+        >> ${D}${localstatedir}/lib/lxc/android/config
+
     # Optional pre-start.d/ and overrides/ from the bundle.
     if [ -n "$(ls -A ${UNPACKDIR}/pre-start.d 2>/dev/null)" ]; then
         cp -a ${UNPACKDIR}/pre-start.d/. ${D}${localstatedir}/lib/lxc/android/pre-start.d/
