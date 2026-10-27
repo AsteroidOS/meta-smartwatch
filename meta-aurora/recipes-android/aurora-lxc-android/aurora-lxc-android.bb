@@ -96,6 +96,7 @@ do_install() {
     if [ -n "$(ls -A ${UNPACKDIR}/overrides 2>/dev/null)" ]; then
         cp -a ${UNPACKDIR}/overrides/. ${D}${localstatedir}/lib/lxc/android/overrides/
     fi
+    chown -R root:root ${D}${localstatedir}/lib/lxc/android
 
     # systemd unit + start script
     install -d ${D}${libexecdir}
