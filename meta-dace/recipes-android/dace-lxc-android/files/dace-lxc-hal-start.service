@@ -1,0 +1,17 @@
+[Unit]
+Description=dace: start the container graphics HALs (allocator + composer)
+DefaultDependencies=no
+After=dace-lxc-android.service
+Requires=dace-lxc-android.service
+Before=basic.target
+ConditionPathExists=/var/lib/lxc/android/config
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/libexec/dace-lxc-hal-start.sh
+StandardOutput=journal+console
+StandardError=journal+console
+
+[Install]
+WantedBy=multi-user.target

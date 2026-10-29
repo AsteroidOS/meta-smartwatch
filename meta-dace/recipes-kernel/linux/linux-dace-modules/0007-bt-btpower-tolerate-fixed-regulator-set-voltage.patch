@@ -1,0 +1,32 @@
+From: Cristodcgomez <cristo.c.mc@gmail.com>
+Subject: [PATCH] bt: btpower: tolerate the -EINVAL from regulator_set_voltage
+
+On monaco the BT rails (qcom,bt-vdd-io/core/pa/xtal) are FIXED RPM regulators
+(min==max), but btpower asks for a range (e.g. 3000000-3312000 for PA) and the
+core returns -EINVAL even though the target value is the one the rail already
+has. btpower aborts bluetooth_power(1) -> the chip is not powered and btattach
+hangs (no reset, but no HCI). Do not abort: log and continue with the enable.
+
+Upstream-Status: Inappropriate [dace bring-up]
+Signed-off-by: Cristodcgomez <cristo.c.mc@gmail.com>
+---
+
+--- a/private/msm-google-modules/bt/pwr/btpower.c
++++ b/private/msm-google-modules/bt/pwr/btpower.c
+@@ -292,9 +292,14 @@
+ 						vreg->min_vol,
+ 						vreg->max_vol);
+ 			if (rc < 0) {
+-				pr_err("%s: regulator_set_voltage(%s) failed rc=%d\n",
++				/* dace: on monaco the BT rails are FIXED RPM
++				 * regulators (min==max) and the core rejects
++				 * the range with -EINVAL even though the value is
++				 * the correct one. Do not abort; the rail is already
++				 * at its voltage, continue with the enable. */
++				pr_warn("%s: set_voltage(%s) rc=%d (fixed rail, ignored)\n",
+ 						__func__, vreg->name, rc);
+-				goto out;
++				rc = 0;
+ 			}
+ 		}
+ 

@@ -1,0 +1,27 @@
+From: Cristodcgomez <cristo.c.mc@gmail.com>
+Subject: [PATCH] usb: dwc3: dwc3-msm: propagate the vbus change in dr_mode=peripheral
+
+The state machine (dwc3_ext_event_notify: B_SESS_VLD) is only re-evaluated if
+resume_work is queued, and the vbus_notifier only did it for dr_mode=OTG.
+In dr_mode=peripheral the extcon updated vbus_active but the controller did not
+enter LPM on disconnect: the 4e00000.hsusb wakeup source stayed active
+(active_count=1 since boot) and autosleep never suspended.
+Upstream-Status: Inappropriate [dace bring-up]
+Signed-off-by: Cristodcgomez <cristo.c.mc@gmail.com>
+---
+
+--- a/drivers/usb/dwc3/dwc3-msm-core.c
++++ b/drivers/usb/dwc3/dwc3-msm-core.c
+@@ -4678,7 +4678,11 @@
+ 	}
+ 
+ 	mdwc->ext_idx = enb->idx;
+-	if (mdwc->dr_mode == USB_DR_MODE_OTG && !mdwc->in_restart)
++	/* dace: in dr_mode=peripheral the state machine (B_SESS_VLD) must also
++	 * be re-evaluated when vbus changes, or on unplugging the cable the
++	 * controller does not enter LPM, the wakeup source stays active and
++	 * blocks autosleep. resume_work -> dwc3_ext_event_notify -> sm_work. */
++	if (!mdwc->in_restart)
+ 		queue_work(mdwc->dwc3_wq, &mdwc->resume_work);
+ 
+ 	return NOTIFY_DONE;

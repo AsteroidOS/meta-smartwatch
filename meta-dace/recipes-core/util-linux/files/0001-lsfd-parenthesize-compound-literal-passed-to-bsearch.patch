@@ -1,0 +1,30 @@
+From 8f3c2a1b4e6d9c0f5a7b2e8d1c4f6a0b3e5d7c9a Mon Sep 17 00:00:00 2001
+From: AsteroidOS TicWatch Pro 5 port <port@localhost>
+Date: Tue, 19 Aug 2026 00:00:00 +0200
+Subject: [PATCH] lsfd: parenthesize compound literal passed to bsearch
+
+Newer glibc (>= 2.41) turns bsearch() into a function-like macro when
+_ISOC23_SOURCE is enabled (which _GNU_SOURCE implies unconditionally).
+The preprocessor splits macro arguments on commas at nesting level 0,
+and braces do not protect commas, so the trailing comma inside the
+compound literal broke argument parsing:
+
+  misc-utils/lsfd.c:1573: error: macro 'bsearch' passed 6 arguments, but takes just 5
+
+Wrapping the compound literal in parentheses makes it a single macro
+argument. Mirrors upstream util-linux fix.
+
+Upstream-Status: Backport [util-linux lsfd bsearch compound literal fix]
+
+Signed-off-by: AsteroidOS TicWatch Pro 5 port <port@localhost>
+--- a/misc-utils/lsfd.c
++++ b/misc-utils/lsfd.c
+@@ -1569,7 +1569,7 @@
+ 		struct file *file = list_entry(f, struct file, files);
+ 		if (is_opened_file(file) && !file->multiplexed) {
+ 			int fd = file->association;
+-			if (bsearch(&(struct pollfd){.fd = fd,}, local.iov_base,
++			if (bsearch((&(struct pollfd){.fd = fd,}), local.iov_base,
+ 				    nfds, sizeof(struct pollfd), pollfdcmp))
+ 				file->multiplexed = 1;
+ 		}
