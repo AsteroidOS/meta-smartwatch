@@ -184,6 +184,21 @@ if [ -f "$QTI_KERNEL_RC" ] && ! mountpoint -q "$QTI_KERNEL_RC"; then
     fi
 fi
 
+# The modem location engine starts sensor-assisted positioning (SAP=PREMIUM
+# in izat.conf) with every GNSS session and opens a sensor client on the
+# ADSP sensor process, which then throws (PD_ERR sensor_process SNS_SEE).
+# ADSP recovery is disabled, so every GNSS start panicked the kernel.
+# Run the engine standalone. Same overlay idiom as init.qti.kernel.rc above.
+IZAT_CONF="$ROOTFS/vendor/etc/izat.conf"
+if [ -f "$IZAT_CONF" ] && ! mountpoint -q "$IZAT_CONF"; then
+    IZAT_CONF_OVERLAY=/run/aurora-izat.conf
+    sed -e 's/^SAP=.*/SAP=DISABLED/' "$IZAT_CONF" > "$IZAT_CONF_OVERLAY"
+    chmod 0644 "$IZAT_CONF_OVERLAY"
+    if mount --bind "$IZAT_CONF_OVERLAY" "$IZAT_CONF"; then
+        echo "aurora-lxc-android: izat.conf overlay: SAP=DISABLED"
+    fi
+fi
+
 # Dump g1 state BEFORE container starts so we can compare against what
 # aurora-udc-bind sees later. init_gfs.service should have created g1 with
 # ffs.adb; this lets us know whether anything is touching it before LXC.
