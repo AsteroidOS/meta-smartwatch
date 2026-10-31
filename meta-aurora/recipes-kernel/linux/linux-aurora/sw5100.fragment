@@ -100,6 +100,41 @@ CONFIG_FB=y
 CONFIG_FB_QCOM_CONT_SPLASH=y
 # CONFIG_DRM_FBDEV_EMULATION is not set
 
+# Opportunistic suspend (autosleep) — the enabler for system suspend.
+#
+# AsteroidOS delegates power/suspend to mce (sailfishos/mce), which is
+# built WITH its wakelock + autosuspend state machine and has it enabled
+# by default (autosuspend_policy=ENABLED). At runtime mce's lwl_probe()
+# picks a kernel suspend model: SUSPEND_TYPE_AUTO iff /sys/power/autosleep
+# is writable, else EARLY iff /sys/power/state accepts "on", else NONE.
+# On this tree autosleep is absent and "on" is rejected, so mce resolves
+# to SUSPEND_TYPE_NONE: its suspend trigger is inert, so mce never hands
+# off and instead parks its "mce_mux" wakelock permanently — HW-observed,
+# /sys/power/wake_lock=[mce_mux] held continuously across display on/off,
+# and uptime==wall-time (the watch accumulates ~0s of suspend). This is
+# THE reason aurora never sleeps below the active-idle floor (~36-55mA).
+#
+# CONFIG_PM_AUTOSLEEP=y creates /sys/power/autosleep -> mce auto-detects
+# SUSPEND_TYPE_AUTO, releases mce_mux on display-blank and writes "mem"
+# to autosleep, arming kernel opportunistic suspend: the kernel then
+# suspends-to-RAM whenever every wakeup source is released. Prereqs are
+# already met (PM_SLEEP/PM_WAKELOCKS/SUSPEND all =y); PM_AUTOSLEEP only
+# depends on PM_SLEEP, so this is a self-contained single-symbol enable.
+#
+# Deliberate divergence from stock WearOS GKI (which leaves this unset):
+# WearOS reaches deep sleep via Android's userspace SystemSuspend/
+# libsuspend, coordinating /sys/power/wakeup_count -> "mem" itself. We do
+# not run that coordinator; mce is ours, and mce's clean backend is
+# kernel autosleep. Enabling it here is the aurora-specific way to give
+# our existing coordinator a working trigger, not a convergence toward
+# Google's config.
+#
+# NB this is the necessary enabler, not the whole fix: with autosleep
+# armed the kernel still won't suspend while the Android LXC container
+# holds wakeup sources (EPOLLWAKEUP/timerfd) or has a task that refuses
+# to freeze -- that container-side release is a separate, userspace fix.
+CONFIG_PM_AUTOSLEEP=y
+
 # Virtual HCI device — backs /dev/vhci, which bluebinder writes HCI
 # packets to so the kernel BlueZ stack sees them as if they came from a
 # real controller. The QCA BT chip on this watch is owned by the Android
@@ -107,3 +142,14 @@ CONFIG_FB_QCOM_CONT_SPLASH=y
 # proxies binder→/dev/vhci to expose it to BlueZ on the host side. With
 # this off, /dev/vhci doesn't exist and bluebinder has nowhere to write.
 CONFIG_BT_HCIVHCI=m
+
+# Qualcomm ships this off in monaco_GKI.config because Android's WiFi
+# framework (wificond/WifiStateMachine) enables nl80211 powersave itself
+# once a network connects. We run connman, which never touches the knob,
+# so every wdev kept cfg80211's initial value: powersave OFF, i.e. the
+# WLAN chip in full-active RX around the clock — measured at ~320 mW on
+# the charger ammeter (2026-07-21), both awake AND across AP suspend,
+# the single largest battery drain on this watch. Upstream's default is
+# y; restore it so the driver comes up in IMPS/BMPS without needing a
+# userspace `iw dev wlan0 set power_save on`.
+CONFIG_CFG80211_DEFAULT_PS=y
