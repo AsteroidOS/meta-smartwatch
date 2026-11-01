@@ -1,0 +1,1 @@
+OPTIONS="-r nitrous_bluetooth -c /usr/share/bluetooth-rfkill-event/bcm4343.conf"
