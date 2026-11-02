@@ -13,7 +13,6 @@ inherit kernel-gcc8
 
 SRC_URI = "git://github.com/fossil-engineering/kernel-msm-fossil-cw;branch=fossil-android-msm-hoki-lw1.2-4.14;protocol=https \
            file://defconfig \
-           file://img_info \
            file://0001-dts-Add-hoki-device-trees.patch \
            file://0002-mmc-Fix-embedded_sdio_data-duplicate-definition.patch \
            file://0003-video-fbdev-msm-Provide-mdss_dsi_switch_page.patch \
@@ -39,4 +38,8 @@ do_install:append() {
     find ${D}/usr/src/ -name ..install.cmd | xargs rm -f
 }
 
-inherit mkboot old-kernel-gcc-hdrs
+MKBOOTIMG_CMDLINE = "console=ttyMSM0,115200,n8 androidboot.console=ttyMSM0 androidboot.selinux=permissive androidboot.hardware=hoki user_debug=30 msm_rtb.filter=0x237 ehci-hcd.park=3 androidboot.bootdevice=7824900.sdhci lpm_levels.sleep_disabled=1 earlycon=msm_serial_dm,0x78b0000 vmalloc=300M androidboot.usbconfigfs=true loop.max_part=7 androidboot.memcg=true cgroup.memory=nokmem,nosocket buildvariant=user audit=0"
+MKBOOTIMG_BOARD = "hoki"
+MKBOOTIMG_ARGS = "--base 0x80000000 --kernel_offset 0x00008000 --ramdisk_offset 0x01000000 --tags_offset 0x0000100 --pagesize 4096"
+
+inherit mkbootimg old-kernel-gcc-hdrs
