@@ -57,7 +57,7 @@ service deamonserver /system/bin/deamonserver
     class core
     oneshot
 
-service pm-service /vendor/bin/pm-service
+service pm-service /usr/bin/sh -c "/vendor/bin/pm-service & trap 'kill -INT $$!' TERM; wait; wait"
     class core
     oneshot
 
