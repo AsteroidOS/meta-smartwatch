@@ -1,0 +1,66 @@
+dace: cfi_check ABI slot in struct module (compat with stock vendor .ko's)
+
+The stock kernel (Mobvoi/Google eos, msm-5.15 g7f9d6c16b5cd) is built with
+CONFIG_CFI_CLANG=y, which adds the `cfi_check_fn cfi_check` field right after
+`num_syms` in `struct module` (+8 bytes for everything after). Our kernel
+cannot enable CFI (CFI_CLANG requires LTO_CLANG, off due to host OOM), so the
+field does not exist and ALL later fields become misaligned with respect to the
+vendor prebuilt .ko's.
+
+Measured consequence (2026-09-13, Zinitix touch): the stock .ko's load
+(initstate=live) but the loader reads `mod->init` at OUR offset (8 bytes
+earlier), where there is NULL -> do_init_module NEVER calls init: the module
+stays live, registers nothing, prints nothing and does not crash. It affected
+zinitix-i2c, slate_events_bridge, slate_mobvoi_rpc and the rest of the vendor
+collection.
+
+With the gap, the stock .ko's keep their layout (init/exit/kp/kallsyms/refcnt
+at the same offsets) and their init runs normally.
+Offsets measured in .gnu.linkonce.this_module: init@0x178/exit@0x378 (stock)
+vs init@0x170/exit@0x368 (ours without the slot). Verified live: the vendor
+driver bt541_ts_device probes SUCCESS and the touch works.
+
+SCS note: the stock .ko's use shadow-call-stack (x18); that is covered by
+CONFIG_SHADOW_CALL_STACK=y in sw5100.fragment (not by this patch).
+
+Upstream-Status: Inappropriate [dace bring-up: compat with vendor prebuilt modules]
+Signed-off-by: dace-port <dace@localhost>
+diff --git a/include/linux/module.h b/include/linux/module.h
+index 0f004d5..b6420b8 100644
+--- a/include/linux/module.h
++++ b/include/linux/module.h
+@@ -391,6 +391,19 @@ struct module {
+ 
+ #ifdef CONFIG_CFI_CLANG
+ 	cfi_check_fn cfi_check;
++#else
++	/*
++	 * dace: ABI slot. The stock kernel (Mobvoi/Google eos) is built with
++	 * CONFIG_CFI_CLANG=y, which places `cfi_check_fn cfi_check` right after
++	 * num_syms (+8). We keep the gap so that the vendor prebuilt modules keep
++	 * their `struct module` layout aligned with ours (mod->init, mod->exit,
++	 * mod->kp, ... at the same offsets). Without it, the loader reads
++	 * mod->init from a misaligned offset (NULL) and the stock modules load but
++	 * their init is NEVER executed.
++	 * Measured: init@0x178/exit@0x378 (stock) vs init@0x170/exit@0x368
++	 * (ours, without the slot).
++	 */
++	void *cfi_check_abi_pad;
+ #endif
+ 
+ 	/* Kernel parameters. */
+@@ -422,6 +435,14 @@ struct module {
+ 	/* Startup function. */
+ 	int (*init)(void);
+ 
++	/*
++	 * dace: second ABI slot. Stock also has +8 here (between init and
++	 * exit) relative to our kernel (mod->exit: 0x378 stock vs 0x368 ours,
++	 * with both this_module at 0x3c0). Without it, mod->exit of the stock
++	 * .ko's would be misaligned and rmmod would jump to garbage.
++	 */
++	void *dace_abi_pad_post_init;
++
+ 	/* Core layout: rbtree is accessed frequently, so keep together. */
+ 	struct module_layout core_layout __module_layout_align;
+ 	struct module_layout init_layout;

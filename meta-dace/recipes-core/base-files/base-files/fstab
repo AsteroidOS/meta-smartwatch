@@ -1,0 +1,9 @@
+/dev/root            /                    auto       defaults              1  1
+proc                 /proc                proc       defaults              0  0
+devpts               /dev/pts             devpts     mode=0620,gid=5       0  0
+tmpfs                /run                 tmpfs      mode=0755,nodev,nosuid,strictatime 0  0
+tmpfs                /var/volatile        tmpfs      defaults              0  0
+# nofail keeps the persist partition from blocking the boot if mounting fails.
+# p23 = persist on the T5 (p16 is abl: the recipe was copied from the Pixel
+# Watch 2 and mounted the 1 MB bootloader as /persist -> persist.mount failed).
+/dev/mmcblk0p23      /persist             auto       nofail,nosuid,nodev,noatime    0  0

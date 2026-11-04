@@ -1,0 +1,16 @@
+[Unit]
+Description=dace: attach Bluetooth QCA WCN3988 on /dev/ttyHS0 (UART, -P qca)
+After=dev-ttyHS0.device
+Before=bluetooth.service
+Wants=bluetooth.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/btattach -B /dev/ttyHS0 -P qca
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal+console
+StandardError=journal+console
+
+[Install]
+WantedBy=multi-user.target
