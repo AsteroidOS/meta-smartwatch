@@ -1,0 +1,13 @@
+[Unit]
+Description=aurora: re-register BLE advertising after Bluetooth is switched on
+After=bluetooth.service dbus.service
+Wants=bluetooth.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/aurora-bt-adv-rearm.sh
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
