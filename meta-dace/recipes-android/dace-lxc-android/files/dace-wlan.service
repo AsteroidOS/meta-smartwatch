@@ -1,0 +1,23 @@
+[Unit]
+Description=dace: WLAN (qcacld/icnss2) bring-up, aurora-style
+Documentation=file:///usr/libexec/dace-wlan.sh
+DefaultDependencies=no
+# The WLAN chain (modules) is left loaded by dace-modules-load; the ADSP and
+# firmware_mnt are set up by dace-vendor-mount; the slate MCU (which icnss2
+# needs because of qcom,is_slate_rfa) is started by dace-slate-mcu (late, ~60 s).
+# We run after all of that.
+After=dace-lxc-android.service dace-lxc-hal-start.service dace-slate-mcu.service dace-modules-load.service
+Wants=dace-lxc-android.service dace-slate-mcu.service
+ConditionPathExists=/sys/class/remoteproc/remoteproc1/state
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/libexec/dace-wlan.sh
+# Do NOT write to journald/console: the script logs to /run and /var/log.
+StandardOutput=null
+StandardError=null
+TimeoutStartSec=480
+
+[Install]
+WantedBy=multi-user.target

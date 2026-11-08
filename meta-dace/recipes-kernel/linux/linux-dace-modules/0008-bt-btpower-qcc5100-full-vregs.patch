@@ -1,0 +1,43 @@
+From: Cristodcgomez <cristo.c.mc@gmail.com>
+Subject: [PATCH] bt: btpower: full rails (io/core/pa/xtal) for qcc5100
+
+On monaco the BT shares rails with the WLAN: IO=L17A (1.8V),
+core/RFA=L13A (1.304V), PA/CH0=L26A (3.0-3.304V), XO=L14A (1.8V) -- values
+from the stock DTSI monaco-standalone-idp-v1.dtsi. The generic qcc5100 table
+only declares 'pa' and at 1.7-1.9V, so bluetooth_power(1) did not turn on io
+or core: the BT chip was left UNPOWERED (pm5100_l13/l17 at 'disabled' in
+/sys/class/regulator) and did not answer the HAL handshake (opens ttyHS0 at
+2400 bps and dies with 'InitTimeOut' + 'UART driver returns err code = 0x55').
+With soc=slate the BT HAL does not vote regulators ("FOR SLATE not voting any
+Regulators"), so this enable is the ONLY way to power the chip.
+
+Upstream-Status: Inappropriate [dace bring-up]
+Signed-off-by: Cristodcgomez <cristo.c.mc@gmail.com>
+---
+
+--- a/private/msm-google-modules/bt/pwr/btpower.c	2026-09-20 19:56:40.346339722 +0200
++++ b/private/msm-google-modules/bt/pwr/btpower.c	2026-09-20 19:56:40.360100598 +0200
+@@ -179,9 +179,22 @@
+ };
+ 
+ // Regulator structure for QCC5100 BT SoC series
++// dace: on monaco (SW5100/TicWatch Pro 5) the BT shares rails with the WLAN:
++// IO=L17A (1.8V), core/RFA=L13A (1.304V), PA/CH0=L26A (3.0-3.304V), XO=L14A
++// (1.8V) -- values from the stock DTSI monaco-standalone-idp-v1.dtsi. The
++// generic qcc5100 table only has 'pa' and at 1.7-1.9V, so bluetooth_power(1)
++// did NOT turn on io/core: the chip was left UNPOWERED and mute (handshake at
++// 2400 bps -> err 0x55). With soc=slate the HAL does not vote regulators
++// ("FOR SLATE not voting any Regulators"), so this enable is the ONLY way.
+ static struct bt_power_vreg_data bt_vreg_info_qcc5xxx[] = {
+-	{NULL, "qcom,bt-vdd-pa", 1700000, 1900000, 0, false, false,
++	{NULL, "qcom,bt-vdd-io",   1700000, 1900000, 0, false, false,
++			{BT_VDD_IO_LDO, BT_VDD_IO_LDO_CURRENT}},
++	{NULL, "qcom,bt-vdd-core", 1304000, 1304000, 0, false, false,
++			{BT_VDD_CORE_LDO, BT_VDD_CORE_LDO_CURRENT}},
++	{NULL, "qcom,bt-vdd-pa",   3000000, 3312000, 0, false, false,
+ 			{BT_VDD_PA_LDO, BT_VDD_PA_LDO_CURRENT}},
++	{NULL, "qcom,bt-vdd-xtal", 1700000, 1900000, 0, false, false,
++			{BT_VDD_XTAL_LDO, BT_VDD_XTAL_LDO_CURRENT}},
+ };
+ 
+ static struct bt_power bt_vreg_info_qca6174 = {

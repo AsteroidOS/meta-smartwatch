@@ -1,0 +1,98 @@
+From: Cristodcgomez <cristo.c.mc@gmail.com>
+Subject: [PATCH] usb: phy: phy-msm-snps-hs: tolerate a firmware-owned EUD/LDO (dace)
+
+The bootloader leaves the HS phy LDOs and the EUD block enabled, but the
+upstream probe treats the EUD ioremap and the regulator handles as mandatory
+and bails out if they are missing. On dace the EUD region is reserved by the
+bootloader and the LDOs are not described as supplies, so the phy never probes
+and no UDC appears.
+
+Fall back to NULL for both instead of failing, and arm EUD_SPOOF_CONNECT so the
+glue connects without a real VBUS source (there is no charger on this watch).
+
+Upstream-Status: Inappropriate [dace bring-up]
+Signed-off-by: Cristodcgomez <cristo.c.mc@gmail.com>
+---
+diff --git a/drivers/usb/phy/phy-msm-snps-hs.c b/drivers/usb/phy/phy-msm-snps-hs.c
+index 2b55f17e5..8610a8f60 100644
+--- a/drivers/usb/phy/phy-msm-snps-hs.c
++++ b/drivers/usb/phy/phy-msm-snps-hs.c
+@@ -177,6 +177,10 @@ static int msm_hsphy_enable_power(struct msm_hsphy *phy, bool on)
+ 		return 0;
+ 	}
+ 
++	/* dace B: no LDO control -> the bootloader left them on */
++	if (!phy->vdd && !phy->vdda18 && !phy->vdda33)
++		return 0;
++
+ 	if (!on)
+ 		goto disable_vdda33;
+ 
+@@ -803,17 +807,18 @@ static int msm_hsphy_probe(struct platform_device *pdev)
+ 				phy->phy_rcal_reg);
+ 	}
+ 
+ 	res = platform_get_resource_byname(pdev, IORESOURCE_MEM,
+ 			"eud_enable_reg");
+ 	if (res) {
+-		phy->eud_enable_reg = devm_ioremap_resource(dev, res);
++		/* dace: EUD reserves 0x1612000; plain, tolerant ioremap */
++		phy->eud_enable_reg = devm_ioremap(dev, res->start, resource_size(res));
+ 		if (IS_ERR(phy->eud_enable_reg)) {
+-			dev_err(dev, "err getting eud_enable_reg address\n");
+-			return PTR_ERR(phy->eud_enable_reg);
++			dev_dbg(dev, "eud_enable_reg not available (bootloader on)");
++			phy->eud_enable_reg = NULL;
+ 		}
+ 		phy->eud_reg = res->start;
+ 	}
+ 
+ 	/* ref_clk_src is needed irrespective of SE_CLK or DIFF_CLK usage */
+ 	phy->ref_clk_src = devm_clk_get(dev, "ref_clk_src");
+ 	if (IS_ERR(phy->ref_clk_src)) {
+@@ -880,25 +885,25 @@ static int msm_hsphy_probe(struct platform_device *pdev)
+ 	}
+ 
+ 
++	/* dace B: optional LDO (bootloader leaves on) */
+ 	phy->vdd = devm_regulator_get(dev, "vdd");
+ 	if (IS_ERR(phy->vdd)) {
+-		dev_err(dev, "unable to get vdd supply\n");
+-		ret = PTR_ERR(phy->vdd);
+-		goto err_ret;
++		dev_dbg(dev, "vdd not available (bootloader on)");
++		phy->vdd = NULL;
+ 	}
+ 
++	/* dace B: optional LDO (bootloader leaves on) */
+ 	phy->vdda33 = devm_regulator_get(dev, "vdda33");
+ 	if (IS_ERR(phy->vdda33)) {
+-		dev_err(dev, "unable to get vdda33 supply\n");
+-		ret = PTR_ERR(phy->vdda33);
+-		goto err_ret;
++		dev_dbg(dev, "vdda33 not available (bootloader on)");
++		phy->vdda33 = NULL;
+ 	}
+ 
++	/* dace B: optional LDO (bootloader leaves on) */
+ 	phy->vdda18 = devm_regulator_get(dev, "vdda18");
+ 	if (IS_ERR(phy->vdda18)) {
+-		dev_err(dev, "unable to get vdda18 supply\n");
+-		ret = PTR_ERR(phy->vdda18);
+-		goto err_ret;
++		dev_dbg(dev, "vdda18 not available (bootloader on)");
++		phy->vdda18 = NULL;
+ 	}
+ 
+ 	mutex_init(&phy->phy_lock);
+@@ -931,6 +936,10 @@
+ 	 */
+ 	if (phy->eud_enable_reg && readl_relaxed(phy->eud_enable_reg))
+ 		msm_hsphy_enable_power(phy, true);
++	/* dace: force cable connected (EUD_SPOOF_CONNECT) since the charger (the
++	 * VBUS source) is not there; without this dwc3-msm never arms the connect
++	 * path and the host does not enumerate even though the UDC exists. */
++	phy->phy.flags |= EUD_SPOOF_CONNECT;
+ 	return 0;
+ 
+ err_ret:

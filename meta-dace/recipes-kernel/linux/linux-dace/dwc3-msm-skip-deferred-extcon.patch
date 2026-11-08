@@ -1,0 +1,64 @@
+From: Cristodcgomez <cristo.c.mc@gmail.com>
+Subject: [PATCH] usb: dwc3: dwc3-msm: skip extcon suppliers stuck in probe-defer
+
+On the TicWatch Pro 5 (dace) the dwc3 glue's DT extcon property lists two
+suppliers: the pm5100 charger (qpnp-smblite) and the EUD. The charger driver
+belongs to the out-of-tree BMS techpack and is not shipped in our first-stage
+module set, so its device never probes and extcon_get_edev_by_phandle()
+returns -EPROBE_DEFER for it forever. dwc3_msm_extcon_register() propagates
+the defer immediately, so the glue never finishes probing and no UDC is ever
+registered -- USB/adb stays dead even though the EUD extcon (the one that
+actually drives USB-attach events on this device) is available.
+
+Skip suppliers that are still deferred, register with the ones that are
+present, and only fall back to -EPROBE_DEFER when none succeeded. Behaviour
+for fully-populated systems is unchanged.
+
+Upstream-Status: Inappropriate [dace bring-up]
+Signed-off-by: Cristodcgomez <cristo.c.mc@gmail.com>
+---
+ drivers/usb/dwc3/dwc3-msm-core.c | 16 +++++++++++++---
+ 1 file changed, 13 insertions(+), 3 deletions(-)
+
+--- a/drivers/usb/dwc3/dwc3-msm-core.c
++++ b/drivers/usb/dwc3/dwc3-msm-core.c
+@@ -4688,7 +4688,8 @@
+ 	struct device_node *node = mdwc->dev->of_node;
+ 	struct extcon_dev *edev;
+ 	int idx, extcon_cnt, ret = 0;
+-	bool check_vbus_state, check_id_state, phandle_found = false;
++	bool check_vbus_state, check_id_state, phandle_found = false,
++	     deferred = false;
+ 
+ 	extcon_cnt = of_count_phandle_with_args(node, "extcon", NULL);
+ 	if (extcon_cnt < 0) {
+@@ -4703,8 +4704,18 @@
+ 
+ 	for (idx = 0; idx < extcon_cnt; idx++) {
+ 		edev = extcon_get_edev_by_phandle(mdwc->dev, idx);
+-		if (IS_ERR(edev) && PTR_ERR(edev) != -ENODEV)
+-			return PTR_ERR(edev);
++		if (IS_ERR(edev)) {
++			if (PTR_ERR(edev) == -EPROBE_DEFER) {
++				/* dace: a supplier (e.g. the pm5100 smblite charger)
++				 * may never probe when its module is not shipped;
++				 * proceed with the suppliers that did probe.
++				 */
++				deferred = true;
++				continue;
++			}
++			if (PTR_ERR(edev) != -ENODEV)
++				return PTR_ERR(edev);
++		}
+ 
+ 		if (IS_ERR_OR_NULL(edev))
+ 			continue;
+@@ -4740,6 +4751,8 @@
+ 	}
+ 
+ 	if (!phandle_found) {
++		if (deferred)
++			return -EPROBE_DEFER;
+ 		dev_err(mdwc->dev, "no extcon device found\n");
+ 		return -ENODEV;
+ 	}
