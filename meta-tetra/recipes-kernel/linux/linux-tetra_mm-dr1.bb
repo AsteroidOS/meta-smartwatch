@@ -13,7 +13,6 @@ inherit kernel-gcc8
 
 SRC_URI = "git://android.googlesource.com/kernel/bcm;branch=android-bcm-tetra-3.10-marshmallow-dr1-wear-release;protocol=https \
     file://defconfig \
-    file://img_info \
     file://0001-scripts-dtc-Remove-redundant-YYLOC-global-declaratio.patch \
     file://0002-Fix-build-with-OE.patch \
     file://0003-Bluetooth-fixes-a-poorly-done-patch.patch \
