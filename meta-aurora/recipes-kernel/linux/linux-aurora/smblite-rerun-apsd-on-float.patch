@@ -1,0 +1,106 @@
+From: Florent Revest <revestflo@gmail.com>
+Date: Sun, 11 Oct 2026 00:00:00 +0000
+Subject: [PATCH] power: smblite: keep re-running APSD while a FLOAT charger is detected
+
+Upstream-Status: Inappropriate [aurora pogo-pin charger behaviour]
+
+On aurora (Pixel Watch 2) the charging puck connects through pogo pins and
+VBUS regularly makes contact before D+/D-. APSD then runs with floating
+data lines and latches FLOAT; the driver's single "slow insertion" rerun
+(1.5 s after attach, micro-USB connector type) is often still too early.
+The watch charges from the host but never enumerates as a USB device until
+it is lifted off the puck and re-seated, sometimes more than once
+(observed repeatedly on the development Mac; dmesg shows
+"APSD=FLOAT, real_charger_type =23" with no later SDP result).
+
+While the APSD result is FLOAT, re-run it up to four more times, 3 s apart,
+through the existing smblite_lib_rerun_apsd_if_required() path (which
+re-enables DPDM). A genuine float charger just gets the same FLOAT result
+each time; the reruns stop at the counter or on detach.
+
+Signed-off-by: Florent Revest <revestflo@gmail.com>
+---
+--- a/drivers/power/supply/qcom/smblite-lib.h
++++ b/drivers/power/supply/qcom/smblite-lib.h
+@@ -341,6 +341,7 @@
+ 	struct delayed_work	thermal_regulation_work;
+ 	struct delayed_work	role_reversal_check;
+ 	struct delayed_work	pr_swap_detach_work;
++	struct delayed_work	float_rerun_work;
+ 
+ 	struct charger_param	chg_param;
+ 
+@@ -384,6 +385,7 @@
+ 	bool			typec_role_swap_failed;
+ 	bool			use_extcon;
+ 	bool			uusb_apsd_rerun_done;
++	int			float_rerun_count;
+ 	bool			dpdm_enabled;
+ 	bool			hvdcp3_detected;
+ 	bool			hvdcp3_detect_en;
+--- a/drivers/power/supply/qcom/smblite-lib.c
++++ b/drivers/power/supply/qcom/smblite-lib.c
+@@ -610,6 +610,8 @@
+ 					rc);
+ 
+ 	chg->uusb_apsd_rerun_done = false;
++	chg->float_rerun_count = 0;
++	cancel_delayed_work(&chg->float_rerun_work);
+ 	chg->hvdcp3_detected = false;
+ 
+ 	/* Disable concurrent mode on USB removal. */
+@@ -3423,6 +3425,32 @@
+ 	return 0;
+ }
+ 
++/*
++ * aurora (Pixel Watch 2): the charging puck connects over pogo pins, and
++ * VBUS routinely makes contact before D+/D- do. APSD then runs on floating
++ * data lines, latches FLOAT, and the one-shot "slow insertion" rerun above
++ * (1.5 s after attach) is often still too early: the watch charges from the
++ * host but never enumerates until it is lifted off and re-seated. Re-run
++ * APSD a few more times, spaced out, while the result stays FLOAT.
++ */
++#define FLOAT_RERUN_MAX		4
++#define FLOAT_RERUN_DELAY_MS	3000
++
++static void smblite_lib_float_rerun_work(struct work_struct *work)
++{
++	struct smb_charger *chg = container_of(work, struct smb_charger,
++						float_rerun_work.work);
++	const struct apsd_result *apsd_result =
++			smblite_lib_get_apsd_result(chg);
++
++	if (apsd_result->bit != FLOAT_CHARGER_BIT)
++		return;
++
++	smblite_lib_dbg(chg, PR_MISC, "FLOAT charger: re-running APSD (%d/%d)\n",
++			chg->float_rerun_count, FLOAT_RERUN_MAX);
++	smblite_lib_rerun_apsd_if_required(chg);
++}
++
+ static void smblite_lib_handle_apsd_done(struct smb_charger *chg, bool rising)
+ {
+ 	const struct apsd_result *apsd_result =
+@@ -3443,6 +3471,12 @@
+ 			smblite_lib_notify_device_mode(chg, true);
+ 		break;
+ 	case FLOAT_CHARGER_BIT:
++		if (chg->float_rerun_count < FLOAT_RERUN_MAX) {
++			chg->float_rerun_count++;
++			schedule_delayed_work(&chg->float_rerun_work,
++				msecs_to_jiffies(FLOAT_RERUN_DELAY_MS));
++		}
++		break;
+ 	case OCP_CHARGER_BIT:
+ 	case DCP_CHARGER_BIT:
+ 		break;
+@@ -4596,6 +4630,8 @@
+ 					smblite_lib_typec_role_check_work);
+ 	INIT_DELAYED_WORK(&chg->pr_swap_detach_work,
+ 					smblite_lib_pr_swap_detach_work);
++	INIT_DELAYED_WORK(&chg->float_rerun_work,
++					smblite_lib_float_rerun_work);
+ 	chg->fake_capacity = -EINVAL;
+ 	chg->fake_batt_status = -EINVAL;
+ 	chg->sink_src_mode = UNATTACHED_MODE;
