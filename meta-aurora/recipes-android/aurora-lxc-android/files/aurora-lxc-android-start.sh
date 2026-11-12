@@ -88,6 +88,25 @@ if [ -f /android/vendor/build.prop ]; then
     echo "aurora-lxc-android: prepared vendor/build.prop overlay (disable_ubwc=1)"
 fi
 
+# A power-on caused by the charger (the puck after a battery death, or
+# docking a powered-off watch) is an off-mode-charging boot: the bootloader
+# sets androidboot.mode=charger in the bootconfig. Android init then fires
+# "on charger" instead of late-init and starts nothing but the charger
+# class, so no composer, sensors or audio HAL ever registers and the modem
+# crash-loops: the launcher waits forever on the splash logo. We have no
+# charging UI to show, so always boot normally. Hand the container a copy
+# of /proc/bootconfig with the mode forced to normal (bind-mounted over
+# proc/bootconfig by the LXC config).
+BOOTCONFIG_OVERLAY=/run/aurora-bootconfig
+if [ -f /proc/bootconfig ]; then
+    sed -e 's/^androidboot\.mode = "charger"$/androidboot.mode = "normal"/' \
+        /proc/bootconfig > "$BOOTCONFIG_OVERLAY"
+    chmod 0644 "$BOOTCONFIG_OVERLAY"
+    if grep -q '^androidboot\.mode = "charger"$' /proc/bootconfig; then
+        echo "aurora-lxc-android: charger-mode boot, forcing androidboot.mode=normal"
+    fi
+fi
+
 for src in /android/vendor /android/vendor_dlkm; do
     name=$(basename "$src")
     dst="$ROOTFS/$name"
