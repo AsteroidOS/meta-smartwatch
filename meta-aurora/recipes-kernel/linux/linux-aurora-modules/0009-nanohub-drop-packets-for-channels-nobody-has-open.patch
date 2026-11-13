@@ -1,0 +1,178 @@
+From: Ben Fennema <fennema@google.com>
+Date: Wed, 18 Sep 2024 10:48:31 -0700
+Subject: [PATCH] nanohub: drop packets for channels nobody has open
+
+Upstream-Status: Backport [android-msm-sw5100-5.15-android15-qpr2 e77e483d8d4d, 829edc9e550f]
+
+Only the first /dev/nanohub client channel dropped packets while it was
+closed. Every other channel kept queueing them, so a channel with no
+reader (on AsteroidOS: nanohub_metrics, which no daemon opens) holds
+receive buffers forever and starves the rest of the pool.
+
+Mark every userspace channel drop-when-closed and only let one client
+open such a channel at a time, so a second open/close cannot silence the
+first reader. Buffers still queued when the reader exits go back to the
+pool.
+
+Squash of Google's two commits; adapted to the tm-wear-kr3 channel table
+(no pele, bt, touch_kernel or wac_bootloader channels).
+
+Bug: 368144561
+Signed-off-by: Ben Fennema <fennema@google.com>
+Signed-off-by: Peter Carlson <petercarlson@google.com>
+Signed-off-by: Florent Revest <revestflo@gmail.com>
+---
+diff --git a/private/google-modules/nanohub/main.c b/private/google-modules/nanohub/main.c
+index 620bcf7..b4f404e 100644
+--- a/private/google-modules/nanohub/main.c
++++ b/private/google-modules/nanohub/main.c
+@@ -128,6 +128,7 @@ struct device_config {
+ 	const char *name;
+ 	const uint8_t channels;
+ 	const bool is_kernel;
++	const bool drop_when_closed;
+ };
+ 
+ #define GPIO_OPT_HAS_IRQ	0x0001
+@@ -220,7 +221,8 @@ static inline void nanohub_io_init(struct nanohub_io *io,
+ 				   struct nanohub_data *data,
+ 				   struct device *dev,
+ 				   int id,
+-				   bool is_kernel)
++				   bool is_kernel,
++				   bool drop_when_closed)
+ {
+ 	init_waitqueue_head(&io->buf_wait);
+ 	INIT_LIST_HEAD(&io->buf_list);
+@@ -228,6 +230,7 @@ static inline void nanohub_io_init(struct nanohub_io *io,
+ 	io->dev = dev;
+ 	io->id = id;
+ 	io->is_kernel = is_kernel;
++	io->drop_when_closed = drop_when_closed;
+ 	atomic_set(&io->busy, 0);
+ 	io->queued = 0;
+ 	io->dropped = 0;
+@@ -1517,19 +1520,19 @@ static int nanohub_create_devices(struct nanohub_data *data)
+ {
+ 	int i, j, k, ret;
+ 	static const struct device_config device_configs[] = {
+-		{ "nanohub_comms", 1, false },
+-		{ "nanohub", ID_NANOHUB_CLIENT_NUM_IDS, false },
+-		{ "nanohub_audio", 1, true },
+-		{ "nanohub_display", 1, false },
+-		{ "nanohub_render", 1, false },
+-		{ "nanohub_debug_log", 1, false },
+-		{ "nanohub_metrics", 1, false },
+-		{ "nanohub_console", 1, false },
+-		{ "nanohub_rpc0", 1, false },
+-		{ "nanohub_rpc1", 1, false },
+-		{ "nanohub_brightness", 1, false },
+-		{ "nanohub_touch", 1, true },
+-		{ "nanohub_display_kernel", 1, true },
++		{ "nanohub_comms", 1, false, false },
++		{ "nanohub", ID_NANOHUB_CLIENT_NUM_IDS, false, true },
++		{ "nanohub_audio", 1, true, false },
++		{ "nanohub_display", 1, false, true },
++		{ "nanohub_render", 1, false, true },
++		{ "nanohub_debug_log", 1, false, true },
++		{ "nanohub_metrics", 1, false, true },
++		{ "nanohub_console", 1, false, true },
++		{ "nanohub_rpc0", 1, false, true },
++		{ "nanohub_rpc1", 1, false, true },
++		{ "nanohub_brightness", 1, false, true },
++		{ "nanohub_touch", 1, true, false },
++		{ "nanohub_display_kernel", 1, true, false },
+ 	};
+ 	static_assert(ARRAY_SIZE(device_configs) == ID_NANOHUB_MAX - ID_NANOHUB_CLIENT_NUM_IDS + 1);
+ 
+@@ -1549,7 +1552,8 @@ static int nanohub_create_devices(struct nanohub_data *data)
+ 		for (k = 0; k < device_configs[j].channels; ++i, ++k) {
+ 			struct nanohub_io *io = &data->io[i];
+ 
+-			nanohub_io_init(io, data, dev, i, device_configs[j].is_kernel);
++			nanohub_io_init(io, data, dev, i, device_configs[j].is_kernel,
++					device_configs[j].drop_when_closed);
+ 		}
+ 	}
+ 
+@@ -1592,9 +1596,21 @@ static int nanohub_open(struct inode *inode, struct file *file)
+ 			}
+ 			return -EBUSY;
+ 		} else {
+-			file->private_data = &data->io[MINOR(devt)];
+-			nonseekable_open(inode, file);
+-			return 0;
++			struct nanohub_io *io =
++				&data->io[MINOR(devt)];
++			if (io->drop_when_closed) {
++				if (atomic_cmpxchg(&io->busy, 0, 1) == 0) {
++					file->private_data = io;
++					nonseekable_open(inode, file);
++					return 0;
++				}
++				return -EBUSY;
++			} else {
++				atomic_set(&io->busy, 1);
++				file->private_data = io;
++				nonseekable_open(inode, file);
++				return 0;
++			}
+ 		}
+ 	}
+ 
+@@ -1725,11 +1741,11 @@ static unsigned int nanohub_poll(struct file *file, poll_table *wait)
+ 
+ static int nanohub_release(struct inode *inode, struct file *file)
+ {
+-	dev_t devt = inode->i_rdev;
+-	if (MINOR(devt) == ID_NANOHUB_CLIENT) {
++	struct nanohub_io *io = file->private_data;
++
++	if (io->drop_when_closed) {
+ 		int drop_cnt = 0;
+ 		struct nanohub_buf *buf;
+-		struct nanohub_io *io = file->private_data;
+ 		struct nanohub_data *data = io->data;
+ 
+ 		/* discard packets on release */
+@@ -1742,9 +1758,8 @@ static int nanohub_release(struct inode *inode, struct file *file)
+ 			pr_info("nanohub: Discarded %d buffers on release",
+ 				drop_cnt);
+ 		}
+-
+-		atomic_set(&io->busy, 0);
+ 	}
++	atomic_set(&io->busy, 0);
+ 	file->private_data = NULL;
+ 	return 0;
+ }
+@@ -1832,7 +1847,7 @@ static void nanohub_process_buffer(struct nanohub_data *data, uint8_t id,
+ 	wakeup = true;
+ 	io = &data->io[id];
+ 
+-	if (id == ID_NANOHUB_CLIENT && atomic_read(&io->busy) != 1) {
++	if (io->drop_when_closed && atomic_read(&io->busy) != 1) {
+ 		pr_info("nanohub: dropping packet for /dev/nanohub/%d\n", id);
+ 	} else if (!io->is_kernel) {
+ 		if (nanohub_io_over_quota(data, io)) {
+@@ -2379,7 +2394,7 @@ struct iio_dev *nanohub_probe(struct device *dev, struct iio_dev *iio_dev)
+ 
+ 	init_waitqueue_head(&data->kthread_wait);
+ 
+-	nanohub_io_init(&data->free_pool, data, dev, 0, false);
++	nanohub_io_init(&data->free_pool, data, dev, 0, false, false);
+ 
+ 	buf = vmalloc(sizeof(*buf) * READ_QUEUE_DEPTH);
+ 	data->vbuf = buf;
+diff --git a/private/google-modules/nanohub/main.h b/private/google-modules/nanohub/main.h
+index 8ec312a..56c3ec8 100644
+--- a/private/google-modules/nanohub/main.h
++++ b/private/google-modules/nanohub/main.h
+@@ -51,6 +51,7 @@ struct nanohub_io {
+ 	atomic_t busy;
+ 	uint8_t id;
+ 	bool is_kernel;
++	bool drop_when_closed;
+ 	void (*on_message_received)(const char *buffer, size_t length);
+ 	/* buffers currently on buf_list (under buf_wait.lock) / packets dropped by quota */
+ 	int queued;
