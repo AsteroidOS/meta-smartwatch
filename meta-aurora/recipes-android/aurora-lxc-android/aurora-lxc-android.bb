@@ -76,6 +76,13 @@ do_install() {
     # swclock-offset / the phone (timedated) survives.
     echo 'lxc.cap.drop = sys_time' >> ${D}${localstatedir}/lib/lxc/android/config
 
+    # init.qcom.rc and init.qti.kernel.rc write "6 6 1 7" / "4 6 1 7" to
+    # /proc/sys/kernel/printk: that is the host kernel's console loglevel and
+    # the writes undo the 8 aurora-warm-reset sets so the ramoops console keeps
+    # its info lines. Give the container a /dev/null in that file's place.
+    echo 'lxc.mount.entry = /dev/null proc/sys/kernel/printk none bind,create=file 0 0' \
+        >> ${D}${localstatedir}/lib/lxc/android/config
+
     # Capture container stdout/stderr so debugging is possible. Android init
     # redirects its own stdio to /dev/null and logs via /dev/kmsg, but the
     # bionic linker writes early warnings to stderr before that redirect runs.

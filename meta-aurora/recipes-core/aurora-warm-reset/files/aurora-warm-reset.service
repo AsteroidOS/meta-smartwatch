@@ -1,0 +1,12 @@
+[Unit]
+Description=Warm resets and ramoops-friendly console loglevel
+DefaultDependencies=no
+After=systemd-modules-load.service
+Before=sysinit.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/aurora-warm-reset.sh
+
+[Install]
+WantedBy=sysinit.target
