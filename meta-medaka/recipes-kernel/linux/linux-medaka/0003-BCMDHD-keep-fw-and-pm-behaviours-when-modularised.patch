@@ -1,0 +1,32 @@
+From 4d4732b3e983abb19a2f0260c465be3905f5102b Mon Sep 17 00:00:00 2001
+From: OpenEmbedded <oe.patch@oe>
+Date: Wed, 30 Sep 2026 22:35:50 +0100
+Subject: [PATCH] BCMDHD: keep fw and pm behaviours when modularised the driver
+ seems to use a variable called `dhd_download_fw_on_driverload` as a general
+ tell of whether the driver has been built as a module. Apart from changing
+ the fw loading behaviour, it also influences power management. This patch
+ keeps the variable the same as when built-in, so the normal behaviour is
+ preserved. Upstream-Status: Inappropriate
+
+---
+ drivers/net/wireless/bcmdhd/Makefile | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/drivers/net/wireless/bcmdhd/Makefile b/drivers/net/wireless/bcmdhd/Makefile
+index c96a2e7022e6..440ec04564b3 100644
+--- a/drivers/net/wireless/bcmdhd/Makefile
++++ b/drivers/net/wireless/bcmdhd/Makefile
+@@ -48,9 +48,8 @@ endif
+ EXTRA_CFLAGS = $(DHDCFLAGS)
+ ifeq ($(CONFIG_BCMDHD),m)
+ EXTRA_LDFLAGS += --strip-debug
+-else
+-DHDCFLAGS += -DENABLE_INSMOD_NO_FW_LOAD
+ endif
++DHDCFLAGS += -DENABLE_INSMOD_NO_FW_LOAD
+ 
+ #########################
+ # Chip dependent feature
+-- 
+2.55.0
+
