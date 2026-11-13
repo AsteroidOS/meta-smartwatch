@@ -23,6 +23,39 @@ if ! mountpoint -q $ROOTFS; then
     exit 1
 fi
 
+# mcu_mgmtd treats android.frameworks.stats.IStats/default as mandatory.  If
+# AServiceManager_isDeclared() returns false, its stats thread gives up after
+# twenty retries and exits the whole process. Android init then restarts
+# mcu_mgmtd, which reloads the MCU firmware underneath long-lived sensor
+# clients every three minutes.
+#
+# The stock fragment only declares the legacy HIDL interface. Add the AIDL
+# declaration used by mcu_mgmtd; aurora-stats-service provides the reporting
+# sink in this otherwise framework-less container.
+STATS_MANIFEST="$ROOTFS/system/etc/vintf/manifest/android.frameworks.stats@1.0-service.xml"
+STATS_MANIFEST_RUNTIME=/run/aurora-android-frameworks-stats.xml
+while mountpoint -q "$STATS_MANIFEST"; do
+    umount "$STATS_MANIFEST"
+done
+if [ -f "$STATS_MANIFEST" ]; then
+    if grep -q '<hal format="aidl">' "$STATS_MANIFEST"; then
+        cp "$STATS_MANIFEST" "$STATS_MANIFEST_RUNTIME"
+    else
+        awk '
+            /<\/manifest>/ {
+                print "    <hal format=\"aidl\">"
+                print "        <name>android.frameworks.stats</name>"
+                print "        <version>1</version>"
+                print "        <fqname>IStats/default</fqname>"
+                print "    </hal>"
+            }
+            { print }
+        ' "$STATS_MANIFEST" > "$STATS_MANIFEST_RUNTIME"
+    fi
+    mount --bind "$STATS_MANIFEST_RUNTIME" "$STATS_MANIFEST"
+    echo "aurora-lxc-android: declared the AIDL IStats service"
+fi
+
 # Wipe the host-shared property area before each start: /dev/__properties__ is
 # bind-mounted from the host and persists across runs; init (the property writer)
 # SIGSEGVs if it re-mmaps a stale area left by a previous run.
@@ -108,6 +141,33 @@ for src in /android/vendor /android/vendor_dlkm; do
     fi
 done
 
+# Neutralise the container's futile in-container kernel-module loads. Android
+# init blocks the display HAL on `wait_for_prop vendor.*.modules.ready`, which
+# init.insmod.sh sets only after its modprobe pass. But every module in
+# /vendor/lib/modules is a stock-WearOS-kernel module and fails to insmod on
+# aurora's from-source kernel with "Exec format error" (vermagic mismatch) --
+# the common cfg tries all ~271, the device cfg 4 more -- while the host has
+# already loaded the correct from-source modules. So those ~275 failing
+# modprobes cost ~7s of boot for nothing before the composer can start. Overlay
+# each cfg with a setprop-only version: the ready props still fire (instantly),
+# and no module that loads today stops loading (none do).
+INSMOD_ETC="$ROOTFS/vendor/etc"
+overlay_insmod_cfg() {
+    _cfg="$INSMOD_ETC/$1"
+    shift
+    [ -f "$_cfg" ] || return 0
+    mountpoint -q "$_cfg" && return 0
+    _ovl="/run/aurora-$(basename "$_cfg")"
+    : > "$_ovl"
+    for _p in "$@"; do echo "setprop|$_p" >> "$_ovl"; done
+    chmod 0644 "$_ovl"
+    mount --bind "$_ovl" "$_cfg" && \
+        echo "aurora-lxc-android: setprop-only overlay for $(basename "$_cfg") (skip failing module loads)"
+}
+overlay_insmod_cfg init.insmod.sw5100.cfg vendor.common.modules.ready
+overlay_insmod_cfg init.insmod.aurora.cfg \
+    vendor.device.modules.ready vendor.all.modules.ready vendor.all.devices.ready
+
 # Mask vendor init's USB scripts. AsteroidOS owns the USB gadget end-to-end
 # (init_gfs.service stages /config/usb_gadget/g1; aurora-udc-bind binds UDC
 # once adbd has its FunctionFS endpoints). Halium already neutralizes the
@@ -149,8 +209,8 @@ fi
 
 # Mask pixelstats-vendor.rc: pixelstats_vendor is Google's Pixel telemetry
 # daemon. It polls for android.frameworks.stats.IStats/default at ~2 Hz
-# forever, but IStats is implemented by the Android framework's statsd,
-# which a Halium container doesn't run -- so every poll makes
+# forever, but that AIDL reporting service is unavailable in this container
+# (the running statsd exposes the distinct android.os.IStatsd) -- so every poll makes
 # servicemanager fire a ctl.interface_start that init rejects with
 # "Could not find 'aidl/android.frameworks.stats.IStats/default'",
 # spamming kmsg for the whole uptime. Nothing consumes the telemetry
@@ -162,6 +222,130 @@ if [ -f "$PIXELSTATS_RC" ] && ! mountpoint -q "$PIXELSTATS_RC"; then
         echo "aurora-lxc-android: masked pixelstats-vendor.rc"
     fi
 fi
+
+# Mask two more Android services which cannot provide anything useful in the
+# HAL-only container and otherwise run permanent failure/poll loops:
+#
+#  - time_daemon requires CAP_SYS_TIME. We deliberately drop that capability
+#    so Android cannot overwrite the host clock from Aurora's volatile PMIC
+#    RTC; init consequently retries the failed daemon every five seconds.
+#    It is declared both in init.time_daemon.rc and in the much larger
+#    init.qcom.rc, so empty the former and remove only its service stanza from
+#    the latter.
+#  - vendor.power.stats polls android.frameworks.stats.IStats/default once per
+#    second. That framework service is not available in this HAL-only setup,
+#    and AsteroidOS has no consumer for Pixel energy telemetry.
+TIME_DAEMON_RC="$VENDOR_INIT/init.time_daemon.rc"
+if [ -f "$TIME_DAEMON_RC" ] && ! mountpoint -q "$TIME_DAEMON_RC"; then
+    : > /run/aurora-mask-init.time_daemon.rc
+    if mount --bind /run/aurora-mask-init.time_daemon.rc "$TIME_DAEMON_RC"; then
+        echo "aurora-lxc-android: masked init.time_daemon.rc"
+    fi
+fi
+
+INIT_QCOM_RC="$VENDOR_INIT/hw/init.qcom.rc"
+if [ -f "$INIT_QCOM_RC" ] && ! mountpoint -q "$INIT_QCOM_RC"; then
+    INIT_QCOM_RC_OVERLAY=/run/aurora-init.qcom.rc
+    awk '
+        $1 == "service" && $2 == "time_daemon" { skip = 1; next }
+        skip && /^[ \t]/ { next }
+        skip { skip = 0 }
+        { print }
+    ' "$INIT_QCOM_RC" > "$INIT_QCOM_RC_OVERLAY"
+    chmod 0644 "$INIT_QCOM_RC_OVERLAY"
+    if mount --bind "$INIT_QCOM_RC_OVERLAY" "$INIT_QCOM_RC"; then
+        echo "aurora-lxc-android: removed time_daemon from init.qcom.rc"
+    fi
+fi
+
+POWER_STATS_RC="$VENDOR_INIT/android.hardware.power.stats-service.pixel.rc"
+if [ -f "$POWER_STATS_RC" ] && ! mountpoint -q "$POWER_STATS_RC"; then
+    : > /run/aurora-mask-android.hardware.power.stats-service.pixel.rc
+    if mount --bind /run/aurora-mask-android.hardware.power.stats-service.pixel.rc \
+            "$POWER_STATS_RC"; then
+        echo "aurora-lxc-android: masked Pixel power-stats service"
+    fi
+fi
+
+# Mask Android services that have no consumer on AsteroidOS. The container
+# exists for the HALs that libhybris, sensorfw, bluebinder and pulseaudio talk
+# to (composer/allocator, sensors, bluetooth, audio, display offload) plus the
+# daemons the SoC needs (charger/gauge, MCU, thermal, WLAN-on-modem helpers).
+# The rest of the stock init set is Android-framework plumbing (package
+# installer, credential/gatekeeper stores, media codecs, perfetto, incident and
+# storage reporting, camera, wificond/netd for a framework that is not there)
+# and Qualcomm modem-data/diag helpers (IPA, cnd, tftp) with nothing to serve.
+# Measured 2026-10-15: they cost no idle power, but they are ~30 processes
+# and their rc files on the container's critical boot path, and each one is a
+# potential poll/crash loop of the pixelstats kind. Every file below holds only
+# its own service stanza plus mkdir/property boilerplate. Masking is a
+# bind-mount of an empty file, like the USB and pixelstats cases above.
+#
+# NOT in this list, both found the hard way:
+#  - vendor.qti.diag.rc (diag-router): the QTI diag client library linked
+#    into the audio HAL (AGMIPC) spins on EOF when diag-router is gone,
+#    logging ~300 lines/s; each line also goes to /dev/pmsg0 and the spinner
+#    starves every other Android logger on the pmsg lock, including the
+#    bluetooth HAL, which then drops the controller.
+#  - vendor.qti.tftp.rc (tftp_server): it is the modem's remote file system
+#    (RFSA). Without it the modem never announces its WLAN process domain
+#    (no "PDR: Indication received from msm/modem/wlan_pd"), the WLAN
+#    firmware never reports ready and wlan0 never appears.
+#  - vendor.google_clockwork.wristorientation@1.0-service.rc: the sensors
+#    sub-HAL (sensors.usf.so) and the display offload HAL link its
+#    IWristOrientation interface and block in getService() until it is
+#    registered. Without it the sensors HAL never registers ISensors,
+#    sensorfwd never answers mce, and mce's D-Bus connection fills up
+#    with pending replies (no tilt, no ALS, power key ignored).
+# statsd and media.swcodec come from APEX rc files that apexd bind-mounts
+# into /apex without submounts, so they cannot be masked here; they are
+# disabled from the servicemanager.rc overlay below instead.
+# sscrpcd (vendor.sensors) is the sensors-DSP RPC daemon:
+# monaco has no SDSP, open_device_node fails, and init respawns it at ~1 Hz
+# (30 logcat lines per attempt).
+#  - vold.rc: also load-bearing (found the hard way, 2026-10-16). vold has no
+#    consumer, but init.rc exec's /system/bin/vdc synchronously several
+#    times (checkpoint markBootAttempt, prepareCheckpoint, keymaster
+#    earlyBootEnded); without vold the post-fs-data sequence never
+#    completes, apexd/linkerconfig never run and the watch reset itself
+#    about 90 s into every boot. It stays, EIO uevent noise and all.
+NOCONSUMER_RCS="
+system/etc/init/camera_service.rc
+system/etc/init/credstore.rc
+system/etc/init/gatekeeperd.rc
+system/etc/init/installd.rc
+system/etc/init/incidentd.rc
+system/etc/init/idmap2d.rc
+system/etc/init/storaged.rc
+system/etc/init/perfetto.rc
+system/etc/init/drmserver.rc
+system/etc/init/gpuservice.rc
+system/etc/init/mediaextractor.rc
+system/etc/init/mediametrics.rc
+system/etc/init/wificond.rc
+system/etc/init/android.system.net.netd@1.1-service.rc
+vendor/etc/init/android.hardware.gatekeeper@1.0-service-qti.rc
+vendor/etc/init/android.hardware.media.omx@1.0-service.rc
+vendor/etc/init/vendor.qti.media.c2@1.0-service.rc
+vendor/etc/init/ipacm.rc
+vendor/etc/init/ipacm-diag.rc
+vendor/etc/init/cnd.rc
+vendor/etc/init/slatedaemon.rc
+vendor/etc/init/qconfig.rc
+vendor/etc/init/vendor.qti.hardware.powerstateservice@1.0-service.rc
+vendor/etc/init/powerstateutility.rc
+vendor/etc/init/vendor.qti.hardware.healthservices@1.0-service.rc
+vendor/etc/init/vendor.sensors.sscrpcd.rc
+"
+: > /run/aurora-mask-empty.rc
+_n=0
+for _rc in $NOCONSUMER_RCS; do
+    _f="$ROOTFS/$_rc"
+    [ -f "$_f" ] || continue
+    mountpoint -q "$_f" && continue
+    mount --bind /run/aurora-mask-empty.rc "$_f" && _n=$((_n + 1))
+done
+echo "aurora-lxc-android: masked $_n no-consumer Android services"
 
 # Drop the CDSP and CVP remoteproc boot writes from init.qti.kernel.rc's
 # early-boot action. The Compute-DSP (camera ML / NN / FastRPC compute offload)
@@ -268,6 +452,22 @@ service servicemanager /system/bin/servicemanager
     onrestart class_restart --only-enabled early_hal
     task_profiles ServiceCapacityLow
     shutdown critical
+
+# Not servicemanager's business, but this is the one system-side rc we
+# already overlay. media.swcodec (software codecs; it polls the masked
+# vendor codec HAL once a second forever) and statsd (framework metrics;
+# aurora-stats-service is the IStats sink) come from APEX rc files that
+# cannot be masked at the source (see NOCONSUMER_RCS). Disable them before
+# class_start main, and stop them if they slipped through anyway.
+on property:apexd.status=activated
+    disable media.swcodec
+    disable statsd
+
+on property:init.svc.media.swcodec=running
+    stop media.swcodec
+
+on property:init.svc.statsd=running
+    stop statsd
 RC
 
 # system_dlkm (kernel modules for the Android container) -- UBPorts

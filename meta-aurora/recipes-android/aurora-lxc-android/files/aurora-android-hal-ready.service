@@ -1,0 +1,12 @@
+[Unit]
+Description=Signal when Android container HALs are binder-ready (aurora)
+After=aurora-lxc-android.service
+Requires=aurora-lxc-android.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/libexec/aurora-wait-hal-ready.sh
+
+[Install]
+WantedBy=multi-user.target

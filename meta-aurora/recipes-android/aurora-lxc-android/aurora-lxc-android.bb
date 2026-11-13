@@ -23,12 +23,14 @@ SRC_URI = "https://dl.dropboxusercontent.com/scl/fi/insvp7s5wp516iv56a4vx/aurora
            file://aurora-lxc-android.service \
            file://aurora-lxc-android-rootfs.mount \
            file://aurora-lxc-android-start.sh \
+           file://aurora-android-hal-ready.service \
+           file://aurora-wait-hal-ready.sh \
            file://aurora-no-kmsg.conf \
            file://bluebinder-aurora.conf"
 SRC_URI[md5sum] = "145a40e6e863afa6a00be6ad0fa28ea4"
 S = "${UNPACKDIR}"
 
-RDEPENDS:${PN} = "lxc aurora-vendor-mount"
+RDEPENDS:${PN} = "lxc aurora-vendor-mount util-linux-nsenter"
 
 do_install() {
     install -d ${D}${localstatedir}/lib/lxc/android \
@@ -102,11 +104,19 @@ do_install() {
     install -m 0755 ${UNPACKDIR}/aurora-lxc-android-start.sh \
         ${D}${libexecdir}/aurora-lxc-android-start.sh
 
+    # HAL-readiness barrier: waits (via lshal) until the container's composer +
+    # bluetooth HALs are actually registered, then drops /run/aurora-hal-ready
+    # so HAL clients don't race HAL registration. See aurora-wait-hal-ready.sh.
+    install -m 0755 ${UNPACKDIR}/aurora-wait-hal-ready.sh \
+        ${D}${libexecdir}/aurora-wait-hal-ready.sh
+
     install -d ${D}${systemd_unitdir}/system
     install -m 0644 ${UNPACKDIR}/aurora-lxc-android.service \
         ${D}${systemd_unitdir}/system/aurora-lxc-android.service
     install -m 0644 ${UNPACKDIR}/aurora-lxc-android-rootfs.mount \
         ${D}${systemd_unitdir}/system/var-lib-lxc-android-rootfs.mount
+    install -m 0644 ${UNPACKDIR}/aurora-android-hal-ready.service \
+        ${D}${systemd_unitdir}/system/aurora-android-hal-ready.service
 
     # bluebinder ordering drop-in: see the comment in bluebinder-aurora.conf.
     install -d ${D}${systemd_unitdir}/system/bluebinder.service.d
@@ -125,12 +135,14 @@ do_install() {
 do_package_qa() {
 }
 
-SYSTEMD_SERVICE:${PN} = "aurora-lxc-android.service var-lib-lxc-android-rootfs.mount"
+SYSTEMD_SERVICE:${PN} = "aurora-lxc-android.service var-lib-lxc-android-rootfs.mount aurora-android-hal-ready.service"
 SYSTEMD_AUTO_ENABLE:${PN} = "enable"
 FILES:${PN} = "${localstatedir}/lib/lxc/android \
                ${libexecdir}/aurora-lxc-android-start.sh \
+               ${libexecdir}/aurora-wait-hal-ready.sh \
                ${systemd_unitdir}/system/aurora-lxc-android.service \
                ${systemd_unitdir}/system/var-lib-lxc-android-rootfs.mount \
+               ${systemd_unitdir}/system/aurora-android-hal-ready.service \
                ${systemd_unitdir}/system/bluebinder.service.d/bluebinder-aurora.conf \
                ${sysconfdir}/systemd/journald.conf.d/aurora-no-kmsg.conf"
 EXCLUDE_FROM_SHLIBS = "1"

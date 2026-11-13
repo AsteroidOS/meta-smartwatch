@@ -275,7 +275,18 @@ snd-soc-cs40l26:tp
 @dep qcom_pil_info.ko:
 @dep qcom_sysmon.ko: qmi_helpers.ko rproc_qcom_common.ko
 @dep qcom_q6v5.ko: rproc_qcom_common.ko smem.ko qcom_sysmon.ko qmi_helpers.ko
-@dep qcom_q6v5_pas.ko: qcom_sysmon.ko rproc_qcom_common.ko qcom_q6v5.ko qcom-scm.ko mdt_loader.ko qcom_pil_info.ko qcom_aoss.ko secure_buffer.ko qcom_ramdump.ko qmi_helpers.ko smem.ko
+# qcom_q6v5_pas (ADSP/modem remoteproc): the line must be loadable right-to-left
+# by busybox modprobe (parents strictly to the right of their consumers) and
+# complete. The stock cdsp-loader line pulled qcom_q6v5_pas in WITHOUT
+# qcom_pil_info/qcom_ramdump/qcom_aoss, so init.early's insmod of it failed on
+# unresolved symbols (qcom_pil_info_store, qcom_create_ramdump_device, ...),
+# the remoteproc driver was left to a later udev coldplug, and on the boots
+# where that did not happen the ADSP/modem never booted: no sensors, no audio,
+# no WLAN, launcher start timing out forever -- the 'stuck on the AsteroidOS
+# logo' lottery (captured in logdump + journal 2026-10-09). cdsp-loader itself
+# imports nothing (depends= empty).
+@dep qcom_q6v5_pas.ko: qcom_q6v5.ko qcom_sysmon.ko rproc_qcom_common.ko qcom_aoss.ko mdt_loader.ko secure_buffer.ko qcom-scm.ko qcom_pil_info.ko qcom_ramdump.ko qmi_helpers.ko qcom_smd.ko qcom_glink_smem.ko qcom_glink.ko smem.ko qcom_ipc_logging.ko
+@dep cdsp-loader.ko:
 
 # ADSP / audio chain
 @dep snd_event_dlkm.ko:
@@ -284,7 +295,6 @@ snd-soc-cs40l26:tp
 @dep gpr_dlkm.ko: snd_event_dlkm.ko q6_notifier_dlkm.ko rproc_qcom_common.ko q6_pdr_dlkm.ko pdr_interface.ko qmi_helpers.ko
 @dep spf_core_dlkm.ko: gpr_dlkm.ko snd_event_dlkm.ko q6_notifier_dlkm.ko rproc_qcom_common.ko q6_pdr_dlkm.ko pdr_interface.ko qmi_helpers.ko
 @dep adsp_loader_dlkm.ko: spf_core_dlkm.ko gpr_dlkm.ko snd_event_dlkm.ko q6_notifier_dlkm.ko rproc_qcom_common.ko q6_pdr_dlkm.ko pdr_interface.ko qmi_helpers.ko
-@dep cdsp-loader.ko: rproc_qcom_common.ko qcom_q6v5_pas.ko qcom_q6v5.ko qcom_sysmon.ko qmi_helpers.ko
 @dep audpkt_ion_dlkm.ko: secure_buffer.ko
 @dep audio_pkt_dlkm.ko: gpr_dlkm.ko audpkt_ion_dlkm.ko spf_core_dlkm.ko qcom_ipc_logging.ko snd_event_dlkm.ko q6_notifier_dlkm.ko rproc_qcom_common.ko q6_pdr_dlkm.ko pdr_interface.ko qmi_helpers.ko secure_buffer.ko
 @dep audio_prm_dlkm.ko: q6_notifier_dlkm.ko gpr_dlkm.ko spf_core_dlkm.ko snd_event_dlkm.ko rproc_qcom_common.ko q6_pdr_dlkm.ko pdr_interface.ko qmi_helpers.ko

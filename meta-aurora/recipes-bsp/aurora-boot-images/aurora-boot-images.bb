@@ -51,6 +51,7 @@ DEPENDS = "\
 do_compile[depends] += "\
     virtual/kernel:do_compile \
     virtual/kernel:do_install \
+    virtual/kernel:do_package \
     linux-aurora-modules:do_package_write_ipk \
     initramfs-android-image:do_image_complete \
 "

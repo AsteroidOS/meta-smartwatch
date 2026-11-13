@@ -1,0 +1,16 @@
+# Pixel Watch 2: the eMMC carries 82 GPT partitions and udev processes the
+# partitions of one disk one after the other. The generic persistent-storage
+# rules probe each of them for a filesystem signature and give each a handful
+# of by-id/by-path/by-partuuid links (every link is one more device unit for
+# systemd to create), which costs about 40 ms per partition on this SoC. The
+# root partition's device unit, which local-fs.target and therefore the
+# Android container wait for, only shows up once all of them are done.
+# Only the partitions mounted by the host need the generic treatment. The
+# others keep their by-partlabel link, built from the kernel-provided PARTNAME.
+ACTION=="remove", GOTO="aurora_partitions_end"
+SUBSYSTEM!="block", GOTO="aurora_partitions_end"
+KERNEL!="mmcblk0p*", GOTO="aurora_partitions_end"
+ENV{PARTNAME}=="persist|userdata", GOTO="aurora_partitions_end"
+ENV{UDEV_DISABLE_PERSISTENT_STORAGE_RULES_FLAG}="1"
+ENV{PARTNAME}=="?*", SYMLINK+="disk/by-partlabel/$env{PARTNAME}"
+LABEL="aurora_partitions_end"
