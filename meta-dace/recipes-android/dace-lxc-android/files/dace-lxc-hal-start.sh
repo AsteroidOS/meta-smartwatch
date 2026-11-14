@@ -38,7 +38,7 @@ done
 # with ctl.start (the hwservicemanager ctl.interface_start does not map it and
 # bluebinder stays in 'Waiting for bluetooth service' forever).
 #
-# TWO permissions that must be fixed (measured live 2026-09-19):
+# TWO permissions that must be fixed:
 #  - the CONTAINER's /dev/ttyHS0 is crw------- root root (the host ueventd does
 #    not rule the container's /dev tmpfs; stock has no rule for ttyHS0). The HAL
 #    runs as user 'bluetooth' -> EACCES opening the UART.
@@ -62,7 +62,7 @@ lxc-attach -n android -- /system/bin/getprop init.svc.vendor.bluetooth-1-0-qti 2
 # Zinitix touch: VENDOR CHAIN (stock .ko, see AGENTS.md §5). Requires the kernel
 # with the cfi_check ABI slot + SCS (dace-module-cfi-abi-slot.patch,
 # CONFIG_SHADOW_CALL_STACK). Our mainline zinitix no longer exists (=n in the
-# fragment). Exact order measured live:
+# fragment). Load order:
 #   bridge rpmsg -> bridge -> mobvoi_rpmsg -> mobvoi -> zinitix-i2c
 modprobe panel_event_notifier 2>/dev/null
 VD=/usr/lib/dace-vendor-modules

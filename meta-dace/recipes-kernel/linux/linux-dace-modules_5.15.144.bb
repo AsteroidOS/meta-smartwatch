@@ -280,11 +280,9 @@ modroot() {
       # calls BUG() (cmn qdf/linux/src/i_qdf_trace.h); without it they compile
       # to logged no-ops — the same asserts-off mode QC ships on perf builds.
       # A failed assert then costs us a wifi error message instead of a
-      # PS_HOLD reboot loop (the 2026-06-06 cnss-daemon incident). Make
-      # command-line vars override the defconfig's `:=` assignments, so
-      # passing them here wins. CONFIG_ICNSS2_DEBUG dropped from this case
-      # too: qcacld's Kbuild never references it (it was inert copy-paste
-      # from the wlan/platform option set).
+      # PS_HOLD reboot loop. Make command-line vars override the defconfig's
+      # `:=` assignments, so passing them here wins. CONFIG_ICNSS2_DEBUG is
+      # dropped from this case too: qcacld's Kbuild never references it.
       wlan/qcacld-3.0)      echo "WLAN_ROOT=$P/wlan/qcacld-3.0/ WLAN_COMMON_ROOT=cmn WLAN_COMMON_INC=$P/wlan/qcacld-3.0/cmn WLAN_FW_API=$P/wlan/fw-api/ MODNAME=wlan WLAN_WEAR_CHIPSET=qca_cld3 CONFIG_QCA_CLD_WLAN=m CONFIG_QCA_WIFI_ISOC=0 CONFIG_QCA_WIFI_2_0=1 WLAN_CTRL_NAME=wlan WLAN_PROFILE=wear PANIC_ON_BUG=n WLAN_WARN_ON_ASSERT=n CONFIG_CNSS_OUT_OF_TREE=y CONFIG_ICNSS2=m CONFIG_ICNSS2_QMI=y CONFIG_CNSS_GENL=m CONFIG_WCNSS_MEM_PRE_ALLOC=m CONFIG_CNSS_UTILS=m CONFIG_CONNECTIVITY_PKTLOG=y KERNEL_SUPPORTS_NESTED_COMPOSITES=n" ;;
       # google-modules/bms{,/misc} & msm-google/drivers/power/supply/qcom are
       # out-of-tree Kbuilds that gate their obj-* on CONFIG_GOOGLE_* /

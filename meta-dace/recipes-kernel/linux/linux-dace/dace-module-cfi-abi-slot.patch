@@ -7,7 +7,7 @@ cannot enable CFI (CFI_CLANG requires LTO_CLANG, off due to host OOM), so the
 field does not exist and ALL later fields become misaligned with respect to the
 vendor prebuilt .ko's.
 
-Measured consequence (2026-09-13, Zinitix touch): the stock .ko's load
+Consequence (seen with the Zinitix touch): the stock .ko's load
 (initstate=live) but the loader reads `mod->init` at OUR offset (8 bytes
 earlier), where there is NULL -> do_init_module NEVER calls init: the module
 stays live, registers nothing, prints nothing and does not crash. It affected
@@ -16,9 +16,9 @@ collection.
 
 With the gap, the stock .ko's keep their layout (init/exit/kp/kallsyms/refcnt
 at the same offsets) and their init runs normally.
-Offsets measured in .gnu.linkonce.this_module: init@0x178/exit@0x378 (stock)
-vs init@0x170/exit@0x368 (ours without the slot). Verified live: the vendor
-driver bt541_ts_device probes SUCCESS and the touch works.
+Offsets in .gnu.linkonce.this_module: init@0x178/exit@0x378 (stock)
+vs init@0x170/exit@0x368 (ours without the slot). With the gap the vendor
+driver bt541_ts_device probes successfully and the touch works.
 
 SCS note: the stock .ko's use shadow-call-stack (x18); that is covered by
 CONFIG_SHADOW_CALL_STACK=y in sw5100.fragment (not by this patch).

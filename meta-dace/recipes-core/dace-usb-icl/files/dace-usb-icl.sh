@@ -1,7 +1,7 @@
 #!/bin/sh
 # dace: force the USB SDP current so smblite CHARGES.
 #
-# ROOT CAUSE (measured 2026-09-25): smblite starts with `usb_icl_votable` at
+# ROOT CAUSE: smblite starts with `usb_icl_votable` at
 # ~2 mA (the `SW_ICL_MAX_VOTER`/the Android USB driver which does not run here:
 # there is no Android framework). `smblite_lib_configure_usb_icl()` suspends the
 # input if the ICL <= 25 uA -> POWER_PATH_STATUS=0x29 (USE_USBIN=1 but
@@ -14,7 +14,7 @@
 # present with online=0, we write 500000 uA (SDP_CURRENT_MAX) to
 # `usb/input_current_limit` -> `smblite_lib_set_prop_current_max()` votes
 # `USB_PSY_VOTER` and clears `SW_ICL_MAX_VOTER` -> online=1 and `battery
-# Charging` (measured: current_now becomes +354 mA).
+# Charging` (current_now then reads +354 mA).
 #
 # Only touches SDP ports (POWER_SUPPLY_TYPE_USB). DCP/CDP are configured by the
 # PMIC itself. Idempotent and no effect if it is already online.

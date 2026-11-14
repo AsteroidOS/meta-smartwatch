@@ -25,7 +25,7 @@ def patch_slatecom(path):
 	}
 
 	for (i = 0; i < ARRAY_SIZE(service_data); i++) {'''
-    # v1 (IS_BUILTIN) may have been injected by a previous build: replace it.
+    # Also replace an IS_BUILTIN variant if present.
     old_v1 = '''static void ssr_register(void)
 {
 	int i;
@@ -39,7 +39,7 @@ def patch_slatecom(path):
     if old_v1 in src:
         src = src.replace(old_v1, new, 1)
         open(path, 'w').write(src)
-        print("slatecom: v1 (IS_BUILTIN) -> v2 (IS_REACHABLE) OK")
+        print("slatecom: IS_BUILTIN -> IS_REACHABLE OK")
         return
     old = '''static void ssr_register(void)
 {

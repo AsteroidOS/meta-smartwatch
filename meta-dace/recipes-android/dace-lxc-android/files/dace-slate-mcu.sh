@@ -6,7 +6,7 @@
 # MCU's glink link, and the MCU is what powers/clocks the chip. Without the MCU
 # the chip is MUTE (Get Version never answers).
 #
-# ORDER AND TIMING MATTER (measured 2026-09-20):
+# ORDER AND TIMING MATTER:
 #   1) the slate .ko's are already loaded (udev) when this runs;
 #   1b) `powerstateservice-hal-1-0` (pss) must be STARTED: it is the MCU's state
 #      peer. Its .rc does NOT have an 'interface' line -> ctl.start.
@@ -22,18 +22,17 @@
 #      Started with the system already up (unit Ordered after graphical.target
 #      + margin) it is stable and that is when the HAL makes use of it.
 #
-# CROWN/RSB (2026-09-22): the slate_rsb + slatersb_rpmsg modules are loaded
-# HERE, before the `echo start`. Short reason: the slate-rsb-ctl channel does
+# CROWN/RSB: the slate_rsb + slatersb_rpmsg modules are loaded
+# HERE, before the `echo start`. The slate-rsb-ctl channel does
 # not exist until the MCU starts; if slatersb_rpmsg probes with slate_rsb absent
 # (rsb_ops=NULL) it is a call to NULL -> oops -> panic (panic_on_oops=1) ->
-# reset (documented crash). With the MCU stopped the order is
-# the only safe one, and it is the same as stock (loads both in
-# vendor_dlkm/modules.load before starting the MCU).
+# reset. With the MCU stopped this order is the only safe one, and it is the
+# same as stock (loads both in vendor_dlkm/modules.load before starting the MCU).
 #
-# v2 (2026-09-22): the RSB is NOT pre-enabled. With pending_enable=1 the driver,
-# on completing the AFTER_POWERUP CONFIGR_RSB, sends SLATERSB_ENABLE to the MCU
-# immediately -> prime suspect for the reset a few seconds after starting the
-# MCU. ENABLE is done AT THE END, with BT already confirmed.
+# The RSB is NOT pre-enabled: with pending_enable=1 the driver, on completing
+# the AFTER_POWERUP CONFIGR_RSB, sends SLATERSB_ENABLE to the MCU immediately,
+# which resets the SoC a few seconds after the MCU starts. ENABLE is done AT
+# THE END, with BT already confirmed.
 set -u
 
 # The log goes to /run (tmpfs, live read) AND to /var/log (eMMC: survives a hard
@@ -45,14 +44,14 @@ log() {
     sync 2>/dev/null
 }
 
-# CRITICAL NOTE (2026-09-20): this service does NOT write to journald or the
-# console (StandardOutput=null in the unit). Measured: with journald/logd stuck
+# NOTE: this service does NOT write to journald or the
+# console (StandardOutput=null in the unit). With journald/logd stuck
 # (it happens on loaded boots) any write to journald BLOCKS, and the script hung
 # on its first message -> 'start operation timed out' and the MCU never started.
 # The log goes to /run (tmpfs, no wear) and can be read later:
 #   cat /run/dace-slate-mcu.log
-# For the same reason lxc-attach is no longer used on the critical path (it
-# hangs when launched by a unit): pss starts via the .rc 'interface' line and
+# For the same reason lxc-attach is not used on the critical path (it hangs
+# when launched by a unit): pss starts via the .rc 'interface' line and
 # the HAL/bluebinder are relaunched by killing them via /proc.
 
 # 2) powerstateservice (vendor.qti.hardware.powerstateservice@1.0).
@@ -159,12 +158,11 @@ if [ "$(cat /sys/kernel/slate_bt_state/slate_bt_state 2>/dev/null)" = "ready" ];
             log "WARNING: BT chip power failed (/dev/btpower)"
         fi
     fi
-    # BT HAL and its CLIENT, relaunched WITHOUT lxc-attach (measured 2026-09-20:
-    # `lxc-attach` hangs when launched by a systemd unit with the system loaded
-    # -- dbus/systemd saturated: it works from the shell, not from a service).
+    # BT HAL and its CLIENT, relaunched WITHOUT lxc-attach (`lxc-attach`
+    # hangs when launched by a systemd unit with the system loaded).
     # Instead we kill them via /proc: the container init relaunches the HAL
-    # (verified: the pid changes) and systemd relaunches bluebinder
-    # (Restart=always). Without a FRESH bluebinder the HAL never gets to
+    # and systemd relaunches bluebinder (Restart=always).
+    # Without a FRESH bluebinder the HAL never gets to
     # initialize ("Waiting for bluetooth service" forever) and hci0 stays
     # without a BD address. With both fresh + slate ready -> hci0 UP RUNNING.
     for _p in /proc/[0-9]*; do
@@ -180,12 +178,10 @@ else
 fi
 
 # 7) Wait for the controller to become operational (hci0 with a BD address).
-# NOTE: the REAL bring-up takes ~100 s from here: the HAL is relaunched but its
+# NOTE: the real bring-up takes ~100 s from here: the HAL is relaunched but its
 # first attempt with the chip already powered comes on the next cycle (~60 s) and
-# the patch+NVM download takes a few more seconds (measured 2026-09-21: hci0
-# comes up at ~90-110 s). The previous cap (40 x 2 s = 80 s) was too short and
-# the log spat out a misleading WARNING even though everything ended fine: hence
-# 150 x 2 s = 300 s.
+# the patch+NVM download takes a few more seconds (hci0 comes up at ~90-110 s),
+# so the wait cap is 150 x 2 s = 300 s.
 i=0
 while [ $i -lt 150 ]; do
     if hciconfig 2>/dev/null | grep -qE "BD Address: ([0-9A-Fa-f]{2}:){5}" && \

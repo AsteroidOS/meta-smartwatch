@@ -1,4 +1,4 @@
-# El T5 no usa device-mapper (el rootfs va en userdata directo). dmeventd
-# falla al linkear (undefined dm_* con gcc 14); lo apagamos del build.
-LVM2_PACKAGECONFIG = ""
-PACKAGECONFIG:remove = "dmeventd"
+# dace: no usa device-mapper (el rootfs va directo en userdata). dmeventd
+# falla al linkar (undefined dm_* con gcc 14); se apaga solo en dace.
+LVM2_PACKAGECONFIG:dace = ""
+PACKAGECONFIG:remove:dace = "dmeventd"

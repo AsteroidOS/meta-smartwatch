@@ -210,7 +210,7 @@ sysmon_subsystem_stats:k
 # and the slate MCU's peer is MOBVOI's "powerstateservice" (pss), which requests
 # the states with the STOCK ABI: with ours, its MODEM_EXIT(5) falls on
 # CDSP_SUSPEND and the state machine never completes -> the MCU is left without a
-# peer and does NOT enable the BT block (measured: geni_ios:0x0 in the UART SE =
+# peer and does NOT enable the BT block (geni_ios:0x0 in the UART SE =
 # the chip does not drive its lines, and the HAL dies with InitTimeOut). With
 # the stock .ko the ABI matches exactly (the same binary the pss uses on stock).
 power_state:stock

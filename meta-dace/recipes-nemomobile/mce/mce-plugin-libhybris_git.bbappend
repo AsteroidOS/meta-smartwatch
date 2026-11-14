@@ -6,4 +6,4 @@
 # libmce-glib, which is not enough for the headers). Also, being mce's "libhybris
 # plugin", it needs the libhybris headers (the plugin talks to the Android HAL
 # through it).
-DEPENDS += "glib-2.0 libhybris"
+DEPENDS:append:dace = " glib-2.0 libhybris"

@@ -15,8 +15,8 @@ change) -> unidentified streams are ABORTED. The firmware table only has 4 SMRs
 
   - eMMC, USB, qcrypto, tmc...: they are ALREADY in the firmware CB and work
     with physical addresses. If Linux attaches them to a domain it CHANGES
-    their CB and the boot hangs (measured 2026-09-20 with the unconditional
-    patch) -> they must be left as they were (-ETIMEDOUT, still no domain).
+    their CB and the boot hangs (an unconditional attach does exactly that)
+    -> they must be left as they were (-ETIMEDOUT, still no domain).
   - 0xe3 (qcom,qupv3_0_geni_se wrapper, which maps the SPI/UART buffers:
     geni_se_tx/rx_dma_prep -> dma_map_single(wrapper->dev)) and 0xf6 (slate
     GPI-DMA): they are NOT in the table -> their DMA is ABORTED (RX_SBE on the

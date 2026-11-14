@@ -10,5 +10,5 @@
 #
 # NOTE: -std=gnu17 does NOT help; the macro is unconditional under _GNU_SOURCE.
 # The upstream fix wraps the compound literal in parentheses.
-SRC_URI += "file://0001-lsfd-parenthesize-compound-literal-passed-to-bsearch.patch"
-FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
+SRC_URI:append:dace = "file://0001-lsfd-parenthesize-compound-literal-passed-to-bsearch.patch"
+FILESEXTRAPATHS:prepend:dace := "${THISDIR}/files:"

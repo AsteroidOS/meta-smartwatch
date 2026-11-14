@@ -11,5 +11,5 @@
 #
 # Workaround: build cmake-native without -O2, which avoids the spurious
 # template instantiation. Only affects cmake-native build speed slightly.
-CXXFLAGS:remove = "-O2"
-CFLAGS:remove = "-O2"
+CXXFLAGS:remove:dace = "-O2"
+CFLAGS:remove:dace = "-O2"

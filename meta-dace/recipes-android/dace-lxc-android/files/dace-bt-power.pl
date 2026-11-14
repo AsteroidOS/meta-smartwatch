@@ -5,8 +5,8 @@
 # WHY IT IS NEEDED: aurora (Pixel Watch 2) powers up the chip via /dev/btpower.
 # On our watch the Qualcomm HAL, with soc=slate, does NOT vote regulators
 # ("FOR SLATE not voting any Regulators") and without the supplies in the DT
-# `btpower` also does not know which rails to touch: measured 2026-09-20,
-# pm5100_l13 (core 1.304V) and pm5100_l17 (IO 1.8V) stay at state=disabled and
+# `btpower` also does not know which rails to touch: pm5100_l13 (core 1.304V)
+# and pm5100_l17 (IO 1.8V) stay at state=disabled and
 # the chip is MUTE (the HAL opens ttyHS0 at 2400 bps and dies with InitTimeOut +
 # err 0x55).
 #

@@ -158,8 +158,8 @@ do_compile() {
     # ─── Step 3: T5 DTB blob = 2 CONCATENATED DTBs (monaco-real + monacop). ───
     # The ABL selects the DTB by the hardware msm-id/board-id: monaco-real
     # (qcom,monaco, msm-id 486) + monacop (qcom,monacop, msm-id 517). Without the
-    # matching one (monacop) it falls to EDL 05c6:900e (confirmed 2026-08-22 in
-    # the ticwatch recipe). vkb-base.dtb (aurora) is no longer used.
+    # matching one (monacop) it falls to EDL 05c6:900e (as in the ticwatch
+    # recipe). vkb-base.dtb (aurora) is no longer used.
     # monaco-real already carries ramoops@9ff00000 and splash_region — do not inject.
     # VIA1 V67-fix: force dr_mode=peripheral on the dwc3@4e00000 child. With
     # "otg" the core waits for the glue's role decision (extcon/io-channels of
@@ -256,39 +256,35 @@ do_compile() {
         else
             bbwarn "$dtb: missing monaco-idp-v1-overlay.dtbo"
         fi
-        # ── WLAN EXPERIMENT (2026-09-26): aurora-style icnss ─────────────────
-        # The ONLY deep difference from aurora (which has
-        # WiFi) is that on dace the WLAN RF lives in the slate MCU
-        # (`qcom,is_slate_rfa=1`, `rf_subtype=0`), while on aurora it lives in
-        # the modem (`rf_subtype=1`/APACHE, no `is_slate_rfa`). The modem firmware
-        # dies with DOG without its WLAN PD starting (it does not register
-        # `wlan/fw` in the servloc). Hypothesis: the WLAN PD gets stuck waiting
-        # for the slate RF. This experiment makes dace's icnss look like aurora's:
-        #   - deletes `qcom,is_slate_rfa` (with `fdtput -d`; NOTE: setting it to
+        # ── WLAN: aurora-style icnss ─────────────────────────────────────────
+        # On dace the WLAN RF lives in the slate MCU (`qcom,is_slate_rfa=1`,
+        # `rf_subtype=0`), while on aurora it lives in the modem
+        # (`rf_subtype=1`/APACHE, no `is_slate_rfa`). The modem firmware dies
+        # with DOG while its WLAN PD does not start (it never registers
+        # `wlan/fw` in the servloc). Make dace's icnss look like aurora's:
+        #   - delete `qcom,is_slate_rfa` (with `fdtput -d`; NOTE: setting it to
         #     0 does not work -- `of_property_read_bool` only checks if it EXISTS)
-        #   - sets `qcom,rf_subtype = <1>` (WLFW_WLAN_RF_APACHE_V01)
-        # This way icnss2 does not block waiting for the `slatefw` SSR and asks
-        # for the APACHE RF. If the DOG disappears and `wlan0` appears, the
-        # modem<->slate coupling is confirmed. REVERT the experiment = delete
-        # these 2 lines.
+        #   - set `qcom,rf_subtype = <1>` (WLFW_WLAN_RF_APACHE_V01)
+        # so icnss2 does not block waiting for the `slatefw` SSR and asks for
+        # the APACHE RF.
         "$FDTPUT" -d ${WORKDIR}/${dtb}-per.dtb /soc/qcom,icnss@C800000 \
             qcom,is_slate_rfa
         "$FDTPUT" -t x ${WORKDIR}/${dtb}-per.dtb /soc/qcom,icnss@C800000 \
             qcom,rf_subtype 1
-        bbnote "$dtb: WLAN experiment -- icnss without is_slate_rfa + rf_subtype=1 (APACHE)"
+        bbnote "$dtb: icnss without is_slate_rfa + rf_subtype=1 (APACHE)"
         # ── POWER / CHARGING: `dpdm-supply` from smblite is KEPT ────────────
         # The smblite uses `dpdm-supply = <&usb2_phy0>` (hsphy@1613000, phandle
         # 0x30) to enable the DPDM regulator registered by phy-msm-snps-hs:
         # it puts the PHY in "non-driving" mode so the PMIC completes the
         # charger detection (BC1.2/APSD). Without DPDM, POWER_PATH_STATUS has no
         # USE_USBIN -> `usb/online=0` -> ICL 2 mA -> **the watch does not
-        # charge** (measured 2026-09-25: charging worked in the bootloader but
-        # not in Linux). This property used to be deleted because the smblite
-        # probe hung in smblite_lib_request_dpdm(); now the PHY driver already
-        # carries the "dace B: no LDO control" patch (msm_hsphy_enable_power
-        # returns without touching regulators if they are missing) and the DPDM
-        # regulator is registered (regulator.56: hsphy@1613000), so it is tried
-        # again. Reversible: if it hung again, restore the `fdtput -d`.
+        # charge** (charging worked in the bootloader but not in Linux). The
+        # PHY driver carries the "dace B: no LDO control" patch
+        # (msm_hsphy_enable_power returns without touching regulators if they
+        # are missing) and the DPDM regulator is registered
+        # (regulator.56: hsphy@1613000), so the smblite probe no longer hangs
+        # in smblite_lib_request_dpdm(); if it ever does, delete the property
+        # with `fdtput -d`.
         bbnote "$dtb: smblite KEEPS dpdm-supply (DPDM charger detection)"
         # ── BT/WCN3988: the compatible decides the SOC in the HAL; the rails, if there is a chip ─
         # 1) COMPATIBLE: the HAL reads the FIRST one and derives the SOC type
@@ -297,7 +293,7 @@ do_compile() {
         #    qcc5100 is left FIRST and wcn3990 as second: the kernel drivers
         #    (btpower/btqca) match on ANY compatible in the list, so that second
         #    one serves their tables.
-        # 2) RAILS: measured 2026-09-20 -- with soc=slate the HAL does NOT vote
+        # 2) RAILS: with soc=slate the HAL does NOT vote
         #    regulators ("FOR SLATE not voting any Regulators") and without these
         #    supplies `btpower` does not know which rails to turn on: pm5100_l13
         #    (core 1.304V) and pm5100_l17 (IO 1.8V) stayed at state=disabled and
@@ -328,13 +324,10 @@ do_compile() {
             qcom,bt-sw-ctrl-gpio "$TLMM" 69 0
         bbnote "$dtb: bt-sw-ctrl-gpio = <&tlmm 69 0> (tlmm phandle=$TLMM)"
         # ── BT UART pinctrl: patched in the DRIVER (no hog in the DT) ───────
-        # The UART node is left EXACTLY like stock/aurora. Verified 2026-09-19:
-        # (a) the qupv3_se5_* groups are identical to aurora and the pinctrl-N
-        # assignment too; (b) the 23259b2d hack (default/sleep = qup05) does NOT
-        # mux (pins 26-29 stay at function=gpio during the whole HAL attempt);
-        # (c) a HOG on /soc/pinctrl@500000 DOES mux to qup05 but CLAIMS the pins
-        # and breaks the UART probe (msm_geni_serial loads with 0 ports:
-        # /dev/ttyHS* never appears).
+        # The UART node is left EXACTLY like stock/aurora: the qupv3_se5_*
+        # groups are identical to aurora. A DT hog on /soc/pinctrl@500000 muxes
+        # to qup05 but CLAIMS the pins and breaks the UART probe
+        # (msm_geni_serial loads with 0 ports: /dev/ttyHS* never appears).
         # The solution is to force the mux from the driver itself in
         # msm_geni_serial_probe() -> dace-hs-uart-pinctrl.patch (in linux-dace).
         bbnote "$dtb: BT UART pinctrl is forced by the driver (dace-hs-uart-pinctrl.patch)"

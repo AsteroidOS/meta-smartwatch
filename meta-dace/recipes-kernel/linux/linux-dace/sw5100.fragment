@@ -160,17 +160,13 @@ CONFIG_STACKPROTECTOR_STRONG=y
 # ── SHADOW CALL STACK (compatibility with stock vendor .ko's) ────────────────
 # The stock .ko's (Mobvoi msm-5.15 g7f9d6c16b5cd) were built with SCS: they
 # save x30 via x18 (str x30,[x18],#8).
-# NOTE: this line does NOT take effect (verified 2026-09-15: the final .config
-# does not have CONFIG_SHADOW_CALL_STACK and a freshly built module of ours
-# comes out with 0 SCS instructions; Kconfig discards it in this
-# configuration). That is why the vendor .ko's are NOPed in the
-# dace-vendor-touch recipe (see its files/README.txt and patch-stock-module.py).
-# The line is kept in case it can be enabled some day: then the .ko's would
-# have to be baked WITHOUT patching.
+# NOTE: Kconfig discards this line in this configuration (the final .config
+# has no CONFIG_SHADOW_CALL_STACK), so the stock vendor .ko's are SCS-NOPed in
+# the dace-vendor-touch recipe (patch-stock-module.py).
 CONFIG_SHADOW_CALL_STACK=y
 
-# ── POWER MANAGEMENT: autosleep for MCE (2026-09-23) ─────────────────────────
-# MEASURED: the watch NEVER suspends (`/sys/power/suspend_stats/success` = 0
+# ── POWER MANAGEMENT: autosleep for MCE ─────────────────────────
+# The watch never suspends (`/sys/power/suspend_stats/success` = 0
 # after 21 h of uptime). Root cause: MCE (mce/libwakelock.c:lwl_probe()) looks
 # for a supported suspend model and finds none:
 #   * `echo on > /sys/power/state` -> EINVAL (early-suspend does not exist in 5.15)

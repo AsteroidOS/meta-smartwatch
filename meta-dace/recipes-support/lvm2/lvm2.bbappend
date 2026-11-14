@@ -1,3 +1,4 @@
-# Igual para lvm2: sin dmeventd (no se usa; rompe el link con gcc 14).
-LVM2_PACKAGECONFIG = ""
-PACKAGECONFIG:remove = "dmeventd"
+# dace: no usa device-mapper (el rootfs va directo en userdata) y dmeventd
+# falla al linkar con gcc 14 en el host de build.
+LVM2_PACKAGECONFIG:dace = ""
+PACKAGECONFIG:remove:dace = "dmeventd"

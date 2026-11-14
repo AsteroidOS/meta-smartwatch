@@ -3,24 +3,18 @@ DESCRIPTION = "The .ko's in /lib/modules/<krel>/vendor/ (linux-dace-modules) \
 are only reachable AFTER the switch_root to the rootfs (the VKB ramdisk only \
 carries the boot-critical ones), so their load goes through \
 systemd-modules-load.d/dace-post-rootfs.conf. \
-NOTE: that file used to be shipped WITH THE LIST COMMENTED OUT because that \
-module chain (WLAN/icnss2 + ASoC + BT) took the SoC down to EDL at ~10 s: the \
-real trigger is udev's coldplug by modalias, but systemd-modules-load does an \
-explicit 'modprobe <module>' and 'blacklist' does NOT block that (only \
-aliases). That is why /etc/modprobe.d/00-dace-vendor-blacklist.conf is also \
-installed (76 modules, blocks udev) and why the autoload list had to stay \
-commented out until the culprit was bisected: uncommenting lines is how it is \
-bisected."
+The vendor modules are blocked from udev's modalias coldplug via \
+/etc/modprobe.d/00-dace-vendor-blacklist.conf (a blacklist only stops \
+autoload by alias); dace-modules-load.service then loads the list by hand \
+with an explicit modprobe, which is not affected by the blacklist."
 LICENSE = "MIT"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MIT;md5=0835ade698e0bcf8506ecda2f7b4f302"
 COMPATIBLE_MACHINE = "dace"
 
-# 2026-09-18: the list is NO LONGER commented out. It was verified that kmod
-# applies the blacklist as a *deny-list* also to systemd-modules-load's
-# `modprobe` ("Module 'wlan' is deny-listed (by kmod)"), so that service cannot
-# load the chain. dace-modules-load.service loads it by hand, doing an explicit
-# `modprobe` (which DOES ignore the deny-list) reading the same
-# /etc/modules-load.d/dace-post-rootfs.conf.
+# kmod applies the blacklist as a deny-list also to systemd-modules-load's
+# `modprobe`, so that service cannot load the chain. dace-modules-load.service
+# loads the list by hand with an explicit `modprobe` (which ignores the
+# deny-list) reading /etc/modules-load.d/dace-post-rootfs.conf.
 inherit systemd
 
 SRC_URI = "file://dace-post-rootfs.conf \

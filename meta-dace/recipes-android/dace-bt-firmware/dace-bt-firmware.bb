@@ -3,7 +3,7 @@ SUMMARY = "QCA BT firmware for the TicWatch Pro 5 (dace)"
 #   /image/apbtfw11.tlv + apnv11.bin   -> WCN3988 'ap' family
 #   /image/slbtfw20.mbn + slnv20.bin   -> 'sl' family (the slate-mode one)
 #
-# NOTE (2026-09-20): with the SOC in slate mode (DT compatible qcom,qcc5100,
+# NOTE: with the SOC in slate mode (DT compatible qcom,qcc5100,
 # which is what stock ships) the Qualcomm HAL requests the **sl** family and
 # these two files must be in the container's /vendor/firmware (copied by
 # dace-lxc-android-start.sh from /lib/firmware/qca):

@@ -28,7 +28,7 @@ index 7579afb..eb00ed2 100644
          }
          QPoint angle = event->angleDelta();
 -        inputDevice->sendMouseWheelEvent(Qt::Vertical, angle.y());
-+        // dace/CROWN (2026-09-22): the slate crown is a CONTINUOUS
++        // dace/CROWN: the slate crown is a CONTINUOUS
 +        // high-resolution encoder: each REL_WHEEL event is worth 1 and Qt
 +        // delivers it as angleDelta.y = 120 (a "notch"). A minimal turn generates
 +        // a huge number of events, so they are accumulated and 1 notch is sent
@@ -80,7 +80,7 @@ index cdcd723..466c008 100644
  
      anchors.fill: parent
 +
-+    /* dace/CROWN (2026-09-22): the side wheel (slate-spi, event2) arrives as a
++    /* dace/CROWN: the side wheel (slate-spi, event2) arrives as a
 +     * QWheelEvent via Qt's generic evdevmouse plugin. The ListView does not
 +     * consume it on its own, so we advance/go back one item per "tooth"
 +     * (angleDelta = 120 per notch). If the direction comes out inverted, change
@@ -274,7 +274,7 @@ index 3d78ce9..80d864b 100644
      visible: Lipstick.compositor.homeActive || aboutToOpen || aboutToClose || aboutToMinimize
      enabled: visible
  
-+    /* dace/CROWN (2026-09-22): the crown pushbutton. It is delivered by the
++    /* dace/CROWN: the crown pushbutton. It is delivered by the
 +     * GLOBAL event filter (CrownButtonHandler, src/main.cpp): this scene does NOT
 +     * receive keyboard focus, with Keys.onPressed the key never arrived.
 +     * compositor.qml forwards its `pressed` signal here as crownPressed().

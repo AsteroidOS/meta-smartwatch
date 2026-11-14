@@ -135,9 +135,9 @@ done
 # panics and the SoC resets ("rproc recovery state: disabled -> device crash").
 # aurora LIVES WITH the modem crashes (its own note: "modem perpetually crashes
 # & recovers"). By enabling recovery from sysfs, the same DOG becomes
-# "recovery state: enabled and kick recovery process" and the watch survives;
-# the modem relaunches itself. Verified 2026-09-19: crash #1/#2 every ~40 s with
-# the watch stable and adb alive (before: immediate reset).
+# "recovery state: enabled and kick recovery process" and the watch survives:
+# the modem DOG fires every ~40 s but the watch stays up, adb alive, and the
+# modem relaunches itself.
 for r in /sys/class/remoteproc/remoteproc*; do
     [ -e "$r/recovery" ] || continue
     [ "$(cat "$r/recovery" 2>/dev/null)" = "enabled" ] && continue
@@ -146,7 +146,7 @@ for r in /sys/class/remoteproc/remoteproc*; do
 done
 # NOTE: the modem (remoteproc1) also ends up with recovery=enabled: the DOG of
 # its firmware (if it is ever started for WLAN) does NOT reset the SoC; the
-# driver relaunches it on its own (this was the 2026-09-19 fix).
+# driver relaunches it on its own.
 
 # ─ Start the ADSP (the modem/WLAN fw waits for it to be alive) ──────────────
 # The MODEM (remoteproc1) is NO LONGER started here. On dace the WLAN needs at
