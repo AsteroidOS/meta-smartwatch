@@ -1,0 +1,12 @@
+[Unit]
+Description=sol: WLAN suspend power-save mode while the display is off
+After=mce.service dbus.service
+Requires=dbus.service
+
+[Service]
+ExecStart=/usr/bin/sol-wlan-suspendmode.sh
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
