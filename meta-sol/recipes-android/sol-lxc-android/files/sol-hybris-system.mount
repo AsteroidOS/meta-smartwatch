@@ -1,0 +1,16 @@
+[Unit]
+Description=sol: loop-mount the Halium system libhybris runs against (host side)
+DefaultDependencies=no
+After=sol-vendor-mount.service
+Before=local-fs.target
+ConditionPathExists=/var/lib/lxc/android/hybris-system.img
+RequiresMountsFor=/var/lib/lxc/android
+
+[Mount]
+What=/var/lib/lxc/android/hybris-system.img
+Where=/android/hybris
+Type=ext4
+Options=loop,ro,nosuid,nodev
+
+[Install]
+WantedBy=local-fs.target
