@@ -1,0 +1,42 @@
+From: Florent Revest <revestflo@gmail.com>
+Subject: [PATCH] rtc: pm8xxx: force the aurora RTC read-only
+
+Upstream-Status: Inappropriate [aurora-specific HW quirk]
+
+Aurora's (Pixel Watch 2) pm5100 RTC is writable but VOLATILE: it resets to
+~epoch (1970) on every cold boot and never retains wall-clock time. The
+device tree marks the node "allow-set-time", so userspace time daemons
+(dsme/timed) successfully write it, conclude it is a trustworthy clock, and
+then slam the system clock to the raw ~1970 RTC value -- clobbering the time
+restored at boot by swclock-offset.
+
+Force allow_set_time = false so RTC_SET_TIME returns -EACCES. dsme then takes
+its "circumventing read only RTC" delta path (anchored by its mintime floor
+and the swclock-offset-seeded system time), keeping correct wall time without
+any change to the shared dsme recipe. RTC reads and wakeup alarms do not need
+write access, so suspend wakeups keep working.
+
+Signed-off-by: Florent Revest <revestflo@gmail.com>
+--- a/drivers/rtc/rtc-pm8xxx.c
++++ b/drivers/rtc/rtc-pm8xxx.c
+@@ -656,8 +656,18 @@
+ 	if (rtc_dd->rtc_alarm_irq < 0)
+ 		return -ENXIO;
+ 
+-	rtc_dd->allow_set_time = of_property_read_bool(pdev->dev.of_node,
+-						      "allow-set-time");
++	/*
++	 * AURORA (Pixel Watch 2): the pm5100 RTC is VOLATILE -- it resets to
++	 * ~epoch on every cold boot and never holds wall-clock time. The
++	 * device tree marks the node "allow-set-time", which lets userspace
++	 * (dsme/timed) write the RTC, conclude it is a trustworthy clock and
++	 * then pull the system clock back to ~1970. Force the RTC read-only
++	 * so RTC_SET_TIME returns -EACCES: dsme's "circumventing read only
++	 * RTC" delta path then keeps correct system time (seeded by
++	 * swclock-offset), while RTC reads and wakeup alarms -- which do not
++	 * need write access -- keep working.
++	 */
++	rtc_dd->allow_set_time = false;
+ 
+ 	rtc_dd->regs = match->data;
+ 	rtc_dd->rtc_dev = &pdev->dev;

@@ -1,0 +1,65 @@
+From 13966517d41efb0a549544022db7d522503bc718 Mon Sep 17 00:00:00 2001
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Date: Fri, 1 Apr 2022 16:11:23 +0200
+Subject: [PATCH] PM: runtime: Allow to call __pm_runtime_set_status() from
+ atomic context
+
+Upstream commit 13966517d41e. The PSCI-cpuidle syscore resume path calls
+pm_runtime_set_active(), whose __pm_runtime_set_status() took a non-saving
+spin_lock_irq() -- re-enabling interrupts inside syscore resume and tripping a
+WARNING at the first resume of every off-charger boot. Switch to the saving
+variant so it is safe from atomic/irqs-off context.
+
+Backported to sol (Pixel Watch 3, 5.15.148) from Florent Revest's aurora PR
+AsteroidOS/meta-smartwatch#359; regenerated against sol's source.
+
+Upstream-Status: Backport [13966517d41e, v5.19]
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+Signed-off-by: Rafael J. Wysocki <rafael.j.wysocki@intel.com>
+---
+diff --git a/drivers/base/power/runtime.c b/drivers/base/power/runtime.c
+index 35037db2d47a..cecb3afccd69 100644
+--- a/drivers/base/power/runtime.c
++++ b/drivers/base/power/runtime.c
+@@ -1216,12 +1216,13 @@ int __pm_runtime_set_status(struct device *dev, unsigned int status)
+ {
+ 	struct device *parent = dev->parent;
+ 	bool notify_parent = false;
++	unsigned long flags;
+ 	int error = 0;
+ 
+ 	if (status != RPM_ACTIVE && status != RPM_SUSPENDED)
+ 		return -EINVAL;
+ 
+-	spin_lock_irq(&dev->power.lock);
++	spin_lock_irqsave(&dev->power.lock, flags);
+ 
+ 	/*
+ 	 * Prevent PM-runtime from being enabled for the device or return an
+@@ -1232,7 +1233,7 @@ int __pm_runtime_set_status(struct device *dev, unsigned int status)
+ 	else
+ 		error = -EAGAIN;
+ 
+-	spin_unlock_irq(&dev->power.lock);
++	spin_unlock_irqrestore(&dev->power.lock, flags);
+ 
+ 	if (error)
+ 		return error;
+@@ -1253,7 +1254,7 @@ int __pm_runtime_set_status(struct device *dev, unsigned int status)
+ 		device_links_read_unlock(idx);
+ 	}
+ 
+-	spin_lock_irq(&dev->power.lock);
++	spin_lock_irqsave(&dev->power.lock, flags);
+ 
+ 	if (dev->power.runtime_status == status || !parent)
+ 		goto out_set;
+@@ -1294,7 +1295,7 @@ int __pm_runtime_set_status(struct device *dev, unsigned int status)
+ 		dev->power.runtime_error = 0;
+ 
+  out:
+-	spin_unlock_irq(&dev->power.lock);
++	spin_unlock_irqrestore(&dev->power.lock, flags);
+ 
+ 	if (notify_parent)
+ 		pm_request_idle(parent);
