@@ -1,0 +1,15 @@
+[Unit]
+Description=sol: periodic check that the watch can still sleep
+
+[Timer]
+# Five minutes, deliberately: the timer is frozen along with everything else
+# while the watch is genuinely asleep, so on a healthy watch this costs nothing
+# and fires rarely. It only comes round often when the watch is already awake --
+# which is precisely the state it exists to end.
+OnBootSec=5min
+OnUnitActiveSec=5min
+AccuracySec=1min
+Persistent=false
+
+[Install]
+WantedBy=timers.target
