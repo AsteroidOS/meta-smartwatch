@@ -1,0 +1,32 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+#
+# Kbuild for google-modules/display/watch/mcu-offload/mcu_display.
+#
+# Supplied by meta-sol because the upstream repo ships NO Kbuild or Makefile at
+# all: it is bazel-only (a ddk_module in BUILD.bazel with out = "mcu_display.ko").
+# Google builds it with kleaf; we build every EXT_MODULE with the kernel's own
+# M= out-of-tree path, so the module needs a kbuild entry point and this is it.
+#
+# Transcribed from that BUILD.bazel target, not invented:
+#   srcs    = glob(["**/*.c"])            -> main.c mcu_display_nanohub.c
+#   out     = "mcu_display.ko"            -> module name below
+#   hdrs    = :mcu_display_headers, whose ddk_headers has includes = ["include"]
+#                                         -> -I$(src)/include, which is what makes
+#                                            "mcu_display_exports.h" resolve
+#   deps    = //private/google-modules/nanohub (+ its headers)
+#                                         -> nanohub_exports.h, included by
+#                                            mcu_display_nanohub.c. The include
+#                                            path and nanohub's Module.symvers are
+#                                            passed by the recipe (modroot/$extra),
+#                                            matching how mcu_mic_codec and
+#                                            petc_input_filter consume nanohub.
+#
+# Why this module matters: sol's panel is driven through the always-on MCU, and
+# msm_drm's dsi_display.c calls mcu_display_register_panel_power_notifier(). No
+# mcu_display means no msm_drm, and no msm_drm means no DRM device at all, which
+# is why the composer aborted in HWCSession::CreatePrimaryDisplay.
+
+obj-m += mcu_display.o
+mcu_display-y := main.o mcu_display_nanohub.o
+
+ccflags-y += -I$(src)/include

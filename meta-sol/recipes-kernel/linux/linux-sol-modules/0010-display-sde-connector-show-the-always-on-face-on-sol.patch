@@ -1,0 +1,79 @@
+From: moWerk <mo@mowerk.net>
+Date: Mon, 2 Nov 2026 00:00:00 +0000
+Subject: [PATCH] display: sde_connector: show the always-on face on sol
+
+Two problems kept sol's always-on (ambient) watchface black.
+
+The backlight level carries the AOD brightness in its high 16 bits, which
+only Wear OS's composer fills in. AsteroidOS's mce writes a plain level, so
+the panel entered LP1/LP2 at AOD brightness 0. Use a module parameter
+(sol_aod_brightness, default 100 of 255) when the write carries none.
+
+The launcher redraws the ambient face by switching the panel ON, presenting,
+and returning it to LP2 (QPA_HWC2_FORCE_DOZE_UPDATE), about 150 ms. When
+autosleep suspended inside that window, sde_kms_pm_suspend() found the
+connector neither LP1 nor LP2, logged "deactivate crtc", and turned the
+panel off. Hold a 500 ms wakeup source when the panel leaves LP1/LP2 for ON.
+
+Upstream-Status: Inappropriate [AsteroidOS sol: userspace does not use the packed brightness]
+Signed-off-by: moWerk <mo@mowerk.net>
+---diff --git a/private/msm-google-modules/display/msm/sde/sde_connector.c b/private/msm-google-modules/display/msm/sde/sde_connector.c
+--- a/private/msm-google-modules/display/msm/sde/sde_connector.c
++++ b/private/msm-google-modules/display/msm/sde/sde_connector.c
+@@ -21,6 +21,29 @@
+ #include "sde_vm.h"
+ #include <drm/drm_probe_helper.h>
+ #include <linux/version.h>
++#include <linux/moduleparam.h>
++#include <linux/pm_wakeup.h>
++
++/*
++ * AsteroidOS on sol: always-on (doze) brightness used when userspace writes a
++ * plain backlight level. This driver reads the AOD level from the high 16 bits
++ * of the brightness value, which only Wear OS's composer fills in; mce writes
++ * the low 16 bits alone, which left the panel at AOD brightness 0 (black) in
++ * low-power mode. 0 restores the old behaviour.
++ */
++static uint sol_aod_brightness = 100;
++module_param(sol_aod_brightness, uint, 0644);
++MODULE_PARM_DESC(sol_aod_brightness,
++	"AOD brightness used when the backlight write carries none (0-255, 0 = off)");
++
++/*
++ * Held while the panel goes from LP1/LP2 back to ON. Ambient redraws switch the
++ * panel ON, present, and return it to LP2 (~150 ms). If autosleep suspends in
++ * that window, sde_kms_pm_suspend() finds the connector neither LP1 nor LP2 and
++ * deactivates the CRTC, which turns the always-on panel off.
++ */
++#define SOL_AOD_REDRAW_HOLD_MS	500
++static struct wakeup_source *sol_aod_redraw_ws;
+ 
+ #define BL_NODE_NAME_SIZE 32
+ #define HDR10_PLUS_VSIF_TYPE_CODE      0x81
+@@ -164,6 +187,8 @@
+ 	/* We put NBM brightness at lower 16 bits and AOD brightness at higher 16 bits */
+ 	bl_lvl = brightness & 0xFFFF;
+ 	doze_bl_lvl = (brightness >> 16) & 0xFFFF;
++	if (!doze_bl_lvl && bl_lvl)
++		doze_bl_lvl = min_t(uint, sol_aod_brightness, 0xFF);
+ 
+ 	if (!c_conn->allow_bl_update) {
+ 		c_conn->unset_bl_level = bl_lvl;
+@@ -698,6 +723,17 @@
+ 			c_conn->ops.set_hbm(connector, -1, display);
+ 		}
+ 
++		if (mode == SDE_MODE_DPMS_ON &&
++		    (c_conn->last_panel_power_mode == SDE_MODE_DPMS_LP1 ||
++		     c_conn->last_panel_power_mode == SDE_MODE_DPMS_LP2)) {
++			if (!sol_aod_redraw_ws)
++				sol_aod_redraw_ws = wakeup_source_register(NULL,
++							"sol_aod_redraw");
++			if (sol_aod_redraw_ws)
++				__pm_wakeup_event(sol_aod_redraw_ws,
++						  SOL_AOD_REDRAW_HOLD_MS);
++		}
++
+ 		mutex_unlock(&c_conn->lock);
+ 		rc = set_power(connector, mode, display);
+ 		mutex_lock(&c_conn->lock);
