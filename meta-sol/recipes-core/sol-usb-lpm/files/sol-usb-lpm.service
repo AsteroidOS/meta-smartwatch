@@ -1,0 +1,19 @@
+[Unit]
+Description=sol: track cable state so USB can enter low power mode off charger
+Documentation=man:systemd.service(5)
+ConditionPathExists=/sys/bus/platform/devices/soc:google,extcon-usb-shim/spoof_connected
+# Ordered after the gadget exists so the spoof is never cleared underneath the
+# one-shot that is still building it.
+After=sol-bringup-adb.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/sol-usb-lpm.sh
+Restart=always
+RestartSec=10
+# Restore the shipped default on the way out, so stopping this unit leaves the
+# watch in the state the device tree gives it rather than an unreachable one.
+ExecStopPost=/bin/sh -c 'echo 1 > /sys/bus/platform/devices/soc:google,extcon-usb-shim/spoof_connected 2>/dev/null || true'
+
+[Install]
+WantedBy=multi-user.target
