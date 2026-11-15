@@ -1,0 +1,44 @@
+From: moWerk <mo@mowerk.net>
+Subject: [PATCH] hwc2: optionally present ambient updates in DOZE
+
+QPA_HWC2_FORCE_DOZE_UPDATE switches the display to ON for every update
+while it dozes, then back. On sol the panel applies its normal brightness
+in ON, so the always-on face flashes at full brightness once a minute.
+
+sol's composer shows frames presented in DOZE, it only drops them in
+DOZE_SUSPEND. With the variable set to "doze", present the update in
+DOZE instead of ON: the panel stays in its low-power mode and the face
+updates without the flash. Any other value keeps the ON behaviour.
+
+Upstream-Status: Pending
+---
+--- a/hwcomposer/hwcomposer_backend_v20.cpp
++++ b/hwcomposer/hwcomposer_backend_v20.cpp
+@@ -119,6 +119,7 @@
+         bool m_syncBeforeSet;
+         HwComposerBackend_v20 *m_backend;
+         bool m_dozeWorkaround;
++        int m_dozeUpdateMode;
+     protected:
+         void present(HWComposerNativeWindowBuffer *buffer);
+ 
+@@ -145,6 +146,10 @@
+     setBufferCount(bufferCount);
+     m_syncBeforeSet = qEnvironmentVariableIsSet("QPA_HWC_SYNC_BEFORE_SET");
+     m_dozeWorkaround = qEnvironmentVariableIsSet("QPA_HWC2_FORCE_DOZE_UPDATE");
++    // "doze": present in DOZE (the panel stays in its low-power mode, so the
++    // update does not flash at the normal brightness). Anything else: ON.
++    m_dozeUpdateMode = qgetenv("QPA_HWC2_FORCE_DOZE_UPDATE") == "doze" ?
++        HWC2_POWER_MODE_DOZE : HWC2_POWER_MODE_ON;
+ }
+ 
+ HWC2Window::~HWC2Window()
+@@ -176,7 +181,7 @@
+     // Some devices don't support updating the display while it's in doze mode,
+     // transition the display temporarily on to update it.
+     if (m_dozeWorkaround && m_backend->isDozing()) {
+-        hwc2_compat_display_set_power_mode(hwcDisplay, HWC2_POWER_MODE_ON);
++        hwc2_compat_display_set_power_mode(hwcDisplay, m_dozeUpdateMode);
+     }
+ 
+     error = hwc2_compat_display_validate(hwcDisplay, &numTypes,

@@ -1,0 +1,60 @@
+From: moWerk <mo@mowerk.net>
+Subject: [PATCH] hwc2: implement hwc2_compat_display_present_or_validate
+
+The function is declared in hwc2_compatibility_layer.h but has no
+implementation, so a caller resolving it by dlsym gets NULL and Qt's
+hwcomposer QPA plugin crashes at address 0. Implement it on top of
+validate and present.
+
+Applied to Halium libhybris halium-13.0 (bf36ece) to build the
+libhwc2_compat_layer.so in sol-hwc2-aidl-1.0.tar.gz; not applied by BitBake.
+
+Upstream-Status: Pending
+Signed-off-by: moWerk <mo@mowerk.net>
+---
+--- a/compat/hwc2/hwc2_compatibility_layer.cpp
++++ b/compat/hwc2/hwc2_compatibility_layer.cpp
+@@ -301,6 +301,43 @@
+     return static_cast<hwc2_error_t>(error);
+ }
+ 
++/*
++ * hwc2_compat_display_present_or_validate
++ *
++ * Declared in hybris/include/hybris/hwc2/hwc2_compatibility_layer.h but never
++ * implemented in this file, so libhwc2.so resolves the name by dlsym, gets
++ * NULL, and Qt's hwcomposer QPA plugin dies at address 0 while constructing
++ * HwComposerBackend_v20. Added for the sol port; the body follows the existing
++ * validate() and present() wrappers exactly -- zero expectedPresentTime and
++ * frameIntervalNs like validate(), and the dup()/-1 fence handling like
++ * present().
++ */
++hwc2_error_t hwc2_compat_display_present_or_validate(hwc2_compat_display_t* display,
++                                             uint32_t* outNumTypes,
++                                             uint32_t* outNumRequests,
++                                             int32_t* outPresentFence,
++                                             uint32_t* state)
++{
++    const int expectedPresentTime = 0;
++    const int frameIntervalNs = 0;
++    android::sp<android::Fence> presentFence;
++
++    hal::Error error = display->self->presentOrValidate(expectedPresentTime,
++                                                        frameIntervalNs,
++                                                        outNumTypes,
++                                                        outNumRequests,
++                                                        &presentFence,
++                                                        state);
++
++    if (presentFence != NULL) {
++        *outPresentFence = presentFence->dup();
++    } else {
++        *outPresentFence = -1;
++    }
++
++    return static_cast<hwc2_error_t>(error);
++}
++
+ hwc2_error_t hwc2_compat_layer_set_buffer(hwc2_compat_layer_t* layer,
+                                           uint32_t slot,
+                                           struct ANativeWindowBuffer* buffer,
