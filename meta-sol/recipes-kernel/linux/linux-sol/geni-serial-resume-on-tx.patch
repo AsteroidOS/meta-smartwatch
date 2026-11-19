@@ -1,0 +1,132 @@
+From: moWerk <mo@mowerk.net>
+Subject: [PATCH] tty: serial: msm_geni_serial: send the data start_tx could only vote for
+Upstream-Status: Pending [driver bug, not a device workaround; msm_geni_serial
+is a Qualcomm downstream driver with no upstream counterpart to send this to]
+
+
+start_tx runs with the port lock held and interrupts off, so when the port
+has runtime-suspended it cannot wait for a resume. It places an asynchronous
+runtime-PM vote and returns -- but it arms no transfer, and its exit path
+(msm_geni_serial_power_off) immediately drops that vote again. Nothing then
+sends the bytes already sitting in the ring.
+
+The serial core does not call back to help: it calls start_tx when a write
+arrives, not when a port finishes resuming. So any caller that writes once and
+waits for a reply hangs, and the port looks dead whenever it has been idle for
+longer than the 150 ms autosuspend delay.
+
+On sol (Pixel Watch 3) this is the Bluetooth HCI UART. Every HCI command timed
+out with error 110 and the controller appeared dead, which forced the port to be
+pinned runtime-active (power/control=on) for Bluetooth to work at all. That pin
+holds the driver's wakeup source permanently, and a permanently held wakeup
+source means the SoC never attempts suspend: the watch could have Bluetooth or
+it could sleep, never both.
+
+Schedule the retry from the vote site and perform it in process context, where
+a synchronous resume is allowed. The vote is held across start_tx so the port
+cannot autosuspend back out from under the transfer being armed. The worker is
+cancelled on shutdown and on remove, after shutdown_in_progress is set, so an
+instance already past that check cannot outlive the port.
+
+Only the non-console path is affected; the console keeps its existing handling.
+
+Signed-off-by: moWerk <mo@mowerk.net>
+---
+--- a/drivers/tty/serial/msm_geni_serial.c
++++ b/drivers/tty/serial/msm_geni_serial.c
+@@ -403,6 +403,7 @@
+ 	bool gsi_mode;
+ 	struct uart_gsi *gsi;
+ 	struct work_struct tx_xfer_work;
++	struct work_struct tx_resume_work;
+ 	struct work_struct rx_cancel_work;
+ 	struct work_struct tx_cancel_work;
+ 	struct workqueue_struct *tx_wq;
+@@ -2406,6 +2407,19 @@
+ 		UART_LOG_DBG(msm_port->ipc_log_misc, uport->dev,
+ 			"%s.Putting in async RPM vote\n", __func__);
+ 		pm_runtime_get(uport->dev);
++		/*
++		 * The vote above only asks for a resume; this call arms no
++		 * transfer and exit_start_tx immediately drops the vote again,
++		 * so the bytes already queued in the ring are left with nobody
++		 * to send them. The serial core will not call back on its own:
++		 * it calls start_tx when a write arrives, not when the port
++		 * finishes resuming. A caller that writes once and waits for a
++		 * reply - an HCI command, for instance - therefore times out,
++		 * and the port looks dead every time it has been idle for
++		 * longer than the autosuspend delay. Schedule the retry that
++		 * actually performs the transfer once the port is up.
++		 */
++		schedule_work(&msm_port->tx_resume_work);
+ 		goto exit_start_tx;
+ 	}
+ 
+@@ -2483,6 +2497,36 @@
+ 		msm_geni_serial_power_off(uport);
+ }
+ 
++/*
++ * Retry a transfer that start_tx could only vote for. start_tx runs with the
++ * port lock held and interrupts off, so it cannot wait for a runtime resume;
++ * this runs in process context, where it can.
++ */
++static void msm_geni_serial_tx_resume_work(struct work_struct *work)
++{
++	struct msm_geni_serial_port *port = container_of(work,
++			struct msm_geni_serial_port, tx_resume_work);
++	struct uart_port *uport = &port->uport;
++	unsigned long flags;
++
++	if (!uport->state || port->shutdown_in_progress)
++		return;
++
++	/*
++	 * Resume synchronously and hold the vote across start_tx, so the port
++	 * cannot autosuspend back out from under the transfer we are arming.
++	 */
++	pm_runtime_get_sync(uport->dev);
++
++	spin_lock_irqsave(&uport->lock, flags);
++	if (!uart_circ_empty(&uport->state->xmit))
++		msm_geni_serial_start_tx(uport);
++	spin_unlock_irqrestore(&uport->lock, flags);
++
++	pm_runtime_mark_last_busy(uport->dev);
++	pm_runtime_put_autosuspend(uport->dev);
++}
++
+ static void stop_tx_sequencer(struct uart_port *uport)
+ {
+ 	unsigned int geni_status;
+@@ -3813,6 +3857,13 @@
+ 
+ 	UART_LOG_DBG(msm_port->ipc_log_misc, uport->dev, "%s: %d\n", __func__, true);
+ 	msm_port->shutdown_in_progress = true;
++	/*
++	 * Flag first, then cancel: the worker bails on shutdown_in_progress, and
++	 * this waits out an instance already past that check before the port is
++	 * torn down under it.
++	 */
++	if (!uart_console(uport))
++		cancel_work_sync(&msm_port->tx_resume_work);
+ 
+ 	start_time = geni_capture_start_time(&msm_port->se, msm_port->ipc_log_kpi,
+ 					     __func__, msm_port->uart_kpi);
+@@ -5041,6 +5092,8 @@
+ 		return ret;
+ 
+ 	if (!is_console) {
++		INIT_WORK(&dev_port->tx_resume_work,
++			  msm_geni_serial_tx_resume_work);
+ 		dev_port->geni_wake = wakeup_source_register(uport->dev,
+ 						dev_name(&pdev->dev));
+ 		if (!dev_port->geni_wake) {
+@@ -5245,6 +5298,7 @@
+ 	if (port->wakeup_irq > 0)
+ 		destroy_workqueue(port->wakeup_irq_wq);
+ 	if (!uart_console(&port->uport)) {
++		cancel_work_sync(&port->tx_resume_work);
+ 		wakeup_source_unregister(port->geni_wake);
+ 		port->geni_wake = NULL;
+ 	}

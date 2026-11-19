@@ -1,0 +1,12 @@
+[Unit]
+Description=sol: notice when the watch can no longer sleep, and nudge mce
+Documentation=file:///usr/bin/sol-sleep-guard.sh
+After=mce.service
+Wants=mce.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/sol-sleep-guard.sh
+# Never compete with anything the wearer can see.
+Nice=19
+IOSchedulingClass=idle

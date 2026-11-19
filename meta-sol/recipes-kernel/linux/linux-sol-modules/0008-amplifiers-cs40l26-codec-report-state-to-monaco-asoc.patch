@@ -1,0 +1,86 @@
+From: moWerk <mo@mowerk.net>
+Date: Sun, 17 Aug 2026 01:00:00 +0000
+Subject: [PATCH] amplifiers: cs40l26-codec: report state to monaco-asoc
+
+sol has no sound card at all: monaco-asoc-snd never creates one, retrying
+forever with
+
+    populate_snd_card_dailinks(): CS40L26 codec support present
+        - Using Primary MI2S | snd_cs40l26_loaded: 0
+    msm_asoc_machine_probe: Card uninitialized
+    msm_asoc_machine_probe: Defer probe for card retry
+
+monaco.c gates the card on a tri-state that the codec is expected to write:
+
+    == 1   add the haptics DAI links
+    == 0   card_defer_probe = true; return NULL
+    else   skip haptics, bring the card up anyway
+
+snd_cs40l26_loaded is defined and exported by machine_dlkm itself
+(asoc/monaco.c). The codec half is what sets it -- and only in the seluna
+generation of this driver (cs40l26-codec.c:19,1153,1159 there), which is what
+sol's audio module was written against. sol builds amplifiers from the
+pixel-watch branch instead, because seluna's is bazel-only, and that branch
+has no writer anywhere in the tree. So the flag stays 0 and the card defers
+forever.
+
+Note this is NOT the same symbol as cs40l26_loaded, the bool externed from
+cs40l26.c just above: that one gates this probe, this one gates the sound
+card. Two similarly named flags, only one of which had a writer here.
+
+Mirror seluna's semantics exactly: 1 once the component registers, -1 on any
+failure return, so a codec that cannot come up degrades to a card without the
+haptics DAI rather than no card at all.
+
+Upstream-Status: Inappropriate [sol-specific: pairs a pixel-watch-branch
+codec with a seluna-branch audio module]
+
+Signed-off-by: Mo Werk <mo@mowerk.net>
+Signed-off-by: moWerk <mo@mowerk.net>
+---
+ .../google-modules/amplifiers/cs40l26/cs40l26-codec.c  | 14 ++++++++++----
+ 1 file changed, 10 insertions(+), 4 deletions(-)
+
+diff --git a/private/google-modules/amplifiers/cs40l26/cs40l26-codec.c b/private/google-modules/amplifiers/cs40l26/cs40l26-codec.c
+--- a/private/google-modules/amplifiers/cs40l26/cs40l26-codec.c
++++ b/private/google-modules/amplifiers/cs40l26/cs40l26-codec.c
+@@ -16,6 +16,7 @@
+ };
+ 
+ extern bool cs40l26_loaded;
++extern int snd_cs40l26_loaded;
+ 
+ static int cs40l26_get_clk_config(u32 freq, u8 *clk_cfg)
+ {
+@@ -978,13 +979,16 @@
+ 	if (!cs40l26_loaded) {
+ 		/* cs40l26 did not load successfully */
+ 		dev_err(&pdev->dev, "Skipping cs40l26-codec probe\n");
++		snd_cs40l26_loaded = -1;
+ 		return -EIO;
+ 	}
+ 
+ 	codec = devm_kzalloc(&pdev->dev, sizeof(struct cs40l26_codec),
+ 			GFP_KERNEL);
+-	if (!codec)
++	if (!codec) {
++		snd_cs40l26_loaded = -1;
+ 		return -ENOMEM;
++	}
+ 
+ 	codec->core = cs40l26;
+ 	codec->regmap = cs40l26->regmap;
+@@ -996,8 +1000,12 @@
+ 
+ 	ret = snd_soc_register_component(&pdev->dev, &soc_codec_dev_cs40l26,
+ 			cs40l26_dai, ARRAY_SIZE(cs40l26_dai));
+-	if (ret < 0)
++	if (ret < 0) {
+ 		dev_err(&pdev->dev, "Failed to register codec: %d\n", ret);
++		snd_cs40l26_loaded = -1;
++	} else {
++		snd_cs40l26_loaded = 1;
++	}
+ 
+ 	return ret;
+ }

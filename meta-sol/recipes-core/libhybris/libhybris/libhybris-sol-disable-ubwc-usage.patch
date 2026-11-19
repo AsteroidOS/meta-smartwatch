@@ -1,0 +1,87 @@
+libhybris: strip UBWC-triggering usage bits in HWComposerNativeWindow on sol
+
+This is meta-aurora's libhybris-aurora-disable-ubwc-usage.patch, by Florent,
+reused for sol. sol (Pixel Watch 3) is the same Qualcomm Monaco / sw5100 SoC as
+aurora (Pixel Watch 2) and hits the identical display-pipeline limitation, so
+the fix is the same. The diff is identical to aurora's apart from one comment
+line naming the device, and it applies to the libhybris SRCREV this layer pins
+with zero fuzz and zero offset.
+
+QTI gralloc's IsUBwcEnabled() (hardware/qcom/<soc>/display/gralloc/gr_utils.cpp)
+returns true when any of the following bits are set in the buffer usage:
+
+  - GRALLOC_USAGE_HW_COMPOSER       = 0x800        (= BufferUsage::COMPOSER_CLIENT_TARGET)
+  - GRALLOC_USAGE_PRIVATE_ALLOC_UBWC    = 0x10000000   (private bit 28; libEGL_adreno
+                                                       adds this when creating an EGLSurface)
+  - GRALLOC_USAGE_PRIVATE_ALLOC_UBWC_PI = 0x40000000   (private bit 30, "paddingless intra")
+
+When IsUBwcEnabled returns true the allocator stamps the buffer with
+DRM_FORMAT_MOD_QCOM_COMPRESSED at AddFB2 time. The only SDE SSPP available to
+SDM for the launcher's client-composition layer is plane 70, a DMA pipe with no
+UBWC support, so the atomic commit is rejected by the kernel.
+
+Confirmed on sol hardware 2026-08-13, from the composer's own logs:
+
+    E SDM: DRMAtomicReq::Commit: drmModeAtomicCommit failed with error 22
+           (Invalid argument).
+    E SDM: HWDeviceDRM::AtomicCommit: AtomicCommit failed with error -22 crtc 80
+    E SDM: HWCDisplay::CommitLayerStack: Commit failed. Error = 11
+    I SDM: HWDeviceDRM::DumpHWLayers: src_width = 512, src_height = 464,
+           src_format = 12
+    I SDM: HWDeviceDRM::DumpHWLayers: pipe = left_pipe, pipe_id = 70, z_order = 0
+
+matching aurora's own reported symptom (`validate failed for display 0: 2`) --
+sol's hwc2 compat layer reports the same error 2 out of validate. Everything
+upstream of the commit is healthy on sol: the composer client is acquired, the
+primary display hotplugs, Qt gets the real 456x456 panel, and validate/present
+run in a continuous loop. Only the kernel-side commit fails, which is why the
+connector stays "disabled" and crtc-0 stays enable=0/active=0.
+
+HW_FB (0x1000) is NOT a UBWC trigger per gr_utils.cpp; EGL/libui need it for
+the buffer to be a valid framebuffer surface. Keep it, add HW_RENDER and
+HW_TEXTURE for GPU access, and strip the three UBWC triggers above.
+
+Applied only on sol via SRC_URI:append:sol in the libhybris bbappend, so other
+watches keep stock behavior bit-for-bit.
+
+Note that this patch is NOT gated on HYBRIS_HWC_DISABLE_COMPOSER_USAGE, despite
+what meta-aurora's bbappend comment says about its own copy: neither the aurora
+original nor this one reads that variable anywhere. The gating is the
+per-machine SRC_URI append, nothing else.
+
+Upstream-Status: Pending
+
+Signed-off-by: Florent Revest <revestflo@gmail.com>
+
+--- a/egl/platforms/hwcomposer/hwcomposer_window.cpp
++++ b/egl/platforms/hwcomposer/hwcomposer_window.cpp
+@@ -128,7 +128,12 @@
+     m_width = width;
+     m_height = height;
+     m_bufFormat = format;
+-    m_usage = GRALLOC_USAGE_HW_COMPOSER|GRALLOC_USAGE_HW_FB;
++    // sol (Pixel Watch 3 / Monaco): QTI gralloc's IsUBwcEnabled() returns
++    // true when usage has GRALLOC_USAGE_HW_COMPOSER. HW_FB is NOT a UBWC
++    // trigger; it's still needed so EGL/libui consider this a framebuffer
++    // surface. Strip HW_COMPOSER, add HW_RENDER|HW_TEXTURE for GPU access.
++    // Source: hardware/qcom/<soc>/display/gralloc/gr_utils.cpp.
++    m_usage = GRALLOC_USAGE_HW_RENDER|GRALLOC_USAGE_HW_TEXTURE|GRALLOC_USAGE_HW_FB;
+     m_bufferCount = 2;
+     m_nextBuffer = 0;
+ }
+@@ -434,7 +439,14 @@
+  */
+ int HWComposerNativeWindow::setUsage(uint64_t usage)
+ {
+-    usage |= GRALLOC_USAGE_HW_COMPOSER|GRALLOC_USAGE_HW_FB;
++    // Strip every flag QTI's IsUBwcEnabled() treats as a UBWC trigger:
++    //   - GRALLOC_USAGE_HW_COMPOSER         = 0x800       (= BufferUsage::COMPOSER_CLIENT_TARGET)
++    //   - GRALLOC_USAGE_PRIVATE_ALLOC_UBWC    = 0x10000000  (private bit 28; libEGL_adreno
++    //                                                       sets this on EGLSurface creation)
++    //   - GRALLOC_USAGE_PRIVATE_ALLOC_UBWC_PI = 0x40000000  (private bit 30, "paddingless intra")
++    // Source: hardware/qcom/<soc>/display/gralloc/gr_utils.cpp.
++    usage &= ~(uint64_t)(GRALLOC_USAGE_HW_COMPOSER | 0x10000000ULL | 0x40000000ULL);
++    usage |= GRALLOC_USAGE_HW_RENDER|GRALLOC_USAGE_HW_TEXTURE|GRALLOC_USAGE_HW_FB;
+     int need_realloc = (m_usage != usage);
+     TRACE("usage=x%" PRIx64 " realloc=%d", usage, need_realloc);
+     m_usage = usage;

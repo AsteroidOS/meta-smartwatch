@@ -1,0 +1,1 @@
+obj-m += sol_vidc_stub.o

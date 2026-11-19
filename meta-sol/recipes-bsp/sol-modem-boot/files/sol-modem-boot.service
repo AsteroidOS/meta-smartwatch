@@ -1,0 +1,23 @@
+[Unit]
+Description=sol: boot the modem subsystem so the GNSS engine can run
+Documentation=file:///usr/libexec/sol-modem-boot.sh
+# Needs the vendor mount (firmware) and runs after sol-adsp-boot, whose
+# firmware search path it borrows and hands back.
+#
+# It must also run after the container. The container pulls the modem up at
+# "on boot"; that load fails and subsystem-restart escalates to a full SoC
+# reset, which is why sol-unbind-modem-remoteproc exists. Booting the modem
+# before the container put sol into a reset loop (uptime never past ~55s).
+After=sol-vendor-mount.service sol-adsp-boot.service sol-lxc-android.service
+Requires=sol-vendor-mount.service
+Wants=sol-lxc-android.service
+ConditionPathExists=/sys/bus/platform/drivers/qcom_q6v5_pas
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/libexec/sol-modem-boot.sh
+# No ExecStop: stopping a remoteproc can reset the SoC without a trace.
+
+[Install]
+WantedBy=multi-user.target

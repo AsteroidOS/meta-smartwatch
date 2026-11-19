@@ -1,0 +1,17 @@
+[Unit]
+Description=Enable SoC deep low-power modes (clear qcom-lpm sleep_disabled)
+# The qcom_lpm governor module (loaded via modules-load.d) boots with
+# sleep_disabled=true, Qualcomm's boot-stability default. Stock userspace
+# clears it once boot completes; this unit is our equivalent. Without the
+# write, cluster power-collapse is rejected forever and the SoC cannot leave
+# shallow retention during suspend (~27 mA floor).
+After=systemd-modules-load.service
+ConditionPathExists=/sys/devices/system/cpu/qcom_lpm/parameters/sleep_disabled
+
+[Service]
+Type=oneshot
+ExecStart=/bin/sh -c 'echo 0 > /sys/devices/system/cpu/qcom_lpm/parameters/sleep_disabled'
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

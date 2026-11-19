@@ -1,0 +1,16 @@
+[Unit]
+Description=sol: tell the bootloader this boot succeeded (A/B slot)
+Documentation=file:///usr/bin/sol-mark-boot-successful.sh
+After=sol-lxc-android.service
+Requires=sol-lxc-android.service
+
+[Service]
+Type=simple
+RemainAfterExit=yes
+ExecStart=/usr/bin/sol-mark-boot-successful.sh
+# Never let this stop the boot: an unmarked slot costs a retry, a failed unit
+# could cost the user their watch.
+SuccessExitStatus=0 1
+
+[Install]
+WantedBy=multi-user.target

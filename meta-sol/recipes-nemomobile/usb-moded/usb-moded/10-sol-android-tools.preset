@@ -1,0 +1,10 @@
+# Keep android-tools-adbd from being enabled at boot.
+#
+# meta-oe's 98-android-tools-adbd.preset enables it in basic.target. On sol it
+# must start only when usb-moded triggers it (adb_mode dyn-mode, appsync
+# StartUnit). Started early, it races configfs_set_function(): adbd either
+# fails to open ep0 before FunctionFS is mounted, or holds the abstract socket
+# "local:5037" and blocks later restarts.
+#
+# Presets are read in lexicographic order, first match wins, so 10- beats 98-.
+disable android-tools-adbd.service

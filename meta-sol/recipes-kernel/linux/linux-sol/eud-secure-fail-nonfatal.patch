@@ -1,0 +1,44 @@
+From: Florent Revest <revestflo@gmail.com>
+Subject: [PATCH] soc: qcom: eud: aurora: don't abort enable_eud() on secure-EUD failure
+
+On a production Pixel Watch 2 the TrustZone monitor rejects the
+secure-EUD enable (qcom_scm_io_writel -> rc:-22). enable_eud() then
+returns early, before its final extcon_set_state_sync(EXTCON_USB,
+true), leaving EUD's extcon stuck "disconnected". dwc3-msm is wired to
+the EUD extcon (its google,extcon-usb-shim phandle has no driver, see
+dwc3-msm-force-peripheral.patch), so it never sees a USB attach and no
+UDC is created -> USB/adb dead.
+
+The secure step only gates EUD's own debug endpoint, which is unusable
+on production anyway. Log the failure but continue so the EXTCON_USB
+attach event is still asserted -- that is all dwc3-msm needs.
+
+Upstream-Status: Inappropriate [aurora bring-up]
+Signed-off-by: Florent Revest <revestflo@gmail.com>
+---
+--- a/drivers/soc/qcom/eud.c
++++ b/drivers/soc/qcom/eud.c
+@@ -180,11 +180,19 @@
+ 	if (priv->secure_eud_en && !check_eud_mode_mgr2(priv)) {
+ 		ret = qcom_scm_io_writel(priv->eud_mode_mgr2_phys_base +
+ 				   EUD_REG_EUD_EN2, EUD_ENABLE_CMD);
+-		if (ret) {
++		if (ret)
++			/*
++			 * aurora: on production the TZ monitor rejects the
++			 * secure-EUD enable (rc:-22). That only gates EUD's
++			 * own debug endpoint, which is unusable here anyway.
++			 * Do NOT return: fall through so the EXTCON_USB=true
++			 * below is still asserted -- that extcon event is the
++			 * only thing dwc3-msm needs to bring the USB gadget
++			 * (adb) up on this watch.
++			 */
+ 			dev_err(&pdev->dev,
+-			"qcom_scm_io_writel failed with rc:%d\n", ret);
+-			return;
+-		}
++			"qcom_scm_io_writel failed rc:%d (non-fatal; EUD extcon still drives USB attach)\n",
++			ret);
+ 	}
+ 
+ 	/* Ensure Register Writes Complete */

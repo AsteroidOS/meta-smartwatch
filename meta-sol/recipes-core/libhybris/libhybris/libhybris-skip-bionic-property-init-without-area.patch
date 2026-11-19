@@ -1,0 +1,67 @@
+From: moWerk <mo@mowerk.net>
+Subject: [PATCH] libhybris: don't call bionic's __system_properties_init when there is no property area
+
+The hybris linker deliberately skips libc.so's constructors, but it makes one
+exception: it dlsyms bionic's real __system_properties_init() out of the loaded
+libc.so and calls it, so that Android libraries can read properties.
+
+On a device where Android's init never runs, /dev/__properties__ does not exist,
+and that call dereferences NULL. Confirmed by strace on sol (Pixel Watch 3,
+Android 14 system libs, no Android userspace):
+
+    openat(AT_FDCWD, "/dev/cpu_variant:arm", O_RDONLY) = -1 ENOENT
+    openat(AT_FDCWD, "/dev/__properties__", O_RDONLY|...) = -1 ENOENT
+    --- SIGSEGV {si_signo=SIGSEGV, si_code=SEGV_MAPERR, si_addr=0x410} ---
+
+Creating the directory is not enough; bionic then reads the SELinux property
+context files (which do exist) and goes looking for the per-context area:
+
+    openat(AT_FDCWD, "/system/etc/selinux/plat_property_contexts", ...) = 3
+    openat(AT_FDCWD, "/vendor/etc/selinux/vendor_property_contexts", ...) = 3
+    openat(AT_FDCWD, "/dev/__properties__/properties_serial", ...) = -1 ENOENT
+    --- SIGSEGV ... si_addr=0x410 ---
+
+A correctly populated property area is something Android's init builds; a
+libhybris-only system has no way to produce one, and does not need one, because
+libhybris already serves property reads through its own __system_property_*
+hooks (that is exactly why the hook table has them).
+
+So make the call conditional on an area actually being present. Where one exists
+-- for instance on ports that run an Android container, which is where this code
+path has always worked -- behaviour is unchanged. Where one does not, the linker
+now proceeds instead of taking the process down at load time.
+
+Upstream-Status: Pending
+
+Signed-off-by: moWerk <mo@mowerk.net>
+---
+--- a/common/q/linker_soinfo.cpp
++++ b/common/q/linker_soinfo.cpp
+@@ -447,12 +447,22 @@
+ 
+   if (soname_ != nullptr && strcmp(soname_, "libc.so") == 0) {
+     DEBUG("HYBRIS: =============> Skipping libc.so (but initializing properties)\n");
+-    bionic___system_properties_init = (void(*)())android_dlsym(this, "__system_properties_init");
+-    if (!bionic___system_properties_init) {
+-        fprintf(stderr, "Could not initialize android system properties!\n");
+-        abort();
++    // Only hand control to bionic's property-area initialiser if an area
++    // actually exists. Without Android's init there is none, and bionic
++    // dereferences NULL (SIGSEGV at 0x410) before we ever reach main().
++    // libhybris serves property reads via its own __system_property_* hooks,
++    // so skipping this costs nothing on such a system.
++    if (access("/dev/__properties__/properties_serial", R_OK) == 0) {
++        bionic___system_properties_init = (void(*)())android_dlsym(this, "__system_properties_init");
++        if (!bionic___system_properties_init) {
++            fprintf(stderr, "Could not initialize android system properties!\n");
++            abort();
++        }
++        bionic___system_properties_init();
++    } else {
++        DEBUG("HYBRIS: no bionic property area (/dev/__properties__), "
++              "skipping __system_properties_init; hybris hooks serve properties\n");
+     }
+-    bionic___system_properties_init();
+     constructors_called = true;
+     return;
+   }

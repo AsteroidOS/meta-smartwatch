@@ -1,0 +1,19 @@
+[Unit]
+Description=sol: drain unread nanohub channels so the shared buffer pool cannot starve
+Documentation=file:///usr/share/doc/sol-nanohub-drain/README
+# The nodes are created when the nanohub driver probes, which happens once
+# spi-msm-geni is loaded by systemd-modules-load.
+After=systemd-modules-load.service sol-lxc-android.service
+# Ordered before sensorfw because the failure this prevents is a sensor stall.
+Before=sensorfwd.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/sol-nanohub-drain.sh
+Restart=always
+RestartSec=15
+# The drainers are cheap blocking readers, but never let them crowd the watch.
+Nice=10
+
+[Install]
+WantedBy=multi-user.target

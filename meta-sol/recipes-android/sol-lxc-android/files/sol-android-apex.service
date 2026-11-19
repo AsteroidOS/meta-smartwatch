@@ -1,0 +1,16 @@
+[Unit]
+Description=sol: bind the Halium flattened APEXes over /apex
+DefaultDependencies=no
+After=android-hybris.mount var-lib-lxc-android-rootfs.mount
+Requires=android-hybris.mount
+Before=local-fs.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/libexec/sol-android-apex.sh
+StandardOutput=journal+console
+StandardError=journal+console
+
+[Install]
+WantedBy=local-fs.target

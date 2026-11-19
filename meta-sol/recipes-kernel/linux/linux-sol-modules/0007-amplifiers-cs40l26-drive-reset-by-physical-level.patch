@@ -1,0 +1,65 @@
+From: moWerk <mo@mowerk.net>
+Date: Sat, 16 Aug 2026 12:00:00 +0000
+Subject: [PATCH] amplifiers: cs40l26: drive reset by physical level
+
+sol builds this driver from the pixel-watch branch (aurora's working
+reference for the same CS40L26A) but boots its own stock device tree,
+and the two disagree on which logical value releases reset:
+
+    seluna     (sol's stock driver)  set_value(reset, 0) releases
+    pixel-watch (this driver)        set_value(reset, 1) releases
+
+Each is self-consistent with the DT it shipped with -- sol declares
+reset-gpios ... GPIO_ACTIVE_LOW, aurora declares GPIO_ACTIVE_HIGH -- so
+both land on a physically high line, which is what the part needs: RESET
+is active low on the CS40L26A.
+
+Combining sol's DT with this driver inverts twice and holds the line low,
+i.e. keeps the chip in reset. The first register access after the pulse
+then finds nothing on the bus:
+
+    cs40l26 0-0043: Failed to configure PLL
+    cs40l26: probe of 0-0043 failed with error -110
+
+set_pll_loop() is the first control-port access in probe, ahead of the
+DEVID read, so no chip ID is ever logged.
+
+Use the raw accessors for the reset line. Polarity is a property of the
+part, not of the board, so expressing the pulse in physical levels is
+correct for either DT flag and leaves aurora's behaviour unchanged.
+
+Upstream-Status: Inappropriate [sol-specific DT/driver pairing; upstream
+carries one driver per branch and each matches its own DT]
+
+Signed-off-by: Mo Werk <mo@mowerk.net>
+Signed-off-by: moWerk <mo@mowerk.net>
+---
+ private/google-modules/amplifiers/cs40l26/cs40l26.c | 8 ++++++--
+ 1 file changed, 6 insertions(+), 2 deletions(-)
+
+diff --git a/private/google-modules/amplifiers/cs40l26/cs40l26.c b/private/google-modules/amplifiers/cs40l26/cs40l26.c
+--- a/private/google-modules/amplifiers/cs40l26/cs40l26.c
++++ b/private/google-modules/amplifiers/cs40l26/cs40l26.c
+@@ -4880,10 +4880,12 @@
+ 		goto err;
+ 	}
+
++	gpiod_set_raw_value_cansleep(cs40l26->reset_gpio, 0);
++
+ 	usleep_range(CS40L26_MIN_RESET_PULSE_WIDTH,
+ 			CS40L26_MIN_RESET_PULSE_WIDTH + 100);
+
+-	gpiod_set_value_cansleep(cs40l26->reset_gpio, 1);
++	gpiod_set_raw_value_cansleep(cs40l26->reset_gpio, 1);
+
+ 	usleep_range(CS40L26_CONTROL_PORT_READY_DELAY,
+ 			CS40L26_CONTROL_PORT_READY_DELAY + 100);
+@@ -4999,7 +5001,7 @@
+ 	if (va_consumer)
+ 		regulator_disable(va_consumer);
+
+-	gpiod_set_value_cansleep(cs40l26->reset_gpio, 0);
++	gpiod_set_raw_value_cansleep(cs40l26->reset_gpio, 0);
+
+ 	if (cs40l26->vibe_init_success) {
+ #if !IS_ENABLED(CONFIG_INPUT_CS40L26_ATTR_UNDER_BUS)

@@ -1,0 +1,25 @@
+# sol override of upstream usb-moded's adbd-prepare.service.
+#
+# 1. ExecStartPre creates the configfs function dir functions/ffs.adb. Mounting
+#    FunctionFS "adb" needs it (otherwise ENODEV), and usb-moded creates it in
+#    configfs_set_function(), which runs after appsync_activate_pre() has
+#    already started this unit. mkdir -p is idempotent on both sides.
+#
+# 2. No [Install]: the unit is pulled in only by android-tools-adbd.service
+#    (Wants= in 99-sol-no-configfs.conf), which usb-moded starts. Starting it
+#    from basic.target would race configfs_set_function().
+#
+# ConditionPathExists makes it fail fast when USB debugging is off.
+
+[Unit]
+Description=functionfs setup for adbd
+ConditionPathExists=/etc/usb-debugging-enabled
+Before=android-tools-adbd.service
+PartOf=android-tools-adbd.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStartPre=/bin/mkdir -p /config/usb_gadget/g1/functions/ffs.adb
+ExecStart=/usr/sbin/adbd-functionfs.sh
+ExecStop=/bin/umount /dev/usb-ffs/adb

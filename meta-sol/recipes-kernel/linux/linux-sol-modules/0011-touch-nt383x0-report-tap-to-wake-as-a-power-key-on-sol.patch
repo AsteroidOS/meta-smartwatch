@@ -1,0 +1,53 @@
+From: moWerk <mo@mowerk.net>
+Date: Mon, 2 Nov 2026 00:00:00 +0000
+Subject: [PATCH] touch: nt383x0: report tap-to-wake as a power key on sol
+
+Tapping sol's screen while it is off does not wake it. The touch firmware
+reports its tap-to-wake gesture, and the driver turns it into one synthetic
+finger tap. That is what Wear OS wants, but AsteroidOS's mce wakes the
+display on a double tap: it recognises one from two real taps, or from a
+power key released by the touchscreen. A single synthetic tap is neither.
+
+Report the gesture as KEY_POWER, as the driver already does for its other
+wake gestures. mce treats that as a double tap and applies its usual
+doubletap policy. The module parameter sol_tap_wake_as_power (default 1)
+restores the synthetic tap at runtime.
+
+Tested on hardware: tapping wakes the display, on USB and while
+suspended on the wrist.
+
+Upstream-Status: Inappropriate [AsteroidOS sol: mce wakes on a double tap, Wear OS on a single tap]
+Signed-off-by: moWerk <mo@mowerk.net>
+---diff --git a/private/google-modules/touch/novatek/nt383x0/nt383x0.c b/private/google-modules/touch/novatek/nt383x0/nt383x0.c
+--- a/private/google-modules/touch/novatek/nt383x0/nt383x0.c
++++ b/private/google-modules/touch/novatek/nt383x0/nt383x0.c
+@@ -630,6 +630,16 @@
+ return:
+ 	Executive outcomes. 0---succeed. negative---failed.
+ *******************************************************/
++/*
++ * AsteroidOS's mce wakes the display on a double tap, which it recognises
++ * either from two real taps or from a power key released by the touchscreen.
++ * The firmware's tap-to-wake gesture arrives as one synthetic tap, which mce
++ * never pairs into a double tap. Report it as KEY_POWER instead, like the
++ * other wake gestures here; 0 restores the synthetic tap.
++ */
++static bool sol_tap_wake_as_power = true;
++module_param(sol_tap_wake_as_power, bool, 0644);
++
+ int nvt_ts_wakeup_gesture_report(uint8_t gesture_id, uint8_t *data)
+ {
+ 	uint32_t keycode = 0;
+@@ -658,6 +668,12 @@
+ 				break;
+ 			}
+ 
++			if (sol_tap_wake_as_power) {
++				NVT_LOG("Gesture : Tap to Wake, reported as KEY_POWER\n");
++				keycode = KEY_POWER;
++				break;
++			}
++
+ 			NVT_LOG("Gesture : Tap to Wake, coordinates (%d,%d) instead of keycode.\n",
+ 				input_x, input_y);
+ 			/* Send finger down */

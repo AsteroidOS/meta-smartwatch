@@ -1,0 +1,22 @@
+[Unit]
+Description=sol: boot the ADSP so the USF sensor sub-HAL can run
+Documentation=file:///usr/libexec/sol-adsp-boot.sh
+# The ADSP firmware lives in the Android vendor image, so that has to be mounted
+# first. It must be running before the container starts, because the container's
+# sscrpcd immediately tries to spawn the sensor protection domain on it and will
+# otherwise loop.
+After=sol-vendor-mount.service
+Requires=sol-vendor-mount.service
+Before=sol-lxc-android.service
+ConditionPathExists=/sys/class/remoteproc/remoteproc0
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/libexec/sol-adsp-boot.sh
+# Deliberately no ExecStop: stopping a remoteproc out from under a running
+# container is a good way to wedge the sensor stack, and there is nothing to
+# gain from it.
+
+[Install]
+WantedBy=multi-user.target

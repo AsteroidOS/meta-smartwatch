@@ -1,0 +1,58 @@
+From: Florent Revest <revestflo@gmail.com>
+Date: Mon, 9 Jun 2026 14:00:00 +0000
+Subject: [PATCH] amplifiers: cs40l26: set cs40l26_loaded before MFD child probe
+ fires
+
+cs40l26_probe() calls devm_mfd_add_devices() which immediately
+instantiates the cs40l26-codec child platform device, whose probe
+runs synchronously and short-circuits with:
+
+    if (!cs40l26_loaded) {
+        dev_err(... "Skipping cs40l26-codec probe");
+        return -EIO;
+    }
+
+But cs40l26_loaded is only set TRUE on the very next line in
+cs40l26_probe(), after MFD has already run the child probe. So
+the codec child never binds, the snd_soc component is never
+registered, and monaco-asoc-snd's Secondary MI2S dai_link to
+"cs40l26_codec" never resolves -- no audio path to the speaker
+even though the parent (haptic) side is fine.
+
+Set cs40l26_loaded = true BEFORE devm_mfd_add_devices() so the
+codec child sees the right state. If MFD fails, the err path
+calls cs40l26_remove() which already clears the flag.
+
+This is a Pixel Watch 2 (pixel-watch branch) driver-internal race;
+the dr-eos branch's codec probe doesn't have the !cs40l26_loaded
+check at all.
+
+Upstream-Status: Inappropriate [aurora-specific HW glue; upstream
+                                should reorder this if they kept
+                                the !cs40l26_loaded check]
+
+Signed-off-by: Florent Revest <revestflo@gmail.com>
+---
+ private/google-modules/amplifiers/cs40l26/cs40l26.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/private/google-modules/amplifiers/cs40l26/cs40l26.c b/private/google-modules/amplifiers/cs40l26/cs40l26.c
+--- a/private/google-modules/amplifiers/cs40l26/cs40l26.c
++++ b/private/google-modules/amplifiers/cs40l26/cs40l26.c
+@@ -4950,6 +4950,8 @@ int cs40l26_probe(struct cs40l26_private *cs40l26,
+
+ 	INIT_LIST_HEAD(&cs40l26->effect_head);
+
++	cs40l26_loaded = true;
++
+ 	ret = devm_mfd_add_devices(dev, PLATFORM_DEVID_AUTO, cs40l26_devs,
+ 			CS40L26_NUM_MFD_DEVS, NULL, 0, NULL);
+ 	if (ret) {
+@@ -4957,7 +4959,6 @@ int cs40l26_probe(struct cs40l26_private *cs40l26,
+ 		goto err;
+ 	}
+
+-	cs40l26_loaded = true;
+ 	return 0;
+ err:
+ 	cs40l26_remove(cs40l26);

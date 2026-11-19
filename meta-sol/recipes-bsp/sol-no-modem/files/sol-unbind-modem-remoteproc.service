@@ -1,0 +1,20 @@
+[Unit]
+# sol has no modem (kernel log: modem_supported=0x0). Starting
+# 6080000.remoteproc-mss fails the firmware load and subsystem-restart escalates
+# to a full SoC reset. Something in the container's class hal/core starts it at
+# `on boot`, so with mss bound the container start resets the SoC within ~10 s.
+# Unbind the one device, not the driver: ab00000.remoteproc-adsp shares
+# qcom_q6v5_pas and sensors and audio need it.
+Description=sol: unbind the modem remoteproc (this watch has no modem)
+DefaultDependencies=no
+After=sysinit.target
+Before=sol-lxc-android.service
+ConditionPathExists=/sys/bus/platform/drivers/qcom_q6v5_pas/6080000.remoteproc-mss
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/bin/sh -c 'echo 6080000.remoteproc-mss > /sys/bus/platform/drivers/qcom_q6v5_pas/unbind'
+
+[Install]
+WantedBy=multi-user.target

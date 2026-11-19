@@ -1,0 +1,16 @@
+[Unit]
+Description=sol: loop-mount the Halium Android system image
+DefaultDependencies=no
+After=sol-vendor-mount.service
+Before=local-fs.target
+ConditionPathExists=/var/lib/lxc/android/android-rootfs.img
+RequiresMountsFor=/var/lib/lxc/android
+
+[Mount]
+What=/var/lib/lxc/android/android-rootfs.img
+Where=/var/lib/lxc/android/rootfs
+Type=ext4
+Options=loop,ro,nosuid,nodev
+
+[Install]
+WantedBy=local-fs.target

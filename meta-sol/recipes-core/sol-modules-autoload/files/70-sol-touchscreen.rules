@@ -1,0 +1,7 @@
+# Stable name for sol's touch digitizer.
+#
+# The compositor needs a fixed evdev node, but the digitizer's event number
+# depends on module load order (touch_nt383x0, haptics and nanohub all register
+# input devices). It is a virtual input device, so there is no by-path entry;
+# the driver's device name is the stable handle.
+SUBSYSTEM=="input", KERNEL=="event*", ATTRS{name}=="NVTCapacitiveTouchScreen", SYMLINK+="input/touchscreen", TAG+="systemd"

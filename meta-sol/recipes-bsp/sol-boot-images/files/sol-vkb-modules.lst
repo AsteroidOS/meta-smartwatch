@@ -1,0 +1,115 @@
+# sol vendor_kernel_boot module manifest.
+#
+# Generated from sol's stock vendor_kernel_boot (AW2A.240903.001.A4), 98
+# modules. aurora's manifest does not fit: 51 modules sol lacks, 8 it needs
+# missing (sdhci-msm-scaling, google-extcon-shim, touch-nt383x0, ...).
+#
+# <name>:k  = built by linux-sol      <name>:tp = built by linux-sol-modules
+# vkb-assemble's KMI gate reports any listed module the build did not produce.
+
+arm_smmu:k
+bcl_pmic5:k
+clk-dummy:k
+clk-qcom:k
+clk-smd-rpm:k
+coresight:k
+cpu_hotplug:k
+cqhci:k
+crypto-qti-common:k
+crypto-qti-hwkm:k
+dcc_v2:k
+debug-regulator:k
+dispcc-monaco:k
+dwc3-msm:k
+eud:k
+gcc-monaco:k
+gdsc-regulator:k
+google-battery:tp
+google-bms:tp
+google-charger:tp
+google-extcon-shim:tp
+gpucc-monaco:k
+gvotable:tp
+hwkm_v1:k
+i2c-msm-geni:k
+icc-rpm:k
+iommu-logger:k
+logbuffer:tp
+mcu_display:tp
+mdt_loader:k
+mem_buf:k
+mem_buf_dev:k
+memory_dump_v2:k
+minidump:k
+msm_dma_iommu_mapping:k
+msm_drm:tp
+# Display chain deps, wrong in the inherited stock modules.dep:
+#   mcu_display needs nanohub, but its stock dep line is empty and modules.load
+#   is alphabetical, so it would load first and fail with "Unknown symbol".
+#   msm_drm needs mcu_display (our modinfo), which the stock line omits.
+# secure_buffer is kept from the stock line; stock loads it for this chain.
+@dep mcu_display.ko: nanohub.ko
+@dep msm_drm.ko: spmi-pmic-arb.ko pinctrl-msm.ko qcom_iommu_util.ko nanohub.ko panel_event_notifier.ko msm_dma_iommu_mapping.ko secure_buffer.ko qcom-scm.ko mcu_display.ko
+msm_gpi:k
+msm_kgsl:tp
+msm_performance:k
+msm_sysstats:k
+nanohub:tp
+nvmem_qcom-spmi-sdam:k
+panel_event_notifier:k
+phy-generic:k
+phy-msm-snps-hs:k
+pinctrl-monaco:k
+pinctrl-msm:k
+pinctrl-spmi-gpio:k
+@drop proxy-consumer   # CONFIG_REGULATOR_PROXY_CONSUMER deliberately unset (see sw5100.fragment)
+qcom-apcs-ipc-mailbox:k
+qcom-cpufreq-hw:k
+qcom-dcvs:k
+qcom-dload-mode:k
+qcom-mpm:k
+qcom-pmu-lib:k
+qcom-reboot-reason:k
+qcom-scm:k
+qcom-spmi-adc5-gen3:k
+qcom-spmi-pmic:k
+qcom-vadc-common:k
+qcom_aoss:k
+qcom_cpu_vendor_hooks:k
+qcom_dma_heaps:k
+qcom_glink:k
+qcom_glink_rpm:k
+qcom_glink_smem:k
+qcom_hwspinlock:k
+qcom_iommu_util:k
+qcom_ipc_logging:k
+qcom_logbuf_vh:k
+qcom_smd:k
+qcom_soc_wdt:k
+qcom_wdt_core:k
+qnoc-monaco:k
+qnoc-qos-rpm:k
+qpnp-power-on:k
+qpnp-smblite-main:tp
+qrtr:k
+qseecom_dlkm:tp
+qseecom_proxy:k
+qti-qbg-main:tp
+qti-regmap-debugfs:k
+@drop regmap-spmi   # CONFIG_REGMAP_SPMI=y in our kernel, so no .ko is produced. Stock builds it =m, so the stock modules.dep we inherit lists regmap-spmi.ko as a dependency of qcom-spmi-pmic.ko -- and busybox modprobe resolves modules.dep, fails on the absent file, and ABORTS without loading qcom-spmi-pmic. That left the SPMI bus with no driver at all, so pm5100 was never bound, devm_of_platform_populate() never ran, and none of its children (qcom,qpnp-smblite, pinctrl@8800, rtc@6400, ...) were ever created -- which is why the USB extcon supplier never appeared and adb never came up. The symbols are genuinely built in: Module.symvers shows __devm_regmap_init_spmi_ext exported from vmlinux, not from a module.
+rpm-smd:k
+rpm-smd-regulator:k
+rproc_qcom_common:k
+rtc-pm8xxx:k
+sched-walt:k
+sdhci-msm:k
+sdhci-msm-scaling:k
+secure_buffer:k
+smcinvoke_dlkm:tp
+smem:k
+smp2p:k
+socinfo:k
+spmi-pmic-arb:k
+stub-regulator:k
+sw5100_bms:tp
+touch_nt383x0:tp

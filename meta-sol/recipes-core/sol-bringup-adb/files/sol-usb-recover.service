@@ -1,0 +1,19 @@
+[Unit]
+Description=sol BRING-UP: re-bind the adb gadget after a VBUS loss
+Documentation=man:systemd.service(5)
+ConditionPathExists=/etc/usb-debugging-enabled
+# Must follow the one-shot that builds the gadget in the first place; this unit
+# only ever REPAIRS what sol-bringup-adb.service created.
+After=sol-bringup-adb.service
+Requires=sol-bringup-adb.service
+
+[Service]
+# Long-running watchdog, not a oneshot: it has to observe VBUS returning, which
+# happens at an arbitrary time long after boot.
+Type=simple
+ExecStart=/usr/bin/sol-usb-recover.sh
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

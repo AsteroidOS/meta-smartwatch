@@ -1,0 +1,13 @@
+[Unit]
+Description=sol BRING-UP: bind the adb gadget without usb-moded
+ConditionPathExists=/etc/usb-debugging-enabled
+Wants=android-tools-adbd.service
+After=android-tools-adbd.service adbd-prepare.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/bin/sol-bringup-adb.sh
+
+[Install]
+WantedBy=multi-user.target

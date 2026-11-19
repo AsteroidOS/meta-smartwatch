@@ -1,0 +1,38 @@
+From: moWerk <mo@mowerk.net>
+Subject: [PATCH] Bluetooth: hci_vhci: do not disconnect links on system suspend
+
+hci_register_dev() registers hci_suspend_notifier() for every controller
+that lacks HCI_QUIRK_NO_SUSPEND_NOTIFIER. On PM_SUSPEND_PREPARE it runs
+BT_SUSPEND_DISCONNECT and drops every connection.
+
+On a watch whose controller is driven by the vendor HAL through
+bluebinder and /dev/vhci, that drops the paired phone at every suspend
+attempt. The phone reconnects on the next wake, the reconnect wakes the
+display, and the watch never stays asleep with a phone connected.
+Measured on sol: 50 "terminated by local host for suspend" disconnects
+in 25 minutes.
+
+Set the quirk for vhci devices, as hci_h5 does for its controllers that
+must not be touched at suspend.
+
+Upstream-Status: Inappropriate [device-specific workaround; reported to AsteroidOS]
+
+Signed-off-by: moWerk <mo@mowerk.net>
+---
+--- a/drivers/bluetooth/hci_vhci.c
++++ b/drivers/bluetooth/hci_vhci.c
+@@ -126,6 +126,14 @@
+ 
+ 	set_bit(HCI_QUIRK_VALID_LE_STATES, &hdev->quirks);
+ 
++	/* The controller behind this device is run by a userspace HAL
++	 * (bluebinder), which keeps connections alive across system suspend
++	 * itself. Without this quirk the suspend notifier disconnects every
++	 * link on each PM_SUSPEND_PREPARE, so a paired phone is dropped at
++	 * every suspend attempt and reconnects on the next wake.
++	 */
++	set_bit(HCI_QUIRK_NO_SUSPEND_NOTIFIER, &hdev->quirks);
++
+ 	if (hci_register_dev(hdev) < 0) {
+ 		BT_ERR("Can't register HCI device");
+ 		hci_free_dev(hdev);

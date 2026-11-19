@@ -1,0 +1,65 @@
+From: moWerk <mo@mowerk.net>
+Subject: [PATCH] serial: msm_geni: hold the system wakelock only for a real RX wakeup
+Upstream-Status: Pending [driver bug, not a device workaround; msm_geni_serial
+is a Qualcomm downstream driver with no upstream counterpart to send this to]
+
+msm_geni_serial_runtime_resume() took __pm_stay_awake(geni_wake) on EVERY
+runtime resume, and only released it in runtime_suspend. The port therefore
+vetoes system suspend for as long as it is runtime-active, which on sol is
+fatal in two different ways.
+
+Pinned awake -- which the BT UART must be on a device whose DT declares no
+wakeup IRQ, because a runtime-suspended port never sees an incoming byte --
+the vote is held permanently, so the kernel never even ARMS autosleep.
+suspend_stats then shows success AND fail both frozen, and the watch simply
+drains: measured 46.2 mA over an hour with Bluetooth on and zero suspends.
+
+Left on auto with a wakeup IRQ present, it is worse: each suspend attempt
+resumes the port, the resume takes this vote, and the vote aborts that same
+attempt. Instrumented at 2 s resolution: runtime_status flips to active,
+wakeup active_count +10, suspend_fail +10 and ~48 UART interrupts every two
+seconds, indefinitely -- a 5 Hz self-wake loop at ~75 mA. hs_uart_wakeup
+itself never fires (count 0), so it is the resume path, not the RX line.
+
+check_wakeup_byte is set by msm_geni_wakeup_isr() and cleared once the byte is
+consumed (and in runtime_suspend), so it is precisely the "there is incoming
+data" condition this wakelock exists to cover. Gate the vote on it. An ordinary
+TX-driven resume needs no system wakelock, because msm_geni_serial_sys_suspend()
+already returns -EBUSY for a port that is not runtime-suspended, so an active
+port still cannot be suspended underneath a transfer.
+
+Signed-off-by: moWerk <mo@mowerk.net>
+---
+--- a/drivers/tty/serial/msm_geni_serial.c
++++ b/drivers/tty/serial/msm_geni_serial.c
+@@ -5526,11 +5526,27 @@
+ 	start_time = geni_capture_start_time(&port->se, port->ipc_log_kpi,
+ 					     __func__, port->uart_kpi);
+ 	/*
+-	 * Do an unconditional relax followed by a stay awake in case the
+-	 * wake source is activated by the wakeup isr.
++	 * Hold the system awake ONLY when this resume was caused by the wakeup
++	 * ISR, i.e. when there is an incoming byte to collect.
++	 *
++	 * Taking it on every runtime resume makes the port veto system suspend
++	 * for as long as it is runtime-active. On a watch that is fatal in two
++	 * different ways: with the Bluetooth UART pinned awake (which it must
++	 * be on a device whose DT declares no wakeup IRQ) the vote is held
++	 * forever and the kernel never even ARMS autosleep; and with the port
++	 * left on auto, every suspend attempt resumes the port, the resume
++	 * takes this vote, and the vote aborts that same attempt -- a self-wake
++	 * loop measured at 5 Hz, ~75 mA, indefinitely.
++	 *
++	 * check_wakeup_byte is set by msm_geni_wakeup_isr() and cleared once
++	 * the byte has been consumed (and in runtime_suspend), so it is exactly
++	 * the "real incoming data" condition this vote exists for. An ordinary
++	 * TX-driven resume needs no system wakelock: msm_geni_serial_sys_suspend()
++	 * already refuses to suspend a port that is not runtime-suspended.
+ 	 */
+ 	__pm_relax(port->geni_wake);
+-	__pm_stay_awake(port->geni_wake);
++	if (atomic_read(&port->check_wakeup_byte))
++		__pm_stay_awake(port->geni_wake);
+ 	/*
+ 	 * check for wakeup_enabled before disabling the wakeup_irq as
+ 	 * this might be disabled from shutdown as well.
