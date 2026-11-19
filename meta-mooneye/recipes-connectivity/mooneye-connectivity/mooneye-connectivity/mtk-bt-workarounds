@@ -1,0 +1,87 @@
+#!/bin/sh
+# Workarounds for Bluetooth on the MediaTek MT6630 (TicWatch E/S, "mooneye").
+#
+# 1. The MT6630 firmware asserts ("sys_patch_bin_t.c #4444 ... rc=RB_FULL")
+#    and the driver resets the whole chip when the host sends bursts of
+#    full-size (1021 byte) ACL packets, typically while the link is in sniff
+#    mode. Capping the host ACL MTU and disallowing sniff avoids it.
+#    The kernel resets both values every time the adapter is powered on, so
+#    they are re-applied whenever they have been lost.
+# 2. After a whole-chip reset the hci_stp driver does not bring hci0 back by
+#    itself. When the kernel reports a reset, restart bluetoothd and power the
+#    adapter back up (only if BlueZ wants it powered).
+
+ACL_MTU="300:8"
+LINK_POLICY="RSWITCH"
+HCI="hci0"
+
+log() { echo "mtk-bt-workarounds: $*"; }
+
+hci_running() {
+    hciconfig "$HCI" 2>/dev/null | grep -q "UP RUNNING"
+}
+
+apply_tweaks() {
+    hci_running || return 0
+    if ! hciconfig "$HCI" 2>/dev/null | grep -q "ACL MTU: ${ACL_MTU%%:*}:"; then
+        hciconfig "$HCI" aclmtu "$ACL_MTU" && log "ACL MTU set to $ACL_MTU"
+    fi
+    if hciconfig "$HCI" lp 2>/dev/null | grep -q "SNIFF"; then
+        hciconfig "$HCI" lp "$LINK_POLICY" && log "link policy set to $LINK_POLICY"
+    fi
+}
+
+powered_in_bluez() {
+    bluetoothctl show 2>/dev/null | grep -q "Powered: yes"
+}
+
+recover() {
+    log "combo chip was reset, restarting bluetooth"
+    systemctl restart bluetooth.service
+    sleep 5
+    for _ in $(seq 1 6); do
+        hci_running && break
+        # The first attempt after a reset often fails with an I/O error.
+        if powered_in_bluez; then
+            hciconfig "$HCI" up 2>/dev/null
+        else
+            bluetoothctl power on >/dev/null 2>&1
+        fi
+        sleep 3
+    done
+    if hci_running; then
+        log "bluetooth is back"
+    else
+        log "bluetooth did not come back"
+    fi
+    apply_tweaks
+}
+
+# Periodically re-apply the tweaks (cheap: two ioctls every 15 s).
+(
+    while true; do
+        apply_tweaks
+        sleep 15
+    done
+) &
+
+# React to whole-chip resets reported by the WMT driver. /dev/kmsg must be
+# read one whole record per read(), which the shell's read builtin does not
+# do, so let cat do the reading. A reset floods the kernel log: when the ring
+# buffer overruns the reader, read() fails with EPIPE and cat exits, so start
+# it again. Every open replays the ring buffer from the start, so skip
+# records that were logged before this script started or were already seen.
+last_us=$(awk '{ printf "%d", $1 * 1000000 }' /proc/uptime)
+while true; do
+    cat /dev/kmsg 2>/dev/null
+    sleep 1
+done | while IFS= read -r record; do
+    # Records look like "priority,sequence,timestamp_us,flags;message"; the
+    # kernel logs several a second, so parse without forking.
+    ts=${record#*,}; ts=${ts#*,}; ts=${ts%%,*}
+    [ "${ts:-0}" -gt "$last_us" ] 2>/dev/null || continue
+    last_us=$ts
+    case "$record" in
+        *"whole chip reset end"*) recover ;;
+    esac
+done

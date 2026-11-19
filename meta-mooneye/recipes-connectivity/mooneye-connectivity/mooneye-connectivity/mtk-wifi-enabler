@@ -1,0 +1,71 @@
+#!/bin/sh
+# Power on the WLAN function of the MediaTek MT6630 combo chip.
+#
+# On Android this is done by the Wi-Fi HAL, which writes "1" to /dev/wmtWifi.
+# Nothing does that on AsteroidOS, so wlan0 never appears and connman has no
+# wifi technology to manage. /dev/wmtWifi is created once wmt_loader (started
+# by Android init) has initialised the connectivity drivers, and the write only
+# takes effect once 6620_launcher has brought the chip up, so wait and retry.
+
+log() { echo "mtk-wifi-enabler: $*"; }
+
+for i in $(seq 1 90); do
+    [ -c /dev/wmtWifi ] && break
+    sleep 1
+done
+if [ ! -c /dev/wmtWifi ]; then
+    log "/dev/wmtWifi did not appear, giving up"
+    exit 1
+fi
+
+wifi_powered_in_connman() {
+    connmanctl technologies 2>/dev/null |
+        sed -n '/technology\/wifi/,/^\//p' | grep -q "Powered = True"
+}
+
+# connman tries to power the wifi technology as soon as wlan0 shows up, which
+# is before the driver is ready, and does not retry. Enable it again unless the
+# user switched Wi-Fi off (connman then saves Enable=false for WiFi).
+enable_in_connman() {
+    if sed -n '/^\[WiFi\]/,/^\[/p' /var/lib/connman/settings 2>/dev/null |
+            grep -q "^Enable=false"; then
+        log "Wi-Fi is disabled in connman, leaving it off"
+        return 0
+    fi
+    for i in $(seq 1 30); do
+        sleep 3
+        wifi_powered_in_connman && { log "Wi-Fi is enabled in connman"; return 0; }
+        case $i in
+            2|8|16) connmanctl enable wifi >/dev/null 2>&1 ;;
+        esac
+    done
+    log "could not enable Wi-Fi in connman"
+}
+
+# Hand the per-unit NVRAM record (MAC address, calibration) to the driver
+# before the first power-on; it is only read while the WLAN function powers up.
+# Without it the driver makes up a new MAC address on every power-on.
+NVRAM=/data/nvram/APCFG/APRDEB/WIFI
+if [ -e "$NVRAM" ]; then
+    for i in $(seq 1 10); do
+        mtk-wifi-nvram "$NVRAM" && break
+        sleep 1
+    done
+else
+    log "$NVRAM missing, the driver will use a random MAC address"
+fi
+
+for attempt in $(seq 1 12); do
+    echo 1 > /dev/wmtWifi 2>/dev/null
+    for i in $(seq 1 10); do
+        if [ -e /sys/class/net/wlan0 ]; then
+            log "wlan0 is present (attempt $attempt)"
+            enable_in_connman
+            exit 0
+        fi
+        sleep 1
+    done
+done
+
+log "wlan0 did not appear"
+exit 1

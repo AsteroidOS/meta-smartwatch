@@ -1,0 +1,14 @@
+[Unit]
+Description=Restore MT6630 Bluetooth and Wi-Fi configuration from the nvram partition
+DefaultDependencies=no
+Wants=dev-disk-by\x2dpartlabel-nvram.device
+After=local-fs.target dev-disk-by\x2dpartlabel-nvram.device
+Before=mtk-wifi-enabler.service bluetooth.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/bin/mtk-nvram-restore
+
+[Install]
+WantedBy=multi-user.target
