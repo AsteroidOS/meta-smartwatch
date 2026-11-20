@@ -20,6 +20,9 @@ on init
     chown system root /sys/class/leds/vibrator/state
     chown system root /sys/class/timed_output/vibrator/enable
 
+    chown system root /sys/devices/virtual/graphics/fb0/mdss_fb_disp_en_gpio
+    chown system root /sys/devices/platform/soc/soc:oppo,sensor-hub/reset
+
     load_system_props
     restorecon_recursive /persist
 
