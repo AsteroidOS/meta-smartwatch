@@ -1,6 +1,7 @@
 DESCRIPTION = "NVRAM restore, Wi-Fi enabler and Bluetooth workarounds for the MediaTek MT6630 in the TicWatch E/S"
 PR = "r0"
 SRC_URI = "file://mtk-wifi-nvram.c \
+           file://mtk-wifi-wowlan.c \
            file://mtk-nvram-restore \
            file://mtk-nvram-restore.service \
            file://mtk-wifi-enabler \
@@ -17,11 +18,13 @@ RDEPENDS:${PN} = "bluez5 connman-client"
 
 do_compile() {
     ${CC} ${CFLAGS} ${LDFLAGS} -o mtk-wifi-nvram mtk-wifi-nvram.c
+    ${CC} ${CFLAGS} ${LDFLAGS} -o mtk-wifi-wowlan mtk-wifi-wowlan.c
 }
 
 do_install() {
     install -d ${D}${bindir}
     install -m 0755 mtk-wifi-nvram ${D}${bindir}
+    install -m 0755 mtk-wifi-wowlan ${D}${bindir}
     install -m 0755 mtk-nvram-restore ${D}${bindir}
     install -m 0755 mtk-wifi-enabler ${D}${bindir}
     install -m 0755 mtk-bt-workarounds ${D}${bindir}
