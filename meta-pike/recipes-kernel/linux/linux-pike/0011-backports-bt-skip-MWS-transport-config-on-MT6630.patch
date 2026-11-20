@@ -1,0 +1,24 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: AsteroidOS <pike@asteroidos>
+Date: Mon, 6 Jul 2026 04:45:00 +0000
+Subject: [PATCH] backports/bt: skip GET_MWS_TRANSPORT_CONFIG on MT6630
+
+Upstream-Status: Inappropriate [MT6630 controller-quirk workaround]
+
+MT6630 advertises support for Get MWS Transport Layer Configuration in
+Read Local Supported Commands, but returns an error (Unknown Connection
+Identifier) when the 4.1 core issues it during hci_init4. That error aborts
+HCI init, so hci0 never comes up (ENOTCONN). MWS coexistence is unused on
+the watch, so skip the command.
+---
+--- a/backports/net/bluetooth/hci_core.c
++++ b/backports/net/bluetooth/hci_core.c
+@@ -829,7 +829,7 @@
+ 		hci_req_add(req, HCI_OP_READ_LOCAL_CODECS, 0, NULL);
+ 
+ 	/* Get MWS transport configuration if the HCI command is supported */
+-	if (hdev->commands[30] & 0x08)
++	if (0 && (hdev->commands[30] & 0x08)) /* MT6630 errors on GET_MWS_TRANSPORT_CONFIG, aborting init; skip */
+ 		hci_req_add(req, HCI_OP_GET_MWS_TRANSPORT_CONFIG, 0, NULL);
+ 
+ 	/* Check for Synchronization Train support */

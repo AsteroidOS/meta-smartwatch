@@ -1,0 +1,31 @@
+From: Darrel Griet <dgriet@gmail.com>
+Date: Thu, 6 Aug 2026 00:00:00 +0200
+Subject: [PATCH] backports: Anchor the include paths to srctree
+
+The integrated build passes the backports headers as build-directory
+relative include flags. That only works in tree; with the out-of-tree flow
+of linux-yocto.inc the compiler runs with the build directory as its
+working directory and backports/ only exists in the source tree.
+Upstream-Status: Inappropriate [android vendor kernel]
+---
+diff --git a/backports/Makefile b/backports/Makefile
+index 759fe7f1..a5893f5a 100644
+--- a/backports/Makefile
++++ b/backports/Makefile
+@@ -22,11 +22,11 @@ else
+ export BACKPORT_DIR = backports/
+ export backport_srctree = $(BACKPORT_DIR)
+ NOSTDINC_FLAGS := \
+-	-I$(BACKPORT_DIR)/backport-include/ \
+-	-I$(BACKPORT_DIR)/backport-include/uapi \
+-	-I$(BACKPORT_DIR)/include/ \
+-	-I$(BACKPORT_DIR)/include/uapi \
+-	-include $(BACKPORT_DIR)/backport-include/backport/backport.h \
++	-I$(srctree)/$(BACKPORT_DIR)/backport-include/ \
++	-I$(srctree)/$(BACKPORT_DIR)/backport-include/uapi \
++	-I$(srctree)/$(BACKPORT_DIR)/include/ \
++	-I$(srctree)/$(BACKPORT_DIR)/include/uapi \
++	-include $(srctree)/$(BACKPORT_DIR)/backport-include/backport/backport.h \
+ 	$(CFLAGS)
+ endif
+ 

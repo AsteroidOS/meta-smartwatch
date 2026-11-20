@@ -11,6 +11,9 @@ COMPATIBLE_MACHINE = "pike"
 # Use an older version of gcc (gcc >= 9 doesn't boot.)
 inherit kernel-gcc8
 
+# The 70 MB Linux backports (mainline 4.1 Bluetooth) patch is shared with harmony; reuse it instead of a copy.
+FILESEXTRAPATHS:prepend := "${THISDIR}/../../../meta-mtk6580/recipes-kernel/linux:"
+
 SRC_URI = "git://android.googlesource.com/kernel/mediatek;branch=android-mediatek-pike-3.10-oreo-wear-dr;protocol=https \
     file://0001-mediatek-ipanic-Remove-inline-to-fix-a-compilation-w.patch \
     file://0002-Fix-compilations-warnings.patch \
@@ -19,6 +22,12 @@ SRC_URI = "git://android.googlesource.com/kernel/mediatek;branch=android-mediate
     file://0005-ARM-wire-up-getrandom-syscall.patch \
     file://0006-ARM-8933-1-replace-Sun-Solaris-style-flag-on-section.patch \
     file://0007-vfs-allow-umount-to-handle-mountpoints-without-reval.patch \
+    file://linux-harmony/0008-Backport-Bluetooth-subsytem-from-a-mailine-4.1-kerne.patch \
+    file://0009-Backport-HCI_STP-for-MT6630-combo-Bluetooth.patch \
+    file://0010-backports-drop-duplicate-bit_wait_io.patch \
+    file://0011-backports-bt-skip-MWS-transport-config-on-MT6630.patch \
+    file://0012-backports-Drop-the-trailing-slash-from-BACKPORT_DIR.patch \
+    file://0013-backports-Anchor-the-include-paths-to-srctree.patch \
     file://defconfig \
     file://img_info"
 SRCREV = "5f7ba64dbb0f566149f5190db8c229da623a54bb"

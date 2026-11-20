@@ -1,0 +1,26 @@
+From: Darrel Griet <dgriet@gmail.com>
+Date: Thu, 6 Aug 2026 00:00:00 +0200
+Subject: [PATCH] backports: Drop the trailing slash from BACKPORT_DIR
+
+Every Kconfig of the integrated backports tree is pulled in as
+source "$BACKPORT_DIR/.../Kconfig". With BACKPORT_DIR set to "backports/"
+those expand with a double slash, e.g. backports//drivers/net/wireless/b43/
+Kconfig. kconfig copes, but it records the names verbatim in
+include/config/auto.conf.cmd, and in an out-of-tree build those
+prerequisites are resolved through VPATH = $(srctree). GNU make's VPATH
+search does not handle // inside a file name, so they are treated as
+non-existent, include/config/auto.conf never becomes up to date, and make
+restarts silentoldconfig forever without ever compiling anything.
+Upstream-Status: Inappropriate [android vendor kernel]
+---
+--- a/backports/Kconfig
++++ b/backports/Kconfig
+@@ -4,7 +4,7 @@
+ 
+ config BACKPORT_DIR
+ 	string
+-	default "backports/"
++	default "backports"
+ 
+ config BACKPORT_VERSION
+ 	string
