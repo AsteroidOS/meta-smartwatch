@@ -1,0 +1,17 @@
+[Unit]
+Description=Recreate dm-linear mappings for the T5's /super (system/vendor/...) and mount them
+DefaultDependencies=no
+After=systemd-tmpfiles-setup-dev.service
+Before=local-fs.target
+ConditionPathExists=/dev/mmcblk0p7
+RequiresMountsFor=/dev
+
+[Service]
+Type=oneshot
+ExecStart=/usr/libexec/dace-vendor-mount.sh
+RemainAfterExit=yes
+StandardOutput=journal+console
+StandardError=journal+console
+
+[Install]
+WantedBy=local-fs.target

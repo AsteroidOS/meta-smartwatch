@@ -1,0 +1,89 @@
+From: Cristodcgomez <cristo.c.mc@gmail.com>
+Subject: [PATCH] usb: dwc3: dwc3-msm: retry registering the smblite extcon
+
+The dwc3 probes in the initramfs and the smblite (which provides the
+pm5100_charger extcon with EXTCON_USB) in the rootfs. In peripheral mode
+vbus_active was forced true, so the controller never entered LPM and the
+4e00000.hsusb wakeup source blocked autosleep. Retry the extcon registration
+(every 1 s) and keep following the smblite USB state so that on disconnect
+vbus_active is cleared and the USB can suspend.
+
+Upstream-Status: Inappropriate [dace bring-up]
+Signed-off-by: Cristodcgomez <cristo.c.mc@gmail.com>
+---
+
+--- a/drivers/usb/dwc3/dwc3-msm-core.c
++++ b/drivers/usb/dwc3/dwc3-msm-core.c
+@@ -532,6 +532,7 @@
+ #define MDWC3_POWER_COLLAPSE		BIT(2)
+ #define MDWC3_USE_PWR_EVENT_IRQ_FOR_WAKEUP	BIT(3)
+ 	struct extcon_nb	*extcon;
++	struct delayed_work	extcon_retry_work;
+ 	int			ext_idx;
+ 	struct notifier_block	host_nb;
+ 
+@@ -4697,12 +4698,17 @@
+ 		return -ENODEV;
+ 	}
+ 
+-	mdwc->extcon = devm_kcalloc(mdwc->dev, extcon_cnt,
++	if (!mdwc->extcon) {
++		mdwc->extcon = devm_kcalloc(mdwc->dev, extcon_cnt,
+ 					sizeof(*mdwc->extcon), GFP_KERNEL);
+-	if (!mdwc->extcon)
+-		return -ENOMEM;
++		if (!mdwc->extcon)
++			return -ENOMEM;
++	}
+ 
+ 	for (idx = 0; idx < extcon_cnt; idx++) {
++		if (mdwc->extcon[idx].edev)
++			continue;
++
+ 		edev = extcon_get_edev_by_phandle(mdwc->dev, idx);
+ 		if (IS_ERR(edev)) {
+ 			if (PTR_ERR(edev) == -EPROBE_DEFER) {
+@@ -4739,9 +4745,10 @@
+ 						true, edev);
+ 	}
+ 
++	if (deferred)
++		return -EPROBE_DEFER;
++
+ 	if (!phandle_found) {
+-		if (deferred)
+-			return -EPROBE_DEFER;
+ 		dev_err(mdwc->dev, "no extcon device found\n");
+ 		return -ENODEV;
+ 	}
+@@ -4747,6 +4754,18 @@
+ 	return 0;
+ }
+ 
++static void dwc3_msm_extcon_retry_work(struct work_struct *work)
++{
++	struct dwc3_msm *mdwc = container_of(to_delayed_work(work),
++					struct dwc3_msm, extcon_retry_work);
++	int ret;
++
++	ret = dwc3_msm_extcon_register(mdwc);
++	if (ret == -EPROBE_DEFER)
++		schedule_delayed_work(&mdwc->extcon_retry_work,
++					msecs_to_jiffies(1000));
++}
++
+ static bool dwc3_msm_role_allowed(struct dwc3_msm *mdwc, enum usb_role role)
+ {
+ 	dev_dbg(mdwc->dev, "%s: dr_mode=%s role_requested=%s\n",
+@@ -5900,4 +5919,11 @@
+ 	if (of_property_read_bool(node, "extcon")) {
++		INIT_DELAYED_WORK(&mdwc->extcon_retry_work,
++					dwc3_msm_extcon_retry_work);
+ 		ret = dwc3_msm_extcon_register(mdwc);
++		if (ret == -EPROBE_DEFER) {
++			schedule_delayed_work(&mdwc->extcon_retry_work,
++						msecs_to_jiffies(1000));
++			ret = 0;
++		}
+ 		if (ret)
+ 			goto put_dwc3;
