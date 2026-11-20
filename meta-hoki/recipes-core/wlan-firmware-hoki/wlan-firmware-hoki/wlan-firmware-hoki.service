@@ -1,0 +1,12 @@
+[Unit]
+Description=Enable pronto WLAN firmware and load the wlan module on hoki
+After=android-init.service
+Before=connman.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/bin/wlan-firmware-hoki.sh
+
+[Install]
+WantedBy=multi-user.target

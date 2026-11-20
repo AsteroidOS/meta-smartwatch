@@ -1,0 +1,31 @@
+From 749c0d6d61aaf3e2e9f655cd1af980c0d06efc6e Mon Sep 17 00:00:00 2001
+From: pettcomputers <chris@pettcomputers.com>
+Date: Sun, 30 Aug 2026 09:48:28 -0500
+Subject: [PATCH] hdd_process_bt_sco_profile: fix use of adapter before
+ assignment
+
+---
+ CORE/HDD/src/wlan_hdd_main.c | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/CORE/HDD/src/wlan_hdd_main.c b/CORE/HDD/src/wlan_hdd_main.c
+index 91368f1..a80b1f4 100644
+--- a/CORE/HDD/src/wlan_hdd_main.c
++++ b/CORE/HDD/src/wlan_hdd_main.c
+@@ -3974,6 +3974,13 @@ int hdd_process_bt_sco_profile(hdd_context_t *hdd_ctx,
+ 		return -EINVAL;
+ 	}
+ 
++	adapter = hdd_get_adapter(hdd_ctx, WLAN_HDD_INFRA_STATION);
++	if (!adapter) {
++		hddLog(VOS_TRACE_LEVEL_ERROR,
++		       "%s: No station adapter, skipping bt profile", __func__);
++		return -EINVAL;
++	}
++
+ 	INIT_COMPLETION(hdd_ctx->sw_pta_comp);
+ 
+ 	hal_status = sme_sw_pta_req(hdd_ctx->hHal, hdd_sw_pta_resp_callback,
+-- 
+2.51.1
+
