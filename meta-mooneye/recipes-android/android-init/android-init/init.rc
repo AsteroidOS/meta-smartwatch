@@ -10,8 +10,13 @@ service logd /system/bin/logd
     socket logdr seqpacket 0666 root root
     socket logdw dgram 0222 root root
 
+# Android 8's servicemanager and vndservicemanager abort at once without
+# SELinux, which this kernel doesn't have. init restarted them every 5 s
+# and spun the CPU in between, draining the battery in a few hours.
+# Nothing here can use them anyway, so don't start them.
 service servicemanager /system/bin/servicemanager
     class core
+    disabled
 
 service 662x_launcher /vendor/bin/6620_launcher -m 4 -p /system/etc/firmware/
     class core
@@ -36,6 +41,7 @@ service memtrack-hal-1-0 /vendor/bin/hw/android.hardware.memtrack@1.0-service
 
 service vndservicemanager /vendor/bin/vndservicemanager /dev/vndbinder
     class core
+    disabled
     writepid /dev/cpuset/system-background/tasks
 
 service ril-daemon /vendor/bin/hw/rild
