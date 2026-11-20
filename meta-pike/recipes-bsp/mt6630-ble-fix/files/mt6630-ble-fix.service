@@ -1,0 +1,13 @@
+[Unit]
+Description=Patch the MT6630 combo firmware so LE slave connections work
+DefaultDependencies=no
+After=local-fs.target
+Before=android-init.service bluetooth.service sysinit.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/sbin/mt6630-ble-fix
+
+[Install]
+WantedBy=sysinit.target
