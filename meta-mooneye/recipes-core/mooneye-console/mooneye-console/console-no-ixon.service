@@ -1,0 +1,15 @@
+[Unit]
+Description=Disable XON/XOFF flow control on the serial console
+# ttyMT1 is not connected and picks up line noise. With ixon set, a stray ^S
+# stops console output for good and the next write to /dev/console blocks.
+DefaultDependencies=no
+Before=sysinit.target
+ConditionPathExists=/dev/ttyMT1
+
+[Service]
+Type=oneshot
+ExecStart=/bin/stty -F /dev/ttyMT1 -ixon
+TimeoutStartSec=5
+
+[Install]
+WantedBy=sysinit.target

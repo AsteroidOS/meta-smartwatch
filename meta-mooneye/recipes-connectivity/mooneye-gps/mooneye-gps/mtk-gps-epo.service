@@ -1,0 +1,12 @@
+[Unit]
+Description=Download GPS orbit predictions (EPO) from MediaTek
+Documentation=file:///usr/bin/mtk-gps-epo
+
+[Service]
+Type=oneshot
+# Does nothing while the EPO data on the watch is less than 3 days old.
+ExecStart=/usr/bin/mtk-gps-epo update
+# Wi-Fi is managed by connman, so network-online.target never fires: retry
+# instead when the watch is offline.
+Restart=on-failure
+RestartSec=30min

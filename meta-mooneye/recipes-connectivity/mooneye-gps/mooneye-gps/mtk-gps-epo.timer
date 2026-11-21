@@ -1,0 +1,12 @@
+[Unit]
+Description=Keep GPS orbit predictions (EPO) up to date
+Documentation=file:///usr/bin/mtk-gps-epo
+
+[Timer]
+# mtk-gps-epo only downloads when its copy is more than 3 days old, so
+# checking often costs nothing.
+OnBootSec=10min
+OnUnitActiveSec=6h
+
+[Install]
+WantedBy=timers.target

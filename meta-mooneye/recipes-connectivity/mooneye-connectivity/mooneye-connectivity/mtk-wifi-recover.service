@@ -1,0 +1,8 @@
+[Unit]
+Description=Bring the MediaTek MT6630 WLAN function back after a whole-chip reset
+# Started by mtk-bt-workarounds when the kernel reports a whole-chip reset.
+After=mtk-wifi-enabler.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/mtk-wifi-enabler --after-reset
