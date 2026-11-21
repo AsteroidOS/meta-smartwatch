@@ -1,0 +1,2 @@
+# The GPS HAL opens /dev/gps from inside the user's session.
+KERNEL=="gps", GROUP="gps", MODE="0660"
