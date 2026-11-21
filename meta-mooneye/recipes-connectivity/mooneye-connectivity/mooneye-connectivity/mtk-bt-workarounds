@@ -9,7 +9,9 @@
 #    they are re-applied whenever they have been lost.
 # 2. After a whole-chip reset the hci_stp driver does not bring hci0 back by
 #    itself. When the kernel reports a reset, restart bluetoothd and power the
-#    adapter back up (only if BlueZ wants it powered).
+#    adapter back up (only if BlueZ wants it powered). The reset also powers
+#    off the WLAN function, and the driver's own attempt to bring it back fails
+#    or loses the NVRAM record, so let mtk-wifi-recover.service redo it.
 
 ACL_MTU="300:8"
 LINK_POLICY="RSWITCH"
@@ -36,7 +38,8 @@ powered_in_bluez() {
 }
 
 recover() {
-    log "combo chip was reset, restarting bluetooth"
+    log "combo chip was reset, restarting Wi-Fi and Bluetooth"
+    systemctl restart --no-block mtk-wifi-recover.service
     systemctl restart bluetooth.service
     sleep 5
     for _ in $(seq 1 6); do

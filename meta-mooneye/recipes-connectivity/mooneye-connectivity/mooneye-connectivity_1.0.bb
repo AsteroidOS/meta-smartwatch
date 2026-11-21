@@ -6,6 +6,7 @@ SRC_URI = "file://mtk-wifi-nvram.c \
            file://mtk-nvram-restore.service \
            file://mtk-wifi-enabler \
            file://mtk-wifi-enabler.service \
+           file://mtk-wifi-recover.service \
            file://mtk-bt-workarounds \
            file://mtk-bt-workarounds.service"
 LICENSE = "Apache-2.0"
@@ -32,6 +33,7 @@ do_install() {
     install -d ${D}/etc/systemd/system/multi-user.target.wants/
     install -m 0644 mtk-nvram-restore.service ${D}/etc/systemd/system/
     install -m 0644 mtk-wifi-enabler.service ${D}/etc/systemd/system/
+    install -m 0644 mtk-wifi-recover.service ${D}/etc/systemd/system/
     install -m 0644 mtk-bt-workarounds.service ${D}/etc/systemd/system/
     ln -s ../mtk-nvram-restore.service ${D}/etc/systemd/system/multi-user.target.wants/mtk-nvram-restore.service
     ln -s ../mtk-wifi-enabler.service ${D}/etc/systemd/system/multi-user.target.wants/mtk-wifi-enabler.service

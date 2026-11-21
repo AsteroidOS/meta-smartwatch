@@ -18,6 +18,19 @@ if [ ! -c /dev/wmtWifi ]; then
     exit 1
 fi
 
+# After a whole-chip reset the driver tries to power WLAN back on by itself.
+# That fails or brings wlan0 up without the NVRAM record (random MAC address,
+# no calibration), so power it off and bring it up again the normal way.
+if [ "$1" = "--after-reset" ]; then
+    sleep 10
+    echo 0 > /dev/wmtWifi 2>/dev/null
+    for i in $(seq 1 10); do
+        [ -e /sys/class/net/wlan0 ] || break
+        sleep 1
+    done
+    log "recovering Wi-Fi after a whole-chip reset"
+fi
+
 wifi_powered_in_connman() {
     connmanctl technologies 2>/dev/null |
         sed -n '/technology\/wifi/,/^\//p' | grep -q "Powered = True"
