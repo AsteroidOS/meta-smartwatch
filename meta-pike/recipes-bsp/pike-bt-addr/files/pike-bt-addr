@@ -1,0 +1,26 @@
+#!/bin/sh
+# pike-bt-addr: give the MT6630 its factory Bluetooth address and RF calibration.
+# The HCI_STP driver reads its 36-byte btradio_conf_data from /data/BT_Addr when BT powers on. With no file it
+# writes MediaTek's defaults there (address 00:00:46:66:30:01, generic radio/sleep values) and keeps using them.
+# The factory record is at offset 0x20000 of the "nvram" eMMC partition. Copy it once, and only replace a missing
+# file or one that still holds the default address, so a deliberate override survives.
+CFG=/data/BT_Addr
+DEFAULT=000046663001
+cur=$(od -An -tx1 -N6 "$CFG" 2>/dev/null | tr -d ' \n')
+[ -n "$cur" ] && [ "$cur" != "$DEFAULT" ] && { echo "pike-bt-addr: $CFG already holds $cur"; exit 0; }
+part=$(grep -l '^PARTNAME=nvram$' /sys/block/mmcblk0/mmcblk0p*/uevent 2>/dev/null | head -n 1)
+[ -n "$part" ] || { echo "pike-bt-addr: no nvram partition"; exit 0; }
+dev=/dev/$(basename "$(dirname "$part")"); [ -b "$dev" ] || dev=/dev/block/$(basename "$(dirname "$part")")
+tmp=/run/pike-bt-addr.$$
+dd if="$dev" bs=4 skip=$((0x20000 / 4)) count=9 2>/dev/null > "$tmp"
+addr=$(od -An -tx1 -N6 "$tmp" | tr -d ' \n')
+voice=$(od -An -tx1 -j6 -N2 "$tmp" | tr -d ' \n')
+[ "$voice" = 6000 ] || { echo "pike-bt-addr: no BT record in $dev (voice $voice)"; rm -f "$tmp"; exit 0; }
+case "$addr" in
+  ""|000000000000|ffffffffffff|000046663001) echo "pike-bt-addr: no factory address in $dev ($addr)"; rm -f "$tmp"; exit 0 ;;
+esac
+[ "$(wc -c < "$tmp")" -eq 36 ] || { echo "pike-bt-addr: short read"; rm -f "$tmp"; exit 1; }
+# /data is not in the image. On a first boot pike's /init.rc creates it ("mkdir /data/ 0770 root root"),
+# but Android's init starts after this unit. Create it the same way.
+[ -d /data ] || mkdir -m 0770 /data || { rm -f "$tmp"; exit 1; }
+mv "$tmp" "$CFG" && echo "pike-bt-addr: $CFG <- factory address $addr from $dev"
