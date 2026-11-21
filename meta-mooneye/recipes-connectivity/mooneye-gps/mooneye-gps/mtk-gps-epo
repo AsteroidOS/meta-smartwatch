@@ -1,0 +1,104 @@
+#!/bin/sh
+# GPS orbit predictions (EPO) for the TicWatch E/S.
+#
+# With EPO, a 30-day prediction of where the GPS satellites will be, the GPS
+# finds satellites in seconds instead of minutes. It is the same file for
+# every device. mtk-gps-epo.timer downloads it from MediaTek's server
+# whenever the copy on the watch is more than 3 days old, and mnld loads it
+# when a GPS session starts.
+#
+# Privacy: each download is an HTTPS request to the server below (run by
+# MediaTek, hosted on Amazon CloudFront). It reveals the watch's IP address,
+# the time and the User-Agent "Wget/<version>". Nothing else is sent: no
+# position, no device identifiers, no account. To stop it, run
+# "mtk-gps-epo disable"; the GPS still works, it just takes longer to get a
+# first fix.
+#
+# Usage: mtk-gps-epo status | update [--force] | enable | disable
+
+URL="https://epodownload.mediatek.com/EPO.DAT"
+DIR="/data/misc/gps"
+FILE="$DIR/EPO.DAT"
+MAX_AGE=$((3 * 24 * 3600))
+# Each 6-hour segment holds 32 satellites x 72 bytes.
+SEGMENT=2304
+TIMER="mtk-gps-epo.timer"
+
+log() { echo "mtk-gps-epo: $*"; }
+
+file_age() {
+    [ -s "$FILE" ] || return 1
+    echo $(( $(date +%s) - $(stat -c %Y "$FILE") ))
+}
+
+update() {
+    if [ "$1" != "--force" ] && age=$(file_age) && [ "$age" -lt "$MAX_AGE" ]; then
+        log "EPO data is $((age / 3600)) hours old, not downloading"
+        return 0
+    fi
+    log "downloading GPS orbit predictions from $URL" \
+        "(to opt out: mtk-gps-epo disable)"
+    mkdir -p "$DIR"
+    tmp="$FILE.new"
+    headers="$FILE.headers"
+    # -S prints the response headers (to stderr), for the ETag check.
+    if ! wget -q -S -T 60 -t 2 -O "$tmp" "$URL" 2>"$headers"; then
+        log "download failed"
+        rm -f "$tmp" "$headers"
+        return 1
+    fi
+    size=$(stat -c %s "$tmp")
+    # Amazon S3 sets the ETag of a file uploaded in one part to its MD5.
+    etag=$(sed -n 's/^ *[Ee][Tt][Aa][Gg]: *"\([0-9a-f]\{32\}\)".*/\1/p' "$headers" | tail -n 1)
+    rm -f "$headers"
+    if [ "$size" -eq 0 ] || [ $((size % SEGMENT)) -ne 0 ]; then
+        log "downloaded file has an unexpected size ($size bytes), keeping the old one"
+        rm -f "$tmp"
+        return 1
+    fi
+    if [ -n "$etag" ] && [ "$(md5sum "$tmp" | cut -d' ' -f1)" != "$etag" ]; then
+        log "downloaded file does not match its ETag, keeping the old one"
+        rm -f "$tmp"
+        return 1
+    fi
+    chmod 0644 "$tmp"
+    mv "$tmp" "$FILE"
+    log "EPO data updated ($((size / SEGMENT / 4)) days)"
+}
+
+status() {
+    if systemctl -q is-enabled "$TIMER" 2>/dev/null; then
+        echo "Automatic EPO downloads: enabled (mtk-gps-epo disable to turn off)"
+    else
+        echo "Automatic EPO downloads: disabled (mtk-gps-epo enable to turn on)"
+    fi
+    echo "Server: $URL"
+    echo "Sent with each download: IP address, time, User-Agent \"Wget/<version>\""
+    if age=$(file_age); then
+        echo "EPO data on the watch: $((age / 3600)) hours old"
+    else
+        echo "EPO data on the watch: none"
+    fi
+}
+
+case "$1" in
+    update)
+        update "$2"
+        ;;
+    enable)
+        systemctl enable --now "$TIMER" && update
+        ;;
+    disable)
+        systemctl disable --now "$TIMER"
+        systemctl stop mtk-gps-epo.service 2>/dev/null
+        rm -f "$FILE" "$FILE.new" "$FILE.headers"
+        log "automatic EPO downloads disabled and EPO data removed"
+        ;;
+    status|"")
+        status
+        ;;
+    *)
+        echo "Usage: mtk-gps-epo status | update [--force] | enable | disable" >&2
+        exit 2
+        ;;
+esac
