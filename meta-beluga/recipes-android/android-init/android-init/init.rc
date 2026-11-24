@@ -22,6 +22,7 @@ on init
 
     chown system root /sys/devices/virtual/graphics/fb0/mdss_fb_disp_en_gpio
     chown system root /sys/devices/platform/soc/soc:oppo,sensor-hub/reset
+    chown system root /sys/devices/platform/soc/1a00000.qcom,mdss_mdp/twm_enable
 
     load_system_props
     restorecon_recursive /persist
