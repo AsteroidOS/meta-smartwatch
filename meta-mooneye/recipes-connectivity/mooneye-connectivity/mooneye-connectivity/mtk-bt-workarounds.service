@@ -1,0 +1,13 @@
+[Unit]
+Description=MT6630 Bluetooth firmware workarounds
+After=bluetooth.service
+Wants=bluetooth.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/mtk-bt-workarounds
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

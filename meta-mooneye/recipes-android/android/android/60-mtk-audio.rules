@@ -1,0 +1,3 @@
+# The MediaTek audio driver node is root-only by default. The audio HAL runs
+# inside pulseaudio as the user, which is in the audio group.
+KERNEL=="eac", GROUP="audio", MODE="0660"

@@ -1,0 +1,87 @@
+#!/bin/sh
+# Restore the per-unit Bluetooth and Wi-Fi configuration of the MediaTek MT6630
+# from the device's own "nvram" partition.
+#
+# On Android, nvram_daemon restores /data/nvram/... from the BinRegion backup
+# kept in the nvram partition. That does not happen on AsteroidOS, so:
+#  - hci_stp finds no /data/BT_Addr and every watch uses MediaTek's default
+#    Bluetooth address 00:00:46:66:20:01,
+#  - the WLAN driver finds no /data/nvram/APCFG/APRDEB/WIFI and invents a new
+#    MAC address on every power-on (so connman forgets saved networks), without
+#    the per-unit TX power calibration.
+#
+# BinRegion layout (TicWatch E/S, verified against a stock Wear OS backup):
+#   offset 0x0      header, file table entries every 0x8c bytes starting at
+#                   0x34: u32 attr, u32 data offset, u32 size, char path[0x80]
+#   offset 0x20000  file data
+# Each entry's path is checked before it is used; if anything does not match,
+# nothing is written. Existing files are never overwritten.
+
+NVRAM=/dev/disk/by-partlabel/nvram
+DATA=$((0x20000))
+APRDEB=/data/nvram/APCFG/APRDEB
+
+log() { echo "mtk-nvram-restore: $*"; }
+
+# Little-endian u32 at the given byte offset (BusyBox od lacks -j/-N, use hexdump).
+u32() {
+    hexdump -s "$1" -n 4 -e '1/4 "%u"' "$NVRAM"
+}
+
+# extract <table entry offset> <expected path> <destination>
+extract() {
+    # POSIX sh has no "local": use x_ names so callers' variables survive.
+    x_entry=$1; x_path=$2; x_dest=$3
+    x_found=$(dd if="$NVRAM" bs=1 skip=$((x_entry + 12)) count=${#x_path} 2>/dev/null)
+    if [ "$x_found" != "$x_path" ]; then
+        log "unexpected BinRegion entry at $x_entry (wanted $x_path), skipping"
+        return 1
+    fi
+    x_off=$(u32 $((x_entry + 4)))
+    x_size=$(u32 $((x_entry + 8)))
+    case "$x_off$x_size" in
+        ''|*[!0-9]*) log "could not read BinRegion entry for $x_path"; return 1 ;;
+    esac
+    if [ "$x_size" -eq 0 ] || [ "$x_size" -gt 4096 ]; then
+        log "implausible size $x_size for $x_path"
+        return 1
+    fi
+    dd if="$NVRAM" of="$x_dest" bs=1 skip=$((DATA + x_off)) count="$x_size" 2>/dev/null &&
+        [ "$(wc -c < "$x_dest")" -eq "$x_size" ]
+}
+
+for _ in $(seq 1 30); do
+    [ -b "$NVRAM" ] && break
+    sleep 1
+done
+[ -b "$NVRAM" ] || { log "no nvram partition"; exit 0; }
+mkdir -p "$APRDEB"
+tmp=$(mktemp -d)
+
+# Wi-Fi: MAC address and calibration, read by the WLAN driver at power-on.
+for f in WIFI:0xc0 WIFI_CUSTOM:0x1d8; do
+    name=${f%%:*}
+    entry=$((${f##*:}))
+    [ -e "$APRDEB/$name" ] && continue
+    if extract "$entry" "$APRDEB/$name" "$tmp/$name" &&
+            cp "$tmp/$name" "$APRDEB/$name" && chmod 0660 "$APRDEB/$name"; then
+        log "restored $APRDEB/$name"
+    fi
+done
+
+# Bluetooth: hci_stp reads a 36 byte config from /data/BT_Addr (address,
+# voice, codec, radio, sleep, feature, TX power offset, coex adjust). Take it
+# from the BT_Addr record and apply the sleep timeouts stock Android sets with
+# ro.mediatek.bt.sleep=0x00100010 (bytes 19-22, little endian).
+if [ ! -e /data/BT_Addr ] && extract 0x34 "$APRDEB/BT_Addr" "$tmp/BT_Addr"; then
+    dd if="$tmp/BT_Addr" bs=1 count=19 2>/dev/null > "$tmp/hci"
+    printf '\020\000\020\000' >> "$tmp/hci"
+    dd if="$tmp/BT_Addr" bs=1 skip=23 count=13 2>/dev/null >> "$tmp/hci"
+    if [ "$(wc -c < "$tmp/hci")" -eq 36 ] &&
+            cp "$tmp/hci" /data/BT_Addr && chmod 0644 /data/BT_Addr; then
+        log "restored /data/BT_Addr"
+    fi
+fi
+
+rm -rf "$tmp"
+exit 0

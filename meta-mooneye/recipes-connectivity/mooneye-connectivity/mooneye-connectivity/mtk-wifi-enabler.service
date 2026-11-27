@@ -1,0 +1,12 @@
+[Unit]
+Description=Power on the MediaTek MT6630 WLAN function
+After=android-init.service
+Wants=android-init.service
+
+[Service]
+# Bringing the chip up can take minutes; don't hold up the rest of the boot.
+Type=simple
+ExecStart=/usr/bin/mtk-wifi-enabler
+
+[Install]
+WantedBy=multi-user.target
