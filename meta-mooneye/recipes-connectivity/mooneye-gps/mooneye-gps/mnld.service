@@ -1,0 +1,26 @@
+[Unit]
+Description=MediaTek GPS daemon (mnld)
+# mnld reads Android properties, and /dev/stpgps appears once wmt_loader
+# (started by Android init) has brought up the connectivity drivers.
+After=android-init.service
+Wants=android-init.service
+
+[Service]
+ExecStartPre=/bin/sh -c 'for i in $(seq 1 60); do [ -c /dev/stpgps ] && exit 0; sleep 1; done; exit 1'
+ExecStartPre=/bin/rm -f /data/gps_mnl/hal2mnld /data/gps_mnl/mnld2hal
+ExecStartPre=/bin/mkdir -p /data/gps_mnl /data/misc/gps /data/agps_supl
+# The GPS HAL runs inside the user's session (geoclue), so it needs to create
+# its reply socket here and to reach mnld's socket.
+ExecStartPre=/bin/chown root:gps /data/gps_mnl /data/misc/gps
+ExecStartPre=/bin/chmod 2770 /data/gps_mnl /data/misc/gps
+# mnld writes a debug log of a few MB per GPS session unless told not to.
+ExecStartPre=/bin/sh -c '[ -e /data/misc/gps/mnl.prop ] || printf "debug.dbg2file=0\\ndebug.debug_nmea=0\\n" > /data/misc/gps/mnl.prop'
+ExecStart=/vendor/bin/mnld
+# mnld hard-codes Android's inet group (3003) on its socket.
+ExecStartPost=/bin/sh -c 'for i in $(seq 1 50); do [ "$(stat -c %%g /data/gps_mnl/hal2mnld 2>/dev/null)" = 3003 ] && exec chgrp gps /data/gps_mnl/hal2mnld; sleep 0.2; done; exit 1'
+Restart=on-failure
+# mnld ignores SIGTERM.
+TimeoutStopSec=5
+
+[Install]
+WantedBy=multi-user.target
