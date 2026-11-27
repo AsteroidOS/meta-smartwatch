@@ -1,0 +1,13 @@
+[Unit]
+Description=Give the MT6630 Bluetooth its factory address and RF calibration
+DefaultDependencies=no
+After=local-fs.target
+Before=android-init.service bluetooth.service sysinit.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/sbin/mooneye-bt-addr
+
+[Install]
+WantedBy=sysinit.target

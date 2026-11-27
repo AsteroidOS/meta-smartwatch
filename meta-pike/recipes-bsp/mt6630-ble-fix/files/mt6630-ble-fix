@@ -1,0 +1,23 @@
+#!/bin/sh
+# mt6630-ble-fix: make LE slave connections work on MT6630 watches (Polar M600 "pike", TicWatch E "mooneye").
+# The watch builds of MediaTek's combo patch (platform 1527) abort every LE slave connection event before the
+# T_IFS reply while the chip CPU runs below 80 MHz (it runs at 32 MHz). Patching one instruction
+# (movi55 a5,6 -> movi55 a5,-1) makes that abort condition unreachable. The stock file is never modified:
+# it is copied to /run, patched there, verified, and bind-mounted over the original before BT powers on.
+# Known files: stock md5 -> byte offset -> fixed md5.
+SRC=/system/etc/firmware/mt6630_patch_e3_1_hdr.bin
+DST=/run/mt6630/mt6630_patch_e3_1_hdr.bin
+grep -q " $SRC " /proc/mounts && { echo "mt6630-ble-fix: already applied"; exit 0; }
+sum=$(md5sum "$SRC" | cut -d' ' -f1)
+case "$sum" in
+  6fe7618038a9eb9c56c17878f9b9eb2e) off=$((0x87c3)); want=0ddce24d12125beb9d025fde5350a68f ;;  # pike 2018-02-01
+  bc0ec2a9eb428dfadabd13c04f046c63) off=$((0x89bb)); want=c38af922a5ce19ecf782779b86c67010 ;;  # mooneye 2018-04-03
+  *) echo "mt6630-ble-fix: unknown patch $sum, leaving it alone"; exit 0 ;;
+esac
+# Assembled from three pieces instead of dd conv=notrunc or head -c: minimal
+# BusyBox builds (AsteroidOS images since 2026) have neither.
+mkdir -p /run/mt6630 || exit 1
+{ dd if="$SRC" bs=$off count=1 2>/dev/null; printf '\277'; tail -c +$((off + 2)) "$SRC"; } > "$DST" || exit 1
+got=$(md5sum "$DST" | cut -d' ' -f1)
+[ "$got" = "$want" ] || { echo "mt6630-ble-fix: verify failed ($got)"; rm -f "$DST"; exit 1; }
+mount --bind "$DST" "$SRC" && echo "mt6630-ble-fix: applied ($sum -> $got)"

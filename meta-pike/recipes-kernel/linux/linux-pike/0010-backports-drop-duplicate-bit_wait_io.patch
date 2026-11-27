@@ -1,0 +1,27 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: AsteroidOS <pike@asteroidos>
+Date: Mon, 6 Jul 2026 04:30:00 +0000
+Subject: [PATCH] backports: drop duplicate bit_wait_io (pike oreo kernel has it)
+
+Upstream-Status: Inappropriate [backports/vendor-kernel symbol collision]
+
+pike's 3.10-oreo kernel already defines bit_wait_io in kernel/wait.c, so the
+backports 3.17 compat copy causes a multiple-definition link error in vmlinux.
+bit_wait and ktime_get_raw are absent from pike's kernel, so they remain.
+---
+--- a/backports/compat/backport-3.17.c
++++ b/backports/compat/backport-3.17.c
+@@ -19,13 +19,6 @@
+ }
+ EXPORT_SYMBOL_GPL(bit_wait);
+ 
+-int bit_wait_io(void *word)
+-{
+-	io_schedule();
+-	return 0;
+-}
+-EXPORT_SYMBOL_GPL(bit_wait_io);
+-
+ /**
+  * ktime_get_raw - Returns the raw monotonic time in ktime_t format
+  */

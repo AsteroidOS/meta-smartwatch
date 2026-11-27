@@ -1,0 +1,33 @@
+#!/bin/sh
+# mooneye-bt-addr: give the MT6630 its factory Bluetooth address and RF calibration.
+# The HCI_STP driver reads its 36-byte btradio_conf_data from /data/BT_Addr when BT powers on, and otherwise
+# falls back to MediaTek's defaults (address 00:00:46:66:20:01). The factory record sits in the "nvram" eMMC
+# partition at offset 0x20202, behind an "aa fe" record marker. Copy it once; replace only a missing file or one
+# that still holds a default address, so a deliberate override survives.
+CFG=/data/BT_Addr
+OFF=$((0x20202))
+cur=$(od -An -tx1 -N6 "$CFG" 2>/dev/null | tr -d ' \n')
+case "$cur" in
+  ""|00004666*) ;;
+  *) echo "mooneye-bt-addr: $CFG already holds $cur"; exit 0 ;;
+esac
+part=$(grep -l '^PARTNAME=nvram$' /sys/block/mmcblk0/mmcblk0p*/uevent 2>/dev/null | head -n 1)
+[ -n "$part" ] || { echo "mooneye-bt-addr: no nvram partition"; exit 0; }
+dev=/dev/$(basename "$(dirname "$part")"); [ -b "$dev" ] || dev=/dev/block/$(basename "$(dirname "$part")")
+tmp=/run/mooneye-bt-addr.$$
+dd if="$dev" bs=1 skip=$((OFF - 2)) count=38 2>/dev/null > "$tmp.raw"
+marker=$(od -An -tx1 -N2 "$tmp.raw" | tr -d ' \n')
+tail -c 36 "$tmp.raw" > "$tmp"; rm -f "$tmp.raw"
+addr=$(od -An -tx1 -N6 "$tmp" | tr -d ' \n')
+voice=$(od -An -tx1 -j6 -N2 "$tmp" | tr -d ' \n')
+if [ "$marker" != aafe ] || [ "$voice" != 6000 ]; then
+  echo "mooneye-bt-addr: no BT record at $OFF in $dev (marker $marker voice $voice)"; rm -f "$tmp"; exit 0
+fi
+case "$addr" in
+  000000000000|ffffffffffff|00004666*) echo "mooneye-bt-addr: no factory address ($addr)"; rm -f "$tmp"; exit 0 ;;
+esac
+# /data is not in the image. On a first boot it only appears after Android's init, which starts after this
+# unit, has run MediaTek's services (nvram_daemon fills /data/nvram). Create it the way it ends up there:
+# mode 0771, group 1000.
+[ -d /data ] || { mkdir -m 0771 /data && chgrp 1000 /data; } || { rm -f "$tmp"; exit 1; }
+mv "$tmp" "$CFG" && echo "mooneye-bt-addr: $CFG <- factory address $addr from $dev"
