@@ -1,11 +1,20 @@
 [Unit]
 Description=Load firmware into bluetooth chip
+# brcm_patchram_plus sometimes keeps running without ever creating hci0,
+# leaving Bluetooth silently unusable until reboot. Fail when hci0 does not
+# show up and retry with a freshly reset chip.
+StartLimitIntervalSec=300
+StartLimitBurst=5
 
 [Service]
 Type=simple
+ExecStartPre=-/usr/sbin/rfkill block bluetooth
 ExecStartPre=/bin/sleep 8
 ExecStartPre=/usr/sbin/rfkill unblock bluetooth
 ExecStart=/usr/bin/brcm_patchram_plus --baudrate 3000000 --enable_lpm --enable_hci --no2bytes --patchram /data/firmware/BCM43430A1.hcd /dev/ttyHS0
+ExecStartPost=/bin/sh -c 'for i in $$(seq 30); do [ -e /sys/class/bluetooth/hci0 ] && exit 0; sleep 1; done; echo "hci0 did not appear" >&2; exit 1'
+Restart=on-failure
+RestartSec=3
 
 [Install]
 WantedBy=basic.target
