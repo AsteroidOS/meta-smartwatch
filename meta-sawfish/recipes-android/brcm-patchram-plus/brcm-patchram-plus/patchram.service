@@ -1,11 +1,16 @@
 [Unit]
 Description=Load firmware into bluetooth chip
+RequiresMountsFor=/nvdata
 
 [Service]
 Type=simple
 ExecStartPre=/bin/sleep 8
 ExecStartPre=/usr/sbin/rfkill unblock bluetooth
-ExecStart=/usr/bin/brcm_patchram_plus --baudrate 3000000 --enable_lpm --enable_hci --no2bytes --patchram /data/firmware/BCM43430A1.hcd /dev/ttyHS0
+# Program the factory Bluetooth address from /nvdata/MACBT ("F8:C3:9E:..."
+# padded with NUL bytes). Without it the chip keeps Broadcom's default
+# 43:43:A1:12:1F:AC, the same on every watch. A missing or malformed file
+# keeps the default.
+ExecStart=/bin/sh -c 'addr=$$(tr -d "\\000" < /nvdata/MACBT 2>/dev/null | grep -xE "([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}"); exec /usr/bin/brcm_patchram_plus $${addr:+--bd_addr $$addr} --baudrate 3000000 --enable_lpm --enable_hci --no2bytes --patchram /data/firmware/BCM43430A1.hcd /dev/ttyHS0'
 
 [Install]
 WantedBy=basic.target
