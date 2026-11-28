@@ -1,0 +1,21 @@
+[Unit]
+Description=sol: derive PulseAudio's droid audio policy configuration
+Documentation=file:///usr/libexec/sol-audio-policy.sh
+# The source file lives in the Android vendor image, so that has to be mounted
+# first. PulseAudio reads the result when the user session starts, and treats a
+# missing policy file as "no card at all", so this has to be done by then. The
+# speaker-protection bind mounts have to be in place before anything opens a
+# stream, for the same reason.
+After=sol-vendor-mount.service
+Requires=sol-vendor-mount.service
+Before=user@1000.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/libexec/sol-audio-policy.sh
+# The bind mounts go with the unit; the derived copies live on tmpfs anyway.
+ExecStop=/bin/sh -c 'for m in /vendor/etc/audio/sku_*/resourcemanager_*.xml; do umount "$m" 2>/dev/null; done; exit 0'
+
+[Install]
+WantedBy=multi-user.target

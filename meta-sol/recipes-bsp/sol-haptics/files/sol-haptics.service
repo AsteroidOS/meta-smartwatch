@@ -1,0 +1,23 @@
+[Unit]
+Description=sol: load the CS40L26 haptic driver (after the firmware path is set)
+# Ordering matters. cs40l26 loads its DSP firmware with synchronous
+# request_firmware() (cs40l26.c:4649/4651/4914), so probe fails for good if the
+# firmware is not reachable yet. The files live in the vendor image, and
+# sol-adsp-boot sets the firmware_class search path to /android/vendor/firmware.
+# For the same reason the module is not in sol-post-rootfs.conf, and
+# sol-cs40l26-blacklist.conf stops udev's modalias autoload, leaving this the
+# only loader. RequiresMountsFor implies Requires= and After= on the mount.
+After=sol-adsp-boot.service
+Requires=sol-adsp-boot.service
+RequiresMountsFor=/android/vendor/firmware
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+# input-cs40l26-i2c pulls cl_dsp and the codec in via modules.dep.
+ExecStart=/sbin/modprobe input-cs40l26-i2c
+# Report the result, so a failed firmware load shows in the journal.
+ExecStartPost=/bin/sh -c 'd=/sys/bus/i2c/devices/0-0043; if [ -e "$d/driver" ]; then echo "sol-haptics: bound to $(basename $(readlink $d/driver))"; else echo "sol-haptics: 0-0043 present but unbound; see dmesg for the probe error"; fi; for e in /dev/input/event*; do [ "$(cat /sys/class/input/$(basename $e)/device/name 2>/dev/null)" = cs40l26_input ] && echo "sol-haptics: force-feedback node $e"; done'
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,53 @@
+From: moWerk <mo@mowerk.net>
+Subject: [PATCH] hwc2: start the binder thread pool before waitForService
+
+AidlComposer calls AServiceManager_waitForService() before it starts its
+binder thread pool. The service notification is delivered on a binder
+thread, so with no pool the caller deadlocks: on sol the launcher hung at
+start with one thread parked in a condition-variable wait. Start the pool
+first.
+
+Applied to Halium libhybris halium-13.0 (bf36ece) to build the
+libhwc2_compat_layer.so in sol-hwc2-aidl-1.0.tar.gz; not applied by BitBake.
+
+Upstream-Status: Pending
+Signed-off-by: moWerk <mo@mowerk.net>
+---
+--- a/compat/hwc2/AidlComposerHal.cpp
++++ b/compat/hwc2/AidlComposerHal.cpp
+@@ -255,6 +255,24 @@
+ }
+ 
+ AidlComposer::AidlComposer(const std::string& serviceName) {
++    // sol: START THE THREAD POOL BEFORE waitForService, NOT AFTER.
++    //
++    // AServiceManager_waitForService() registers a service-notification
++    // callback and blocks on a condition variable until it fires. That callback
++    // is delivered by a BINDER THREAD -- so with the pool started afterwards
++    // there is no thread to deliver it, nothing ever signals the condvar, and
++    // the process deadlocks single-threaded. Observed exactly that on sol:
++    // asteroid-launcher with one thread parked in
++    // std::condition_variable::wait_for, /dev/binderfs/binder open and no DRM
++    // or GPU fd, and systemd reporting only a start timeout.
++    //
++    // This became reachable only after sol's VINTF fix: the comment below is
++    // right that it "only waits if the service is actually declared", and until
++    // the composer was declared, isDeclared() was false and this path never
++    // blocked.
++    ABinderProcess_setThreadPoolMaxThreadCount(1);
++    ABinderProcess_startThreadPool();
++
+     // This only waits if the service is actually declared
+     mAidlComposer = AidlIComposer::fromBinder(
+             ndk::SpAIBinder(AServiceManager_waitForService(instance(serviceName).c_str())));
+@@ -268,10 +286,6 @@
+         return;
+     }
+ 
+-    // Start the binder thread pool if not already started for AIDL composer
+-    ABinderProcess_setThreadPoolMaxThreadCount(1);
+-    ABinderProcess_startThreadPool();
+-
+ #if ANDROID_VERSION_MAJOR >= 14
+     addReader(translate<Display>(kSingleReaderKey));
+ #endif

@@ -1,0 +1,15 @@
+[Unit]
+Description=sol: periodic check that sensorfw's D-Bus still answers
+
+[Timer]
+# Five minutes, matching sol-sleep-guard: frozen along with everything else while
+# the watch is genuinely asleep, so it costs nothing on a healthy watch. The
+# first check waits 6 min so a fresh boot's container + sensorfw have fully
+# settled before the guard could ever consider a wedge.
+OnBootSec=6min
+OnUnitActiveSec=5min
+AccuracySec=1min
+Persistent=false
+
+[Install]
+WantedBy=timers.target

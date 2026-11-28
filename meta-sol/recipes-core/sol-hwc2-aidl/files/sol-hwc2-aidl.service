@@ -1,0 +1,21 @@
+[Unit]
+Description=sol: overlay the AIDL-capable hwc2 compat layer into the Halium system
+Documentation=file:///usr/share/sol-hwc2-aidl/README.txt
+# The overlay's lowerdir is inside the hybris system image, so that mount has to
+# exist first. It must also be in place before anything dlopens the compat layer:
+# the container's composer publishes the AIDL service the layer talks to, and
+# user@1000 hosts the launcher that loads it.
+After=android-hybris.mount
+Requires=android-hybris.mount
+Before=sol-lxc-android.service user@1000.service
+ConditionPathExists=/usr/share/sol-hwc2-aidl/libhwc2_compat_layer.so
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/libexec/sol-hwc2-aidl-overlay.sh
+# Leave the overlay up on stop: processes have these libraries mapped, and
+# tearing it down under a running compositor buys nothing.
+
+[Install]
+WantedBy=multi-user.target

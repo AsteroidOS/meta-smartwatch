@@ -1,0 +1,116 @@
+From: moWerk <mo@mowerk.net>
+Subject: [PATCH] serial: msm_geni: force a voteless port down on system suspend
+Upstream-Status: Pending [driver bug, not a device workaround; msm_geni_serial
+is a Qualcomm downstream driver with no upstream counterpart to send this to]
+
+msm_geni_serial_sys_suspend() returned -EBUSY whenever the port was not already
+runtime-suspended, blaming an "active userspace vote" even when ioctl_count was
+zero. With Bluetooth up that makes the port permanently unsuspendable, because
+the suspend attempt itself creates the traffic that blocks it:
+
+  1. autosleep starts a suspend; PM_SUSPEND_PREPARE fires
+  2. hci_suspend_notifier() transmits HCI commands to configure wake events
+  3. that TX runtime-resumes this port
+  4. dpm_suspend() reaches us with the port active, and we refuse
+  5. autosleep retries, goto 1
+
+Measured on sol: 610 HCI commands across 217 aborts, suspend_stats showing
+last_failed_dev=4a94000.qcom,qup_uart, last_failed_errno=-16 and success frozen
+at 0, while the same watch with Bluetooth off suspends 170 times in 300 s.
+
+Two weaker fixes were tried on hardware first, recorded so nobody repeats them.
+Dropping the autosuspend delay to 10 ms via sysfs let exactly ONE suspend
+through out of 641 attempts. Waiting inside the callback for the pending
+autosuspend to land failed on all 443 attempts, each logging "port still active
+after 400 ms": a runtime-PM reference is held across the whole window, so the
+autosuspend cannot land on its own however long we wait.
+
+Do what the sibling GENI SPI driver already does in spi_geni_suspend(): force
+the port down with pm_runtime_force_suspend(), paired with
+pm_runtime_force_resume() in sys_resume() so runtime PM is re-enabled and the
+port keeps autosuspending normally afterwards. A genuine TIOCPMGET vote still
+refuses the suspend, since that client explicitly asked for the port to stay up.
+
+Signed-off-by: moWerk <mo@mowerk.net>
+---
+--- a/drivers/tty/serial/msm_geni_serial.c
++++ b/drivers/tty/serial/msm_geni_serial.c
+@@ -388,6 +388,8 @@
+ 	u32 cur_tx_remaining;
+ 	bool startup_in_progress;
+ 	bool is_console;
++	/* set when sys_suspend force-suspended us; sys_resume must undo it */
++	bool sys_force_suspended;
+ 	bool rumi_platform;
+ 	bool m_cmd_done;
+ 	bool s_cmd_done;
+@@ -5576,6 +5578,7 @@
+ 	struct msm_geni_serial_port *port = platform_get_drvdata(pdev);
+ 	struct uart_port *uport = &port->uport;
+ 	unsigned long long start_time;
++	int ret;
+ 
+ 	/* Platform driver is registered for console and when console
+ 	 * is disabled from cmdline simply return success.
+@@ -5594,7 +5597,11 @@
+ 		struct tty_port *tty_port = &state->port;
+ 
+ 		mutex_lock(&tty_port->mutex);
+-		if (!pm_runtime_status_suspended(dev)) {
++		/*
++		 * A real userspace vote (TIOCPMGET) wins: that client asked for
++		 * the port to stay powered, so refuse the system suspend.
++		 */
++		if (!pm_runtime_status_suspended(dev) && port->ioctl_count) {
+ 			dev_err(dev, "%s:Active userspace vote; ioctl_cnt %d\n",
+ 					__func__, port->ioctl_count);
+ 			UART_LOG_DBG(port->ipc_log_pwr, dev,
+@@ -5603,6 +5610,32 @@
+ 			mutex_unlock(&tty_port->mutex);
+ 			return -EBUSY;
+ 		}
++		/*
++		 * Otherwise force the port down, exactly as the sibling GENI
++		 * SPI driver does in spi_geni_suspend().
++		 *
++		 * Merely refusing when the port is not already runtime-suspended
++		 * makes a Bluetooth UART permanently unsuspendable, because the
++		 * suspend attempt creates the traffic that blocks it:
++		 * hci_suspend_notifier() transmits HCI commands on
++		 * PM_SUSPEND_PREPARE, that TX resumes this port, and we then
++		 * abort the very suspend that caused it. Measured on sol: 610
++		 * HCI commands across 217 aborts, success frozen at 0. Waiting
++		 * does not help -- the port was still active after a bounded
++		 * 400 ms wait on all 443 attempts -- because a runtime-PM
++		 * reference is held across the window, so the pending
++		 * autosuspend can never land by itself.
++		 */
++		ret = pm_runtime_force_suspend(dev);
++		if (ret) {
++			dev_err(dev, "%s: force suspend failed %d\n",
++				__func__, ret);
++			UART_LOG_DBG(port->ipc_log_pwr, dev,
++				"%s: force suspend failed %d\n", __func__, ret);
++			mutex_unlock(&tty_port->mutex);
++			return ret;
++		}
++		port->sys_force_suspended = true;
+ 		UART_LOG_DBG(port->ipc_log_pwr, dev, "%s end %d\n", __func__, true);
+ 		mutex_unlock(&tty_port->mutex);
+ 	}
+@@ -5678,6 +5711,15 @@
+ 		uart_resume_port((struct uart_driver *)uport->private_data,
+ 									uport);
+ 		IPC_LOG_MSG(port->console_log, "%s end %d", __func__, true);
++	} else if (port->sys_force_suspended) {
++		/*
++		 * Undo the force suspend from sys_suspend(). This MUST be
++		 * paired, or runtime PM stays disabled and the port never
++		 * autosuspends again. Same shape as spi_geni_resume().
++		 */
++		port->sys_force_suspended = false;
++		if (pm_runtime_force_resume(dev))
++			dev_err(dev, "%s: force resume failed\n", __func__);
+ 	}
+ 	geni_capture_stop_time(&port->se, port->ipc_log_kpi,
+ 			       __func__, port->uart_kpi, start_time, 0, 0);

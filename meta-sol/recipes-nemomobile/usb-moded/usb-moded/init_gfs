@@ -1,0 +1,74 @@
+#!/bin/sh
+# Stage the configfs gadget skeleton for usb-moded. sol's GKI 5.15 kernel has
+# no android_usb, so usb-moded uses configfs, but configfs_probe() bails out if
+# /config/usb_gadget/g1 does not exist. Create only the skeleton: usb-moded's
+# configfs_set_function() wipes configs/b.1 links and recreates the function, so
+# it must be the sole writer of g1/functions/* and configs/b.1.
+
+# Gadget serial. sol's cmdline has no androidboot.serialno=, so aurora's plain
+# sed pipeline returned the first cmdline token, and a malformed serial keeps the
+# watch out of `adb devices`. Match before extracting and fall back.
+serial=""
+case "$(cat /proc/cmdline)" in
+    *androidboot.serialno=*)
+        serial="$(sed 's/.*androidboot.serialno=//; s/[[:space:]].*//' /proc/cmdline)"
+        ;;
+esac
+# Some bootloaders publish it in the device tree instead of the cmdline.
+if [ -z "$serial" ] && [ -r /proc/device-tree/serial-number ]; then
+    serial="$(tr -d '\000' < /proc/device-tree/serial-number)"
+fi
+# Last resort: the same fixed default android-gadget-setup uses.
+case "$serial" in
+    ''|*[!A-Za-z0-9_-]*) serial="0123456789ABCDEF" ;;
+esac
+echo "init_gfs: gadget serial=$serial"
+
+# usb-moded reads configfs through /config; mount the kernel's configfs there
+# if not already mounted.
+mkdir -p /config
+mountpoint -q /config || mount -t configfs none /config
+
+# Clear initramfs gadget state. A no-op on normal boots; on a debug-ramdisk boot
+# the initramfs `adb` gadget may hold the UDC and /dev/usb-ffs/adb may linger.
+for u in /config/usb_gadget/*/UDC; do
+    [ -e "$u" ] || continue
+    current=$(cat "$u" 2>/dev/null)
+    if [ -n "$current" ]; then
+        echo "init_gfs: unbinding $current from $u"
+        echo "" > "$u" 2>/dev/null || echo "init_gfs: unbind FAILED for $u" >&2
+    fi
+done
+
+if mountpoint -q /dev/usb-ffs/adb; then
+    echo "init_gfs: unmounting stale /dev/usb-ffs/adb"
+    umount /dev/usb-ffs/adb 2>/dev/null || umount -l /dev/usb-ffs/adb 2>/dev/null || true
+fi
+
+# Remove the initramfs `adb` gadget so it cannot take the UDC from g1, the only
+# gadget usb-moded manages (DEFAULT_GADGET_BASE_DIRECTORY, usb_moded-configfs.c).
+if [ -d /config/usb_gadget/adb ]; then
+    echo "init_gfs: tearing down initramfs's 'adb' gadget"
+    echo "" > /config/usb_gadget/adb/UDC 2>/dev/null || true
+    rm -f /config/usb_gadget/adb/configs/c.1/ffs.usb0 2>/dev/null
+    rmdir /config/usb_gadget/adb/configs/c.1/strings/0x409 2>/dev/null
+    rmdir /config/usb_gadget/adb/configs/c.1 2>/dev/null
+    rmdir /config/usb_gadget/adb/functions/ffs.usb0 2>/dev/null
+    rmdir /config/usb_gadget/adb/strings/0x409 2>/dev/null
+    rmdir /config/usb_gadget/adb 2>/dev/null
+fi
+
+# === Skeleton-only g1: usb-moded handles functions and configs/b.1 links.
+echo "init_gfs: cleanup done, staging g1 skeleton"
+
+mkdir -p /config/usb_gadget/g1
+echo 0x18d1 > /config/usb_gadget/g1/idVendor    # Google
+echo 0xd002 > /config/usb_gadget/g1/idProduct   # adb composite (overwritten per-mode by usb-moded)
+
+mkdir -p /config/usb_gadget/g1/strings/0x409
+echo "$serial" > /config/usb_gadget/g1/strings/0x409/serialnumber
+echo AsteroidOS > /config/usb_gadget/g1/strings/0x409/manufacturer
+hostname > /config/usb_gadget/g1/strings/0x409/product
+
+mkdir -p /config/usb_gadget/g1/configs/b.1/strings/0x409
+echo "adb" > /config/usb_gadget/g1/configs/b.1/strings/0x409/configuration

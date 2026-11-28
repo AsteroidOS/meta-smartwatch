@@ -1,0 +1,16 @@
+[Unit]
+Description=Halium Android container for sol (composer + vendor HALs)
+After=var-lib-lxc-android-rootfs.mount sol-android-apex.service sol-vendor-mount.service
+Requires=var-lib-lxc-android-rootfs.mount
+Before=user@1000.service
+ConditionPathExists=/var/lib/lxc/android/config
+
+[Service]
+Type=simple
+ExecStart=/usr/libexec/sol-lxc-android-start.sh
+ExecStop=-/usr/bin/lxc-stop -n android -P /var/lib/lxc
+Restart=no
+TimeoutStartSec=120
+
+[Install]
+WantedBy=multi-user.target

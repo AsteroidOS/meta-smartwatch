@@ -1,0 +1,17 @@
+[Unit]
+Description=sol: USB network (NCM) for ssh-over-USB
+Documentation=file:///usr/bin/sol-usb-network.sh
+# sol-bringup-adb creates and binds the gadget with ffs.adb; this adds ncm.0 to
+# the SAME config so the result is a composite carrying adb AND network, rather
+# than replacing one with the other. usb-moded is masked on sol, so nothing else
+# writes configfs.
+After=sol-bringup-adb.service
+Requires=sol-bringup-adb.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/bin/sol-usb-network.sh
+
+[Install]
+WantedBy=multi-user.target

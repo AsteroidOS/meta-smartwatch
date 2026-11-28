@@ -1,0 +1,39 @@
+From: Florent Revest <revestflo@gmail.com>
+Date: Wed, 10 Jun 2026 00:30:00 +0000
+Subject: [PATCH] amplifiers: cs40l26: pin the codec MFD child platform id
+ to 0
+
+The cs40l26-codec MFD child is added with PLATFORM_DEVID_AUTO, so its
+device (and thus ASoC component) name depends on the global auto-id
+allocation order: "cs40l26-codec.2.auto" on stock WearOS, something
+else with our module set/load order. monaco's haptics dai_links must
+reference that component by literal name (the aurora DT's
+asoc-codec-names/of_node path resolves to a poisoned bolero-spawned
+duplicate instead -- see the monaco dailink patch), so the name has
+to be deterministic.
+
+Pin the id to 0: the child is always "cs40l26-codec.0". A fixed id
+also avoids colliding with the bare "cs40l26-codec" platform device
+bolero_add_child_devices() creates from the DT node of the same name.
+
+Applies on top of the loaded-before-mfd-add reorder patch.
+
+Upstream-Status: Inappropriate [aurora-specific HW glue]
+
+Signed-off-by: Florent Revest <revestflo@gmail.com>
+---
+ private/google-modules/amplifiers/cs40l26/cs40l26.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/private/google-modules/amplifiers/cs40l26/cs40l26.c b/private/google-modules/amplifiers/cs40l26/cs40l26.c
+--- a/private/google-modules/amplifiers/cs40l26/cs40l26.c
++++ b/private/google-modules/amplifiers/cs40l26/cs40l26.c
+@@ -4952,7 +4952,7 @@ int cs40l26_probe(struct cs40l26_private *cs40l26,
+
+ 	cs40l26_loaded = true;
+
+-	ret = devm_mfd_add_devices(dev, PLATFORM_DEVID_AUTO, cs40l26_devs,
++	ret = devm_mfd_add_devices(dev, 0, cs40l26_devs,
+ 			CS40L26_NUM_MFD_DEVS, NULL, 0, NULL);
+ 	if (ret) {
+ 		dev_err(dev, "Failed to register codec component\n");

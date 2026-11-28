@@ -1,0 +1,17 @@
+[Unit]
+Description=sol: give wlan0 the factory MAC from the device tree
+Documentation=file:///usr/libexec/sol-wlan-mac.sh
+# AFTER the driver is loaded (the netdev has to exist to be renamed) and BEFORE
+# connman, whose saved-network identity embeds the MAC -- if connman sees the
+# wrong address first it will not match the stored profile.
+After=systemd-modules-load.service
+Before=connman.service
+ConditionPathExists=/sys/firmware/devicetree/base/chosen/config/wlan_mac1
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/libexec/sol-wlan-mac.sh
+
+[Install]
+WantedBy=multi-user.target

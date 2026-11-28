@@ -1,0 +1,12 @@
+[Unit]
+Description=sol: notice when sensorfw's D-Bus goes deaf and re-register the sensors HAL
+Documentation=file:///usr/bin/sol-sensors-guard.sh
+After=sensorfwd.service mce.service sol-lxc-android.service
+Wants=sensorfwd.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/sol-sensors-guard.sh
+# Never compete with anything the wearer can see.
+Nice=19
+IOSchedulingClass=idle

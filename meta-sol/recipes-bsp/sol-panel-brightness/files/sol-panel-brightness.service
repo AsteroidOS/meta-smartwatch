@@ -1,0 +1,19 @@
+[Unit]
+Description=sol: advertise the panel's real brightness range to userspace
+Documentation=file:///usr/libexec/sol-panel-brightness.sh
+# The backlight device is created by the display driver, which comes up with the
+# Android container; mce must not read the raw value before this corrects it.
+After=sol-lxc-android.service
+Before=mce.service
+ConditionPathExists=/sys/class/backlight/panel0-backlight/max_brightness
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/libexec/sol-panel-brightness.sh
+# The mount lives in the host namespace; undo it if this unit is stopped so the
+# raw kernel attribute is visible again.
+ExecStop=/bin/sh -c 'umount /sys/class/backlight/panel0-backlight/max_brightness 2>/dev/null || true'
+
+[Install]
+WantedBy=multi-user.target

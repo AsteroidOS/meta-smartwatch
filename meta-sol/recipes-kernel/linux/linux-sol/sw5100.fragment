@@ -1,0 +1,105 @@
+CONFIG_I2C_CHARDEV=m
+CONFIG_QCOM_RAMDUMP=m
+
+CONFIG_VT=y
+CONFIG_VT_CONSOLE=y
+CONFIG_VT_CONSOLE_SLEEP=y
+CONFIG_HW_CONSOLE=y
+CONFIG_CONSOLE_TRANSLATIONS=y
+CONFIG_DUMMY_CONSOLE=y
+CONFIG_LDISC_AUTOLOAD=y
+
+# Kernel-owned USB debug channel.
+CONFIG_USB_G_SERIAL=m
+CONFIG_U_SERIAL_CONSOLE=y
+
+# With REGULATOR_PROXY_CONSUMER set, gcc-monaco/gdsc fail with "Failed to
+# register GCC clocks": the GDSC proxy-consumer does regulator_get() on an RPM
+# regulator that is not up yet (-517, never resolves), leaving no display and
+# no eMMC bus scaling, and boot hangs. Unset, as in the stock kernel.
+# CONFIG_REGULATOR_PROXY_CONSUMER is not set
+
+# Namespaces for the LXC container. monaco_GKI.config trims these;
+# NAMESPACES/UTS/NET are already =y. IPC_NS depends on SYSVIPC, which
+# monaco_GKI also unsets, so without it olddefconfig silently drops IPC_NS.
+CONFIG_SYSVIPC=y
+CONFIG_USER_NS=y
+CONFIG_PID_NS=y
+CONFIG_IPC_NS=y
+
+# AppArmor is built in, as in UBports' kernel for this hardware, but not used:
+# the cmdline's lsm= (SOL_CMDLINE in linux-sol_5.15.148.bb) selects SELinux,
+# permissive with no policy loaded, because Android init needs selinuxfs.
+CONFIG_SECURITY_APPARMOR=y
+CONFIG_SECURITY_APPARMOR_HASH=y
+CONFIG_SECURITY_APPARMOR_HASH_DEFAULT=y
+CONFIG_SECURITY_PATH=y
+CONFIG_DEFAULT_SECURITY_APPARMOR=y
+CONFIG_LSM="landlock,lockdown,yama,loadpin,safesetid,integrity,apparmor,selinux,smack,tomoyo,bpf"
+
+# monaco_GKI.config sets QPNP_SMBLITE=m, but its smblite-shim.h includes
+# <misc/gvotable.h> from the out-of-tree google-modules/bms, so the in-tree
+# build fails. Google builds it as an external module (EXT_MODULES).
+# CONFIG_QCOM_POWER_SUPPLY is not set
+# CONFIG_QPNP_SMBLITE is not set
+# CONFIG_QTI_QBG is not set
+# CONFIG_MSM_SEB is not set
+# CONFIG_MSM_SEB_RPMSG is not set
+# CONFIG_MSM_SLATECOM is not set
+# CONFIG_MSM_SLATECOM_EVENT is not set
+# CONFIG_MSM_SLATECOM_INTERFACE is not set
+# CONFIG_MSM_SLATECOM_RPMSG is not set
+# CONFIG_MSM_SLATERSB is not set
+# CONFIG_MSM_SLATERSB_RPMSG is not set
+# CONFIG_QCOM_RPROC_SLATE is not set
+
+# CONFIG_RPMSG_QCOM_GLINK_SLATECOM is not set
+
+# Boot splash: psplash needs /dev/fb0, and SDE DRM has no fbdev emulation. The
+# bootloader's cont_splash buffer (splash_region) is still being scanned out
+# during boot, so qcom-cont-splash-fb (bound to an injected
+# "qcom,cont-splash-fb" DT node) exposes it as /dev/fb0 and psplash writes show
+# up directly. FRAMEBUFFER_CONSOLE stays off so nothing else draws there.
+# DRM_FBDEV_EMULATION defaults to y, and then msm_drv.c references
+# msm_fbdev_init()/free(), which this tree lacks, and insmod fails.
+CONFIG_FB=y
+CONFIG_FB_QCOM_CONT_SPLASH=y
+# CONFIG_DRM_FBDEV_EMULATION is not set
+
+# /dev/vhci: bluebinder proxies the container's Bluetooth HAL to BlueZ
+# through it.
+CONFIG_BT_HCIVHCI=m
+
+# Bluetooth core and rfkill must be built in. As modules they fail with a
+# misleading EPERM ("could not insert 'bluetooth': Permission denied"); the
+# kernel log has the cause:
+#     rfkill: exports protected symbol rfkill_alloc
+# GKI forbids modules from exporting symbols in its protected namespace.
+# Same as aurora. BT_HCIVHCI stays =m: it exports nothing protected.
+CONFIG_RFKILL=y
+CONFIG_BT=y
+CONFIG_BT_BCM=y
+CONFIG_BT_HCIBTSDIO=y
+CONFIG_BT_HCIUART=y
+CONFIG_BT_HIDP=y
+CONFIG_BT_QCA=y
+CONFIG_BT_RFCOMM=y
+
+# The stock kernel has DEVTMPFS unset (Android's ueventd creates /dev nodes).
+# The AsteroidOS initramfs ships no static /dev nodes and mounts devtmpfs;
+# without it /dev stays empty, /dev/kmsg writes create a plain file, and init
+# waits forever for /dev/$sdcard_partition.
+CONFIG_DEVTMPFS=y
+CONFIG_DEVTMPFS_MOUNT=y
+
+# Stock leaves PM_AUTOSLEEP unset because Android's power HAL drives suspend.
+# Here nothing does: mce's lwl_probe (libwakelock.c) finds no
+# /sys/power/autosleep, falls back to SUSPEND_TYPE_NONE, and the SoC never
+# suspends. Same gap on aurora.
+CONFIG_PM_AUTOSLEEP=y
+
+# WLAN powersave default. monaco_GKI.config turns it off because Android's wifi
+# framework enables it once connected; connman never does, so the chip stays in
+# full-active RX (~320 mW on aurora). Ported from aurora PR
+# AsteroidOS/meta-smartwatch#359.
+CONFIG_CFG80211_DEFAULT_PS=y

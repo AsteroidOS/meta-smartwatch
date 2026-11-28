@@ -1,0 +1,14 @@
+[Unit]
+Description=Keep sol Wi-Fi associated across system suspend
+After=systemd-modules-load.service
+Before=connman.service
+
+[Service]
+# synadhd4381 arms WoWLAN (disconnect, GTK, EAP, 4-way) itself and answers a
+# second `wowlan enable` with EINVAL, so only enable when it is not armed yet.
+Type=oneshot
+ExecStart=/bin/sh -c 'i=0; while [ ! -e /sys/class/ieee80211/phy0 ] && [ "$i" -lt 60 ]; do sleep 1; i=$((i + 1)); done; test -e /sys/class/ieee80211/phy0; /usr/sbin/iw phy phy0 wowlan show | grep -q "wake up on disconnect" || /usr/sbin/iw phy phy0 wowlan enable disconnect'
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
